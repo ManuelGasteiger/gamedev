@@ -1,0 +1,66 @@
+name: hoard-ci
+
+on:
+  push:
+    paths: ["games/hoard/**", ".github/workflows/hoard-ci.yml"]
+  pull_request:
+    paths: ["games/hoard/**", ".github/workflows/hoard-ci.yml"]
+
+concurrency:
+  group: hoard-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: games/hoard
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: gcc, os: ubuntu-24.04, cc: gcc, cxx: g++ }
+          - { name: clang, os: ubuntu-24.04, cc: clang, cxx: clang++ }
+          - { name: msvc, os: windows-2022 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - name: configure
+        shell: bash
+        env: { CC: "${{ matrix.cc }}", CXX: "${{ matrix.cxx }}" }
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: build
+        shell: bash
+        run: cmake --build build --config Release -j 4
+      - name: fast tests
+        shell: bash
+        run: ctest --test-dir build -C Release -L fast --output-on-failure --no-tests=error
+
+  wasm:
+    runs-on: ubuntu-24.04
+    env:
+      WASI_SDK_VERSION: "25"
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/cache@v4
+        id: wasi
+        with:
+          path: ~/wasi-sdk
+          key: wasi-sdk-${{ env.WASI_SDK_VERSION }}
+      - name: wasi-sdk
+        if: steps.wasi.outputs.cache-hit != 'true'
+        working-directory: .
+        run: |
+          curl -sSL -o wasi.tgz https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_SDK_VERSION}/wasi-sdk-${WASI_SDK_VERSION}.0-x86_64-linux.tar.gz
+          mkdir -p ~/wasi-sdk && tar xzf wasi.tgz -C ~/wasi-sdk --strip-components=1
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: native build for the comparison
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 4 --target ages
+      - name: wasm build
+        run: WASI_SDK=~/wasi-sdk bash web/build.sh --wasm
+      - name: wasm hashes equal the goldens
+        run: node web/smoke.mjs

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds web/ages.wasm with wasi-sdk, web/ages-sandbox.html from sandbox.template.html and web/hoard-game.html from game.template.html.
-# `build.sh --html` skips the wasm compile and only re-embeds the existing web/ages.wasm into both pages.
+# `build.sh --html` skips the wasm compile and only re-embeds the existing web/ages.wasm into both pages; `--wasm` only compiles.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 WASI_SDK="${WASI_SDK:-/tmp/wasi}"
@@ -16,6 +16,7 @@ if [ "${1:-}" != "--html" ]; then
     -Wl,--strip-all \
     $SOURCES sim/wasm/api.cpp -o web/ages.wasm
 fi
+[ "${1:-}" = "--wasm" ] && exit 0
 
 python3 - <<'EOF'
 import base64, json, pathlib
