@@ -1,6 +1,7 @@
 #include "analyse.h"
 #include <algorithm>
 #include <memory>
+#include "ages/defences.h"
 #include "ages/dragon_acts.h"
 #include "ages/growth.h"
 #include "ages/json.h"
@@ -49,7 +50,7 @@ json listed_wounds(const World& w, const Params& p, const std::vector<Act>& acts
         if (!harmful_act(a.type)) continue;
         double dmg = strike_damage(w, p, a);
         total += dmg;
-        by.push_back({{"type", a.type}, {"target", a.target}, {"era", era_of(w, a.target)}, {"damage", dmg}});
+        by.push_back({{"type", a.type}, {"target", a.target}, {"era", era_of(w, a.target)}, {"damage", dmg}, {"ring", inside_ring(w, p, a)}});
     }
     return {{"total", total}, {"acts", by}};
 }
@@ -78,6 +79,14 @@ json buckets(const World& w, const Params& p, int index, int samples) {
     return out;
 }
 
+int towers(const World& w, const Params& p) {
+    int n = 0;
+    for (auto& r : w.regions)
+        for (auto& v : region_defences(w, p, r))
+            if (v.def && v.def->id != "levies" && (v.per_act > 0 || v.passive > 0)) { ++n; break; }
+    return n;
+}
+
 int next_bucket(int years) {
     for (int b : kBuckets) if (b > years) return b;
     return years;
@@ -101,7 +110,7 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
         for (auto& h : w.hooks) hooks.push_back({{"kind", h.kind}, {"refs", h.refs}});
         *pending = {{"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
-                    {"listed", listed_wounds(w, p, acts)}, {"hooks", hooks}};
+                    {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
     };
     if (o.perturb == "sleep")
         s.adjust_sleep = [](int years, int index) { return index == 0 ? next_bucket(years) : years; };

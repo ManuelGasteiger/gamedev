@@ -124,6 +124,7 @@ void run_scenario(World& w, const Params& p, const Scenario& s);
 
 std::vector<Act> resolve_policy(const World& w, const Params& p, const Policy& policy, int sleep_index,
                                 const std::string& data_dir);
+bool inside_ring(const World& w, const Params& p, const Act& a);   // a defence beyond levies would strike this act
 
 // v0.4 hooks (S3), hook_resolve.cpp: a hook answered by a choice (pilgrims: receive | eat); false with the reason
 bool answer_hook(World& w, const Params& p, const std::string& id, const std::string& choice, std::string& reason);

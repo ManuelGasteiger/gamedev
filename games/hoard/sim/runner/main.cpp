@@ -258,6 +258,21 @@ int golden(const Options& o) {
     return 0;
 }
 
+std::string out_dir(const std::string& out) {
+    std::string mkdir = "mkdir -p \"" + out + "\"";
+#ifdef _WIN32
+    mkdir = "mkdir \"" + out + "\" 2>nul";
+#endif
+    if (std::system(mkdir.c_str()) != 0) std::fprintf(stderr, "warning: mkdir failed for %s\n", out.c_str());
+    return out.empty() || out.back() == '/' ? out : out + "/";
+}
+
+bool write_core(const std::string& base, const World& w, const Params& p) {
+    return write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
+           write_file(base + "world_final.json", world_to_json(w)) &&
+           write_file(base + "stats.json", stats_json(w, p).dump(1));
+}
+
 int replay(const Options& o) {
     std::ifstream in(o.replay);
     if (!in) { std::fprintf(stderr, "cannot open %s\n", o.replay.c_str()); return 1; }
@@ -279,6 +294,7 @@ int replay(const Options& o) {
     json end = json::parse(lines.back(), nullptr, false);
     if (end.contains("end") && end.value("h", "") != hash_hex(state_hash(loaded.world).root)) { std::printf("final state differs from the recording\n"); return 3; }
     std::printf("replay ok: %d checkpoints, year %d\n", r.checkpoints, loaded.world.year);
+    if (!o.out.empty() && !write_core(out_dir(o.out), loaded.world, loaded.params)) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
     return 0;
 }
 
@@ -363,17 +379,8 @@ int main(int argc, char** argv) {
     if (!o.save.empty() && !write_save(o.save, save_json(w, p))) { std::fprintf(stderr, "cannot write %s\n", o.save.c_str()); return 1; }
     if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 
-    std::string base = o.out;
-    if (!base.empty() && base.back() != '/') base += '/';
-    std::string mkdir = "mkdir -p \"" + o.out + "\"";
-#ifdef _WIN32
-    mkdir = "mkdir \"" + o.out + "\" 2>nul";
-#endif
-    if (std::system(mkdir.c_str()) != 0) std::fprintf(stderr, "warning: mkdir failed for %s\n", o.out.c_str());
-    bool ok = write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
-              write_file(base + "world_final.json", world_to_json(w)) &&
-              write_file(base + "stats.json", stats_json(w, p).dump(1));
-    if (!ok) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
+    std::string base = out_dir(o.out);
+    if (!write_core(base, w, p)) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
     if (o.narrate) {   // narrated.json: the narrator's sentence for every chronicle event, in chronicle order
         json lines = json::array();
         for (auto& e : w.chronicle) lines.push_back(event_sentence(w, p, e));

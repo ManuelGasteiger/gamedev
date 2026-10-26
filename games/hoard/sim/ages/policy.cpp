@@ -18,8 +18,7 @@ static std::string largest_region(const World& w, const Faction& f) {
     return best;
 }
 
-// a defence beyond levies would strike this act (a range ring the newcomer policy keeps out of)
-static bool inside_ring(const World& w, const Params& p, const Act& a) {
+bool inside_ring(const World& w, const Params& p, const Act& a) {
     const Region* r = act_region(w, a);
     if (!r) return false;
     for (auto& v : region_defences(w, p, *r))
