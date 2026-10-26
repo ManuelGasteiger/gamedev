@@ -1,9 +1,13 @@
-"""Steps 1 and 2 of the scenario validation pipeline (scenario-spec.md s8): schema, then lint.
-Usage: python3 scenario_check.py <scenario.schema.json> <act-api.schema.json> <vocab.json> <scenarios.json>..."""
-import json, re, sys
+"""Steps 1 and 2 of the scenario validation pipeline (scenario-spec.md s8): schema, then lint; with --text, the text
+lint of every language and the forced-state renders (tools/text/lint.py).
+Usage: python3 scenario_check.py <scenario.schema.json> <act-api.schema.json> <vocab.json> <scenarios.json>...
+       [--text DATA --bin HOARD_SIM [--langs en,de]]"""
+import json, os, re, sys
 import jsonschema
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "text"))
+from scenario_strings import strings
 
-TOKEN = re.compile(r"\{([a-z][a-z0-9_]*)\.([a-z][a-z0-9_]*)\}")
+TOKEN = re.compile(r"\{([a-z][a-z0-9_]*)\.([a-z][a-z0-9_]*)(?=[:?}])")
 ROLEREF = re.compile(r"^\$([a-z][a-z0-9_]*)(?:\.([a-z][a-z0-9_]*))?$")
 CLAUSE = re.compile(r"^(?:not )?(?:bound\(([a-z][a-z0-9_]*)\)|has_tag\(([a-z][a-z0-9_]*),\s*([a-z0-9_:]+)\)|([a-z][a-z0-9_]*)\.([a-z_]+)\s*(>=|<=|==|!=|>|<)\s*(\S+))$")
 GLOBALS = {"dragon", "lair", "world"}
@@ -63,7 +67,11 @@ def check(sc, vocab, act_validator, errors):
         if words(b) > caps["body_words"]: e(f"body too long ({words(b)} words)")
     if "because" in text and words(text["because"]) > caps["because_words"]: e("because-line too long")
     for v in text.get("variants", []): pred_ok(v["if"], "variant")
-    for s in [text["headline"], text.get("because", "")] + bodies:
+    vids = [v.get("id") for v in text.get("variants", [])]
+    if len(vids) != len(set(vids)): e("duplicate variant ids")
+    for name, d in roles.items():
+        if types[name] == "person" and d.get("noun") not in vocab["nouns"]: e(f"role {name}: noun {d.get('noun')!r} not in vocab nouns")
+    for _, s in strings(sc):
         for role, field in TOKEN.findall(s):
             if role not in roles: e(f"token {{{role}.{field}}} names unknown role"); continue
             if field not in vocab["fields"][types[role]]: e(f"token {{{role}.{field}}}: field not in vocab for {types[role]}")
@@ -109,9 +117,15 @@ def check(sc, vocab, act_validator, errors):
     if len(read) < 2: e(f"require reads fewer than two distinct state elements ({len(read)})")
 
 def main(argv):
-    sschema, aschema, vocab = (json.load(open(p)) for p in argv[1:4])
+    opts = {}
+    for flag in ("--text", "--bin", "--langs"):
+        if flag in argv:
+            i = argv.index(flag)
+            opts[flag] = argv[i + 1]
+            del argv[i:i + 2]
+    sschema, aschema, vocab = (json.load(open(p, encoding="utf-8")) for p in argv[1:4])
     sv = jsonschema.Draft202012Validator(sschema); av = jsonschema.Draft202012Validator(aschema)
-    scenarios = [s for p in argv[4:] for s in json.load(open(p))]
+    scenarios = [s for p in argv[4:] for s in json.load(open(p, encoding="utf-8"))]
     errors = []; ids = [s["id"] for s in scenarios]
     if len(ids) != len(set(ids)): errors.append(f"duplicate ids: {sorted({i for i in ids if ids.count(i) > 1})}")
     for sc in scenarios:
@@ -122,6 +136,12 @@ def main(argv):
         check(sc, vocab, av, errors)
     used_themes = {t.split(":")[1] for s in scenarios for t in s["tags"] if t.startswith("theme:")}
     print(f"{len(scenarios)} scenarios, {len(errors)} problems; themes used {len(used_themes)}/{len(vocab['themes'])}; unused: {sorted(set(vocab['themes']) - used_themes)}")
+    if "--text" in opts:
+        from lint import lint
+        found = []
+        counts, total = lint(scenarios, opts["--text"], opts["--bin"], opts.get("--langs", "en,de").split(","), vocab["text_caps_chars"], found)
+        print(f"text: {total} forced-state renders ({', '.join(f'{k} {v}' for k, v in counts.items())}), {len(found)} problems")
+        errors += found
     for x in errors: print("  ", x)
     return 1 if errors else 0
 

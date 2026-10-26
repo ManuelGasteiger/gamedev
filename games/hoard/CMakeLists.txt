@@ -162,6 +162,16 @@ ages_test(hash_canonical fast)
 ages_test(save_roundtrip fast)
 ages_test(replay_verify fast)
 
+# item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_FOUND)
+  file(GLOB HOARD_SEEDS ${CMAKE_SOURCE_DIR}/docs/scenarios/seed-*.json)
+  add_test(NAME text_lint_seeds COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/scenario_check.py
+    ${CMAKE_SOURCE_DIR}/docs/scenario.schema.json ${CMAKE_SOURCE_DIR}/docs/act-api.schema.json ${CMAKE_SOURCE_DIR}/docs/scenarios/vocab.json
+    ${HOARD_SEEDS} --text ${AGES_DATA_DIR} --bin $<TARGET_FILE:ages_runner>)
+  set_tests_properties(text_lint_seeds PROPERTIES LABELS fast)
+endif()
+
 find_program(BASH bash)
 if(BASH AND NOT WIN32)
   add_test(NAME banned_ops COMMAND ${BASH} ${CMAKE_SOURCE_DIR}/tools/check_banned.sh)

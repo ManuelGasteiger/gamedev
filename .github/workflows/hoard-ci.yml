@@ -34,6 +34,9 @@ jobs:
       - name: build
         shell: bash
         run: cmake --build build --config Release -j 4
+      - name: python for text_lint_seeds
+        shell: bash
+        run: python3 -m pip install --quiet jsonschema || python -m pip install --quiet jsonschema
       - name: fast tests
         shell: bash
         run: ctest --test-dir build -C Release -L fast --output-on-failure --no-tests=error
