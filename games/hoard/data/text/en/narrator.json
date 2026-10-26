@@ -1221,6 +1221,8 @@
   },
   "misc": {
     "an_envoy": "An envoy",
+    "led_by": ", led by {name},",
+    "brief_fallback": "the {kind} of {year}",
     "and": " and ",
     "quiet": "Nothing the chroniclers thought worth a line.",
     "headline_none": "A quiet age.",
