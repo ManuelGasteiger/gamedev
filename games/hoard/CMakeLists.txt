@@ -105,6 +105,15 @@ add_library(ages STATIC
   sim/ages/rules/magic.cpp
   sim/ages/rules/card_world.cpp
   sim/ages/rules/storyteller.cpp
+  # item 19: text
+  sim/text/tokens.cpp
+  sim/text/lexicon.cpp
+  sim/text/names.cpp
+  sim/text/numbers.cpp
+  sim/text/render.cpp
+  sim/text/bundle.cpp
+  sim/text/bundle_io.cpp
+  sim/text/batch.cpp
 )
 target_include_directories(ages PUBLIC sim)
 hoard_sim_flags(ages)
@@ -118,7 +127,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

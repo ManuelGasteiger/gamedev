@@ -327,10 +327,9 @@ struct OfferDef {
     Tags tags;               // copied onto the oath_sworn event (e.g. exit_not_implemented)
 };
 
-// data/text/en.json: templates and importances per event kind, plus cause, motive and pretext texts
+// data/text/en/narrator.json: templates per event kind, plus cause, motive and pretext texts
 struct TextTemplate {
     std::string text, brief;
-    double importance = 1;
 };
 
 struct Texts {
@@ -495,6 +494,7 @@ struct Params {
     Names names;
     std::vector<OfferDef> offers;
     Texts texts;
+    std::map<std::string, double> importance;   // data/importance.json, per event kind or template key
     std::vector<CardDef> cards;   // data/events, sorted by id
     TalentBook talents;           // v0.4 (S1)
     DefenceBook defences;         // v0.4 (S1)
@@ -536,6 +536,8 @@ struct DataJson {
     std::string talents, defences;     // v0.4 (S1); optional
     std::string hooks;                 // v0.4 hooks (S3); optional
     std::string genesis;               // v0.4 world (S2): data/genesis.json; optional
+    std::string importance;            // data/importance.json
+    std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
 bool params_from_json(const DataJson& d, Params& out, std::string& err);

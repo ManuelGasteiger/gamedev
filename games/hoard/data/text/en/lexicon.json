@@ -1,0 +1,226 @@
+{
+ "nouns": {
+  "envoy": {
+   "*": {
+    "g": "n",
+    "nom": "envoy"
+   }
+  },
+  "hostage": {
+   "*": {
+    "g": "n",
+    "nom": "hostage"
+   }
+  },
+  "scribe": {
+   "*": {
+    "g": "n",
+    "nom": "scribe"
+   }
+  },
+  "historian": {
+   "*": {
+    "g": "n",
+    "nom": "historian"
+   }
+  },
+  "heir": {
+   "*": {
+    "g": "n",
+    "nom": "heir"
+   }
+  },
+  "hero": {
+   "*": {
+    "g": "n",
+    "nom": "hero"
+   }
+  },
+  "sage": {
+   "*": {
+    "g": "n",
+    "nom": "sage"
+   }
+  },
+  "priest": {
+   "*": {
+    "g": "n",
+    "nom": "priest"
+   }
+  },
+  "ruler": {
+   "*": {
+    "g": "n",
+    "nom": "ruler"
+   }
+  },
+  "courtier": {
+   "*": {
+    "g": "n",
+    "nom": "courtier"
+   }
+  },
+  "thief": {
+   "*": {
+    "g": "n",
+    "nom": "thief"
+   }
+  },
+  "consort": {
+   "*": {
+    "g": "n",
+    "nom": "consort"
+   }
+  },
+  "pretender": {
+   "*": {
+    "g": "n",
+    "nom": "pretender"
+   }
+  },
+  "liar": {
+   "*": {
+    "g": "n",
+    "nom": "liar"
+   }
+  },
+  "elder": {
+   "*": {
+    "g": "n",
+    "nom": "elder"
+   }
+  },
+  "prophet": {
+   "*": {
+    "g": "n",
+    "nom": "prophet"
+   }
+  },
+  "reader": {
+   "*": {
+    "g": "n",
+    "nom": "reader"
+   }
+  },
+  "slayer": {
+   "*": {
+    "g": "n",
+    "nom": "slayer"
+   }
+  },
+  "mason": {
+   "*": {
+    "g": "n",
+    "nom": "mason"
+   }
+  },
+  "regent": {
+   "*": {
+    "g": "n",
+    "nom": "regent"
+   }
+  },
+  "monarch": {
+   "m": {
+    "g": "n",
+    "nom": "king"
+   },
+   "f": {
+    "g": "n",
+    "nom": "queen"
+   }
+  },
+  "kin": {
+   "m": {
+    "g": "n",
+    "nom": "kinsman"
+   },
+   "f": {
+    "g": "n",
+    "nom": "kinswoman"
+   }
+  },
+  "drillmaster": {
+   "m": {
+    "g": "n",
+    "nom": "drill-master"
+   },
+   "f": {
+    "g": "n",
+    "nom": "drill-mistress"
+   }
+  }
+ },
+ "articles": {
+  "def": {
+   "*": {
+    "*": "the"
+   }
+  },
+  "indef": {
+   "*": {
+    "*": "a"
+   }
+  },
+  "poss2": {
+   "*": {
+    "*": "your"
+   }
+  }
+ },
+ "vowel_forms": {
+  "a": "an"
+ },
+ "vowel_start": "aeiouAEIOU",
+ "vowel_words": [
+  "heir",
+  "hour",
+  "honest",
+  "honour"
+ ],
+ "consonant_words": [
+  "one",
+  "uni",
+  "use",
+  "eu"
+ ],
+ "pronouns": {
+  "m": {
+   "subj": "he",
+   "obj": "him",
+   "poss": "his",
+   "refl": "himself"
+  },
+  "f": {
+   "subj": "she",
+   "obj": "her",
+   "poss": "her",
+   "refl": "herself"
+  },
+  "n": {
+   "subj": "it",
+   "obj": "it",
+   "poss": "its",
+   "refl": "itself"
+  },
+  "pl": {
+   "subj": "they",
+   "obj": "them",
+   "poss": "their",
+   "refl": "themselves"
+  }
+ },
+ "units": {
+  "year": {
+   "one": {
+    "*": "{n} year"
+   },
+   "other": {
+    "*": "{n} years"
+   }
+  }
+ },
+ "noun_gen_suffix": {
+  "*": "'s"
+ }
+}

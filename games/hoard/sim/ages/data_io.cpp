@@ -4,6 +4,7 @@
 #include <sstream>
 #include "ages.h"
 #include "json.h"
+#include "text/bundle_io.h"
 
 namespace ages {
 
@@ -68,7 +69,8 @@ bool load_data_json(const std::string& dir, DataJson& d, std::string& err) {
            read_text(dir + "/reactions.json", d.reactions, err) && read_text(dir + "/regions.json", d.regions, err) &&
            read_text(dir + "/factions.json", d.factions, err) && read_text(dir + "/shocks.json", d.shocks, err) &&
            read_text(dir + "/names.json", d.names, err) && read_text(dir + "/offers.json", d.offers, err) &&
-           read_text(dir + "/text/en.json", d.text, err) && read_cards(dir, d.events, err) &&
+           read_text(dir + "/text/en/narrator.json", d.text, err) && read_text(dir + "/importance.json", d.importance, err) &&
+           text::bundles_dir_json(dir + "/text", d.text_bundles, err) && read_cards(dir, d.events, err) &&
            read_dragon_files(dir, d) && read_optional(dir + "/hooks.json", d.hooks) &&   // v0.4 hooks (S3)
            read_optional(dir + "/genesis.json", d.genesis);
 }
