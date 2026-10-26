@@ -6,6 +6,10 @@ One line per decision, newest first, with the doc that carries the detail. A new
 
 | date | decision | detail in |
 |---|---|---|
+| 2026-10-26 | Valleys that remember dragons are a start dimension, as data (item 02 start values, item 12). | `first-hour.md` §12, `implementation-plan.md` D5 |
+| 2026-10-26 | German name of the Endings page: „Enden“. | `docs/style-de.md` |
+| 2026-10-26 | The HUD may wrap to two rows at 1024 px (game-check j.1024 height under 80). | `reports/19-text-renderer-l10n.md` §4 |
+| 2026-10-26 | Hatchling-safe century as a band, warning only (no bot death before year 80). | `data/bands.json`, `reports/01-baseline-v04.md` |
 | 2026-10-26 | One repository: `gamedev` on GitHub (private), with Hoard in `games/hoard/` beside the shared skills and tools; LFS for binaries; sim and tooling agents clone without LFS. Supersedes the separate `hoard` repo assumed in prompts 17 and 18. | `implementation-plan.md` §3, `audit-2026-10-26.md` |
 | 2026-10-24 | The shell never remembers: everything a shell shows about the past is read from sim state at wake, aged by the sim's own fields (`last_burn_year`, `ruin` with an age, monuments, `abandoned_year`); smoke exists only within a waking. | `world-aging.md`, preamble rule 9 |
 | 2026-10-24 | Stamina budget and drain, carry, travel speed and travel altitude are talents; the shells read all flight numbers from the API's `dragon.flight` block. | `talents-v2.md`, `raid-design.md` §1 |
