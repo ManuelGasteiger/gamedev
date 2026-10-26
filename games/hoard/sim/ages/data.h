@@ -457,6 +457,7 @@ struct TalentAxis {
 };
 
 struct TalentBook {
+    std::map<std::string, double> flight;     // "flight": the v0.4 flight numbers the dragon.flight block starts from
     std::vector<TalentAxis> axes;
     std::vector<double> nodes;                 // points per node
     std::vector<int> node_phase;               // phase a node needs

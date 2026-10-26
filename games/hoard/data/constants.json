@@ -1,13 +1,13 @@
 {
   "memory": {
-    "oral_halflife": 30, "written_halflife": 250, "monumental_halflife": 1000, "oral_reference": 150,
+    "oral_halflife": 60, "written_halflife": 250, "monumental_halflife": 1000, "oral_reference": 150,
     "written_deposit": 0.6, "monumental_deposit": 0.4, "rep_years": 30, "rep_floor": 0.25,
     "witness_owner": 1.0, "witness_neighbour": 0.5, "library_burn": 0.1, "temple_convert": 0.5,
     "entry_drop": 0.002, "tier_shown": 0.1, "kept_oath_awe": 0.02,
     "pilgrims_awe": 0.15, "honest_awe": 0.30, "cult_awe": 0.30, "temple_awe": 0.50, "faith_floor": 0.3, "temple_years": 50,
     "demand_dread": 0.30, "slayer_dread": 0.50, "flee_dread": 0.70, "grievance_written": 0,
     "stability_dread": 0.8, "pressure_awe": 0.7, "research_dread": 2.0,
-    "research_base": 0.006, "research_spend": 200, "research_wealth_half": 100
+    "research_base": 0.012, "research_spend": 50, "research_wealth_half": 20
   },
   "step_years": 10,
   "land_wealth_scale": 100,

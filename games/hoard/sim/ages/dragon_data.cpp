@@ -68,6 +68,7 @@ TalentLook look_from(const json& j) {
 }
 
 bool load_talents(const json& j, TalentBook& b, std::string& err) {
+    get(j, "flight", b.flight);
     get(j, "nodes", b.nodes);
     get(j, "node_phase", b.node_phase);
     b.node_phase.resize(b.nodes.size(), 1);
