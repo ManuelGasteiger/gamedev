@@ -163,6 +163,7 @@ static json faction_json(const Faction& f) {
     j["max_regions"] = f.max_regions;
     j["max_realm"] = f.max_realm;
     j["era_years"] = f.era_years;
+    j["eff"] = {{"growth", f.eff.growth}, {"cohesion_decay", f.eff.cohesion_decay}, {"era_rate", f.eff.era_rate}, {"war_chance", f.eff.war_chance}, {"settle_chance", f.eff.settle_chance}, {"anti_dragon_rate", f.eff.anti_dragon_rate}, {"diffusion", f.eff.diffusion}, {"faith_gain", f.eff.faith_gain}, {"succession_bonus", f.eff.succession_bonus}, {"vassal_wealth", f.eff.vassal_wealth}, {"memory_halflife", f.eff.memory_halflife}};
     return j;
 }
 
@@ -209,6 +210,19 @@ static Faction faction_from(const json& j) {
     get(j, "max_regions", f.max_regions);
     get(j, "max_realm", f.max_realm);
     get(j, "era_years", f.era_years);
+    if (j.contains("eff")) {
+        get(j["eff"], "growth", f.eff.growth);
+        get(j["eff"], "cohesion_decay", f.eff.cohesion_decay);
+        get(j["eff"], "era_rate", f.eff.era_rate);
+        get(j["eff"], "war_chance", f.eff.war_chance);
+        get(j["eff"], "settle_chance", f.eff.settle_chance);
+        get(j["eff"], "anti_dragon_rate", f.eff.anti_dragon_rate);
+        get(j["eff"], "diffusion", f.eff.diffusion);
+        get(j["eff"], "faith_gain", f.eff.faith_gain);
+        get(j["eff"], "succession_bonus", f.eff.succession_bonus);
+        get(j["eff"], "vassal_wealth", f.eff.vassal_wealth);
+        get(j["eff"], "memory_halflife", f.eff.memory_halflife);
+    }
     return f;
 }
 
@@ -219,6 +233,7 @@ static json region_json(const Region& r) {
     j["owner"] = r.owner;
     j["terrain"] = r.terrain;
     j["land"] = r.land;
+    j["eff_land"] = r.eff_land;
     j["burn"] = r.burn;
     j["lair"] = r.lair;
     j["tags"] = tags_json(r.tags);
@@ -240,6 +255,7 @@ static Region region_from(const json& j) {
     get(j, "hot_decades", r.hot_decades);
     get(j, "cold_decades", r.cold_decades);
     r.eff_land = r.land;
+    get(j, "eff_land", r.eff_land);
     return r;
 }
 
@@ -449,6 +465,7 @@ static json world_json(const World& w) {
     for (auto& g : w.graveyard) j["graveyard"].push_back(record_json(g));
     j["next_serial"] = w.next_serial;
     j["next_event_id"] = w.next_event_id;
+    j["next_offer_serial"] = w.next_offer_serial;
     j["slow_clock"] = w.slow_clock;
     j["people"] = json::array();
     for (auto& x : w.people) j["people"].push_back(person_json(x));
@@ -753,6 +770,7 @@ bool world_from_json(const std::string& text, World& w, std::string& err) {
     get(j, "race_max_era", w.race_max_era);
     get(j, "race_last_region", w.race_last_region);
     get(j, "human_share_decades", w.human_share_decades);
+    get(j, "next_offer_serial", w.next_offer_serial);
     if (j.contains("graveyard"))
         for (auto& v : j["graveyard"]) {
             FactionRecord r;
