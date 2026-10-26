@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hoard/act-api/v1",
+  "title": "Hoard act API v1",
+  "description": "Acts the dragon emits (see act-api.md). A scenario option binds exactly one act. Witnesses, reactions and dread/awe deltas are never supplied; the sim derives them.",
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "required": ["kind", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["faction", "region", "person", "item", "remnant", "structure", "lair", "hook", "scenario", "offer"] },
+        "id": { "type": "string" }
+      }
+    },
+    "magnitude": { "type": "number", "minimum": 0, "maximum": 1 },
+    "source": { "enum": ["raid", "lair", "sleep", "scenario", "hook"] },
+    "structure": { "enum": ["library", "temple", "foundry", "walls", "altar", "granary", "tower"] },
+    "lootPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gold": { "type": "number", "minimum": 0 },
+        "books": { "type": "number", "minimum": 0 },
+        "artifacts": { "type": "number", "minimum": 0 },
+        "art": { "type": "number", "minimum": 0 },
+        "food": { "type": "number", "minimum": 0 },
+        "item": { "type": "string" },
+        "region": { "type": "string" }
+      }
+    },
+    "oathDraft": {
+      "type": "object",
+      "required": ["parties", "clauses"],
+      "properties": {
+        "parties": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 },
+        "clauses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["who", "pred"],
+            "properties": {
+              "who": { "enum": ["dragon", "them"] },
+              "pred": { "enum": ["tribute", "no_harm", "defend", "no_walls", "no_settle", "hostage", "disband", "tear_down", "pilgrimage"] },
+              "params": { "type": "object" }
+            }
+          }
+        },
+        "expires": { "type": "integer" }
+      }
+    },
+    "base": {
+      "type": "object",
+      "required": ["type", "source"],
+      "properties": {
+        "id": { "type": "integer" },
+        "year": { "type": "integer" },
+        "type": { "type": "string" },
+        "source": { "$ref": "#/$defs/source" },
+        "answers": { "type": "string" },
+        "magnitude": { "$ref": "#/$defs/magnitude" }
+      }
+    }
+  },
+  "oneOf": [
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "burn" }, "target": { "$ref": "#/$defs/ref" }, "secondary": { "type": "object", "properties": { "kind": { "const": "structure" }, "id": { "$ref": "#/$defs/structure" } } }, "magnitude": { "$ref": "#/$defs/magnitude" } }, "required": ["target", "magnitude"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "kill" }, "target": { "$ref": "#/$defs/ref" }, "magnitude": { "$ref": "#/$defs/magnitude" }, "payload": { "type": "object", "properties": { "who": { "enum": ["army", "garrison", "civilians"] } } } }, "required": ["target", "magnitude"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "crush" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "fight" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "destroy_altar" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "take" }, "target": { "$ref": "#/$defs/ref" }, "magnitude": { "$ref": "#/$defs/magnitude" }, "payload": { "$ref": "#/$defs/lootPayload" } }, "required": ["target", "magnitude", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "take_hostage" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "properties": { "consent": { "type": "boolean" } } } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "hunt" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "receive" }, "payload": { "type": "object", "required": ["outcome"], "properties": { "outcome": { "enum": ["receive", "eat", "turn_away"] }, "who": { "type": "string" } } } }, "required": ["payload"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "defend" }, "target": { "$ref": "#/$defs/ref" }, "secondary": { "$ref": "#/$defs/ref" } }, "required": ["target", "secondary"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "give" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "$ref": "#/$defs/lootPayload" } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "release" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "properties": { "terms": { "$ref": "#/$defs/oathDraft" } } } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "bless" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["land", "plague", "blight"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "ward" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "show" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["roar", "flyover", "land"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "demand" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["clause"], "properties": { "clause": { "enum": ["tribute", "no_walls", "no_settle", "no_harm_to", "hostage", "disband", "tear_down", "pilgrimage"] }, "params": { "type": "object" } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "swear" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["terms"], "properties": { "terms": { "$ref": "#/$defs/oathDraft" }, "answers_offer": { "type": "string" } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "teach" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["subject"], "properties": { "subject": { "enum": ["letters", "craft", "magic", "war", "intrigue", "dragon_lore"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "incite" }, "target": { "$ref": "#/$defs/ref" }, "secondary": { "$ref": "#/$defs/ref" } }, "required": ["target", "secondary"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "broker" }, "target": { "$ref": "#/$defs/ref" }, "secondary": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["pact"], "properties": { "pact": { "enum": ["marriage", "peace", "alliance", "trade", "vassalage"] } } } }, "required": ["target", "secondary", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "reveal" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["secret"], "properties": { "secret": { "enum": ["hidden_region", "plot", "heir_location", "slayer_plan", "lie"] }, "about": { "$ref": "#/$defs/ref" } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "judge" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["verdict"], "properties": { "verdict": { "enum": ["guilty", "spare"] } } } }, "required": ["target", "payload"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "accept_offering" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "consecrate" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "miracle" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["protector", "terror"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "curse" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["lineage", "research", "blight"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "corrupt" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["toward"], "properties": { "toward": { "enum": ["dark", "undead", "chaos", "dragon"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "raise_undead" }, "target": { "$ref": "#/$defs/ref" }, "secondary": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "haunt" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["message"], "properties": { "message": { "enum": ["warning", "summons", "prophecy", "nightmare"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "commune" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["answer"], "properties": { "answer": { "enum": ["accept", "refuse", "ask"] } } } }, "required": ["target", "payload"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "keep" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["role"], "properties": { "role": { "enum": ["hostage", "historian", "scribe", "consort", "priest", "champion", "ward"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "dismiss" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "build" }, "payload": { "type": "object", "required": ["what"], "properties": { "what": { "enum": ["library", "nest", "altar", "vault", "forge", "gate"] } } } }, "required": ["payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "terraform" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["wasteland", "lake", "lava", "mountain"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "sponsor" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["remnant", "hero", "claimant"] } } } }, "required": ["target", "payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "guise" }, "target": { "$ref": "#/$defs/ref" }, "payload": { "type": "object", "required": ["purpose"], "properties": { "purpose": { "enum": ["visit", "court", "learn", "spy", "preach"] }, "person": { "type": "string" } } } }, "required": ["target", "payload"] } ] },
+
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "sleep" }, "payload": { "type": "object", "required": ["years"], "properties": { "years": { "type": "integer", "minimum": 1 }, "wake_on": { "type": "array", "items": { "enum": ["slaying_prepared", "army_at_lair", "oath_breached", "thief", "cult_schism", "hunger"] } }, "dreams": { "type": "boolean" } } } }, "required": ["payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "pick_talent" }, "payload": { "type": "object", "required": ["node"], "properties": { "node": { "type": "string" }, "choice": { "type": "string" }, "skip": { "type": "boolean" }, "reroll": { "type": "boolean" } } } }, "required": ["payload"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "ignore" }, "target": { "$ref": "#/$defs/ref" } }, "required": ["target"] } ] },
+    { "allOf": [ { "$ref": "#/$defs/base" }, { "properties": { "type": { "const": "exit" }, "payload": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["ascension", "lichdom", "portal", "mountain", "brood", "emperor", "last_flame", "scholar", "mortality", "sun_eater"] } } } }, "required": ["payload"] } ] }
+  ]
+}

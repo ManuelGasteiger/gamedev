@@ -1,0 +1,1422 @@
+[
+  {
+    "id": "scribe_among_hostages",
+    "kind": "consequence",
+    "stakes": "minor",
+    "eras": [
+      "iron",
+      "castles",
+      "gunpowder",
+      "arcane"
+    ],
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "take_hostage",
+          "age_wakings": [
+            0,
+            1
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a",
+          "era_min": 2
+        }
+      },
+      "hostage": {
+        "person": {
+          "court": "lair",
+          "role": "hostage",
+          "choose": "most_recent"
+        }
+      },
+      "scribe": {
+        "person": {
+          "court": "lair",
+          "role": "hostage",
+          "trait": "curious",
+          "choose": "by_score:renown"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.has_library == true",
+      "lair.has_historian == false"
+    ],
+    "salience": [
+      {
+        "if": "dragon.lore >= 3",
+        "w": 3
+      },
+      {
+        "if": "bound(scribe)",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:hostage",
+      "theme:memory",
+      "faction:$court"
+    ],
+    "text": {
+      "headline": "A scribe among the hostages",
+      "body": "{hostage.name} of {court.name} has spent the days since the taking writing on the cave wall with a burnt stick: the names of the dead at {a.place}, the year, the weather. Asked why, {hostage.pronoun} says someone should keep the record, and that nobody else here can read.",
+      "because": "You took {hostage.name} at {a.place} {a.years_ago} years ago; {court.name} keeps a library, so its people are lettered.",
+      "variants": [
+        {
+          "if": "bound(scribe)",
+          "body": "{scribe.name} of {court.name} has covered the cave wall in charcoal: the names of the dead at {a.place}, the year, the weather. {scribe.pronoun} offers, without being asked, to keep your chronicle. Nobody else here can read."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "keep",
+        "label": "Keep the scribe as your historian",
+        "act": {
+          "type": "keep",
+          "target": "$hostage",
+          "payload": {
+            "role": "historian"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "release",
+        "label": "Send the scribe home",
+        "act": {
+          "type": "release",
+          "target": "$hostage"
+        }
+      },
+      {
+        "id": "kill",
+        "label": "Silence the record",
+        "act": {
+          "type": "kill",
+          "target": "$hostage",
+          "magnitude": 0.05
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let the writing stay on the wall",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "keep": [
+        {
+          "history": {
+            "person": "$hostage",
+            "line": "kept_as_historian",
+            "severity": 2
+          }
+        },
+        {
+          "reveal_to_player": "From now on the briefing tells you why, not only what, while this one lives."
+        }
+      ],
+      "release": [
+        {
+          "history": {
+            "person": "$hostage",
+            "line": "released_unharmed",
+            "severity": 1
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:memory"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/take_hostage",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "burned_library_scribes",
+    "kind": "consequence",
+    "stakes": "minor",
+    "eras": [
+      "iron",
+      "castles",
+      "gunpowder"
+    ],
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "arrival": {
+      "who": "envoy",
+      "from": "$court",
+      "needs": [
+        "court.knows_lair",
+        "court.dares"
+      ]
+    },
+    "roles": {
+      "a": {
+        "act": {
+          "type": "burn",
+          "structure": "library",
+          "magnitude": [
+            0.2,
+            1.0
+          ],
+          "age_wakings": [
+            0,
+            2
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a",
+          "era_min": 2
+        }
+      },
+      "sage": {
+        "person": {
+          "court": "$court",
+          "role": "sage",
+          "choose": "by_score:renown"
+        },
+        "optional": true
+      },
+      "envoy": {
+        "person": {
+          "court": "$court",
+          "role": "envoy",
+          "choose": "by_score:cunning"
+        }
+      }
+    },
+    "require": [
+      "court.memory_tier >= written",
+      "court.cohesion >= 0.3"
+    ],
+    "forbid": [
+      {
+        "act": {
+          "type": [
+            "give",
+            "teach"
+          ],
+          "target": "$court",
+          "after": "$a"
+        }
+      }
+    ],
+    "salience": [
+      {
+        "if": "court.dread >= 0.3",
+        "w": 3
+      },
+      {
+        "if": "bound(sage)",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:memory",
+      "theme:library",
+      "faction:$court"
+    ],
+    "text": {
+      "headline": "The scribes of {court.name}",
+      "body": "{envoy.name} stands at the ledge with a satchel of ash. {a.years_ago} years after you burned the library at {a.place}, {court.name} has no record of its own kings, and the young are taught from memory by the old. The envoy asks for what you took, or for someone to teach them letters again.",
+      "because": "The court lost its written memory at {a.place}; what it knows of you is now told, not read.",
+      "variants": [
+        {
+          "if": "bound(sage)",
+          "body": "{sage.name}, the last sage of {court.name}, has sent {envoy.name} with a satchel of ash from {a.place}. The hold has no record of its own kings now. The sage asks for the books you took, or for letters to be taught again."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "books",
+        "label": "Give back the books",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "books": 1
+          }
+        }
+      },
+      {
+        "id": "teach",
+        "label": "Teach them letters",
+        "act": {
+          "type": "teach",
+          "target": "$court",
+          "payload": {
+            "subject": "letters"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "eat",
+        "label": "Eat the envoy",
+        "act": {
+          "type": "kill",
+          "target": "$envoy",
+          "magnitude": 0.05
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Send them away",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "suppress": {
+            "tag": "theme:library",
+            "years": 100
+          }
+        }
+      ],
+      "teach": [
+        {
+          "history": {
+            "person": "$envoy",
+            "line": "taught_by_dragon",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:memory"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "iron/consequence/burn",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "hero_at_dawn",
+    "kind": "consequence",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": "hero_challenge",
+    "roles": {
+      "a": {
+        "act": {
+          "type": "burn",
+          "magnitude": [
+            0.3,
+            1.0
+          ],
+          "age_years": [
+            0,
+            200
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a",
+          "has_tag": [
+            "slayers"
+          ]
+        }
+      },
+      "hero": {
+        "person": {
+          "court": "$court",
+          "role": "hero",
+          "memory_has": "sworn_to_memory",
+          "choose": "by_score:renown"
+        }
+      }
+    },
+    "require": [
+      "court.slayer_stage >= ready",
+      "dragon.wounds_share <= 0.5"
+    ],
+    "salience": [
+      {
+        "if": "court.dread >= 0.5",
+        "w": 3
+      },
+      {
+        "if": "hero.trait == vengeful",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:slayers",
+      "theme:fire",
+      "faction:$court",
+      "tone:grim"
+    ],
+    "text": {
+      "headline": "{hero.name} comes alone",
+      "body": "{hero.name} of {court.name} stands on the lair's border at first light with a banner planted in the scree and no army behind it. {hero.pronoun} was a child at {a.place} when it burned, {a.years_ago} years ago, and has sworn on that fire. The order waits a day's march back. This one wants it settled face to face.",
+      "because": "The burning of {a.place} is written in {court.name}'s chronicle; {hero.name} is sworn to that memory."
+    },
+    "options": [
+      {
+        "id": "fight",
+        "label": "Meet the challenge",
+        "act": {
+          "type": "fight",
+          "target": "$hero"
+        }
+      },
+      {
+        "id": "haunt",
+        "label": "Send a nightmare instead",
+        "act": {
+          "type": "haunt",
+          "target": "$hero",
+          "payload": {
+            "message": "nightmare"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "demand",
+        "label": "Demand the order be disbanded",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "disband"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "Let the banner stand",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "history": {
+            "person": "$hero",
+            "line": "challenge_unanswered",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:slayers"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/burn",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "princess_returns",
+    "kind": "consequence",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "release",
+          "age_wakings": [
+            1,
+            3
+          ]
+        }
+      },
+      "agent": {
+        "person": {
+          "tag": "corrupted:dark",
+          "memory_has": "schooled:intrigue",
+          "knows_dragon": true,
+          "choose": "most_recent"
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      }
+    },
+    "require": [
+      "court.piety >= 0.6",
+      "agent.role == ruler"
+    ],
+    "salience": [
+      {
+        "if": "court.awe >= 0.3",
+        "w": 3
+      },
+      {
+        "if": "court.has_temple == true",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:corruption",
+      "theme:intrigue",
+      "faction:$court",
+      "tone:ominous"
+    ],
+    "text": {
+      "headline": "A letter in a hand you taught",
+      "body": "A kestrel drops a letter on the ledge. {agent.name} writes from {court.name}'s throne that the priests have begun asking where the new queen learned her craft, and that two of them have gone to the archive. {agent.pronoun} asks whether you would like the priests to find something, or nothing.",
+      "because": "You released {agent.name} {a.years_ago} years ago, schooled in intrigue and touched by your magic; a devout court notices."
+    },
+    "options": [
+      {
+        "id": "reveal",
+        "label": "Expose the priests' own plot",
+        "act": {
+          "type": "reveal",
+          "target": "$court",
+          "payload": {
+            "secret": "plot",
+            "about": "$agent"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "spy",
+        "label": "Walk the city yourself, unseen",
+        "act": {
+          "type": "guise",
+          "target": "$court",
+          "payload": {
+            "purpose": "spy"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "haunt",
+        "label": "Warn her to burn the archive",
+        "act": {
+          "type": "haunt",
+          "target": "$agent",
+          "payload": {
+            "message": "warning"
+          }
+        },
+        "gate": "dragon.arcana >= 8"
+      },
+      {
+        "id": "gold",
+        "label": "Send gold to the keeper of the archive",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "gold": 60
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let her manage her own court",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "history": {
+            "person": "$agent",
+            "line": "left_alone_by_dragon",
+            "severity": 1
+          }
+        }
+      ],
+      "gold": [
+        {
+          "history": {
+            "person": "$agent",
+            "line": "archive_bought",
+            "severity": 1
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:intrigue",
+        "theme:corruption"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/release",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "inquisition_opens",
+    "kind": "world",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "court": {
+        "faction": {
+          "has_tag": [
+            "inquisition"
+          ],
+          "choose": "most_recent"
+        }
+      },
+      "priest": {
+        "person": {
+          "court": "$court",
+          "role": "priest",
+          "choose": "by_score:piety"
+        }
+      },
+      "agent": {
+        "person": {
+          "court": "$court",
+          "tag": "corrupted:dark",
+          "choose": "most_recent"
+        },
+        "optional": true
+      },
+      "rival": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "at_war": false,
+          "choose": "by_score:power"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.piety >= 0.5",
+      "court.cohesion <= 0.6"
+    ],
+    "salience": [
+      {
+        "if": "bound(agent)",
+        "w": 9
+      },
+      {
+        "if": "court.era >= 3",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:intrigue",
+      "theme:faith",
+      "faction:$court",
+      "tone:grim"
+    ],
+    "text": {
+      "headline": "The inquisition of {court.name}",
+      "body": "{priest.name} has the court's mages in chains and its archive under seal. The charge is dark craft at the throne; the proof is thin and the fires are not. The mage guild's work has stopped. A court that burns its own scholars is weaker for a generation, and it knows who it blames.",
+      "because": "The secret you planted in {court.name} surfaced; a devout court with a weak crown answers with fire.",
+      "variants": [
+        {
+          "if": "bound(agent)",
+          "body": "{priest.name} has {agent.name}'s tutors in chains and the archive under seal. The charge is dark craft at the throne, and this time the proof is not thin. The mages' work has stopped. {agent.pronoun} has not been named yet."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "gift",
+        "label": "Send the priest a relic to look at instead",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "artifacts": 1
+          }
+        }
+      },
+      {
+        "id": "judge",
+        "label": "Descend and spare the accused in judgement",
+        "act": {
+          "type": "judge",
+          "target": "$priest",
+          "payload": {
+            "verdict": "spare"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "incite",
+        "label": "Set the neighbour on them while they purge",
+        "act": {
+          "type": "incite",
+          "target": "$rival",
+          "secondary": "$court"
+        },
+        "gate": "bound(rival)"
+      },
+      {
+        "id": "ignore",
+        "label": "Let them burn their own",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "gift": [
+        {
+          "history": {
+            "person": "$priest",
+            "line": "bribed_by_dragon",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:faith",
+        "theme:intrigue"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/world/intrigue",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "thief_with_the_cup",
+    "kind": "world",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "cup": {
+        "item": {
+          "in": "court",
+          "kind": "artifact",
+          "choose": "most_recent"
+        }
+      },
+      "court": {
+        "faction": {
+          "has_tag": [
+            "robbed_the_dragon"
+          ],
+          "choose": "most_recent"
+        }
+      },
+      "thief": {
+        "person": {
+          "court": "$court",
+          "tag": "thief",
+          "choose": "most_recent"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.dread <= 0.4",
+      "dragon.phase >= 2"
+    ],
+    "salience": [
+      {
+        "if": "court.era >= 2",
+        "w": 1
+      },
+      {
+        "if": "bound(thief)",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:thief",
+      "theme:hoard",
+      "theme:artifact",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "headline": "The cup is on their table",
+      "body": "The {cup.name} that lay under your left wing is now the centrepiece of {court.name}'s feast table, and the whole city has been quieter since. The thief has a street named after the walk back down. The city is rich, pleased with itself, and watching the sky more than it used to.",
+      "because": "A court that does not fear you sent a thief while you slept; it remembers the theft with pride.",
+      "variants": [
+        {
+          "if": "bound(thief)",
+          "body": "{thief.name} came out of your mountain with the {cup.name} and has not bought a drink since. The cup stands on {court.name}'s feast table and the city watches the sky more than it used to."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "take",
+        "label": "Take it back, and more",
+        "act": {
+          "type": "take",
+          "target": "$court",
+          "magnitude": 0.3,
+          "payload": {
+            "item": "$cup"
+          }
+        }
+      },
+      {
+        "id": "demand",
+        "label": "Demand the thief as hostage",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "hostage"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "gift",
+        "label": "Send them exactly what else was taken",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "gold": 40
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let them keep the cup",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "gift": [
+        {
+          "reveal_to_player": "Generosity after a theft is remembered as a riddle; the court will send someone to ask what you meant."
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:thief",
+        "theme:hoard"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/world/theft",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "two_crowns",
+    "kind": "world",
+    "stakes": "minor",
+    "weight": 50,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "heir": {
+        "person": {
+          "court": "lair",
+          "role": "hostage",
+          "choose": "by_score:age"
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($heir)",
+          "at_war": false
+        }
+      },
+      "match": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "at_war": false,
+          "choose": "by_score:wealth"
+        }
+      },
+      "envoy": {
+        "person": {
+          "court": "$match",
+          "role": "envoy",
+          "choose": "by_score:cunning"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.cohesion >= 0.5",
+      "match.cohesion >= 0.5"
+    ],
+    "salience": [
+      {
+        "if": "dragon.lore >= 15",
+        "w": 3
+      },
+      {
+        "if": "court.awe >= 0.3",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:succession",
+      "theme:hostage",
+      "faction:$court",
+      "faction:$match"
+    ],
+    "text": {
+      "headline": "Two crowns and one heir",
+      "body": "{court.name} has no heir but the one asleep in your hoard, and {match.name} has a widowed queen and a long border. Both courts have written to each other; neither has written to you. A marriage would make one realm of two, and the mountain would stand between it and nothing.",
+      "because": "You hold {heir.name}; a marriage between the two courts needs the heir you have.",
+      "variants": [
+        {
+          "if": "bound(envoy)",
+          "body": "{envoy.name} of {match.name} has come to ask, very carefully, whether {heir.name} is well, and whether the mountain has views on marriage."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "broker",
+        "label": "Broker the marriage yourself",
+        "act": {
+          "type": "broker",
+          "target": "$court",
+          "secondary": "$match",
+          "payload": {
+            "pact": "marriage"
+          }
+        },
+        "gate": "dragon.lore >= 15"
+      },
+      {
+        "id": "release",
+        "label": "Send the heir home under oath",
+        "act": {
+          "type": "release",
+          "target": "$heir",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "them",
+                  "pred": "tribute"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Keep the heir and the border open",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:succession"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/world/succession",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "pilgrims_in_winter",
+    "kind": "audience",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 4,
+      "years": 25
+    },
+    "exclusive_group": null,
+    "arrival": {
+      "who": "pilgrim",
+      "from": "$court",
+      "needs": [
+        "court.faith_share_min",
+        "court.knows_lair",
+        "court.awe_min",
+        "court.route_open"
+      ]
+    },
+    "roles": {
+      "court": {
+        "faction": {
+          "awe": [
+            0.15,
+            1.0
+          ],
+          "choose": "by_score:awe"
+        }
+      },
+      "leader": {
+        "person": {
+          "court": "$court",
+          "role": "priest",
+          "choose": "by_score:piety"
+        },
+        "optional": true
+      },
+      "home": {
+        "region": {
+          "owner": "$court",
+          "choose": "random"
+        }
+      }
+    },
+    "require": [
+      "court.awe >= 0.15",
+      "home.burn <= 0.3"
+    ],
+    "salience": [
+      {
+        "if": "world.year >= 100",
+        "w": 1
+      },
+      {
+        "if": "court.has_temple == false",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:pilgrims",
+      "theme:faith",
+      "faction:$court",
+      "tone:tender"
+    ],
+    "text": {
+      "headline": "Pilgrims at the foot of the mountain",
+      "body": "Eleven of {court.name}'s faithful have come up the pass in the snow with a cart of {home.name}'s last apples and a child who will not stop looking at the cave. They do not ask for anything. They have come to be looked at.",
+      "because": "{court.name} holds you in awe and the road from {home.name} is open.",
+      "variants": [
+        {
+          "if": "bound(leader)",
+          "body": "{leader.name} has led eleven of {court.name}'s faithful up the pass in the snow with a cart of {home.name}'s last apples. They do not ask for anything. They have come to be looked at, and {leader.pronoun} has brought a book to write down what they see."
+        },
+        {
+          "if": "court.dread >= 0.5",
+          "body": "Eleven of {court.name}'s faithful have come up the pass in the snow. They walk slowly and keep the children at the back. They have brought the last apples from {home.name}, and they have not decided whether this is a gift or a tribute."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "receive",
+        "label": "Land and receive them",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "receive"
+          }
+        }
+      },
+      {
+        "id": "bless",
+        "label": "Bless their fields instead of appearing",
+        "act": {
+          "type": "bless",
+          "target": "$home",
+          "payload": {
+            "kind": "land"
+          }
+        },
+        "gate": "dragon.dominion >= 3"
+      },
+      {
+        "id": "eat",
+        "label": "Eat them",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "eat"
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let them wait and go home",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "suppress": {
+            "tag": "theme:pilgrims",
+            "years": 40
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/pilgrim",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "lich_crown_speaks",
+    "kind": "lair",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": "crown_voice",
+    "roles": {
+      "crown": {
+        "item": {
+          "in": "hoard",
+          "agenda": "lichdom",
+          "choose": "most_recent"
+        }
+      },
+      "dead": {
+        "faction": {
+          "race": "undead",
+          "choose": "by_score:power"
+        },
+        "optional": true
+      },
+      "armed": {
+        "faction": {
+          "has_tag": [
+            "cannons"
+          ],
+          "choose": "by_score:power"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "dragon.arcana >= 8",
+      "world.magic >= 0.3"
+    ],
+    "salience": [
+      {
+        "if": "bound(armed)",
+        "w": 9
+      },
+      {
+        "if": "bound(dead)",
+        "w": 3
+      },
+      {
+        "if": "dragon.wounds_share >= 0.3",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:artifact",
+      "theme:undead",
+      "ending:lichdom",
+      "tone:ominous"
+    ],
+    "text": {
+      "headline": "The {crown.name} speaks",
+      "body": "It waits until the cave is quiet. The living will always build cannon, it says, in the voice of the king who drowned wearing it. It can make you something cannon cannot reach. It does not say what that costs. It never does.",
+      "because": "An artifact with its own purpose has been in the hoard long enough to learn your fears.",
+      "variants": [
+        {
+          "if": "bound(armed)",
+          "body": "It waits until the cave is quiet. {armed.name} has cannon now, it says, in the voice of the king who drowned wearing it, and the living will always build more. It can make you something cannon cannot reach. It does not say what that costs."
+        },
+        {
+          "if": "bound(dead)",
+          "body": "It waits until the cave is quiet. The dead of {dead.name} have priests now, it says, and the priests have a rite. It can make you something the living cannot kill. It does not say what you would be afterwards."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "ask",
+        "label": "Ask what it wants",
+        "act": {
+          "type": "commune",
+          "target": "$crown",
+          "payload": {
+            "answer": "ask"
+          }
+        }
+      },
+      {
+        "id": "accept",
+        "label": "Accept the crown's bargain",
+        "act": {
+          "type": "commune",
+          "target": "$crown",
+          "payload": {
+            "answer": "accept"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "refuse",
+        "label": "Refuse it",
+        "act": {
+          "type": "commune",
+          "target": "$crown",
+          "payload": {
+            "answer": "refuse"
+          }
+        }
+      },
+      {
+        "id": "gift",
+        "label": "Give it to the dead and be rid of it",
+        "act": {
+          "type": "give",
+          "target": "$dead",
+          "payload": {
+            "item": "$crown"
+          }
+        },
+        "gate": "bound(dead)"
+      },
+      {
+        "id": "ignore",
+        "label": "Say nothing",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:undead",
+        "theme:artifact"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/lair/artifact",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "door_in_the_temple",
+    "kind": "world",
+    "stakes": "must",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "cult": {
+        "faction": {
+          "has_tag": [
+            "portal_rite"
+          ],
+          "choose": "most_recent"
+        }
+      },
+      "temple": {
+        "region": {
+          "owner": "$cult",
+          "has_structure": "temple",
+          "choose": "most_recent"
+        }
+      },
+      "zealot": {
+        "faction": {
+          "is": "neighbour_of($cult)",
+          "piety": [
+            0.6,
+            1.0
+          ],
+          "at_war": true,
+          "choose": "by_score:piety"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "cult.portal_progress >= 0.8",
+      "cult.portal_progress <= 1.0",
+      "world.magic >= 0.6"
+    ],
+    "salience": [
+      {
+        "if": "bound(zealot)",
+        "w": 3
+      },
+      {
+        "if": "cult.faith_share >= 0.5",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:portal",
+      "theme:cult",
+      "ending:portal",
+      "faction:$cult",
+      "tone:ominous"
+    ],
+    "text": {
+      "headline": "A door in the temple of {temple.name}",
+      "body": "The cult of {cult.name} has built a door in the temple at {temple.name} that opens onto nowhere yet. The priests say it opens for you. The neighbours say it opens for something else, and have sent soldiers to find out. Within two wakings it will open one way or the other, whether you are there or not.",
+      "because": "Faith, magic and time have met in one court; a door is the shape they take.",
+      "variants": [
+        {
+          "if": "bound(zealot)",
+          "body": "The cult of {cult.name} has built a door at {temple.name} that opens onto nowhere yet. {zealot.name}'s soldiers are already in the valley below it with torches. Within two wakings it opens one way or the other, whether you are there or not."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "consecrate",
+        "label": "Consecrate the temple as your own",
+        "act": {
+          "type": "consecrate",
+          "target": "$temple"
+        },
+        "gate": "dragon.dominion >= 8"
+      },
+      {
+        "id": "destroy",
+        "label": "Break the altar and the door with it",
+        "act": {
+          "type": "destroy_altar",
+          "target": "$temple"
+        }
+      },
+      {
+        "id": "defend",
+        "label": "Hold the pass against the soldiers",
+        "act": {
+          "type": "defend",
+          "target": "$temple",
+          "secondary": "$zealot"
+        },
+        "gate": "bound(zealot)"
+      },
+      {
+        "id": "ignore",
+        "label": "Let the door decide",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "reveal_to_player": "If the door opens without you, something may come the other way."
+        }
+      ]
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "arcane/world/portal",
+      "bank": "seed",
+      "reviewed": true
+    }
+  }
+]

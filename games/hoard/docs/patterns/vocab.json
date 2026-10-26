@@ -1,0 +1,17 @@
+{
+  "note": "Event kinds the patterns may name. Level 0 kinds come from the sim's chronicle (ages-sim.md sections 4, 17, 18; act events are dragon_<act>); the list is best effort and item 14 aligns it with data/text/en.json. Level 1 and 2 kinds are emitted by patterns.",
+  "kinds_level0": [
+    "dragon_burn", "dragon_kill", "dragon_take", "dragon_take_hostage", "dragon_release", "dragon_defend", "dragon_give", "dragon_show", "dragon_demand", "dragon_swear", "dragon_teach", "dragon_judge", "dragon_fight", "dragon_consecrate", "dragon_destroy_altar", "dragon_raise_undead", "dragon_guise", "dragon_ignore", "dragon_sleep", "dragon_wake",
+    "war_started", "war_ended", "region_taken", "region_abandoned", "region_settled", "sack", "siege",
+    "collapse", "successor_founded", "vassal_sworn", "vassal_freed", "coalition_formed", "coalition_won", "hegemony", "hegemony_ended", "civil_war",
+    "era_advanced", "research_milestone", "walls_built", "slayers_founded", "slayers_ready", "slay_attempt", "slayer_killed", "order_disbanded", "memorial_raised",
+    "oath_sworn", "oath_breached_by_them", "oath_breached_by_dragon", "oath_expired", "tribute_paid", "tribute_stopped",
+    "person_crowned", "person_died", "person_rose", "hero_rose", "heir_born", "heir_returned", "pretender_landed",
+    "plague", "bad_century", "volcanic_winter", "great_ruler", "succession_crisis", "migration", "remnant_returned", "orc_spawn", "fading_begins", "fading_ends", "elves_departed",
+    "shrine_raised", "temple_raised", "cult_founded", "cult_schism", "cult_persecuted", "false_dragon", "prophecy_spoken", "prophecy_fulfilled", "prophecy_refuted", "pilgrims_sent",
+    "theft_from_hoard", "thief_hanged", "library_founded", "library_burned", "necromancer_rose", "undead_court_founded", "holy_war_declared",
+    "grudge_sworn", "grudge_settled", "exodus", "exiles_returned"
+  ],
+  "tags": ["dragon", "grudge", "faith", "cult", "slayer", "capital", "city", "library", "temple", "elf", "dwarf", "human", "orc", "undead", "irreversible", "prophecy", "hostage", "royal", "oath", "theft", "fire"],
+  "levels": { "0": "sim events", "1": "episode.*", "2": "story.*" }
+}

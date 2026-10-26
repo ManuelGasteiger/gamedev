@@ -1,0 +1,22 @@
+{
+  "themes": ["memory", "library", "hostage", "grudge", "oath", "faith", "cult", "prophecy", "slayers", "thief", "hoard", "fire", "war", "succession", "corruption", "intrigue", "undead", "portal", "ascension", "mountain", "consort", "refugees", "pilgrims", "trade", "forgetting", "quiet", "false_dragon", "artifact", "dwarves", "elves", "orcs", "humans", "exile", "plague"],
+  "tones": ["grim", "wry", "solemn", "tender", "ominous"],
+  "endings": ["ascension", "lichdom", "portal", "mountain", "brood", "emperor", "last_flame", "scholar", "mortality", "sun_eater", "myth"],
+  "races": ["human", "dwarf", "elf", "orc", "undead"],
+  "gates": ["court.knows_lair", "court.knows_lair_exact", "court.dares", "court.route_open", "court.faith_share_min", "court.awe_min", "court.has_library", "court.motive", "court.gold_rumour", "court.order_alive", "court.grievance", "court.kin_alive", "court.lost_region", "court.knows_prophecy"],
+  "fields": {
+    "faction": ["dread", "awe", "memory_tier", "era", "cohesion", "faith_share", "at_war", "piety", "openness", "militarism", "has_slayers", "slayer_stage", "knows_prophecy", "portal_progress", "wealth_rank", "race", "is_vassal", "has_library", "has_temple", "cult_fervor", "name"],
+    "region": ["terrain", "burn", "owner", "has_structure", "name"],
+    "person": ["trait", "role", "age", "race", "court", "renown", "cunning", "is_lie", "dread", "awe", "debt", "name", "title", "pronoun"],
+    "item": ["agenda", "kind", "name", "origin_court"],
+    "remnant": ["race", "strength"],
+    "act": ["type", "magnitude", "years_ago", "wakings_ago", "place", "verb", "size", "target_name"],
+    "dragon": ["might", "flame", "arcana", "lore", "dominion", "phase", "wounds_share", "health", "talents", "hostages", "sources", "stamina"],
+    "lair": ["has_historian", "has_consort", "has_library", "has_altar", "has_vault", "structures", "region_name"],
+    "world": ["magic", "year", "wakings", "ignored_streak", "strongest_era", "chronicle_level", "prophecy_ending"]
+  },
+  "memory_tiers": ["none", "oral", "written", "monumental"],
+  "slayer_stages": ["none", "forming", "ready", "marching"],
+  "choosers": ["most_recent", "random", "by_score:renown", "by_score:cunning", "by_score:piety", "by_score:wealth", "by_score:dread", "by_score:awe", "by_score:power", "by_score:age"],
+  "text_caps": { "headline_words": 8, "body_words": 100, "because_words": 30, "label_words": 12, "result_words": 40 }
+}

@@ -1,0 +1,1300 @@
+[
+  {
+    "id": "the_walls_went_up",
+    "kind": "consequence",
+    "stakes": "minor",
+    "eras": [
+      "iron",
+      "castles",
+      "gunpowder",
+      "arcane"
+    ],
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "burn",
+          "magnitude": [
+            0.3,
+            1.0
+          ],
+          "age_years": [
+            20,
+            150
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a",
+          "has_tag": [
+            "walls"
+          ],
+          "era_min": 2
+        }
+      },
+      "mason": {
+        "person": {
+          "court": "$court",
+          "role": "sage",
+          "choose": "by_score:renown"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.dread >= 0.3",
+      "court.cohesion >= 0.4"
+    ],
+    "salience": [
+      {
+        "if": "court.era >= 3",
+        "w": 1
+      },
+      {
+        "if": "bound(mason)",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:fire",
+      "theme:war",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "headline": "{court.name} has walls now",
+      "body": "Where you burned {a.place} {a.years_ago} years ago there is stone to the height of a house and towers at the corners, each with a slot cut for a bolt-thrower that does not exist yet. The quarry is three valleys away. They have spent a generation's wealth on this, and they will tell you so if you land.",
+      "because": "A court that remembers a burning and has reached the age of castles builds against the sky.",
+      "variants": [
+        {
+          "if": "bound(mason)",
+          "body": "{mason.name} of {court.name} designed the new walls at {a.place}, stone to the height of a house with a slot in every tower for a bolt-thrower that does not exist yet. {mason.pronoun} has written a treatise on dragon fire. It is mostly wrong."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "walls",
+        "label": "Burn the walls while they are new",
+        "act": {
+          "type": "burn",
+          "target": "$court",
+          "magnitude": 0.3,
+          "structure": "walls"
+        }
+      },
+      {
+        "id": "demand",
+        "label": "Demand they tear the towers down",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "tear_down"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "show",
+        "label": "Land inside the walls, in the square",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let them have their walls",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "reveal_to_player": "Walls that stand for an age become a court's pride; pride founds slayer orders."
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:slayers",
+        "theme:war"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "castles/consequence/burn",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_gold_you_took",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "take",
+          "payload_has": [
+            "gold"
+          ],
+          "magnitude": [
+            0.3,
+            1.0
+          ],
+          "age_wakings": [
+            0,
+            1
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      },
+      "rival": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "at_war": false,
+          "choose": "by_score:power"
+        }
+      }
+    },
+    "require": [
+      "court.cohesion <= 0.5",
+      "rival.wealth_rank <= 2"
+    ],
+    "salience": [
+      {
+        "if": "court.at_war == true",
+        "w": 3
+      },
+      {
+        "if": "court.dread >= 0.4",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:hoard",
+      "theme:war",
+      "faction:$court",
+      "faction:$rival"
+    ],
+    "text": {
+      "headline": "An empty treasury and a full neighbour",
+      "body": "The gold you took from {court.name} {a.years_ago} years ago was the gold that paid its soldiers. The soldiers have gone to {rival.name}, which pays. {court.name}'s king now rules a city that cannot defend its own gates, and {rival.name} has noticed.",
+      "because": "You took {a.size} of {court.name}'s wealth; a poor court cannot keep an army."
+    },
+    "options": [
+      {
+        "id": "give",
+        "label": "Return a third of it, quietly",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "gold": 60
+          }
+        }
+      },
+      {
+        "id": "defend",
+        "label": "Promise to stand between them",
+        "act": {
+          "type": "swear",
+          "target": "$court",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "dragon",
+                  "pred": "defend"
+                },
+                {
+                  "who": "them",
+                  "pred": "tribute"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "incite",
+        "label": "Point {rival.name} at the open gates",
+        "act": {
+          "type": "incite",
+          "target": "$rival",
+          "secondary": "$court"
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "A poor court is a quiet court",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:war"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/take",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_army_you_broke",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "kill",
+          "payload_has": [
+            "who"
+          ],
+          "magnitude": [
+            0.4,
+            1.0
+          ],
+          "age_wakings": [
+            0,
+            1
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      },
+      "general": {
+        "person": {
+          "court": "$court",
+          "role": "hero",
+          "choose": "by_score:renown"
+        },
+        "optional": true
+      },
+      "widow": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "choose": "most_recent"
+        }
+      }
+    },
+    "require": [
+      "court.militarism >= 0.5",
+      "court.cohesion <= 0.6"
+    ],
+    "salience": [
+      {
+        "if": "bound(general)",
+        "w": 3
+      },
+      {
+        "if": "court.dread >= 0.5",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:war",
+      "theme:grudge",
+      "faction:$court",
+      "tone:grim"
+    ],
+    "text": {
+      "headline": "A road of cairns",
+      "body": "The road from {a.place} to {court.name}'s capital is lined with cairns now, one for each company you burned on the march. {widow.name} rules a court of widows and boys. The boys are training with spears in the square, and the drill-master was there that day.",
+      "because": "You killed {a.size} of {court.name}'s army at {a.place}; a martial court remembers its dead in stone.",
+      "variants": [
+        {
+          "if": "bound(general)",
+          "body": "{general.name} survived the march you burned at {a.place} and has not stopped talking about it. The road is lined with cairns. The boys drilling in {court.name}'s square call {general.pronoun} teacher."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "crush",
+        "label": "Finish the garrison before the boys grow",
+        "act": {
+          "type": "kill",
+          "target": "$court",
+          "magnitude": 0.5,
+          "payload": {
+            "who": "garrison"
+          }
+        }
+      },
+      {
+        "id": "judge",
+        "label": "Land and judge the drill-master",
+        "act": {
+          "type": "judge",
+          "target": "$general",
+          "payload": {
+            "verdict": "spare"
+          }
+        },
+        "gate": "bound(general)"
+      },
+      {
+        "id": "give",
+        "label": "Send grain for the widows",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "food": 40
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let them drill",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:slayers",
+        "theme:grudge"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/kill",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_city_you_saved",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "defend",
+          "age_wakings": [
+            0,
+            2
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      },
+      "attacker": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "at_war": true,
+          "choose": "by_score:power"
+        },
+        "optional": true
+      },
+      "ruler": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "choose": "most_recent"
+        }
+      }
+    },
+    "require": [
+      "court.awe >= 0.3",
+      "court.cohesion >= 0.4"
+    ],
+    "salience": [
+      {
+        "if": "court.has_temple == false",
+        "w": 3
+      },
+      {
+        "if": "court.piety >= 0.5",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:faith",
+      "theme:war",
+      "faction:$court",
+      "tone:tender"
+    ],
+    "text": {
+      "headline": "A feast day in {court.name}",
+      "body": "{court.name} keeps the day you broke the siege at {a.place} as a holiday now. {ruler.name} has had your likeness carved over the gate, a little too thin and with too many teeth. Children leave bread on the walls. The priests are arguing about whether bread is enough.",
+      "because": "You defended {court.name} {a.years_ago} years ago; a saved city turns gratitude into ritual within a generation.",
+      "variants": [
+        {
+          "if": "bound(attacker)",
+          "body": "{court.name} keeps the day you broke {attacker.name}'s siege at {a.place} as a holiday. {ruler.name} has had your likeness carved over the gate, too thin and with too many teeth. {attacker.name} keeps the day too, differently."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "consecrate",
+        "label": "Make the gate a shrine",
+        "act": {
+          "type": "consecrate",
+          "target": "$court"
+        },
+        "gate": "dragon.dominion >= 8"
+      },
+      {
+        "id": "show",
+        "label": "Fly over the feast at noon",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "flyover"
+          }
+        }
+      },
+      {
+        "id": "demand",
+        "label": "Ask for tribute in place of bread",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "tribute"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "Let them keep their day",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:faith",
+        "theme:cult"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/defend",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_oath_they_remember",
+    "kind": "consequence",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "demand",
+          "age_years": [
+            60,
+            300
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a",
+          "era_min": 2
+        }
+      },
+      "heir": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "choose": "most_recent"
+        }
+      }
+    },
+    "require": [
+      "court.memory_tier >= written",
+      "court.dread <= 0.3"
+    ],
+    "salience": [
+      {
+        "if": "court.awe <= 0.2",
+        "w": 3
+      },
+      {
+        "if": "court.has_slayers == true",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:oath",
+      "theme:memory",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "headline": "The oath is in the book",
+      "body": "{heir.name} of {court.name} has read the oath {heir.pronoun} inherited: tribute to the mountain, sworn {a.years_ago} years ago by a terrified ancestor. The book also records why. {heir.name} is not terrified. The tribute has arrived this year, exactly, with a note asking whether the mountain is still there.",
+      "because": "A written oath outlives the dread that made it; the heir keeps the letter and tests the spirit."
+    },
+    "options": [
+      {
+        "id": "show",
+        "label": "Answer the note in person",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        }
+      },
+      {
+        "id": "release",
+        "label": "Release them from the oath, with grace",
+        "act": {
+          "type": "give",
+          "target": "$court",
+          "payload": {
+            "gold": 20
+          }
+        }
+      },
+      {
+        "id": "demand",
+        "label": "Raise the tribute",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "tribute"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "Take the gold and say nothing",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "history": {
+            "person": "$heir",
+            "line": "tested_the_mountain",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:oath"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "castles/consequence/demand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_pupils",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "teach",
+          "payload_has": [
+            "subject"
+          ],
+          "age_years": [
+            30,
+            200
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      },
+      "sage": {
+        "person": {
+          "court": "$court",
+          "role": "sage",
+          "choose": "by_score:renown"
+        }
+      }
+    },
+    "require": [
+      "court.era >= 2",
+      "court.openness >= 0.4"
+    ],
+    "salience": [
+      {
+        "if": "court.has_library == true",
+        "w": 3
+      },
+      {
+        "if": "court.dread >= 0.4",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:memory",
+      "theme:library",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "headline": "What the pupils did with it",
+      "body": "You taught {court.name} {a.years_ago} years ago. {sage.name} runs a school now where that lesson is the first week. The second week is about dragons. The school has a tower, the tower has a telescope, and the telescope points at the mountain every clear night.",
+      "because": "A court you taught teaches itself; what it learns next is not yours to choose."
+    },
+    "options": [
+      {
+        "id": "teach",
+        "label": "Teach them something harder",
+        "act": {
+          "type": "teach",
+          "target": "$court",
+          "payload": {
+            "subject": "dragon_lore"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "burn",
+        "label": "Burn the tower",
+        "act": {
+          "type": "burn",
+          "target": "$court",
+          "magnitude": 0.2,
+          "structure": "tower"
+        }
+      },
+      {
+        "id": "keep",
+        "label": "Take the sage as your historian",
+        "act": {
+          "type": "take_hostage",
+          "target": "$sage"
+        },
+        "gate": "lair.has_historian == false"
+      },
+      {
+        "id": "ignore",
+        "label": "Let them look",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:slayers",
+        "theme:memory"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "iron/consequence/teach",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_one_you_spared",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "judge",
+          "age_wakings": [
+            1,
+            3
+          ]
+        }
+      },
+      "spared": {
+        "person": {
+          "knows_dragon": true,
+          "memory_has": "spared_by_dragon",
+          "choose": "most_recent"
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($spared)"
+        }
+      }
+    },
+    "require": [
+      "spared.role == ruler",
+      "court.awe >= 0.2"
+    ],
+    "salience": [
+      {
+        "if": "spared.trait == honest",
+        "w": 3
+      },
+      {
+        "if": "spared.trait == vengeful",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:faith",
+      "theme:succession",
+      "faction:$court",
+      "tone:solemn"
+    ],
+    "text": {
+      "headline": "{spared.name} rules now",
+      "body": "You judged {spared.name} and let {spared.pronoun} live, in front of the whole square, {a.years_ago} years ago. {spared.name} rules {court.name} now and has never once mentioned it in public. In private, every envoy who leaves for the mountain is briefed by {spared.name} personally.",
+      "because": "A public mercy makes a ruler who owes you and cannot say so.",
+      "variants": [
+        {
+          "if": "spared.trait == vengeful",
+          "body": "You judged {spared.name} and let {spared.pronoun} live, in front of the whole square. {spared.name} rules {court.name} now and has never forgiven the square for watching. Every envoy who leaves for the mountain is briefed personally, and the brief is not kind."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "broker",
+        "label": "Use the debt: broker a peace through them",
+        "act": {
+          "type": "broker",
+          "target": "$court",
+          "secondary": "$court",
+          "payload": {
+            "pact": "peace"
+          }
+        },
+        "gate": "dragon.lore >= 15"
+      },
+      {
+        "id": "haunt",
+        "label": "Remind them, in a dream",
+        "act": {
+          "type": "haunt",
+          "target": "$spared",
+          "payload": {
+            "message": "summons"
+          }
+        },
+        "gate": "dragon.arcana >= 8"
+      },
+      {
+        "id": "show",
+        "label": "Visit the square again",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let the debt lie",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:intrigue",
+        "theme:oath"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/judge",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_road_of_your_shadow",
+    "kind": "consequence",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 5,
+      "years": 60
+    },
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "show",
+          "age_wakings": [
+            0,
+            1
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)",
+          "remembers": "$a"
+        }
+      },
+      "child": {
+        "person": {
+          "court": "$court",
+          "role": "heir",
+          "choose": "by_score:age"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "court.dread <= 0.2",
+      "court.awe >= 0.15"
+    ],
+    "salience": [
+      {
+        "if": "bound(child)",
+        "w": 3
+      },
+      {
+        "if": "court.era <= 1",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:faith",
+      "theme:quiet",
+      "faction:$court",
+      "tone:tender"
+    ],
+    "text": {
+      "headline": "They saw you pass",
+      "body": "You flew low over {court.name} {a.years_ago} years ago and burned nothing. The road your shadow crossed is called the dragon's road now and the farmers along it leave the first sheaf at the milestone. Nobody has asked you for anything. They might, if you landed.",
+      "because": "A dragon seen and not feared becomes a story the fields tell.",
+      "variants": [
+        {
+          "if": "bound(child)",
+          "body": "You flew low over {court.name} and burned nothing. {child.name}, the heir, was on the road and has drawn you on every wall of the palace since. The farmers leave the first sheaf at the milestone where your shadow crossed."
+        },
+        {
+          "if": "court.era >= 3",
+          "body": "You flew low over {court.name} and burned nothing. The astronomers logged the hour and the heading. The farmers leave the first sheaf at the milestone anyway; the astronomers find this embarrassing."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "land",
+        "label": "Land at the milestone",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        }
+      },
+      {
+        "id": "bless",
+        "label": "Bless the fields along the road",
+        "act": {
+          "type": "bless",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        },
+        "gate": "dragon.dominion >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "Leave the story alone",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:pilgrims",
+        "theme:faith"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/show",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_heir_who_grew_up_here",
+    "kind": "consequence",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "take_hostage",
+          "age_years": [
+            15,
+            60
+          ]
+        }
+      },
+      "hostage": {
+        "person": {
+          "court": "lair",
+          "role": "hostage",
+          "age": [
+            25,
+            90
+          ],
+          "choose": "by_score:age"
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($hostage)"
+        }
+      },
+      "regent": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "choose": "most_recent"
+        }
+      }
+    },
+    "require": [
+      "court.cohesion <= 0.5",
+      "hostage.debt >= 1"
+    ],
+    "salience": [
+      {
+        "if": "hostage.trait == ambitious",
+        "w": 3
+      },
+      {
+        "if": "court.at_war == true",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:hostage",
+      "theme:succession",
+      "faction:$court",
+      "tone:solemn"
+    ],
+    "text": {
+      "headline": "{hostage.name} asks to go home a ruler",
+      "body": "{hostage.name} was a child when you took {hostage.pronoun} from {court.name} {a.years_ago} years ago, and is not a child now. {regent.name} rules in {hostage.name}'s name and would rather not stop. {hostage.name} asks for the throne, and for you to be seen at the coronation, and says it as someone who knows what the request costs you.",
+      "because": "A hostage raised in the hoard comes of age with a claim, a debt and a view of the valley from above."
+    },
+    "options": [
+      {
+        "id": "release",
+        "label": "Send them home with your sign on them",
+        "act": {
+          "type": "release",
+          "target": "$hostage",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "them",
+                  "pred": "hostage"
+                },
+                {
+                  "who": "them",
+                  "pred": "tribute"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "sponsor",
+        "label": "Back the claim with a war",
+        "act": {
+          "type": "sponsor",
+          "target": "$hostage",
+          "payload": {
+            "kind": "claimant"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "keep",
+        "label": "Keep them as your consort instead",
+        "act": {
+          "type": "keep",
+          "target": "$hostage",
+          "payload": {
+            "role": "consort"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "ignore",
+        "label": "Not yet",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:succession",
+        "theme:hostage"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/consequence/take_hostage",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_dead_you_raised",
+    "kind": "consequence",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "raise_undead",
+          "age_wakings": [
+            1,
+            3
+          ]
+        }
+      },
+      "dead": {
+        "faction": {
+          "race": "undead",
+          "choose": "by_score:power"
+        }
+      },
+      "living": {
+        "faction": {
+          "is": "neighbour_of($dead)",
+          "at_war": true,
+          "choose": "by_score:piety"
+        }
+      },
+      "priest": {
+        "person": {
+          "court": "$dead",
+          "role": "priest",
+          "choose": "most_recent"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "dead.wealth_rank <= 4",
+      "living.piety >= 0.5"
+    ],
+    "salience": [
+      {
+        "if": "bound(priest)",
+        "w": 9
+      },
+      {
+        "if": "living.has_slayers == true",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:undead",
+      "theme:faith",
+      "ending:lichdom",
+      "faction:$dead",
+      "faction:$living",
+      "tone:ominous"
+    ],
+    "text": {
+      "headline": "The dead have built a chapel",
+      "body": "The host you raised at {a.place} did not fall when the war ended. It stayed, and the fen it holds has a chapel in it now, roofed with shields. {living.name} says the dead are praying. Nobody has gone close enough to hear to whom.",
+      "because": "You raised the dead {a.years_ago} years ago; what you raise and do not dismiss finds its own reasons.",
+      "variants": [
+        {
+          "if": "bound(priest)",
+          "body": "The host you raised at {a.place} has a priest now, {priest.name}, who was alive when you raised the others and is not quite alive now. {living.name} says the dead are praying and that the prayers name the mountain."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "destroy",
+        "label": "Break the chapel",
+        "act": {
+          "type": "destroy_altar",
+          "target": "$dead"
+        }
+      },
+      {
+        "id": "commune",
+        "label": "Hear what the priest offers",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "receive",
+            "who": "$priest"
+          }
+        },
+        "gate": "bound(priest)"
+      },
+      {
+        "id": "defend",
+        "label": "Stand with the living against them",
+        "act": {
+          "type": "defend",
+          "target": "$living",
+          "secondary": "$dead"
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let the dead pray",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:undead",
+        "theme:cult"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "arcane/consequence/raise_undead",
+      "bank": "seed",
+      "reviewed": true
+    }
+  }
+]
