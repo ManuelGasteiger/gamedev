@@ -361,9 +361,11 @@ static Event event_from(const json& j) {
 }
 
 static json person_json(const Person& x) {
-    return {{"id", x.id}, {"name", x.name}, {"race", x.race}, {"faction", x.faction}, {"role", x.role}, {"born", x.born},
-            {"dies", x.dies}, {"traits", {{"bold", x.traits.bold}, {"pious", x.traits.pious}, {"greedy", x.traits.greedy}, {"cunning", x.traits.cunning}}},
-            {"tags", tags_json(x.tags)}, {"memory_of_dragon", x.memory_of_dragon}, {"hostage_since", x.hostage_since}};
+    json j = {{"id", x.id}, {"name", x.name}, {"race", x.race}, {"faction", x.faction}, {"role", x.role}, {"born", x.born},
+              {"dies", x.dies}, {"traits", {{"bold", x.traits.bold}, {"pious", x.traits.pious}, {"greedy", x.traits.greedy}, {"cunning", x.traits.cunning}}},
+              {"tags", tags_json(x.tags)}, {"memory_of_dragon", x.memory_of_dragon}, {"hostage_since", x.hostage_since}};
+    if (!x.sex.empty()) j["sex"] = x.sex;   // absent in rules-1 saves, so their stored hash still checks
+    return j;
 }
 
 static Person person_from(const json& j) {
@@ -373,6 +375,7 @@ static Person person_from(const json& j) {
     get(j, "race", x.race);
     get(j, "faction", x.faction);
     get(j, "role", x.role);
+    get(j, "sex", x.sex);
     get(j, "born", x.born);
     get(j, "dies", x.dies);
     if (j.contains("traits")) {
@@ -470,8 +473,11 @@ static json world_json(const World& w) {
     j["people"] = json::array();
     for (auto& x : w.people) j["people"].push_back(person_json(x));
     j["dead_people"] = json::array();
-    for (auto& x : w.dead_people)
-        j["dead_people"].push_back({{"id", x.id}, {"name", x.name}, {"race", x.race}, {"faction", x.faction}, {"role", x.role}, {"born", x.born}, {"died", x.died}});
+    for (auto& x : w.dead_people) {
+        json d = {{"id", x.id}, {"name", x.name}, {"race", x.race}, {"faction", x.faction}, {"role", x.role}, {"born", x.born}, {"died", x.died}};
+        if (!x.sex.empty()) d["sex"] = x.sex;
+        j["dead_people"].push_back(d);
+    }
     j["person_counters"] = w.person_counters;
     j["offers_pending"] = json::array();
     for (auto& of : w.offers) {
@@ -691,7 +697,18 @@ std::string chronicle_hash_hex(const World& w) {
     return buf;
 }
 
+void fill_person_sex(World& w) {
+    for (auto& x : w.people) if (x.sex.empty()) x.sex = person_sex(w.seed, x.id);
+    for (auto& x : w.dead_people) if (x.sex.empty()) x.sex = person_sex(w.seed, x.id);
+}
+
 bool world_from_json(const std::string& text, World& w, std::string& err) {
+    if (!world_from_json_as_saved(text, w, err)) return false;
+    fill_person_sex(w);
+    return true;
+}
+
+bool world_from_json_as_saved(const std::string& text, World& w, std::string& err) {
     json j = json::parse(text, nullptr, false);
     if (j.is_discarded() || !j.is_object()) { err = "invalid world json"; return false; }
     get(j, "year", w.year);
@@ -796,6 +813,7 @@ bool world_from_json(const std::string& text, World& w, std::string& err) {
             get(v, "race", x.race);
             get(v, "faction", x.faction);
             get(v, "role", x.role);
+            get(v, "sex", x.sex);
             get(v, "born", x.born);
             get(v, "died", x.died);
             w.dead_people.push_back(x);

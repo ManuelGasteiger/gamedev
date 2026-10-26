@@ -60,6 +60,8 @@ std::string epithet_for(const Params& p, const Person& person) {
     return it == p.names.epithets.end() ? "" : it->second;
 }
 
+std::string person_sex(uint64_t seed, const std::string& id) { return rng_for(seed, "sex", id).chance(0.5) ? "f" : "m"; }
+
 Person new_person(World& w, const Params& p, const std::string& race, const std::string& faction, const std::string& role) {
     Person person;
     int n = ++w.person_counters[race];
@@ -68,6 +70,7 @@ Person new_person(World& w, const Params& p, const std::string& race, const std:
     person.faction = faction;
     person.role = role;
     person.born = w.year;
+    person.sex = person_sex(w.seed, person.id);
     const NameTable* t = table(p.names.people, race);
     if (t) {
         int ia = w.rng.range(0, static_cast<int>(t->a.size()));

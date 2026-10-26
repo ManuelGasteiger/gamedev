@@ -104,6 +104,8 @@ std::string world_to_json(const World& w);
 std::string world_view_json(const World& w, const Params& p);   // world_to_json plus derived values (power, era name, threat, offers)
 std::string sleep_result_to_json(const SleepResult& r, const World& w, const Params& p);
 bool world_from_json(const std::string& text, World& out, std::string& err);
+bool world_from_json_as_saved(const std::string& text, World& out, std::string& err);   // no fill-ins, for hash checks
+void fill_person_sex(World& w);   // people of rules-1 worlds get theirs from the seed
 std::string acts_to_json(const std::vector<Act>& acts);
 bool acts_from_json(const std::string& text, std::vector<Act>& out, std::string& err);
 std::string chronicle_to_json(const std::vector<Event>& events);

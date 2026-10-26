@@ -266,6 +266,7 @@ struct Person {
     std::string race;
     std::string faction;
     std::string role;
+    std::string sex;   // "m" | "f", from rng_for(seed, "sex", id) so no world draw moves
     int born = 0;
     int dies = 0;
     PersonTraits traits;
@@ -275,7 +276,7 @@ struct Person {
 };
 
 struct DeadPerson {
-    std::string id, name, race, faction, role;
+    std::string id, name, race, faction, role, sex;
     int born = 0, died = 0;
 };
 

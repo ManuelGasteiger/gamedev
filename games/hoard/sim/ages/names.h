@@ -7,6 +7,8 @@ namespace ages {
 
 std::string new_faction_name(World& w, const Params& p, const std::string& race);
 
+std::string person_sex(uint64_t seed, const std::string& id);
+
 // a new person with id <race><n>, a syllable name from data/names.json, random traits and an epithet for a strong trait;
 // not yet added to w.people (the caller sets role, faction and lifespan, then calls add_person)
 Person new_person(World& w, const Params& p, const std::string& race, const std::string& faction, const std::string& role);
