@@ -36,6 +36,12 @@ void walk(det::Hasher& h, const nlohmann::json& j) {
 
 }
 
+uint64_t json_hash(const nlohmann::json& j) {
+    det::Hasher h;
+    walk(h, j);
+    return h.done();
+}
+
 StateHash state_hash(const World& w) {
     nlohmann::json j = world_state_json(w);
     StateHash s;

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "unrecorded.h"
 #include <cstdio>
 #include "ages.h"
 #include "rules/rules.h"
@@ -145,7 +146,7 @@ static SpellDef with_talents(const World& w, const Params& p, SpellDef s) {
     return s;
 }
 
-CastResult cast_spell(World& w, const Params& p, const std::string& spell, const std::string& target,
+CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& spell, const std::string& target,
                       const std::string& region, const std::string& against) {
     CastResult r;
     r.spell = spell;
@@ -167,7 +168,7 @@ CastResult cast_spell(World& w, const Params& p, const std::string& spell, const
     return r;
 }
 
-TerraformResult terraform(World& w, const Params& p, const std::string& region, const std::string& kind) {
+TerraformResult terraform_unrecorded(World& w, const Params& p, const std::string& region, const std::string& kind) {
     TerraformResult r;
     const TerraformDef& t = p.terraform;
     auto k = t.kinds.find(kind);

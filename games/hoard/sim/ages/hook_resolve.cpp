@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include "unrecorded.h"
 #include "defences.h"
 #include "growth.h"
 #include "rules/slayers.h"
@@ -123,7 +124,7 @@ void resolve_hooks(World& w, const Params& p, const Act& a) {
     }
 }
 
-bool answer_hook(World& w, const Params& p, const std::string& id, const std::string& choice, std::string& reason) {
+bool answer_hook_unrecorded(World& w, const Params& p, const std::string& id, const std::string& choice, std::string& reason) {
     if (dragon_dead(w)) { reason = "dragon_slain"; return false; }
     const Hook* found = nullptr;
     for (auto& h : w.hooks) if (h.id == id) found = &h;

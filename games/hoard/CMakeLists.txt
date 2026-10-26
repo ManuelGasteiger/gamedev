@@ -25,6 +25,9 @@ endfunction()
 add_library(ages STATIC
   sim/core/detmath.cpp
   sim/ages/state_hash.cpp
+  sim/ages/record.cpp
+  sim/ages/recorded.cpp
+  sim/ages/save.cpp
   sim/ages/ages.cpp
   sim/ages/acts.cpp
   sim/ages/chronicle.cpp
@@ -105,6 +108,10 @@ add_library(ages STATIC
 )
 target_include_directories(ages PUBLIC sim)
 hoard_sim_flags(ages)
+execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE HOARD_BUILD OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(HOARD_BUILD)
+  set_source_files_properties(sim/ages/record.cpp PROPERTIES COMPILE_DEFINITIONS HOARD_BUILD="${HOARD_BUILD}")
+endif()
 if(MSVC)
   target_compile_options(ages PRIVATE /W4 /bigobj)
 else()
@@ -141,6 +148,8 @@ ages_test(golden fast)
 ages_test(detmath_bounds fast)
 ages_test(rng_sequence fast)
 ages_test(hash_canonical fast)
+ages_test(save_roundtrip fast)
+ages_test(replay_verify fast)
 
 find_program(BASH bash)
 if(BASH AND NOT WIN32)

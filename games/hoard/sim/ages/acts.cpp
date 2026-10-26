@@ -1,4 +1,5 @@
 #include "ages.h"
+#include "unrecorded.h"
 #include "dragon_acts.h"
 #include "hooks.h"
 #include "importance.h"
@@ -185,7 +186,7 @@ static Tags act_tags(const Act& a) {
     return t;
 }
 
-std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts) {
+std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const std::vector<Act>& acts) {
     if (dragon_dead(w)) return {};
     double burn_total = 0;
     bool rage = has_tag(w.dragon.tags, "rage");

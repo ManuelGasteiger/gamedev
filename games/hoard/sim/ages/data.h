@@ -484,6 +484,7 @@ struct HookBook {
 
 struct Params {
     Constants c;
+    uint64_t data_hash = 0;   // of the loaded data, set by load_data_from_json (record.cpp)
     std::map<std::string, Race> races;
     std::map<std::string, std::map<std::string, double>> race_affinity;
     std::vector<Reaction> reactions;

@@ -342,6 +342,8 @@ struct Genesis {
     std::map<std::string, std::string> deal;
 };
 
+struct Recorder;
+
 struct World {
     int year = 0;
     uint64_t seed = 0;
@@ -384,6 +386,7 @@ struct World {
     int last_major = 0;                    // storyteller: year of the last major event
     int story_quiet_wakings = 0;           // wakings in a row without a major event
     bool story_breather = false;           // the coming waking is a breather (the last one had a major event)
+    Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
 };
 
 }

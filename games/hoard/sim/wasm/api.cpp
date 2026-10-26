@@ -7,6 +7,8 @@
 #include "ages/importance.h"
 #include "ages/json.h"
 #include "ages/state_hash.h"
+#include "ages/record.h"
+#include "ages/save.h"
 #include "ages/talents.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -27,12 +29,21 @@ struct Session {
     DataJson data;
     Params params;
     World world;
+    Recorder recorder;     // every input since the last load or reset, for "Report a problem"
+    std::string header;
 };
 
 Session g;
 std::string g_out;
 
 json fail(const std::string& msg) { return {{"ok", false}, {"error", msg}}; }
+
+void start_recording(bool genesis) {
+    g.recorder = Recorder();
+    g.recorder.world = &g.world;
+    g.world.recorder = &g.recorder;
+    g.header = replay_header(g.world, g.params, genesis);
+}
 
 json fear_faith_snapshot(const World& w) {
     json j = json::object();
@@ -68,6 +79,7 @@ json cmd_load(const json& in) {
     g.params = r.params;
     g.world = r.world;
     g.loaded = true;
+    start_recording(in.value("genesis", false));
     return {{"ok", true}};
 }
 
@@ -77,12 +89,14 @@ json cmd_reset(const json& in) {
     if (!r.ok) return fail(r.error);
     if (in.value("genesis", false) && !make_genesis(r.world, r.params, r.error)) return fail(r.error);   // v0.4 world (S2)
     g.world = r.world;
+    start_recording(in.value("genesis", false));
     return {{"ok", true}};
 }
 
+// scores the returned copies only: the world changes through the API verbs alone, so a replay sees the same state
 json events_since(size_t first) {
-    score_events(g.world, g.params);
     std::vector<Event> events(g.world.chronicle.begin() + static_cast<std::ptrdiff_t>(first), g.world.chronicle.end());
+    for (auto& e : events) if (e.importance < 0) e.importance = event_importance(g.world, g.params, e);
     return json::parse(chronicle_to_json(events), nullptr, false);
 }
 
@@ -195,7 +209,10 @@ json cmd_load_world(const json& in) {
     World w;
     std::string err;
     if (!world_from_json(in.value("world", json::object()).dump(), w, err)) return fail(err);
+    RecordScope rec(g.world);
     g.world = w;
+    g.world.recorder = &g.recorder;
+    rec.done("load_world", json({{"world", in.value("world", json::object())}}).dump());
     return {{"ok", true}};
 }
 
@@ -318,6 +335,12 @@ json dispatch(const json& in) {
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
     if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);
     if (cmd == "golden") return cmd_golden(in);
+    if (cmd == "report") {   // "Report a problem": the replay of this session, the current save, the build
+        std::string hrp = g.header + "\n";
+        for (auto& l : g.recorder.lines) hrp += l + "\n";
+        hrp += json({{"end", 1}, {"year", g.world.year}, {"h", hash_hex(state_hash(g.world).root)}}).dump() + "\n";
+        return {{"ok", true}, {"hrp", hrp}, {"save", save_json(g.world, g.params)}, {"build", build_id()}};
+    }
     if (cmd == "load_world") return cmd_load_world(in);
     // v0.4 world (S2)
     if (cmd == "legends") return json::parse(legends_json(g.world, g.params), nullptr, false);

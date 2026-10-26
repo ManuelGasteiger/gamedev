@@ -9,7 +9,7 @@ SYSROOT="$WASI_SDK/share/wasi-sysroot"
 
 if [ "${1:-}" != "--html" ]; then
   SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp | grep -v data_io.cpp)
-  "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 -ffp-contract=off -fno-fast-math \
+  "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 -ffp-contract=off -fno-fast-math -DHOARD_BUILD="\"$(git rev-parse --short HEAD 2>/dev/null || echo dev)\"" \
     -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor \
     -Isim \
     -Wl,--export=ages_cmd -Wl,--export=ages_alloc -Wl,--export=ages_free \

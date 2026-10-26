@@ -1,4 +1,5 @@
 #include "ages.h"
+#include "unrecorded.h"
 #include "chronicle.h"
 #include "hooks.h"
 #include "importance.h"
@@ -38,7 +39,7 @@ static void note_ranks(World& w, const Params& p, const std::map<std::string, in
 // single short step). When the growth thresholds for the next phase are met, a sleep at least as long as the phase's
 // long window is a moult: digestion doubles and the dragon wakes one phase up, stiff for its first raid.
 // v0.4: wounds heal step by step; a slain dragon does not sleep.
-SleepResult sleep(World& w, const Params& p, int years) {
+SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     const Constants& c = p.c;
     SleepResult res;
     if (dragon_dead(w)) { res.wake_reason = "dragon_slain"; return res; }

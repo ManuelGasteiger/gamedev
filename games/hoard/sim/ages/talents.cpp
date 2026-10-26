@@ -1,4 +1,5 @@
 #include "talents.h"
+#include "unrecorded.h"
 #include "core/detmath.h"
 #include <algorithm>
 #include <cmath>
@@ -123,7 +124,7 @@ std::vector<Pick> pending_picks(const World& w, const Params& p) {
     return out;
 }
 
-bool pick_talent(World& w, const Params& p, const std::string& id, std::string& reason) {
+bool pick_talent_unrecorded(World& w, const Params& p, const std::string& id, std::string& reason) {
     const TalentDef* t = def_of(p.talents, id);
     if (!t) { reason = "unknown talent " + id; return false; }
     for (auto& pk : pending_picks(w, p)) {

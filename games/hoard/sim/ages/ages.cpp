@@ -1,4 +1,6 @@
 #include <cstdio>
+#include "record.h"
+#include "unrecorded.h"
 #include "ages.h"
 #include "growth.h"
 #include "oaths.h"
@@ -12,6 +14,7 @@ namespace ages {
 LoadResult load_data_from_json(const DataJson& d, uint64_t seed) {
     LoadResult r;
     if (!params_from_json(d, r.params, r.error)) return r;
+    r.params.data_hash = data_hash(d);
     if (!world_from_data_json(d, r.params, r.world, r.error)) return r;
     r.world.seed = seed;
     r.world.rng.seed(seed);
@@ -29,7 +32,7 @@ LoadResult load_data_from_json(const DataJson& d, uint64_t seed) {
 
 // accepting swears the draft; an offer that asks nothing but an act (teach, bless, judge, ...) still becomes an oath
 // record so that the act can be matched to it later (fulfilment, lies). An elope or hide_heir takes the hostage now.
-bool accept_offer(World& w, const Params& p, size_t index) {
+bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
     if (index >= w.offers.size()) return false;
     Offer of = w.offers[index];
     Oath o = of.draft;
@@ -55,7 +58,7 @@ bool accept_offer(World& w, const Params& p, size_t index) {
 
 static std::string num(double v) { char b[32]; std::snprintf(b, sizeof b, "%g", v); return b; }
 
-DemandResult demand_oath(World& w, const Params& p, const std::string& target, const std::string& pred) {
+DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string& target, const std::string& pred) {
     const Constants& c = p.c;
     DemandResult r;
     r.target = target;
@@ -102,7 +105,7 @@ DemandResult demand_oath(World& w, const Params& p, const std::string& target, c
     return r;
 }
 
-bool decline_offer(World& w, const Params& p, size_t index) {
+bool decline_offer_unrecorded(World& w, const Params& p, size_t index) {
     if (index >= w.offers.size()) return false;
     Offer of = w.offers[index];
     if (!of.envoy.empty()) meet(w, of.envoy, "offer", p.c.known_decline);

@@ -26,6 +26,14 @@ The runner writes `chronicle.json`, `world_final.json`, `stats.json` and `briefi
 
 Builds with GCC and Clang here (identical chronicle hashes); no GNU extensions, no exceptions across the public API.
 
+## Replays, saves and bug reports
+
+`hoard-sim ... --record run.hrp` writes every input the run made (each outermost API call: `apply_acts`, `sleep`, `pick_talent`, offers, hooks, `kill_person`, spells, `terraform`, `demand`, `load_world`) as JSON lines, with a state-hash checkpoint after every sleep. `hoard-sim --data data --replay run.hrp` rebuilds the start world from the header (seed, generated or not), replays the inputs and checks every checkpoint; exit 3 names the first checkpoint that differs. A replay that fails here but passed on the machine that recorded it is a determinism bug; `--trace` on both builds and `tools/first_div.py` find the year and the part.
+
+To replay a bug report from the page (Game, Report a problem): decode the blob (`python3 -c "import base64,json,sys; d=json.loads(base64.b64decode(sys.stdin.read())); open('r.hrp','w').write(d['hrp']); open('save.json','w').write(d['save'])" < blob.txt`), check out the build it names, then `--replay r.hrp`.
+
+Saves (`sim/ages/save.h`): a header (`format_version`, `rules_version`, build, data hash, seed, year, state hash) and the world. Loading refuses a newer format and any save whose recomputed state hash differs.
+
 ## Browser sandbox
 
 `web/ages-sandbox.html` is a single self-contained page (the wasm module and the six data files are embedded as text) for trying acts and sleep lengths against the sim: valley map (12 regions), faction table (dominant race and pop share, vassal status, traits), dragon panel with hunger, world panel (regions by race, remnants, wars, a sponsor-remnant control), act builder, offers, sleep controls with a forecast line, chronicle feed, world export/import. Double-click it or serve it; nothing is fetched.

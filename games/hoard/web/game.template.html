@@ -197,7 +197,7 @@
 
   #seed-row input { width: 90px; }
   #import { display: none; }
-  #export-text { width: 100%; height: 120px; background: #12141a; color: var(--fg); border: 1px solid var(--line); font: 11px ui-monospace, monospace; }
+  #export-text, #report-text { width: 100%; height: 120px; background: #12141a; color: var(--fg); border: 1px solid var(--line); font: 11px ui-monospace, monospace; }
 </style>
 </head>
 <body>
@@ -284,6 +284,11 @@
         <div class="muted">The game autosaves to this browser after every age. Export writes the world as JSON; the artifact viewer blocks downloads, so the JSON is also shown below to copy.</div>
         <div class="row"><button id="export">Export world</button><button id="import-btn">Import world</button><input id="import" type="file" accept=".json"><button id="export-copy">Copy JSON</button></div>
         <textarea id="export-text" class="hidden" readonly></textarea>
+      </div>
+      <div class="box"><h3>Report a problem</h3>
+        <div class="muted" id="report-note">Bundles the replay of this session, the current save and the build into one block of text for a bug report. Nothing is sent.</div>
+        <div class="row"><button id="report-btn">Report a problem</button></div>
+        <textarea id="report-text" class="hidden" readonly></textarea>
       </div>
       <div class="box"><h3>Controls</h3>
         <div class="muted">WASD / arrows fly · click a tile to fly there · wheel zoom · right-drag pan · hold B to burn (release to breathe) · L land at the lair · C chronicle · Space / + / - / Esc in the sleep montage</div>
@@ -2193,6 +2198,7 @@ async function importWorld(file) {
 function wireSystem() {
   $('new-game').addEventListener('click', () => newGame(Number($('seed').value) || 1, { genesis: true }));
   $('btn-legends').addEventListener('click', () => { $('system').classList.add('hidden'); openLegends(); });
+  $('report-btn').addEventListener('click', reportProblem);
   $('export').addEventListener('click', exportWorld);
   $('export-copy').addEventListener('click', () => { $('export-text').value = JSON.stringify(world, null, 1); $('export-text').classList.remove('hidden'); $('export-text').select(); try { navigator.clipboard?.writeText($('export-text').value); } catch (e) { /* ignore */ } });
   $('import-btn').addEventListener('click', () => $('import').click());
@@ -2323,6 +2329,7 @@ window.game = {
 <script src="game/hooks.js"></script>
 <script src="game/legends.js"></script>
 <script src="game/death.js"></script>
+<script src="game/report.js"></script>
 <script>main().catch((e) => { setStatus('failed: ' + e.message); console.error(e); });</script>
 </body>
 </html>

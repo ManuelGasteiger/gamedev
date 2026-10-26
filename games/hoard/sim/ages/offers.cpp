@@ -1,4 +1,5 @@
 #include "offers.h"
+#include "unrecorded.h"
 #include "ages.h"
 #include "oaths.h"
 #include "rules/rules.h"
@@ -236,7 +237,7 @@ void note_act(World& w, const Params& p, const Act& a, double m) {
     ledger(w, p, a, m);
 }
 
-bool kill_person(World& w, const Params& p, const std::string& id, std::string& reason, std::vector<ReactionLine>* lines) {
+bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, std::string& reason, std::vector<ReactionLine>* lines) {
     const Constants& c = p.c;
     Person* x = find_person(w, id);
     if (!x) { reason = "no such person"; return false; }
