@@ -1,4 +1,5 @@
 #include <cmath>
+#include "core/detmath.h"
 #include "ages.h"
 #include "growth.h"
 #include "step.h"
@@ -9,7 +10,7 @@ namespace ages {
 
 static double digest(double& stock, double halflife, double years) {
     if (stock <= 0 || halflife <= 0) return 0;
-    double remaining = stock * std::pow(0.5, years / halflife);
+    double remaining = stock * det::half_life(years, halflife);
     double digested = stock - remaining;
     stock = remaining;
     return digested;

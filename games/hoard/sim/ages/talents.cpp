@@ -1,4 +1,5 @@
 #include "talents.h"
+#include "core/detmath.h"
 #include <algorithm>
 #include <cmath>
 #include "world_util.h"
@@ -17,7 +18,7 @@ Merge merge_of(const std::string& key) {
 }
 
 void combine(double& v, double x, Merge m, int times = 1) {
-    if (m == Merge::mult) v *= std::pow(x, times);
+    if (m == Merge::mult) v *= det::pow(x, times);
     else if (m == Merge::add) v += x * times;
     else v = std::max(v, x);
 }

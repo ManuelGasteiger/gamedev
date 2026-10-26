@@ -5,10 +5,10 @@ $WasiSdk = if ($env:WASI_SDK) { $env:WASI_SDK } else { 'D:\tools\wasi-sdk' }
 $Cxx = Join-Path $WasiSdk 'bin\clang++.exe'
 $Sysroot = Join-Path $WasiSdk 'share\wasi-sysroot'
 
-$Sources = @(Get-ChildItem sim\ages\*.cpp, sim\ages\rules\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' } | ForEach-Object { $_.FullName })
+$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' } | ForEach-Object { $_.FullName })
 $Sources += (Resolve-Path sim\wasm\api.cpp).Path
 
-& $Cxx --target=wasm32-wasi --sysroot=$Sysroot -std=c++17 -O2 `
+& $Cxx --target=wasm32-wasi --sysroot=$Sysroot -std=c++17 -O2 -ffp-contract=off -fno-fast-math `
   -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor `
   -Isim `
   -Wl,--export=ages_cmd -Wl,--export=ages_alloc -Wl,--export=ages_free `

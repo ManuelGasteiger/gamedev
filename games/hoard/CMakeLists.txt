@@ -8,7 +8,22 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# determinism policy (docs/research-determinism-ci.md section 1): no contraction, no fast-math, anywhere in sim/
+foreach(v CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_EXE_LINKER_FLAGS)
+  if("${${v}}" MATCHES "-ffast-math|-Ofast|/fp:fast")
+    message(FATAL_ERROR "${v} contains a fast-math flag; the sim must stay deterministic")
+  endif()
+endforeach()
+function(hoard_sim_flags target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /fp:strict)
+  else()
+    target_compile_options(${target} PRIVATE -ffp-contract=off -fno-fast-math)
+  endif()
+endfunction()
+
 add_library(ages STATIC
+  sim/core/detmath.cpp
   sim/ages/ages.cpp
   sim/ages/acts.cpp
   sim/ages/chronicle.cpp
@@ -87,6 +102,7 @@ add_library(ages STATIC
   sim/ages/rules/storyteller.cpp
 )
 target_include_directories(ages PUBLIC sim)
+hoard_sim_flags(ages)
 if(MSVC)
   target_compile_options(ages PRIVATE /W4 /bigobj)
 else()
@@ -95,6 +111,7 @@ endif()
 
 add_executable(ages_runner sim/runner/main.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
+hoard_sim_flags(ages_runner)
 set_target_properties(ages_runner PROPERTIES OUTPUT_NAME hoard-sim)
 
 enable_testing()
@@ -104,6 +121,7 @@ set(AGES_GOLDEN_DIR ${CMAKE_SOURCE_DIR}/tests/golden)
 function(ages_test name label)
   add_executable(test_${name} sim/tests/${name}.cpp)
   target_link_libraries(test_${name} PRIVATE ages)
+  hoard_sim_flags(test_${name})
   target_compile_definitions(test_${name} PRIVATE
     AGES_DATA_DIR="${AGES_DATA_DIR}"
     AGES_GOLDEN_DIR="${AGES_GOLDEN_DIR}"
@@ -118,3 +136,10 @@ ages_test(reactions fast)
 ages_test(oath_breach_sleep fast)
 ages_test(policies slow)
 ages_test(golden fast)
+ages_test(detmath_bounds fast)
+
+find_program(BASH bash)
+if(BASH AND NOT WIN32)
+  add_test(NAME banned_ops COMMAND ${BASH} ${CMAKE_SOURCE_DIR}/tools/check_banned.sh)
+  set_tests_properties(banned_ops PROPERTIES LABELS fast)
+endif()
