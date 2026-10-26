@@ -6,12 +6,19 @@
 #include "ages/genesis.h"
 #include "ages/importance.h"
 #include "ages/json.h"
+#include "ages/state_hash.h"
 #include "ages/talents.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
 
 using namespace ages;
 using nlohmann::json;
+
+// the wasm build has no files: policies arrive as text (`golden`), so a policy that cycles through others cannot load them
+bool ages::load_policy(const std::string&, const std::string& name, Policy&, std::string& err) {
+    err = "no policy files in the wasm build: " + name;
+    return false;
+}
 
 namespace {
 
@@ -271,6 +278,22 @@ bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
     return true;
 }
 
+// the state-hash golden of the native runner (`hoard-sim --golden`): a generated world, a policy, 3000 years
+json cmd_golden(const json& in) {
+    LoadResult r = load_data_from_json(g.data, in.value("seed", uint64_t{1}));
+    if (!r.ok) return fail(r.error);
+    if (!make_genesis(r.world, r.params, r.error)) return fail(r.error);
+    Policy policy;
+    std::string err;
+    if (!policy_from_json(text_of(in, "policy"), policy, err)) return fail(err);
+    Scenario s;
+    s.policy = &policy;
+    s.years = 3000;
+    s.sleep = 100;
+    run_scenario(r.world, r.params, s);
+    return {{"ok", true}, {"hash", hash_hex(state_hash(r.world).root)}};
+}
+
 json dispatch(const json& in) {
     std::string cmd = in.value("cmd", "");
     if (cmd == "load") return cmd_load(in);
@@ -293,6 +316,8 @@ json dispatch(const json& in) {
     if (cmd == "demand") return cmd_demand(in);
     if (cmd == "catalogue") { json j = json::parse(spells_catalogue_json(g.params), nullptr, false); j["ok"] = true; return j; }
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
+    if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);
+    if (cmd == "golden") return cmd_golden(in);
     if (cmd == "load_world") return cmd_load_world(in);
     // v0.4 world (S2)
     if (cmd == "legends") return json::parse(legends_json(g.world, g.params), nullptr, false);

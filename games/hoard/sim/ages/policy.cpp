@@ -154,6 +154,7 @@ void run_scenario(World& w, const Params& p, const Scenario& s) {
         }
         int span = std::min(remaining, s.policy ? policy_sleep(w, p, *s.policy, sleep_index, s.sleep) : s.sleep);
         SleepResult r = sleep(w, p, span);
+        if (s.after_sleep) s.after_sleep(w);
         remaining -= std::max(r.years_slept, std::min(span, p.c.step_years));
         sleep_index += 1;
     }

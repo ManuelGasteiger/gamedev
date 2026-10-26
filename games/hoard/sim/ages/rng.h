@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <string>
+#include "core/hash.h"
 
 namespace ages {
 
@@ -45,5 +47,16 @@ struct Rng {
         return lo + static_cast<int>(next_u32() % span);
     }
 };
+
+// a keyed sub-stream: a new draw in one rule no longer shifts every later draw of the world stream
+inline Rng rng_for(uint64_t seed, const std::string& tag, const std::string& id) {
+    det::Hasher h;
+    h.u64(seed);
+    h.str(tag);
+    h.str(id);
+    Rng r;
+    r.seed(h.done());
+    return r;
+}
 
 }

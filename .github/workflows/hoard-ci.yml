@@ -37,6 +37,15 @@ jobs:
       - name: fast tests
         shell: bash
         run: ctest --test-dir build -C Release -L fast --output-on-failure --no-tests=error
+      - name: state hashes, seeds 1-60
+        shell: bash
+        run: |
+          bin=$(find build -name 'hoard-sim' -o -name 'hoard-sim.exe' | head -1)
+          "$bin" --data data --golden 1-60 > hashes.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hashes-${{ matrix.name }}
+          path: games/hoard/hashes.txt
 
   wasm:
     runs-on: ubuntu-24.04
@@ -58,9 +67,28 @@ jobs:
           mkdir -p ~/wasi-sdk && tar xzf wasi.tgz -C ~/wasi-sdk --strip-components=1
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - name: native build for the comparison
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 4 --target ages
       - name: wasm build
         run: WASI_SDK=~/wasi-sdk bash web/build.sh --wasm
-      - name: wasm hashes equal the goldens
-        run: node web/smoke.mjs
+      - name: wasm hashes equal the goldens; state hashes, seeds 1-60
+        run: node web/smoke.mjs --golden 1-60 --out hashes.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hashes-wasm
+          path: games/hoard/hashes.txt
+
+  compare:
+    needs: [native, wasm]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/download-artifact@v4
+        with: { pattern: hashes-*, path: hashes }
+      - name: platforms agree
+        run: |
+          mkdir -p norm
+          for d in ../../hashes/hashes-*; do tr -d '\r' < "$d/hashes.txt" | sort -n > "norm/$(basename "$d").txt"; done
+          ls norm
+          for f in norm/*.txt; do diff -u norm/hashes-gcc.txt "$f"; done
+      - name: platforms match the committed goldens
+        run: diff -u <(head -60 tests/golden/state_hashes.txt) norm/hashes-gcc.txt

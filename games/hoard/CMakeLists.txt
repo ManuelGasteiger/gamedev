@@ -24,6 +24,7 @@ endfunction()
 
 add_library(ages STATIC
   sim/core/detmath.cpp
+  sim/ages/state_hash.cpp
   sim/ages/ages.cpp
   sim/ages/acts.cpp
   sim/ages/chronicle.cpp
@@ -40,6 +41,7 @@ add_library(ages STATIC
   sim/ages/briefing.cpp
   sim/ages/card_data.cpp
   sim/ages/policy.cpp
+  sim/ages/policy_json.cpp
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
   sim/ages/sleep.cpp
@@ -137,6 +139,8 @@ ages_test(oath_breach_sleep fast)
 ages_test(policies slow)
 ages_test(golden fast)
 ages_test(detmath_bounds fast)
+ages_test(rng_sequence fast)
+ages_test(hash_canonical fast)
 
 find_program(BASH bash)
 if(BASH AND NOT WIN32)

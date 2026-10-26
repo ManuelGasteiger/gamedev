@@ -7,6 +7,7 @@
 #include <vector>
 #include "ages/ages.h"
 #include "ages/genesis.h"
+#include "ages/state_hash.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -27,6 +28,9 @@ struct Options {
     bool briefing = false;
     bool narrate = false;
     bool genesis = false;   // v0.4 world (S2)
+    std::string trace;      // one state-hash line per sleep
+    bool state_hash = false;
+    uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -44,6 +48,14 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--briefing") o.briefing = true;
         else if (k == "--narrate") o.narrate = true;
         else if (k == "--genesis") o.genesis = true;
+        else if (k == "--trace") { if (!need(o.trace)) return false; }
+        else if (k == "--state-hash") o.state_hash = true;
+        else if (k == "--golden") {
+            if (!need(v)) return false;
+            size_t dash = v.find('-');
+            o.golden_from = std::strtoull(v.c_str(), nullptr, 10);
+            o.golden_to = dash == std::string::npos ? o.golden_from : std::strtoull(v.c_str() + dash + 1, nullptr, 10);
+        }
         else { std::fprintf(stderr, "unknown argument %s\n", k.c_str()); return false; }
     }
     return o.years > 0 && o.sleep > 0;
@@ -189,12 +201,35 @@ json stats_json(const World& w, const Params& p) {
 
 }
 
+// the state-hash golden: every seed on a generated world, the played policy, 3000 years in its own sleep lengths
+int golden(const Options& o) {
+    for (uint64_t seed = o.golden_from; seed <= o.golden_to; ++seed) {
+        LoadResult loaded = load_data(o.data, seed);
+        if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
+        std::string err;
+        if (!make_genesis(loaded.world, loaded.params, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
+        Policy policy;
+        if (!load_policy(o.data, "played", policy, err)) { std::fprintf(stderr, "%s\n", err.c_str()); return 1; }
+        Scenario s;
+        s.policy = &policy;
+        s.data_dir = o.data;
+        s.years = 3000;
+        s.sleep = 100;
+        run_scenario(loaded.world, loaded.params, s);
+        std::printf("%llu %s\n", static_cast<unsigned long long>(seed), hash_hex(state_hash(loaded.world).root).c_str());
+        std::fflush(stdout);
+    }
+    return 0;
+}
+
 int main(int argc, char** argv) {
     Options o;
+    if (argc >= 3 && std::string(argv[1]) == "--golden") o.years = 3000;
     if (!parse(argc, argv, o)) {
-        std::fprintf(stderr, "usage: ages --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] --out out/\n");
+        std::fprintf(stderr, "usage: hoard-sim --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] [--trace t.jsonl] [--state-hash] --out out/\n       hoard-sim --data data/ --golden 1-300\n");
         return 2;
     }
+    if (o.golden_to) return golden(o);
     LoadResult loaded = load_data(o.data, o.seed);
     if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
     World& w = loaded.world;
@@ -226,7 +261,15 @@ int main(int argc, char** argv) {
     s.data_dir = o.data;
     s.years = o.years;
     s.sleep = o.sleep;
+    std::ofstream trace;
+    if (!o.trace.empty()) {
+        trace.open(o.trace);
+        if (!trace) { std::fprintf(stderr, "cannot write %s\n", o.trace.c_str()); return 1; }
+        trace << state_hash_json(w) << "\n";
+        s.after_sleep = [&](const World& x) { trace << state_hash_json(x) << "\n"; };
+    }
     run_scenario(w, p, s);
+    if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 
     std::string base = o.out;
     if (!base.empty() && base.back() != '/') base += '/';

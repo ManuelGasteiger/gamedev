@@ -497,6 +497,7 @@ static json world_json(const World& w, const Params& p) {
 }
 
 std::string world_to_json(const World& w) { Params none; return world_json(w, none).dump(1); }
+json world_state_json(const World& w) { Params none; return world_json(w, none); }
 
 static const char* const era_names[] = {"bronze", "iron", "castles", "gunpowder", "arcane"};
 

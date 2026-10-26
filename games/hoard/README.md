@@ -10,7 +10,11 @@ cmake --build build -j
 ./build/hoard-sim --data data --seed 1 --years 3000 --out out/s1
 ./build/hoard-sim --data data --seed 1 --years 2000 --policy raze_all --sleep 100 --out out/r1
 ./build/hoard-sim --data data --seed 1 --years 1000 --acts my_log.json --out out/a1
-cd build && ctest                # all six tests
+cd build && ctest                # all tests (ctest -L fast skips baseline and policies)
+./build/hoard-sim --data data --golden 1-60            # state-hash golden: `seed hash` per seed (generated world, played, 3000 y)
+./build/hoard-sim --data data --seed 3 --years 3000 --policy played --genesis --trace t.jsonl --out out/t3   # state hash per sleep
+python3 tools/first_div.py a.jsonl b.jsonl            # first checkpoint and part where two traces differ
+tools/check_banned.sh                                  # determinism gate on sim/ (also the banned_ops test)
 cd build && ctest -L fast        # determinism, reactions, oath_breach_sleep, golden
 python3 tools/ages_stats.py --bin build/hoard-sim --seeds 1-200 --years 3000 [--policy raze_all]
 python3 tools/ages_stats.py --read out/stats

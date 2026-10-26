@@ -544,5 +544,6 @@ bool load_data_json(const std::string& dir, DataJson& out, std::string& err);
 bool load_params(const std::string& dir, Params& out, std::string& err);
 bool load_world(const std::string& dir, const Params& p, World& out, std::string& err);
 bool load_policy(const std::string& dir, const std::string& name, Policy& out, std::string& err);
+bool policy_from_json(const std::string& text, Policy& out, std::string& err);   // policy_json.cpp
 
 }
