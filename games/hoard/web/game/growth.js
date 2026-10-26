@@ -73,7 +73,7 @@ function renderGrowthHud() {
   const n = on ? openPicks().length : 0;
   $('h-picks').classList.toggle('hidden', !n);
   if (!on) return;
-  $('h-picks').textContent = n === 1 ? 'talent ready' : `${n} talents ready`;
+  $('h-picks').textContent = tf('hud.picks.n', '{p.n:plural(one=talent ready,other=# talents ready)}', { roles: { p: { numbers: { n } } } });
   $('h-growth').innerHTML = AXES04.map((a) => chipHtml(a.id)).join('');
 }
 
@@ -279,7 +279,7 @@ $('h-growth').addEventListener('click', (e) => { const b = e.target.closest('[da
 $('h-picks').addEventListener('click', () => openGrowth());
 
 addStyle(`
-  #hud .chips { display: inline-flex; gap: 3px; min-width: 0; overflow: hidden; flex: 0 1 auto; }
+  #hud .chips { display: inline-flex; gap: 3px; min-width: 0; overflow: hidden; flex: 0 0 auto; }
   #hud .chip { display: inline-flex; flex-direction: column; gap: 2px; padding: 2px 6px 3px; background: #15181f; border: 1px solid var(--line); border-radius: 3px; color: var(--dim); line-height: 1.1; white-space: nowrap; }
   #hud .chip b { color: var(--fg); font-weight: 600; }
   #hud .chip .prog { display: block; height: 2px; background: #2a2e38; border-radius: 1px; overflow: hidden; }
