@@ -89,6 +89,8 @@ Gate: the baseline answers "is the sleep bet real" with the bucket table; the fi
 
 ### Iteration 3: dread, awe and memory (02)
 
+Status 2026-10-27: built, pull request 7 (`reports/02-dread-awe-memory.md`). Gate: first slayer order 320 years after hatching under `played`, every order at dread 0.5 or more; the v0.4 bands that passed still pass (played deaths 8 %, was 21 %); the library-burn test holds. Not met: `protect_one` gets the protected court's awe to 0.07 by year 500, not 0.5 (Manu to say whether the policy or the gains should change). D5 taken: remembering valleys as start data.
+
 Opus. Everything after reads these. Includes the `talents.json` rewrite to `talents-v2.md` with the flight fields (item 16 reads them) and the remembering-valley start values if D5 is yes.
 
 Gate: slayer founding under `played` in 300 to 600 (v0.4: about 400); every v0.4 band passes; the library-burn test holds.
