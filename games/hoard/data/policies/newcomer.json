@@ -1,0 +1,63 @@
+{
+  "acts": [
+    {
+      "type": "take",
+      "target": "richest",
+      "magnitude": 0.2,
+      "payload_share": {
+        "gold": 0.6,
+        "food": 0.3,
+        "books": 0.1
+      }
+    }
+  ],
+  "avoid_rings": true,
+  "talents": [
+    "thick_hide",
+    "iron_scales",
+    "old_bones",
+    "hotter_breath",
+    "clinging_fire",
+    "white_fire",
+    "tower_breaker",
+    "spell_sense",
+    "ward_craft",
+    "dragon_sight",
+    "sleepers_ward",
+    "keen_eyes",
+    "premonition",
+    "patient_mind",
+    "long_memory",
+    "tithe",
+    "kobold_servants",
+    "gilded_throne",
+    "brood_of_mortals"
+  ],
+  "sleep_open": [
+    "long",
+    "long",
+    "100"
+  ],
+  "sleep_cycle": [
+    "long"
+  ],
+  "min_sleep": 1,
+  "answer_hooks": {
+    "acts": [
+      "take",
+      "kill",
+      "defend",
+      "answer"
+    ],
+    "choice": "receive",
+    "magnitude": 0.2,
+    "payload_share": {
+      "gold": 0.6,
+      "food": 0.3,
+      "books": 0.1
+    },
+    "wound_cap": 0.2,
+    "reach": 2,
+    "max": 1
+  }
+}

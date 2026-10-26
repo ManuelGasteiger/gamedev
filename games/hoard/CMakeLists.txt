@@ -118,8 +118,9 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
+target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)
 set_target_properties(ages_runner PROPERTIES OUTPUT_NAME hoard-sim)
 

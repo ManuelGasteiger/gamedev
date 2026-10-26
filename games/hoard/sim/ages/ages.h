@@ -115,12 +115,16 @@ struct Scenario {
     int years = 3000;
     int sleep = 100;
     std::function<void(const World&)> after_sleep;   // trace and replay checkpoints
+    std::function<void(World&, std::vector<Act>&, int)> at_waking;   // the policy's acts before they apply (analysis, perturbation)
+    std::function<void(const World&, int)> before_sleep;             // the waking's end, before the sleep starts
+    std::function<int(int, int)> adjust_sleep;                       // (years, sleep index) -> years
 };
 
 void run_scenario(World& w, const Params& p, const Scenario& s);
 
 std::vector<Act> resolve_policy(const World& w, const Params& p, const Policy& policy, int sleep_index,
                                 const std::string& data_dir);
+bool inside_ring(const World& w, const Params& p, const Act& a);   // a defence beyond levies would strike this act
 
 // v0.4 hooks (S3), hook_resolve.cpp: a hook answered by a choice (pilgrims: receive | eat); false with the reason
 bool answer_hook(World& w, const Params& p, const std::string& id, const std::string& choice, std::string& reason);

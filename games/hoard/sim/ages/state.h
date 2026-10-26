@@ -331,6 +331,7 @@ struct Hook {
     bool fight = false;
     int offered = 0;
     int expires_year = 0;
+    std::vector<int> refs;   // the events that satisfied the template's `when` (analysis only; not saved, not hashed)
 };
 
 // v0.4 world (S2): how this world began (template empty on the fixed start). Years stay absolute: the pre-history runs

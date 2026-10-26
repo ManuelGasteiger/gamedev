@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -10,6 +11,7 @@
 #include "ages/state_hash.h"
 #include "ages/record.h"
 #include "ages/save.h"
+#include "analyse.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -35,6 +37,11 @@ struct Options {
     std::string replay;     // replay a .hrp and verify its checkpoints (exit 3 on the first mismatch)
     std::string save;       // write the final world as a save (temp file, rename, one .bak)
     std::string load_save;  // start from a save instead of a fresh world
+    std::string snapshots;  // item 01: core stocks per sleep (JSON lines)
+    std::string wakings;    // item 01: per waking: listed wounds, hooks, buckets (JSON lines)
+    bool buckets = false;
+    int bucket_samples = 2;
+    std::string perturb;    // burn | sleep
     bool state_hash = false;
     uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
 };
@@ -60,6 +67,11 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--replay") { if (!need(o.replay)) return false; }
         else if (k == "--save") { if (!need(o.save)) return false; }
         else if (k == "--load-save") { if (!need(o.load_save)) return false; }
+        else if (k == "--snapshots") { if (!need(o.snapshots)) return false; }
+        else if (k == "--wakings") { if (!need(o.wakings)) return false; }
+        else if (k == "--buckets") o.buckets = true;
+        else if (k == "--bucket-samples") { if (!need(v)) return false; o.bucket_samples = std::max(1, std::atoi(v.c_str())); }
+        else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -246,6 +258,21 @@ int golden(const Options& o) {
     return 0;
 }
 
+std::string out_dir(const std::string& out) {
+    std::string mkdir = "mkdir -p \"" + out + "\"";
+#ifdef _WIN32
+    mkdir = "mkdir \"" + out + "\" 2>nul";
+#endif
+    if (std::system(mkdir.c_str()) != 0) std::fprintf(stderr, "warning: mkdir failed for %s\n", out.c_str());
+    return out.empty() || out.back() == '/' ? out : out + "/";
+}
+
+bool write_core(const std::string& base, const World& w, const Params& p) {
+    return write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
+           write_file(base + "world_final.json", world_to_json(w)) &&
+           write_file(base + "stats.json", stats_json(w, p).dump(1));
+}
+
 int replay(const Options& o) {
     std::ifstream in(o.replay);
     if (!in) { std::fprintf(stderr, "cannot open %s\n", o.replay.c_str()); return 1; }
@@ -267,6 +294,7 @@ int replay(const Options& o) {
     json end = json::parse(lines.back(), nullptr, false);
     if (end.contains("end") && end.value("h", "") != hash_hex(state_hash(loaded.world).root)) { std::printf("final state differs from the recording\n"); return 3; }
     std::printf("replay ok: %d checkpoints, year %d\n", r.checkpoints, loaded.world.year);
+    if (!o.out.empty() && !write_core(out_dir(o.out), loaded.world, loaded.params)) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
     return 0;
 }
 
@@ -324,6 +352,14 @@ int main(int argc, char** argv) {
         trace << state_hash_json(w) << "\n";
         s.after_sleep = [&](const World& x) { trace << state_hash_json(x) << "\n"; };
     }
+    std::ofstream snaps, wakes;
+    AnalyseOptions ao;
+    if (!o.snapshots.empty()) { snaps.open(o.snapshots); ao.snapshots = &snaps; }
+    if (!o.wakings.empty()) { wakes.open(o.wakings); ao.wakings = &wakes; }
+    ao.buckets = o.buckets;
+    ao.bucket_samples = o.bucket_samples;
+    ao.perturb = o.perturb;
+    if (ao.snapshots || ao.wakings || !ao.perturb.empty()) attach_analysis(s, p, ao);
     Recorder recorder;
     std::string header;
     if (!o.record.empty()) {
@@ -343,17 +379,8 @@ int main(int argc, char** argv) {
     if (!o.save.empty() && !write_save(o.save, save_json(w, p))) { std::fprintf(stderr, "cannot write %s\n", o.save.c_str()); return 1; }
     if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 
-    std::string base = o.out;
-    if (!base.empty() && base.back() != '/') base += '/';
-    std::string mkdir = "mkdir -p \"" + o.out + "\"";
-#ifdef _WIN32
-    mkdir = "mkdir \"" + o.out + "\" 2>nul";
-#endif
-    if (std::system(mkdir.c_str()) != 0) std::fprintf(stderr, "warning: mkdir failed for %s\n", o.out.c_str());
-    bool ok = write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
-              write_file(base + "world_final.json", world_to_json(w)) &&
-              write_file(base + "stats.json", stats_json(w, p).dump(1));
-    if (!ok) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
+    std::string base = out_dir(o.out);
+    if (!write_core(base, w, p)) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
     if (o.narrate) {   // narrated.json: the narrator's sentence for every chronicle event, in chronicle order
         json lines = json::array();
         for (auto& e : w.chronicle) lines.push_back(event_sentence(w, p, e));
