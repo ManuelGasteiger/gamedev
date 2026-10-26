@@ -3,151 +3,177 @@
   "envoy": {
    "*": {
     "g": "n",
-    "nom": "envoy"
+    "nom": "envoy",
+    "gen": "envoy's"
    }
   },
   "hostage": {
    "*": {
     "g": "n",
-    "nom": "hostage"
+    "nom": "hostage",
+    "gen": "hostage's"
    }
   },
   "scribe": {
    "*": {
     "g": "n",
-    "nom": "scribe"
+    "nom": "scribe",
+    "gen": "scribe's"
    }
   },
   "historian": {
    "*": {
     "g": "n",
-    "nom": "historian"
+    "nom": "historian",
+    "gen": "historian's"
    }
   },
   "heir": {
    "*": {
     "g": "n",
-    "nom": "heir"
+    "nom": "heir",
+    "gen": "heir's"
    }
   },
   "hero": {
    "*": {
     "g": "n",
-    "nom": "hero"
+    "nom": "hero",
+    "gen": "hero's"
    }
   },
   "sage": {
    "*": {
     "g": "n",
-    "nom": "sage"
+    "nom": "sage",
+    "gen": "sage's"
    }
   },
   "priest": {
    "*": {
     "g": "n",
-    "nom": "priest"
+    "nom": "priest",
+    "gen": "priest's"
    }
   },
   "ruler": {
    "*": {
     "g": "n",
-    "nom": "ruler"
+    "nom": "ruler",
+    "gen": "ruler's"
    }
   },
   "courtier": {
    "*": {
     "g": "n",
-    "nom": "courtier"
+    "nom": "courtier",
+    "gen": "courtier's"
    }
   },
   "thief": {
    "*": {
     "g": "n",
-    "nom": "thief"
+    "nom": "thief",
+    "gen": "thief's"
    }
   },
   "consort": {
    "*": {
     "g": "n",
-    "nom": "consort"
+    "nom": "consort",
+    "gen": "consort's"
    }
   },
   "pretender": {
    "*": {
     "g": "n",
-    "nom": "pretender"
+    "nom": "pretender",
+    "gen": "pretender's"
    }
   },
   "liar": {
    "*": {
     "g": "n",
-    "nom": "liar"
+    "nom": "liar",
+    "gen": "liar's"
    }
   },
   "elder": {
    "*": {
     "g": "n",
-    "nom": "elder"
+    "nom": "elder",
+    "gen": "elder's"
    }
   },
   "prophet": {
    "*": {
     "g": "n",
-    "nom": "prophet"
+    "nom": "prophet",
+    "gen": "prophet's"
    }
   },
   "reader": {
    "*": {
     "g": "n",
-    "nom": "reader"
+    "nom": "reader",
+    "gen": "reader's"
    }
   },
   "slayer": {
    "*": {
     "g": "n",
-    "nom": "slayer"
+    "nom": "slayer",
+    "gen": "slayer's"
    }
   },
   "mason": {
    "*": {
     "g": "n",
-    "nom": "mason"
+    "nom": "mason",
+    "gen": "mason's"
    }
   },
   "regent": {
    "*": {
     "g": "n",
-    "nom": "regent"
+    "nom": "regent",
+    "gen": "regent's"
    }
   },
   "monarch": {
    "m": {
     "g": "n",
-    "nom": "king"
+    "nom": "king",
+    "gen": "king's"
    },
    "f": {
     "g": "n",
-    "nom": "queen"
+    "nom": "queen",
+    "gen": "queen's"
    }
   },
   "kin": {
    "m": {
     "g": "n",
-    "nom": "kinsman"
+    "nom": "kinsman",
+    "gen": "kinsman's"
    },
    "f": {
     "g": "n",
-    "nom": "kinswoman"
+    "nom": "kinswoman",
+    "gen": "kinswoman's"
    }
   },
   "drillmaster": {
    "m": {
     "g": "n",
-    "nom": "drill-master"
+    "nom": "drill-master",
+    "gen": "drill-master's"
    },
    "f": {
     "g": "n",
-    "nom": "drill-mistress"
+    "nom": "drill-mistress",
+    "gen": "drill-mistress's"
    }
   }
  },

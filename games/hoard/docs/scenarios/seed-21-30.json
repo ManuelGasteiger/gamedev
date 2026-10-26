@@ -43,6 +43,8 @@
           "role": "sage",
           "choose": "by_score:renown"
         },
+        "noun": "mason",
+        "sex": "any",
         "optional": true
       }
     },
@@ -67,13 +69,15 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "{court.name} has walls now",
-      "body": "Where you burned {a.place} {a.years_ago} years ago there is stone to the height of a house and towers at the corners, each with a slot cut for a bolt-thrower that does not exist yet. The quarry is three valleys away. They have spent a generation's wealth on this, and they will tell you so if you land.",
+      "body": "Where you burned {a.place} {a.years_ago:year} ago there is stone to the height of a house and towers at the corners, each with a slot cut for a bolt-thrower that does not exist yet. The quarry is three valleys away. They have spent a generation's wealth on this, and they will tell you so if you land.",
       "because": "A court that remembers a burning and has reached the age of castles builds against the sky.",
       "variants": [
         {
+          "id": "mason",
           "if": "bound(mason)",
-          "body": "{mason.name} of {court.name} designed the new walls at {a.place}, stone to the height of a house with a slot in every tower for a bolt-thrower that does not exist yet. {mason.pronoun} has written a treatise on dragon fire. It is mostly wrong."
+          "body": "{mason.name} of {court.name} designed the new walls at {a.place}, stone to the height of a house with a slot in every tower for a bolt-thrower that does not exist yet. {mason.subj} has written a treatise on dragon fire. It is mostly wrong."
         }
       ]
     },
@@ -202,8 +206,9 @@
       "faction:$rival"
     ],
     "text": {
+      "lang": "en",
       "headline": "An empty treasury and a full neighbour",
-      "body": "The gold you took from {court.name} {a.years_ago} years ago was the gold that paid its soldiers. The soldiers have gone to {rival.name}, which pays. {court.name}'s king now rules a city that cannot defend its own gates, and {rival.name} has noticed.",
+      "body": "The gold you took from {court.name} {a.years_ago:year} ago was the gold that paid its soldiers. The soldiers have gone to {rival.name}, which pays. {court.name} is now a city that cannot defend its own gates, and {rival.name} has noticed.",
       "because": "You took {a.size} of {court.name}'s wealth; a poor court cannot keep an army."
     },
     "options": [
@@ -314,6 +319,8 @@
           "role": "hero",
           "choose": "by_score:renown"
         },
+        "noun": "drillmaster",
+        "sex": "any",
         "optional": true
       },
       "widow": {
@@ -321,7 +328,9 @@
           "court": "$court",
           "role": "ruler",
           "choose": "most_recent"
-        }
+        },
+        "noun": "ruler",
+        "sex": "any"
       }
     },
     "require": [
@@ -345,13 +354,15 @@
       "tone:grim"
     ],
     "text": {
+      "lang": "en",
       "headline": "A road of cairns",
       "body": "The road from {a.place} to {court.name}'s capital is lined with cairns now, one for each company you burned on the march. {widow.name} rules a court of widows and boys. The boys are training with spears in the square, and the drill-master was there that day.",
       "because": "You killed {a.size} of {court.name}'s army at {a.place}; a martial court remembers its dead in stone.",
       "variants": [
         {
+          "id": "general",
           "if": "bound(general)",
-          "body": "{general.name} survived the march you burned at {a.place} and has not stopped talking about it. The road is lined with cairns. The boys drilling in {court.name}'s square call {general.pronoun} teacher."
+          "body": "{general.name} survived the march you burned at {a.place} and has not stopped talking about it. The road is lined with cairns. The boys drilling in {court.name}'s square call {general.obj} teacher."
         }
       ]
     },
@@ -370,7 +381,7 @@
       },
       {
         "id": "judge",
-        "label": "Land and judge the drill-master",
+        "label": "Land and judge {general.noun:def}",
         "act": {
           "type": "judge",
           "target": "$general",
@@ -452,7 +463,9 @@
           "court": "$court",
           "role": "ruler",
           "choose": "most_recent"
-        }
+        },
+        "noun": "ruler",
+        "sex": "any"
       }
     },
     "require": [
@@ -476,11 +489,13 @@
       "tone:tender"
     ],
     "text": {
+      "lang": "en",
       "headline": "A feast day in {court.name}",
       "body": "{court.name} keeps the day you broke the siege at {a.place} as a holiday now. {ruler.name} has had your likeness carved over the gate, a little too thin and with too many teeth. Children leave bread on the walls. The priests are arguing about whether bread is enough.",
-      "because": "You defended {court.name} {a.years_ago} years ago; a saved city turns gratitude into ritual within a generation.",
+      "because": "You defended {court.name} {a.years_ago:year} ago; a saved city turns gratitude into ritual within a generation.",
       "variants": [
         {
+          "id": "attacker",
           "if": "bound(attacker)",
           "body": "{court.name} keeps the day you broke {attacker.name}'s siege at {a.place} as a holiday. {ruler.name} has had your likeness carved over the gate, too thin and with too many teeth. {attacker.name} keeps the day too, differently."
         }
@@ -573,7 +588,9 @@
           "court": "$court",
           "role": "ruler",
           "choose": "most_recent"
-        }
+        },
+        "noun": "heir",
+        "sex": "any"
       }
     },
     "require": [
@@ -597,9 +614,10 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "The oath is in the book",
-      "body": "{heir.name} of {court.name} has read the oath {heir.pronoun} inherited: tribute to the mountain, sworn {a.years_ago} years ago by a terrified ancestor. The book also records why. {heir.name} is not terrified. The tribute has arrived this year, exactly, with a note asking whether the mountain is still there.",
-      "because": "A written oath outlives the dread that made it; the heir keeps the letter and tests the spirit."
+      "body": "{heir.name} of {court.name} has read the oath {heir.subj} inherited: tribute to the mountain, sworn {a.years_ago:year} ago by a terrified ancestor. The book also records why. {heir.name} is not terrified. The tribute has arrived this year, exactly, with a note asking whether the mountain is still there.",
+      "because": "A written oath outlives the dread that made it; {heir.noun:def} keeps the letter and tests the spirit."
     },
     "options": [
       {
@@ -702,7 +720,9 @@
           "court": "$court",
           "role": "sage",
           "choose": "by_score:renown"
-        }
+        },
+        "noun": "sage",
+        "sex": "any"
       }
     },
     "require": [
@@ -726,8 +746,9 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "What the pupils did with it",
-      "body": "You taught {court.name} {a.years_ago} years ago. {sage.name} runs a school now where that lesson is the first week. The second week is about dragons. The school has a tower, the tower has a telescope, and the telescope points at the mountain every clear night.",
+      "body": "You taught {court.name} {a.years_ago:year} ago. {sage.name} runs a school now where that lesson is the first week. The second week is about dragons. The school has a tower, the tower has a telescope, and the telescope points at the mountain every clear night.",
       "because": "A court you taught teaches itself; what it learns next is not yours to choose."
     },
     "options": [
@@ -755,7 +776,7 @@
       },
       {
         "id": "keep",
-        "label": "Take the sage as your historian",
+        "label": "Take {sage.noun:def} as {sage.noun:historian.poss2}",
         "act": {
           "type": "take_hostage",
           "target": "$sage"
@@ -809,7 +830,9 @@
           "knows_dragon": true,
           "memory_has": "spared_by_dragon",
           "choose": "most_recent"
-        }
+        },
+        "noun": "ruler",
+        "sex": "any"
       },
       "court": {
         "faction": {
@@ -838,20 +861,22 @@
       "tone:solemn"
     ],
     "text": {
+      "lang": "en",
       "headline": "{spared.name} rules now",
-      "body": "You judged {spared.name} and let {spared.pronoun} live, in front of the whole square, {a.years_ago} years ago. {spared.name} rules {court.name} now and has never once mentioned it in public. In private, every envoy who leaves for the mountain is briefed by {spared.name} personally.",
-      "because": "A public mercy makes a ruler who owes you and cannot say so.",
+      "body": "You judged {spared.name} and let {spared.obj} live, in front of the whole square, {a.years_ago:year} ago. {spared.name} rules {court.name} now and has never once mentioned it in public. In private, every envoy who leaves for the mountain is briefed by {spared.name} personally.",
+      "because": "A public mercy left {spared.name} owing you, and unable to say so.",
       "variants": [
         {
+          "id": "vengeful",
           "if": "spared.trait == vengeful",
-          "body": "You judged {spared.name} and let {spared.pronoun} live, in front of the whole square. {spared.name} rules {court.name} now and has never forgiven the square for watching. Every envoy who leaves for the mountain is briefed personally, and the brief is not kind."
+          "body": "You judged {spared.name} and let {spared.obj} live, in front of the whole square. {spared.name} rules {court.name} now and has never forgiven the square for watching. Every envoy who leaves for the mountain is briefed personally, and the brief is not kind."
         }
       ]
     },
     "options": [
       {
         "id": "broker",
-        "label": "Use the debt: broker a peace through them",
+        "label": "Use the debt: broker a peace through {spared.obj}",
         "act": {
           "type": "broker",
           "target": "$court",
@@ -864,7 +889,7 @@
       },
       {
         "id": "haunt",
-        "label": "Remind them, in a dream",
+        "label": "Remind {spared.obj}, in a dream",
         "act": {
           "type": "haunt",
           "target": "$spared",
@@ -942,6 +967,8 @@
           "role": "heir",
           "choose": "by_score:age"
         },
+        "noun": "heir",
+        "sex": "any",
         "optional": true
       }
     },
@@ -966,15 +993,18 @@
       "tone:tender"
     ],
     "text": {
+      "lang": "en",
       "headline": "They saw you pass",
-      "body": "You flew low over {court.name} {a.years_ago} years ago and burned nothing. The road your shadow crossed is called the dragon's road now and the farmers along it leave the first sheaf at the milestone. Nobody has asked you for anything. They might, if you landed.",
+      "body": "You flew low over {court.name} {a.years_ago:year} ago and burned nothing. The road your shadow crossed is called the dragon's road now and the farmers along it leave the first sheaf at the milestone. Nobody has asked you for anything. They might, if you landed.",
       "because": "A dragon seen and not feared becomes a story the fields tell.",
       "variants": [
         {
+          "id": "child",
           "if": "bound(child)",
-          "body": "You flew low over {court.name} and burned nothing. {child.name}, the heir, was on the road and has drawn you on every wall of the palace since. The farmers leave the first sheaf at the milestone where your shadow crossed."
+          "body": "You flew low over {court.name} and burned nothing. {child.name}, {child.noun:def}, was on the road and has drawn you on every wall of the palace since. The farmers leave the first sheaf at the milestone where your shadow crossed."
         },
         {
+          "id": "late_era",
           "if": "court.era >= 3",
           "body": "You flew low over {court.name} and burned nothing. The astronomers logged the hour and the heading. The farmers leave the first sheaf at the milestone anyway; the astronomers find this embarrassing."
         }
@@ -1055,7 +1085,9 @@
             90
           ],
           "choose": "by_score:age"
-        }
+        },
+        "noun": "hostage",
+        "sex": "any"
       },
       "court": {
         "faction": {
@@ -1067,7 +1099,9 @@
           "court": "$court",
           "role": "ruler",
           "choose": "most_recent"
-        }
+        },
+        "noun": "regent",
+        "sex": "any"
       }
     },
     "require": [
@@ -1091,14 +1125,15 @@
       "tone:solemn"
     ],
     "text": {
+      "lang": "en",
       "headline": "{hostage.name} asks to go home a ruler",
-      "body": "{hostage.name} was a child when you took {hostage.pronoun} from {court.name} {a.years_ago} years ago, and is not a child now. {regent.name} rules in {hostage.name}'s name and would rather not stop. {hostage.name} asks for the throne, and for you to be seen at the coronation, and says it as someone who knows what the request costs you.",
-      "because": "A hostage raised in the hoard comes of age with a claim, a debt and a view of the valley from above."
+      "body": "{hostage.name} was a child when you took {hostage.obj} from {court.name} {a.years_ago:year} ago, and is not a child now. {regent.name} rules in {hostage.name}'s name and would rather not stop. {hostage.name} asks for the throne, and for you to be seen at the coronation, and says it as someone who knows what the request costs you.",
+      "because": "{hostage.name}, raised in the hoard, comes of age with a claim, a debt and a view of the valley from above."
     },
     "options": [
       {
         "id": "release",
-        "label": "Send them home with your sign on them",
+        "label": "Send {hostage.obj} home with your sign on {hostage.obj}",
         "act": {
           "type": "release",
           "target": "$hostage",
@@ -1136,7 +1171,7 @@
       },
       {
         "id": "keep",
-        "label": "Keep them as your consort instead",
+        "label": "Keep {hostage.obj} as {hostage.noun:consort.poss2} instead",
         "act": {
           "type": "keep",
           "target": "$hostage",
@@ -1207,6 +1242,8 @@
           "role": "priest",
           "choose": "most_recent"
         },
+        "noun": "priest",
+        "sex": "any",
         "optional": true
       }
     },
@@ -1233,13 +1270,15 @@
       "tone:ominous"
     ],
     "text": {
+      "lang": "en",
       "headline": "The dead have built a chapel",
       "body": "The host you raised at {a.place} did not fall when the war ended. It stayed, and the fen it holds has a chapel in it now, roofed with shields. {living.name} says the dead are praying. Nobody has gone close enough to hear to whom.",
-      "because": "You raised the dead {a.years_ago} years ago; what you raise and do not dismiss finds its own reasons.",
+      "because": "You raised the dead {a.years_ago:year} ago; what you raise and do not dismiss finds its own reasons.",
       "variants": [
         {
+          "id": "priest",
           "if": "bound(priest)",
-          "body": "The host you raised at {a.place} has a priest now, {priest.name}, who was alive when you raised the others and is not quite alive now. {living.name} says the dead are praying and that the prayers name the mountain."
+          "body": "The host you raised at {a.place} has {priest.noun:indef} now, {priest.name}, who was alive when you raised the others and is not quite alive now. {living.name} says the dead are praying and that the prayers name the mountain."
         }
       ]
     },
@@ -1254,7 +1293,7 @@
       },
       {
         "id": "commune",
-        "label": "Hear what the priest offers",
+        "label": "Hear what {priest.noun:def} offers",
         "act": {
           "type": "receive",
           "payload": {

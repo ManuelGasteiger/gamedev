@@ -39,7 +39,9 @@
           "court": "$hold",
           "role": "envoy",
           "choose": "by_score:cunning"
-        }
+        },
+        "noun": "envoy",
+        "sex": "any"
       }
     },
     "require": [
@@ -64,6 +66,7 @@
       "race:dwarf"
     ],
     "text": {
+      "lang": "en",
       "headline": "The dwarves ask for fire",
       "body": "{envoy.name} of {hold.name} has brought a block of the hold's best steel as a gift and a request written in the Book: the orcs of {foe.name} have the lower galleries, and the hold's forges cannot make a heat that holds them. The dwarves do not ask you to burn anyone. They ask how fire is made to stay.",
       "because": "{hold.name} is at war with {foe.name} and open enough to ask a dragon for craft."
@@ -202,15 +205,18 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "Nobody is looking at the mountain",
       "body": "Three wakings, three hooks left where they hung. In {court.name} the children are told the mountain has a dragon in it the way they are told the lake has a woman in it. A shepherd grazes goats on the lower slopes. The valley has stopped watching the sky, and it has stopped building things that point at it, too.",
       "because": "You have answered nothing for three wakings; what is not seen is not remembered.",
       "variants": [
         {
+          "id": "third",
           "if": "bound(i3)",
           "body": "Three wakings, three hooks left where they hung. {court.name} tells its children the mountain has a dragon in it the way it tells them the lake has a woman in it. A shepherd grazes goats on your slopes. Nobody is building anything that points at the sky."
         },
         {
+          "id": "late_era",
           "if": "court.era >= 3",
           "body": "Three wakings, three hooks left where they hung. {court.name} has stone walls and a clock tower now and does not look up at the mountain at all. Nobody is building anything that points at the sky. The engineers have other work."
         }
@@ -301,11 +307,13 @@
       "tone:solemn"
     ],
     "text": {
+      "lang": "en",
       "headline": "The slopes are your shoulders",
       "body": "You have not fitted through the cave mouth for a hundred years. Snow stays on your back between wakings now. Goats graze on your tail. If you slept the long sleep here, the valley would build on you and call the mountain by your name, and no engine they ever make would reach your heart.",
       "because": "Might past a threshold and a long sleep make a dragon into a mountain.",
       "variants": [
         {
+          "id": "settlers",
           "if": "bound(settlers)",
           "body": "You have not fitted through the cave mouth for a hundred years. {settlers.name} has a village on your lower slopes already; they think it is a hill. If you slept the long sleep here they would build a city on you and call the mountain by your name."
         }
@@ -396,7 +404,9 @@
           "tag": "willing",
           "knows_dragon": true,
           "choose": "most_recent"
-        }
+        },
+        "noun": "consort",
+        "sex": "any"
       }
     },
     "require": [
@@ -419,14 +429,15 @@
       "tone:tender"
     ],
     "text": {
+      "lang": "en",
       "headline": "{willing.name} has followed you up the mountain",
-      "body": "You walked {court.name}'s streets in a borrowed shape and {willing.name} walked with you, and knew, and came anyway. {willing.pronoun} is standing at the cave mouth now, with a travelling bag and the expression of someone who has already decided. Mortals age while you sleep. {willing.pronoun} knows that too.",
+      "body": "You walked {court.name}'s streets in a borrowed shape and {willing.name} walked with you, and knew, and came anyway. {willing.subj} is standing at the cave mouth now, with a travelling bag and the expression of someone who has already decided. Mortals age while you sleep. {willing.subj} knows that too.",
       "because": "You went among them in guise this waking; one of them saw through it and chose you."
     },
     "options": [
       {
         "id": "keep",
-        "label": "Keep {willing.name} as your consort",
+        "label": "Keep {willing.name} as {willing.noun:poss2}",
         "act": {
           "type": "keep",
           "target": "$willing",
@@ -438,7 +449,7 @@
       },
       {
         "id": "dismiss",
-        "label": "Send them down the mountain, kindly",
+        "label": "Send {willing.obj} down the mountain, kindly",
         "act": {
           "type": "dismiss",
           "target": "$willing"
@@ -446,7 +457,7 @@
       },
       {
         "id": "release",
-        "label": "Send them home under your protection",
+        "label": "Send {willing.obj} home under your protection",
         "act": {
           "type": "release",
           "target": "$willing",
@@ -468,7 +479,7 @@
       },
       {
         "id": "ignore",
-        "label": "Leave them at the cave mouth",
+        "label": "Leave {willing.obj} at the cave mouth",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -524,7 +535,9 @@
           "role": "ruler",
           "tag": "false_dragon",
           "choose": "most_recent"
-        }
+        },
+        "noun": "pretender",
+        "sex": "any"
       }
     },
     "require": [
@@ -548,14 +561,15 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "{pretender.name} speaks for the mountain",
-      "body": "{pretender.name} of {court.name} has announced that the mountain speaks to {pretender.pronoun} alone, and has raised the tithe in its name. The shrine's offerings go to the palace now. The faithful are uneasy and quiet. The sky has not confirmed or denied anything, which {pretender.name} calls agreement.",
+      "body": "{pretender.name} of {court.name} has announced that the mountain speaks to {pretender.obj} alone, and has raised the tithe in its name. The shrine's offerings go to the palace now. The faithful are uneasy and quiet. The sky has not confirmed or denied anything, which {pretender.name} calls agreement.",
       "because": "A long absence and a faithful court leave room for someone to hold your worship for you."
     },
     "options": [
       {
         "id": "judge",
-        "label": "Descend and judge the pretender",
+        "label": "Descend and judge {pretender.noun:def}",
         "act": {
           "type": "judge",
           "target": "$pretender",
@@ -600,7 +614,7 @@
       },
       {
         "id": "ignore",
-        "label": "Let the pretender keep the tithe",
+        "label": "Let {pretender.noun:def} keep the tithe",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -672,7 +686,9 @@
           "role": "envoy",
           "is_lie": true,
           "choose": "by_score:cunning"
-        }
+        },
+        "noun": "envoy",
+        "sex": "any"
       }
     },
     "require": [
@@ -696,17 +712,20 @@
       "faction:$rival"
     ],
     "text": {
+      "lang": "en",
       "headline": "{envoy.name} brings news of a plot",
-      "body": "{envoy.name} of {court.name} has climbed the pass to warn you: {rival.name} is forging engines to slay you and has sworn it at its altar. {court.name} asks only that you strike first, and offers forty gold a year in gratitude. {envoy.pronoun} does not meet your eye when naming the altar.",
+      "body": "{envoy.name} of {court.name} has climbed the pass to warn you: {rival.name} is forging engines to slay you and has sworn it at its altar. {court.name} asks only that you strike first, and offers forty gold a year in gratitude. {envoy.subj} does not meet your eye when naming the altar.",
       "because": "A court at war with a stronger neighbour has a reason to want you angry at it.",
       "variants": [
         {
+          "id": "keen_eyes",
           "if": "dragon.talents == keen_eyes",
-          "body": "{envoy.name} of {court.name} warns you that {rival.name} is forging engines to slay you. The envoy's eyes say otherwise: {rival.name} has no slayers and no engines. {court.name} is losing a war and would like you to win it."
+          "body": "{envoy.name} of {court.name} warns you that {rival.name} is forging engines to slay you. {envoy.noun:def.gen} eyes say otherwise: {rival.name} has no slayers and no engines. {court.name} is losing a war and would like you to win it."
         },
         {
+          "id": "dread",
           "if": "court.dread >= 0.5",
-          "body": "{envoy.name} of {court.name} has climbed the pass and stands as far from the cave as the ledge allows. {rival.name} is forging engines to slay you, the envoy says, too quickly, and {court.name} would pay forty gold a year to see them burned first. The hands shake. The story does not."
+          "body": "{envoy.name} of {court.name} has climbed the pass and stands as far from the cave as the ledge allows. {rival.name} is forging engines to slay you, {envoy.noun:def} says, too quickly, and {court.name} would pay forty gold a year to see them burned first. The hands shake. The story does not."
         }
       ]
     },
@@ -739,7 +758,7 @@
       },
       {
         "id": "reveal",
-        "label": "Name the lie to the envoy's face",
+        "label": "Name the lie to {envoy.noun:def.gen} face",
         "act": {
           "type": "reveal",
           "target": "$court",
@@ -752,7 +771,7 @@
       },
       {
         "id": "eat",
-        "label": "Eat the liar",
+        "label": "Eat {envoy.noun:liar.def}",
         "act": {
           "type": "kill",
           "target": "$envoy",
@@ -761,7 +780,7 @@
       },
       {
         "id": "ignore",
-        "label": "Send the envoy home with no answer",
+        "label": "Send {envoy.noun:def} home with no answer",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -841,6 +860,8 @@
           "role": "sage",
           "choose": "by_score:age"
         },
+        "noun": "elder",
+        "sex": "any",
         "optional": true
       }
     },
@@ -866,15 +887,18 @@
       "tone:solemn"
     ],
     "text": {
+      "lang": "en",
       "headline": "A column on the pass road",
       "body": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. {taker.name} has their valley. They have come to the mountain because the mountain is the one thing in the valley {taker.name} is afraid of. They will plant anywhere you point.",
       "because": "{lost.name} lost its land to {taker.name} and holds you in some awe; the mountain is the last door.",
       "variants": [
         {
+          "id": "elder",
           "if": "bound(elder)",
           "body": "Two hundred of {lost.name}'s people are on the road below, led by {elder.name}, who remembers when you last flew over {lost.name} and has been telling the children about it for a week to keep them walking. They will plant anywhere you point."
         },
         {
+          "id": "orc_taker",
           "if": "taker.race == orc",
           "body": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. The orcs of {taker.name} have their valley and, by the smoke, their harvest. They have come to the mountain because the orcs will not. They will plant anywhere you point."
         }
@@ -979,7 +1003,9 @@
           "role": "priest",
           "trait": "devout",
           "choose": "by_score:renown"
-        }
+        },
+        "noun": "prophet",
+        "sex": "any"
       }
     },
     "require": [
@@ -1004,14 +1030,15 @@
       "tone:solemn"
     ],
     "text": {
+      "lang": "en",
       "headline": "{prophet.name} has read the lines",
-      "body": "{prophet.name} of {court.name} has walked up the mountain with the book open. {prophet.pronoun} has read the prophecy forty times and believes it is about you and about now. {prophet.pronoun} wants to tell you what the four peoples and the house of stone mean, and what {court.name} must build. {prophet.pronoun} also wants to be the one living voice.",
+      "body": "{prophet.name} of {court.name} has walked up the mountain with the book open. {prophet.subj} has read the prophecy forty times and believes it is about you and about now. {prophet.subj} wants to tell you what the four peoples and the house of stone mean, and what {court.name} must build. {prophet.subj} also wants to be the one living voice.",
       "because": "{court.name} holds the prophecy and holds you in awe; a devout priest draws the obvious conclusion."
     },
     "options": [
       {
         "id": "receive",
-        "label": "Hear the prophet out",
+        "label": "Hear {prophet.noun:def} out",
         "act": {
           "type": "receive",
           "payload": {
@@ -1021,7 +1048,7 @@
       },
       {
         "id": "teach",
-        "label": "Teach the prophet what dragons really are",
+        "label": "Teach {prophet.noun:def} what dragons really are",
         "act": {
           "type": "teach",
           "target": "$prophet",
@@ -1033,7 +1060,7 @@
       },
       {
         "id": "keep",
-        "label": "Keep the prophet as your priest",
+        "label": "Keep {prophet.noun:def} as {prophet.noun:priest.poss2}",
         "act": {
           "type": "keep",
           "target": "$prophet",
@@ -1045,7 +1072,7 @@
       },
       {
         "id": "ignore",
-        "label": "Send the book and its reader home",
+        "label": "Send the book and {prophet.noun:reader.def} home",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -1055,7 +1082,7 @@
     "outcomes": {
       "receive": [
         {
-          "reveal_to_player": "The prophet's reading of the four conditions is shown on the Endings page from now on, with the prophet's bias."
+          "reveal_to_player": "{prophet.noun:def.gen} reading of the four conditions is shown on the Endings page from now on, with {prophet.poss} bias."
         }
       ]
     },
@@ -1100,7 +1127,9 @@
           "court": "lair",
           "role": "hostage",
           "choose": "by_score:renown"
-        }
+        },
+        "noun": "hostage",
+        "sex": "any"
       },
       "court": {
         "faction": {
@@ -1112,7 +1141,9 @@
           "court": "$court",
           "role": "ruler",
           "choose": "most_recent"
-        }
+        },
+        "noun": "kin",
+        "sex": "any"
       }
     },
     "require": [
@@ -1136,24 +1167,27 @@
       "tone:tender"
     ],
     "text": {
+      "lang": "en",
       "headline": "{kin.name} has come for {hostage.name}",
-      "body": "{kin.name} of {court.name} has come up the pass alone, which took some courage, and stands at the ledge asking to see {hostage.name}. {kin.pronoun} has brought a ransom and a speech. The speech is about how long {hostage.name} has been gone and how the court needs its heir. The ransom is less than you would have asked.",
-      "because": "The hostage's kin know where you are and are not too afraid to come.",
+      "body": "{kin.name} of {court.name} has come up the pass alone, which took some courage, and stands at the ledge asking to see {hostage.name}. {kin.subj} has brought a ransom and a speech. The speech is about how long {hostage.name} has been gone and how the court needs {hostage.noun:heir.def}. The ransom is less than you would have asked.",
+      "because": "{kin.name} knows where you are and is not too afraid to come.",
       "variants": [
         {
+          "id": "bold",
           "if": "kin.trait == bold",
-          "body": "{kin.name} of {court.name} has come up the pass alone and stands at the ledge demanding, not asking, to see {hostage.name}. {kin.pronoun} has brought a ransom and no speech. The ransom is fair."
+          "body": "{kin.name} of {court.name} has come up the pass alone and stands at the ledge demanding, not asking, to see {hostage.name}. {kin.subj} has brought a ransom and no speech. The ransom is fair."
         },
         {
+          "id": "awe",
           "if": "court.awe >= 0.3",
-          "body": "{kin.name} of {court.name} has come up the pass with a small offering for the shrine and a larger one for you, and asks to see {hostage.name} before anything is said about ransom. {kin.pronoun} kneels at the ledge, which {hostage.name} finds very funny."
+          "body": "{kin.name} of {court.name} has come up the pass with a small offering for the shrine and a larger one for you, and asks to see {hostage.name} before anything is said about ransom. {kin.subj} kneels at the ledge, which {hostage.name} finds very funny."
         }
       ]
     },
     "options": [
       {
         "id": "release",
-        "label": "Take the ransom and release the hostage",
+        "label": "Take the ransom and release {hostage.noun:def}",
         "act": {
           "type": "release",
           "target": "$hostage",
@@ -1187,7 +1221,7 @@
       },
       {
         "id": "keep",
-        "label": "Keep the hostage; let the kin see them",
+        "label": "Keep {hostage.noun:def}; let {kin.noun:def} see {hostage.obj}",
         "act": {
           "type": "receive",
           "payload": {
@@ -1198,7 +1232,7 @@
       },
       {
         "id": "ignore",
-        "label": "Send the kin away unseen",
+        "label": "Send {kin.noun:def} away without seeing {hostage.name}",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -1252,7 +1286,9 @@
           "role": "hero",
           "tag": "slayer",
           "choose": "by_score:renown"
-        }
+        },
+        "noun": "slayer",
+        "sex": "any"
       }
     },
     "require": [
@@ -1275,17 +1311,20 @@
       "tone:grim"
     ],
     "text": {
+      "lang": "en",
       "headline": "{slayer.name} asks for single combat",
-      "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate with a sealed letter from the grandmaster and a challenge: fight here, now, one against one, and whoever lives keeps the mountain. {slayer.pronoun} has a burn scar down one side that did not come from you. Not yet.",
+      "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate with a sealed letter from the grandmaster and a challenge: fight here, now, one against one, and whoever lives keeps the mountain. {slayer.subj} has a burn scar down one side that did not come from you. Not yet.",
       "because": "An order with a grievance and your exact location sends its best before it sends everyone.",
       "variants": [
         {
+          "id": "order_ready",
           "if": "court.slayer_stage == ready",
-          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate while the rest of the order waits a day's march back, ready. The challenge is single combat, here, now. If you refuse, {slayer.pronoun} says, they all come, and soon."
+          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate while the rest of the order waits a day's march back, ready. The challenge is single combat, here, now. If you refuse, {slayer.subj} says, they all come, and soon."
         },
         {
+          "id": "wounded",
           "if": "dragon.wounds_share >= 0.3",
-          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate and has clearly been told you are hurt. The challenge is single combat, here, now. {slayer.pronoun} looks at the way you hold your wing and smiles."
+          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate and has clearly been told you are hurt. The challenge is single combat, here, now. {slayer.subj} looks at the way you hold your wing and smiles."
         }
       ]
     },
@@ -1300,7 +1339,7 @@
       },
       {
         "id": "haunt",
-        "label": "Fill the slayer's night with what fire does",
+        "label": "Fill {slayer.noun:def.gen} night with what fire does",
         "act": {
           "type": "haunt",
           "target": "$slayer",
@@ -1312,7 +1351,7 @@
       },
       {
         "id": "reveal",
-        "label": "Tell the slayer what the order plans for them",
+        "label": "Tell {slayer.noun:def} what the order plans for {slayer.obj}",
         "act": {
           "type": "reveal",
           "target": "$court",

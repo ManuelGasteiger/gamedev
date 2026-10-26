@@ -205,23 +205,24 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "lang",
         "headline",
         "body"
       ],
       "properties": {
+        "lang": {
+          "const": "en"
+        },
         "headline": {
           "type": "string",
-          "minLength": 3,
-          "maxLength": 80
+          "minLength": 3
         },
         "body": {
           "type": "string",
-          "minLength": 20,
-          "maxLength": 700
+          "minLength": 20
         },
         "because": {
-          "type": "string",
-          "maxLength": 220
+          "type": "string"
         },
         "variants": {
           "type": "array",
@@ -229,20 +230,23 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
+              "id",
               "if",
               "body"
             ],
             "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
               "if": {
                 "$ref": "#/$defs/predicate"
               },
               "headline": {
-                "type": "string",
-                "maxLength": 80
+                "type": "string"
               },
               "body": {
-                "type": "string",
-                "maxLength": 700
+                "type": "string"
               }
             }
           }
@@ -251,11 +255,11 @@
           "type": "object",
           "description": "optional result line per option id, shown after the act resolves",
           "additionalProperties": {
-            "type": "string",
-            "maxLength": 280
+            "type": "string"
           }
         }
-      }
+      },
+      "description": "English authoring text. Other languages live in data/text/<lang>/scenarios.json under scn.<id>.<field> keys (headline, body, because, variant.<vid>.body, variant.<vid>.headline, option.<oid>, result.<oid>, reveal.<oid>); length caps per language are in vocab.json text_caps_chars."
     },
     "options": {
       "type": "array",
@@ -773,6 +777,20 @@
               "$ref": "#/$defs/range"
             }
           }
+        },
+        "noun": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "person roles: the closed lexicon key the text calls this person by (vocab.json nouns)"
+        },
+        "sex": {
+          "enum": [
+            "any",
+            "m",
+            "f"
+          ],
+          "default": "any",
+          "description": "person roles: a constraint on the bound person; any for most"
         }
       },
       "oneOf": [
@@ -805,6 +823,20 @@
           "required": [
             "remnant"
           ]
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "person"
+            ]
+          },
+          "then": {
+            "required": [
+              "noun"
+            ]
+          }
         }
       ]
     },
@@ -868,8 +900,7 @@
         },
         "label": {
           "type": "string",
-          "minLength": 2,
-          "maxLength": 80
+          "minLength": 2
         },
         "act": {
           "$ref": "#/$defs/actTemplate"
@@ -931,8 +962,7 @@
           }
         },
         "reveal_to_player": {
-          "type": "string",
-          "maxLength": 200
+          "type": "string"
         }
       }
     }

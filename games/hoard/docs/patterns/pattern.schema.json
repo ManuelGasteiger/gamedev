@@ -67,7 +67,7 @@
     },
     "outcome_by": {
       "type": "object",
-      "description": "clause field \u2192 mapping of its value to an outcome word used in the emitted event and the text key",
+      "description": "clause field → mapping of its value to an outcome word used in the emitted event and the text key",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": {
@@ -107,11 +107,9 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 5
-        },
-        "text_key": {
-          "type": "string"
         }
-      }
+      },
+      "description": "the compound event; its text is data/text/<lang>/patterns.json under pat.<id>.title, pat.<id>.line and pat.<id>.line.<outcome>"
     },
     "stakes_for_dragon": {
       "type": "number",

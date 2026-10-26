@@ -35,7 +35,9 @@
           "court": "lair",
           "role": "hostage",
           "choose": "most_recent"
-        }
+        },
+        "noun": "hostage",
+        "sex": "any"
       },
       "scribe": {
         "person": {
@@ -44,6 +46,8 @@
           "trait": "curious",
           "choose": "by_score:renown"
         },
+        "noun": "scribe",
+        "sex": "any",
         "optional": true
       }
     },
@@ -67,20 +71,22 @@
       "faction:$court"
     ],
     "text": {
-      "headline": "A scribe among the hostages",
-      "body": "{hostage.name} of {court.name} has spent the days since the taking writing on the cave wall with a burnt stick: the names of the dead at {a.place}, the year, the weather. Asked why, {hostage.pronoun} says someone should keep the record, and that nobody else here can read.",
-      "because": "You took {hostage.name} at {a.place} {a.years_ago} years ago; {court.name} keeps a library, so its people are lettered.",
+      "lang": "en",
+      "headline": "{hostage.noun:scribe.indef} among the hostages",
+      "body": "{hostage.name} of {court.name} has spent the days since the taking writing on the cave wall with a burnt stick: the names of the dead at {a.place}, the year, the weather. Asked why, {hostage.subj} says someone should keep the record, and that nobody else here can read.",
+      "because": "You took {hostage.name} at {a.place} {a.years_ago:year} ago; {court.name} keeps a library, so its people are lettered.",
       "variants": [
         {
+          "id": "scribe",
           "if": "bound(scribe)",
-          "body": "{scribe.name} of {court.name} has covered the cave wall in charcoal: the names of the dead at {a.place}, the year, the weather. {scribe.pronoun} offers, without being asked, to keep your chronicle. Nobody else here can read."
+          "body": "{scribe.name} of {court.name} has covered the cave wall in charcoal: the names of the dead at {a.place}, the year, the weather. {scribe.subj} offers, without being asked, to keep your chronicle. Nobody else here can read."
         }
       ]
     },
     "options": [
       {
         "id": "keep",
-        "label": "Keep the scribe as your historian",
+        "label": "Keep {hostage.noun:scribe.def} as {hostage.noun:historian.poss2}",
         "act": {
           "type": "keep",
           "target": "$hostage",
@@ -92,7 +98,7 @@
       },
       {
         "id": "release",
-        "label": "Send the scribe home",
+        "label": "Send {hostage.noun:scribe.def} home",
         "act": {
           "type": "release",
           "target": "$hostage"
@@ -202,6 +208,8 @@
           "role": "sage",
           "choose": "by_score:renown"
         },
+        "noun": "sage",
+        "sex": "any",
         "optional": true
       },
       "envoy": {
@@ -209,7 +217,9 @@
           "court": "$court",
           "role": "envoy",
           "choose": "by_score:cunning"
-        }
+        },
+        "noun": "envoy",
+        "sex": "any"
       }
     },
     "require": [
@@ -244,13 +254,15 @@
       "faction:$court"
     ],
     "text": {
+      "lang": "en",
       "headline": "The scribes of {court.name}",
-      "body": "{envoy.name} stands at the ledge with a satchel of ash. {a.years_ago} years after you burned the library at {a.place}, {court.name} has no record of its own kings, and the young are taught from memory by the old. The envoy asks for what you took, or for someone to teach them letters again.",
-      "because": "The court lost its written memory at {a.place}; what it knows of you is now told, not read.",
+      "body": "{envoy.name} stands at the ledge with a satchel of ash. {a.years_ago:year} after you burned the library at {a.place}, {court.name} has no record of its own kings, and the young are taught from memory by the old. {envoy.noun:def} asks for what you took, or for someone to teach them letters again.",
+      "because": "{court.name} lost its written memory at {a.place}; what it knows of you is now told, not read.",
       "variants": [
         {
+          "id": "sage",
           "if": "bound(sage)",
-          "body": "{sage.name}, the last sage of {court.name}, has sent {envoy.name} with a satchel of ash from {a.place}. The hold has no record of its own kings now. The sage asks for the books you took, or for letters to be taught again."
+          "body": "{sage.name}, the last {sage.noun} of {court.name}, has sent {envoy.name} with a satchel of ash from {a.place}. The hold has no record of its own kings now. {sage.noun:def} asks for the books you took, or for letters to be taught again."
         }
       ]
     },
@@ -280,7 +292,7 @@
       },
       {
         "id": "eat",
-        "label": "Eat the envoy",
+        "label": "Eat {envoy.noun:def}",
         "act": {
           "type": "kill",
           "target": "$envoy",
@@ -366,7 +378,9 @@
           "role": "hero",
           "memory_has": "sworn_to_memory",
           "choose": "by_score:renown"
-        }
+        },
+        "noun": "hero",
+        "sex": "any"
       }
     },
     "require": [
@@ -390,8 +404,9 @@
       "tone:grim"
     ],
     "text": {
+      "lang": "en",
       "headline": "{hero.name} comes alone",
-      "body": "{hero.name} of {court.name} stands on the lair's border at first light with a banner planted in the scree and no army behind it. {hero.pronoun} was a child at {a.place} when it burned, {a.years_ago} years ago, and has sworn on that fire. The order waits a day's march back. This one wants it settled face to face.",
+      "body": "{hero.name} of {court.name} stands on the lair's border at first light with a banner planted in the scree and no army behind it. {hero.subj} was a child at {a.place} when it burned, {a.years_ago:year} ago, and has sworn on that fire. The order waits a day's march back. This one wants it settled face to face.",
       "because": "The burning of {a.place} is written in {court.name}'s chronicle; {hero.name} is sworn to that memory."
     },
     "options": [
@@ -485,7 +500,9 @@
           "memory_has": "schooled:intrigue",
           "knows_dragon": true,
           "choose": "most_recent"
-        }
+        },
+        "noun": "monarch",
+        "sex": "any"
       },
       "court": {
         "faction": {
@@ -515,9 +532,10 @@
       "tone:ominous"
     ],
     "text": {
+      "lang": "en",
       "headline": "A letter in a hand you taught",
-      "body": "A kestrel drops a letter on the ledge. {agent.name} writes from {court.name}'s throne that the priests have begun asking where the new queen learned her craft, and that two of them have gone to the archive. {agent.pronoun} asks whether you would like the priests to find something, or nothing.",
-      "because": "You released {agent.name} {a.years_ago} years ago, schooled in intrigue and touched by your magic; a devout court notices."
+      "body": "A kestrel drops a letter on the ledge. {agent.name} writes from {court.name}'s throne that the priests have begun asking where the new {agent.noun} learned {agent.poss} craft, and that two of them have gone to the archive. {agent.subj} asks whether you would like the priests to find something, or nothing.",
+      "because": "You released {agent.name} {a.years_ago:year} ago, schooled in intrigue and touched by your magic; a devout court notices."
     },
     "options": [
       {
@@ -547,7 +565,7 @@
       },
       {
         "id": "haunt",
-        "label": "Warn her to burn the archive",
+        "label": "Warn {agent.obj} to burn the archive",
         "act": {
           "type": "haunt",
           "target": "$agent",
@@ -570,7 +588,7 @@
       },
       {
         "id": "ignore",
-        "label": "Let her manage her own court",
+        "label": "Let {agent.obj} manage {agent.poss} own court",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -634,7 +652,9 @@
           "court": "$court",
           "role": "priest",
           "choose": "by_score:piety"
-        }
+        },
+        "noun": "priest",
+        "sex": "any"
       },
       "agent": {
         "person": {
@@ -642,6 +662,8 @@
           "tag": "corrupted:dark",
           "choose": "most_recent"
         },
+        "noun": "courtier",
+        "sex": "any",
         "optional": true
       },
       "rival": {
@@ -674,20 +696,22 @@
       "tone:grim"
     ],
     "text": {
+      "lang": "en",
       "headline": "The inquisition of {court.name}",
       "body": "{priest.name} has the court's mages in chains and its archive under seal. The charge is dark craft at the throne; the proof is thin and the fires are not. The mage guild's work has stopped. A court that burns its own scholars is weaker for a generation, and it knows who it blames.",
       "because": "The secret you planted in {court.name} surfaced; a devout court with a weak crown answers with fire.",
       "variants": [
         {
+          "id": "agent",
           "if": "bound(agent)",
-          "body": "{priest.name} has {agent.name}'s tutors in chains and the archive under seal. The charge is dark craft at the throne, and this time the proof is not thin. The mages' work has stopped. {agent.pronoun} has not been named yet."
+          "body": "{priest.name} has {agent.name}'s tutors in chains and the archive under seal. The charge is dark craft at the throne, and this time the proof is not thin. The mages' work has stopped. {agent.subj} has not been named yet."
         }
       ]
     },
     "options": [
       {
         "id": "gift",
-        "label": "Send the priest a relic to look at instead",
+        "label": "Send {priest.noun:def} a relic to look at instead",
         "act": {
           "type": "give",
           "target": "$court",
@@ -783,6 +807,8 @@
           "tag": "thief",
           "choose": "most_recent"
         },
+        "noun": "thief",
+        "sex": "any",
         "optional": true
       }
     },
@@ -808,20 +834,22 @@
       "tone:wry"
     ],
     "text": {
+      "lang": "en",
       "headline": "The cup is on their table",
-      "body": "The {cup.name} that lay under your left wing is now the centrepiece of {court.name}'s feast table, and the whole city has been quieter since. The thief has a street named after the walk back down. The city is rich, pleased with itself, and watching the sky more than it used to.",
+      "body": "{cup.name:def} that lay under your left wing is now the centrepiece of {court.name}'s feast table, and the whole city has been quieter since. The thief has a street named after the walk back down. The city is rich, pleased with itself, and watching the sky more than it used to.",
       "because": "A court that does not fear you sent a thief while you slept; it remembers the theft with pride.",
       "variants": [
         {
+          "id": "thief",
           "if": "bound(thief)",
-          "body": "{thief.name} came out of your mountain with the {cup.name} and has not bought a drink since. The cup stands on {court.name}'s feast table and the city watches the sky more than it used to."
+          "body": "{thief.name} came out of your mountain with {cup.name:def} and has not bought a drink since. {cup.subj} stands on {court.name}'s feast table and the city watches the sky more than it used to."
         }
       ]
     },
     "options": [
       {
         "id": "take",
-        "label": "Take it back, and more",
+        "label": "Take {cup.name:def} back, and more",
         "act": {
           "type": "take",
           "target": "$court",
@@ -856,7 +884,7 @@
       },
       {
         "id": "ignore",
-        "label": "Let them keep the cup",
+        "label": "Let them keep {cup.name:def}",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -899,7 +927,9 @@
           "court": "lair",
           "role": "hostage",
           "choose": "by_score:age"
-        }
+        },
+        "noun": "heir",
+        "sex": "any"
       },
       "court": {
         "faction": {
@@ -920,6 +950,8 @@
           "role": "envoy",
           "choose": "by_score:cunning"
         },
+        "noun": "envoy",
+        "sex": "any",
         "optional": true
       }
     },
@@ -944,11 +976,13 @@
       "faction:$match"
     ],
     "text": {
-      "headline": "Two crowns and one heir",
-      "body": "{court.name} has no heir but the one asleep in your hoard, and {match.name} has a widowed queen and a long border. Both courts have written to each other; neither has written to you. A marriage would make one realm of two, and the mountain would stand between it and nothing.",
-      "because": "You hold {heir.name}; a marriage between the two courts needs the heir you have.",
+      "lang": "en",
+      "headline": "Two crowns and {heir.noun:indef}",
+      "body": "{court.name} has no one for the throne but {heir.name}, asleep in your hoard, and {match.name} has a widowed queen and a long border. Both courts have written to each other; neither has written to you. A marriage would make one realm of two, and the mountain would stand between it and nothing.",
+      "because": "You hold {heir.name}; a marriage between the two courts needs {heir.obj}.",
       "variants": [
         {
+          "id": "envoy",
           "if": "bound(envoy)",
           "body": "{envoy.name} of {match.name} has come to ask, very carefully, whether {heir.name} is well, and whether the mountain has views on marriage."
         }
@@ -970,7 +1004,7 @@
       },
       {
         "id": "release",
-        "label": "Send the heir home under oath",
+        "label": "Send {heir.noun:def} home under oath",
         "act": {
           "type": "release",
           "target": "$heir",
@@ -992,7 +1026,7 @@
       },
       {
         "id": "ignore",
-        "label": "Keep the heir and the border open",
+        "label": "Keep {heir.noun:def} and the border open",
         "act": {
           "type": "ignore",
           "target": "$self"
@@ -1050,6 +1084,8 @@
           "role": "priest",
           "choose": "by_score:piety"
         },
+        "noun": "priest",
+        "sex": "any",
         "optional": true
       },
       "home": {
@@ -1080,15 +1116,18 @@
       "tone:tender"
     ],
     "text": {
+      "lang": "en",
       "headline": "Pilgrims at the foot of the mountain",
       "body": "Eleven of {court.name}'s faithful have come up the pass in the snow with a cart of {home.name}'s last apples and a child who will not stop looking at the cave. They do not ask for anything. They have come to be looked at.",
       "because": "{court.name} holds you in awe and the road from {home.name} is open.",
       "variants": [
         {
+          "id": "leader",
           "if": "bound(leader)",
-          "body": "{leader.name} has led eleven of {court.name}'s faithful up the pass in the snow with a cart of {home.name}'s last apples. They do not ask for anything. They have come to be looked at, and {leader.pronoun} has brought a book to write down what they see."
+          "body": "{leader.name} has led eleven of {court.name}'s faithful up the pass in the snow with a cart of {home.name}'s last apples. They do not ask for anything. They have come to be looked at, and {leader.subj} has brought a book to write down what they see."
         },
         {
+          "id": "dread",
           "if": "court.dread >= 0.5",
           "body": "Eleven of {court.name}'s faithful have come up the pass in the snow. They walk slowly and keep the children at the back. They have brought the last apples from {home.name}, and they have not decided whether this is a gift or a tribute."
         }
@@ -1212,24 +1251,27 @@
       "tone:ominous"
     ],
     "text": {
-      "headline": "The {crown.name} speaks",
-      "body": "It waits until the cave is quiet. The living will always build cannon, it says, in the voice of the king who drowned wearing it. It can make you something cannon cannot reach. It does not say what that costs. It never does.",
+      "lang": "en",
+      "headline": "{crown.name:def} speaks",
+      "body": "{crown.subj} waits until the cave is quiet. The living will always build cannon, {crown.subj} says, in the voice of the king who drowned wearing {crown.obj}. {crown.subj} can make you something cannon cannot reach. {crown.subj} does not say what that costs. {crown.subj} never does.",
       "because": "An artifact with its own purpose has been in the hoard long enough to learn your fears.",
       "variants": [
         {
+          "id": "armed",
           "if": "bound(armed)",
-          "body": "It waits until the cave is quiet. {armed.name} has cannon now, it says, in the voice of the king who drowned wearing it, and the living will always build more. It can make you something cannon cannot reach. It does not say what that costs."
+          "body": "{crown.subj} waits until the cave is quiet. {armed.name} has cannon now, {crown.subj} says, in the voice of the king who drowned wearing {crown.obj}, and the living will always build more. {crown.subj} can make you something cannon cannot reach. {crown.subj} does not say what that costs."
         },
         {
+          "id": "dead",
           "if": "bound(dead)",
-          "body": "It waits until the cave is quiet. The dead of {dead.name} have priests now, it says, and the priests have a rite. It can make you something the living cannot kill. It does not say what you would be afterwards."
+          "body": "{crown.subj} waits until the cave is quiet. The dead of {dead.name} have priests now, {crown.subj} says, and the priests have a rite. {crown.subj} can make you something the living cannot kill. {crown.subj} does not say what you would be afterwards."
         }
       ]
     },
     "options": [
       {
         "id": "ask",
-        "label": "Ask what it wants",
+        "label": "Ask what {crown.subj} wants",
         "act": {
           "type": "commune",
           "target": "$crown",
@@ -1252,7 +1294,7 @@
       },
       {
         "id": "refuse",
-        "label": "Refuse it",
+        "label": "Refuse {crown.obj}",
         "act": {
           "type": "commune",
           "target": "$crown",
@@ -1263,7 +1305,7 @@
       },
       {
         "id": "gift",
-        "label": "Give it to the dead and be rid of it",
+        "label": "Give {crown.obj} to the dead and be rid of {crown.obj}",
         "act": {
           "type": "give",
           "target": "$dead",
@@ -1357,11 +1399,13 @@
       "tone:ominous"
     ],
     "text": {
+      "lang": "en",
       "headline": "A door in the temple of {temple.name}",
       "body": "The cult of {cult.name} has built a door in the temple at {temple.name} that opens onto nowhere yet. The priests say it opens for you. The neighbours say it opens for something else, and have sent soldiers to find out. Within two wakings it will open one way or the other, whether you are there or not.",
       "because": "Faith, magic and time have met in one court; a door is the shape they take.",
       "variants": [
         {
+          "id": "zealot",
           "if": "bound(zealot)",
           "body": "The cult of {cult.name} has built a door at {temple.name} that opens onto nowhere yet. {zealot.name}'s soldiers are already in the valley below it with torches. Within two wakings it opens one way or the other, whether you are there or not."
         }
