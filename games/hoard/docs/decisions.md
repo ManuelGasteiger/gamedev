@@ -6,6 +6,9 @@ One line per decision, newest first, with the doc that carries the detail. A new
 
 | date | decision | detail in |
 |---|---|---|
+| 2026-10-26 | Fear is gone: dread and awe per court in oral, written and monumental stocks (item 02). Runner-set start values: oral half-life 60 years at human memory (scaled by race), research 0.016 per decade x era x dread factor x wealth/(wealth + 20), 50 wealth per unit of research; the written-grievance slayer trigger stays off (founding holds without it). | `reports/02-dread-awe-memory.md` |
+| 2026-10-26 | Witnesses are the owner (1.0) and the neighbouring courts (0.5); the sim derives them and ignores what a shell sends. Sage and envoy presence waits for people with places (item 07). | `act-api.md` §4, `reports/02-dread-awe-memory.md` |
+| 2026-10-26 | `no_walls` and `no_settle` hold while the court remembers the dragon (dread or awe at 0.2) and break by chance at 1 - stability per decade (resentment). | `act-api.md` §6.4, `reports/02-dread-awe-memory.md` |
 | 2026-10-26 | Valleys that remember dragons are a start dimension, as data (item 02 start values, item 12). | `first-hour.md` §12, `implementation-plan.md` D5 |
 | 2026-10-26 | German name of the Endings page: „Enden“. | `docs/style-de.md` |
 | 2026-10-26 | The HUD may wrap to two rows at 1024 px (game-check j.1024 height under 80). | `reports/19-text-renderer-l10n.md` §4 |
@@ -47,7 +50,6 @@ One line per decision, newest first, with the doc that carries the detail. A new
 - Raid open points (`raid-design.md` §8): the fire's civilian toll (proposal: always counts, scaled by who got out), night raids, hostage weight and dropped hostages, travel-flight ceiling per era, how much of the lair is walkable.
 - Paper playtest answers (`paper-playtest-wakings.md`, seven questions). The one that matters most: do the "because" lines or the hooks naming the player's own act make the world feel reactive?
 - `guise` discovery odds; discovered dragon in a city: fight or flight.
-- Dread/awe start values are proposals; the headless runner decides.
 - Which endings ship in v0.5 (proposal: Mortality, The Myth, Ascension).
 - Name collision: "Hoard" (2011, Big Sandwich Games) is also a dragon-burns-villages game.
 - GPU: the GTX 980 is below Lumen's minimum; upgrade, rent, or stay, decided from the spike's Lean numbers (`implementation-plan.md` D12).

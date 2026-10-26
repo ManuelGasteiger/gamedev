@@ -30,7 +30,7 @@ HOARD = ["gold", "books", "artifacts", "art", "royals", "food", "embers"]
 AXES = ["might", "flame", "arcana", "lore", "dominion"]
 STOCK_COLUMNS = ["seed", "century", "year", "since_hatch", "phase", "health_max", "wounds", "slain"] + \
     [f"hoard_{k}" for k in HOARD] + [f"growth_{k}" for k in AXES]
-COURT_COLUMNS = ["seed", "century", "court", "race", "wealth", "era", "anti_dragon", "fear", "faith", "cohesion", "regions"]
+COURT_COLUMNS = ["seed", "century", "court", "race", "wealth", "era", "anti_dragon", "dread", "awe", "faith", "cohesion", "regions"]
 FIRST_HOUR = 150
 HATCHLING = 80
 MARKS = [500, 1500, 3000]
@@ -82,7 +82,7 @@ def century_rows(seed, snaps, years):
                     [round(s["hoard"].get(k, 0), 3) for k in HOARD] + [round(s["growth"].get(k, 0), 3) for k in AXES])
         for f in s["courts"]:
             courts.append([seed, c, f["id"], f["race"], round(f["wealth"], 3), f["era"], round(f["anti_dragon"], 4),
-                           round(f["fear"], 4), round(f["faith"], 4), round(f["cohesion"], 4), f["regions"]])
+                           round(f["dread"], 4), round(f["awe"], 4), round(f["faith"], 4), round(f["cohesion"], 4), f["regions"]])
         if s["slain"]:
             break
     return rows, courts

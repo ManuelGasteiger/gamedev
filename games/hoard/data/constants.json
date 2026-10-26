@@ -7,7 +7,7 @@
     "pilgrims_awe": 0.15, "honest_awe": 0.30, "cult_awe": 0.30, "temple_awe": 0.50, "faith_floor": 0.3, "temple_years": 50,
     "demand_dread": 0.30, "slayer_dread": 0.50, "flee_dread": 0.70, "grievance_written": 0,
     "stability_dread": 0.8, "pressure_awe": 0.7, "research_dread": 2.0,
-    "research_base": 0.012, "research_spend": 50, "research_wealth_half": 20
+    "research_base": 0.016, "research_spend": 50, "research_wealth_half": 20
   },
   "step_years": 10,
   "land_wealth_scale": 100,

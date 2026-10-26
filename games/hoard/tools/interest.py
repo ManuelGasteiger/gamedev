@@ -922,7 +922,7 @@ class Narrator:
             "oath_expired": lambda: f"The oath {s} with {O} lapses" + (" as the party is gone." if t0 == "party_gone" else "."),
             "oath_breached_by_dragon": lambda: f"The dragon breaks its oath to {O} ({t0}); the court remembers the betrayal.",
             "oath_breached_by_them": lambda: f"{O} breaks its oath to the dragon ({t0}).",
-            "demand_refused": lambda: f"{S} refuses the dragon's demand ({o}); fear stands at {m:.2f}.",
+            "demand_refused": lambda: f"{S} refuses the dragon's demand ({o}); dread stands at {m:.2f}.",
             "spell_cast": lambda: f"The dragon's spell {s} falls on {O}" + (f" ({t0})" if t0 else "") + ".",
             "spell_failed": lambda: f"The dragon's spell {o} fails ({t0}).",
             "spell_expired": lambda: f"The spell {s} on {O} fades.",

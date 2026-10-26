@@ -9,9 +9,7 @@ function effect(key) {
   return key.endsWith('_mult') ? 1 : 0;
 }
 
-// fury is a burn multiplier (1.3) that holds from the first wound of the age to its end
-function furyActive() { return !!play.fury && effect('fury') > 0; }
-function burnMagnitude(m) { return clamp(m * effect('burn_mult') * (furyActive() ? effect('fury') : 1), 0.05, 1); }
+function burnMagnitude(m) { return clamp(m * effect('burn_mult'), 0.05, 1); }
 function burnStamina(m) { return Math.max(1, Math.round(burnCost(m) * effect('burn_cost_mult'))); }
 function killMagnitude(m) { return clamp(m * effect('kill_mult'), 0.05, 1); }
 function killStamina() { return Math.max(1, Math.round(COST.kill * effect('kill_cost_mult'))); }
@@ -21,16 +19,7 @@ function burnNote() {
   const notes = [];
   if (effect('burn_mult') !== 1) notes.push(`×${fmt(effect('burn_mult'))} per stamina`);
   if (effect('burn_cost_mult') !== 1) notes.push(`${Math.round((1 - effect('burn_cost_mult')) * 100)}% cheaper`);
-  if (furyActive()) notes.push(`fury ×${fmt(effect('fury'), 1)}`);
   return notes.length ? ` (${notes.join(', ')})` : '';
-}
-
-// Glamour: only a share of the witnesses see the act, the same ones each time over a region
-function keptWitnesses(ids, regionId) {
-  const k = clamp(effect('witness_mult'), 0, 1);
-  if (k >= 1 || !ids.length) return ids;
-  const keep = Math.round(ids.length * k);
-  return ids.slice().sort((a, b) => hashString(regionId + a) - hashString(regionId + b)).slice(0, keep).sort();
 }
 
 function syncEffects() { dragon.speed = DRAGON_SPEED * effect('speed_mult'); }

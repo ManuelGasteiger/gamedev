@@ -38,14 +38,14 @@ function audienceHtml(o, i) {
   const inLair = env?.tags?.includes('hostage');
   const eatWhy = !o.envoy ? 'no envoy came in person' : play.stamina < COST.kill_person ? `needs ${COST.kill_person} stamina (${play.stamina} left)` : '';
   const oath = oathBinds(fid);
-  const eatCost = `${COST.kill_person} stamina. ${factionTitle(fid)} remembers the murder of its envoy (fear +${CONSTANTS.offers?.envoy_kill_fear ?? 0.3}, cohesion drops), ${o.envoy_name || 'the envoy'} dies and the offer with them${oath ? '; you are sworn to this court, so it is a betrayal' : ''}.`;
+  const eatCost = `${COST.kill_person} stamina. ${factionTitle(fid)} remembers the murder of its envoy (dread +${CONSTANTS.offers?.envoy_kill_dread ?? 0.3}, cohesion drops), ${o.envoy_name || 'the envoy'} dies and the offer with them${oath ? '; you are sworn to this court, so it is a betrayal' : ''}.`;
   return `<div class="audience" style="--c:${col}" data-offer="${i}">
     <div class="speaker"><b>${escapeHtml(o.envoy_name || 'An envoy')}</b>${env ? `, ${roleWord(env.role)}` : ''} of <b style="color:${col}">${factionTitle(fid)}</b>${inLair ? ' <span class="muted">(speaking from your own lair, where you hold them)</span>' : ''} <span class="muted">· ${offerTitle(o.text_key)}</span></div>
     <div class="speech">${statedReason(o)}</div>
     <div class="ask">They ask ${escapeHtml(offerAsk(o))}.${o.price > 0 ? ` <span class="price">Price: ${fmt(o.price, 1)} gold${o.oath.clauses.some((c) => c.pred === 'tribute') ? ' a decade, as tribute' : ', paid when it is done'}.</span>` : ''}</div>
     ${hints.map((h) => `<div class="hint">${escapeHtml(h)}</div>`).join('')}
     <div class="clauses">${o.oath.clauses.map(clauseText).join('<br>') || (o.ask ? 'asks you to ' + o.ask.replace(/_/g, ' ') + (o.target_name ? ' ' + o.target_name : '') : offerRite(o.text_key))}<br>if you break it: ${stakeText(o.oath.stakes.breach_by_dragon)} · if they break it: ${stakeText(o.oath.stakes.breach_by_them)} · runs until year ${o.oath.expires}</div>
-    <div class="row"><button class="primary" data-accept="${i}">Accept</button><button data-decline="${i}">Decline (they are shown the dragon, fear +)</button>
+    <div class="row"><button class="primary" data-accept="${i}">Accept</button><button data-decline="${i}">Decline (they are shown the dragon, dread +)</button>
       <button class="danger eat" data-eat="${i}" ${eatWhy ? 'disabled' : ''} title="${escapeHtml(eatWhy || eatCost)}">Eat the envoy</button></div>
     <div class="cost-note">${eatWhy ? 'eat the envoy: ' + escapeHtml(eatWhy) : 'Eat the envoy: ' + escapeHtml(eatCost)}</div>
   </div>`;

@@ -7,7 +7,7 @@
 <style>
   :root {
     --bg: #171a22; --panel: #1f232cf2; --panel-solid: #1f232c; --line: #353a46; --fg: #dde0e7; --dim: #8e94a4;
-    --accent: #e0b24a; --bad: #d4594c; --good: #5fb37a; --fear: #e8705f; --faith: #7fb0ff; --wealth: #e0b24a;
+    --accent: #e0b24a; --bad: #d4594c; --good: #5fb37a; --dread: #e8705f; --awe: #c9a6ff; --faith: #7fb0ff; --wealth: #e0b24a;
     --overlay: #0b0d1266; --fire: #ff8a2a;
   }
   * { box-sizing: border-box; }
@@ -86,7 +86,7 @@
   /* floating deltas and toasts */
   #floats { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
   .float { position: absolute; transform: translate(-50%, -50%); font-weight: 600; font-size: 10.5px; text-shadow: 0 1px 3px #000; white-space: nowrap; }
-  .float.fear { color: var(--fear); } .float.faith { color: var(--faith); } .float.wealth { color: var(--wealth); } .float.info { color: var(--fg); }
+  .float.dread { color: var(--dread); } .float.awe { color: var(--awe); } .float.faith { color: var(--faith); } .float.wealth { color: var(--wealth); } .float.info { color: var(--fg); }
   #toasts { position: fixed; top: calc(var(--hud-h, 38px) + 10px); left: 12px; width: 360px; z-index: 7; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
   .toast { background: var(--panel); border-left: 3px solid var(--accent); padding: 5px 8px; border-radius: 3px; font-size: 12px; opacity: 0; animation: toast 5s forwards; }
   .toast.bad { border-left-color: var(--bad); }
@@ -415,6 +415,17 @@ function factionHsl(id) {
 function factionCss(id) { const c = factionHsl(id); return `hsl(${c.h} ${c.s}% ${c.l}%)`; }
 function factionColor3(id) { const c = factionHsl(id); return new THREE.Color().setHSL(c.h / 360, c.s / 100, c.l / 100); }
 
+// a court's dread and awe arrive as tiers plus effective values; the page reads the effective ones as numbers
+function readView(v) {
+  for (const f of v.factions ?? []) {
+    f.dread_tiers = f.dread;
+    f.awe_tiers = f.awe;
+    f.dread = f.dread_eff ?? 0;
+    f.awe = f.awe_eff ?? 0;
+  }
+  return v;
+}
+
 function regionById(id) { return world.regions.find((r) => r.id === id); }
 function factionById(id) { return world.factions.find((f) => f.id === id); }
 function witnessesFor(regionId, targetId) {
@@ -428,7 +439,7 @@ function buildModel(view) {
   const m = { year: view.year, regions: new Map(), factions: new Map(), armies: view.armies ?? [], remnants: view.remnants ?? [], dragon: view.dragon, offers: view.offers ?? [], wars: view.wars ?? [], modifiers: view.modifiers ?? [] };
   for (const f of view.factions) {
     m.factions.set(f.id, { id: f.id, race: f.dominant_race ?? f.race, era: f.era, capital: f.capital, overlord: f.overlord || '', altar: !!f.altar,
-      hostage_taken: !!f.hostage_taken, at_war_with: [...f.at_war_with], allies: f.allies ?? [], faith: f.faith, fear: f.fear, wealth: f.wealth, power: f.power ?? 0, tags: new Set(f.tags), regions: [...f.regions] });
+      hostage_taken: !!f.hostage_taken, at_war_with: [...f.at_war_with], allies: f.allies ?? [], faith: f.faith, dread: f.dread, awe: f.awe, wealth: f.wealth, power: f.power ?? 0, tags: new Set(f.tags), regions: [...f.regions] });
   }
   for (const r of view.regions) {
     m.regions.set(r.id, { id: r.id, owner: r.owner || '', terrain: r.terrain, burn: r.burn, tags: new Set(r.tags), wealth_share: r.wealth_share ?? 0,
@@ -471,7 +482,7 @@ function armyPosition(army, m) {
 
 function refreshWorld() {
   const prev = model;
-  world = sim({ cmd: 'world' });
+  world = readView(sim({ cmd: 'world' }));
   indexNames(world);
   model = buildModel(world);
   if (valley && valley.key !== valleyKey()) buildValleyScene();   // a cataclysm changed a region's terrain
@@ -1385,7 +1396,7 @@ function actionsFor(regionId) {
     controls: defendable.length ? `<select id="defend-who">${defendable.map((a) => `<option value="${a.attacker}">${escapeHtml(factionTitle(a.attacker))}</option>`).join('')}</select><button data-run="defend">Defend</button>` : '' });
   const crush = crushAction(r, owner);
   if (crush) add(crush);
-  add({ id: 'roar', name: 'Roar', cost: COST.roar, desc: owner ? `show yourself to ${factionTitle(owner.id)} (fear +)` : '', why: owner ? '' : noOne, controls: owner ? `<button data-run="roar">Roar</button>` : '' });
+  add({ id: 'roar', name: 'Roar', cost: COST.roar, desc: owner ? `show yourself to ${factionTitle(owner.id)} (dread and awe +)` : '', why: owner ? '' : noOne, controls: owner ? `<button data-run="roar">Roar</button>` : '' });
   add({ id: 'hostage', name: 'Hostage', cost: COST.hostage, desc: owner ? `take an heir of ${factionTitle(owner.id)}` : '', why: !owner ? `no court here (${noOne})` : !r.capital ? `only at a capital (${owner.capital ? regionTitle(owner.capital) : '?'})` : owner.hostage_taken ? 'already holding their heir' : '',
     controls: `<button data-run="hostage">Take hostage</button>` });
   const lineage = owner && r.capital ? heldLineageOf(owner) : '';
@@ -1396,13 +1407,13 @@ function actionsFor(regionId) {
   add({ id: 'altar', name: 'Altar', cost: COST.accept_offering, desc: altar ? `${factionTitle(owner.id)} keeps an altar to you` : '', why: altar ? '' : !owner ? noOne : !r.capital ? 'altars stand at the capital' : `no altar: faith ${fmt(owner.faith)} must exceed ${CONSTANTS.reaction_faith_high ?? 0.5}`,
     controls: altar ? `<button data-run="accept_offering">Accept offering (${COST.accept_offering})</button><button data-run="destroy_altar">Destroy (${COST.destroy_altar})</button>` : '' });
   const miracleCost = CONSTANTS.act_miracle_faith_cost ?? 1;
-  add({ id: 'miracle', name: 'Miracle', cost: 0, costText: `${miracleCost} faith`, desc: owner ? `protect (faith +0.3) or terror (fear +0.4)` : '', why: !owner ? noOne : d.faith_pool < miracleCost ? `faith pool ${fmt(d.faith_pool)} < ${miracleCost} (gain it from tribute, offerings, art)` : '',
+  add({ id: 'miracle', name: 'Miracle', cost: 0, costText: `${miracleCost} faith`, desc: owner ? `protect (faith +0.3, awe +) or terror (dread +0.4)` : '', why: !owner ? noOne : d.faith_pool < miracleCost ? `faith pool ${fmt(d.faith_pool)} < ${miracleCost} (gain it from tribute, offerings, art)` : '',
     controls: `<button data-run="miracle" data-terror="0">Protect</button><button data-run="miracle" data-terror="1">Terror</button>` });
   const dm = cat.demand;
   // a court already bound by an active oath with that clause refuses it as "already sworn" (oaths.cpp active_oath_with_pred)
   const dmOpen = dm && owner ? dm.preds.filter((x) => !(world.oaths ?? []).some((o) => o.status === 'active' && o.parties.includes(owner.id) && o.clauses.some((c) => c.pred === x))) : [];
-  const dmWhy = !dm ? 'unavailable' : !owner ? noOne : !r.capital ? 'demands are made at the capital' : d.knowledge < dm.gate_knowledge ? `knowledge ${fmt(d.knowledge)} < ${dm.gate_knowledge}` : !dmOpen.length ? `already sworn to you: ${dm.preds.map((x) => x.replace('_', ' ')).join(', ')}` : (owner.fear < dm.fear && owner.power >= 0.5 * d.threat) ? `they refuse: fear ${fmt(owner.fear)} < ${dm.fear} and power ${fmt(owner.power, 0)} ≥ half your threat` : '';
-  add({ id: 'demand', name: 'Demand', cost: COST.demand, costText: `${COST.demand} st · knowledge ${dm?.gate_knowledge ?? '?'}`, desc: owner ? `impose an oath on ${factionTitle(owner.id)} (fear ${fmt(owner.fear)})${dmOpen.length < (dm?.preds.length ?? 0) ? ' · already sworn: ' + dm.preds.filter((x) => !dmOpen.includes(x)).map((x) => x.replace('_', ' ')).join(', ') : ''}` : '', why: dmWhy,
+  const dmWhy = !dm ? 'unavailable' : !owner ? noOne : !r.capital ? 'demands are made at the capital' : d.knowledge < dm.gate_knowledge ? `knowledge ${fmt(d.knowledge)} < ${dm.gate_knowledge}` : !dmOpen.length ? `already sworn to you: ${dm.preds.map((x) => x.replace('_', ' ')).join(', ')}` : (owner.dread < dm.dread && owner.power >= 0.5 * d.threat) ? `they refuse: dread ${fmt(owner.dread)} < ${dm.dread} and power ${fmt(owner.power, 0)} ≥ half your threat` : '';
+  add({ id: 'demand', name: 'Demand', cost: COST.demand, costText: `${COST.demand} st · knowledge ${dm?.gate_knowledge ?? '?'}`, desc: owner ? `impose an oath on ${factionTitle(owner.id)} (dread ${fmt(owner.dread)})${dmOpen.length < (dm?.preds.length ?? 0) ? ' · already sworn: ' + dm.preds.filter((x) => !dmOpen.includes(x)).map((x) => x.replace('_', ' ')).join(', ') : ''}` : '', why: dmWhy,
     controls: dm ? `<select id="demand-pred">${dmOpen.map((x) => `<option value="${x}">${x.replace('_', ' ')}</option>`).join('')}</select><button data-run="demand">Demand</button>` : '' });
   for (const s of (cat.spells ?? [])) {
     const why = spellWhy(s, r, owner, d);
@@ -1434,7 +1445,7 @@ function regionFacts(r, owner) {
   facts.push(`<span><span class="sw" style="background:${r.owner ? factionCss(r.owner) : '#555a66'}"></span><b>${owner ? escapeHtml(factionTitle(owner.id)) : r.lair ? 'your lair' : 'unclaimed'}</b></span>`);
   facts.push(`terrain <b>${r.terrain}</b>`);
   if (owner) {
-    facts.push(`race <b>${owner.race}</b>`, `era <b>${owner.era} ${ERA_NAMES[owner.era] ?? ''}</b>`, `wealth <b>${fmt(owner.wealth, 0)}</b> (share ${Math.round(r.wealth_share * 100)}%)`, `fear <b>${fmt(owner.fear)}</b>`, `faith <b>${fmt(owner.faith)}</b>`, `power <b>${fmt(owner.power ?? 0, 0)}</b>`);
+    facts.push(`race <b>${owner.race}</b>`, `era <b>${owner.era} ${ERA_NAMES[owner.era] ?? ''}</b>`, `wealth <b>${fmt(owner.wealth, 0)}</b> (share ${Math.round(r.wealth_share * 100)}%)`, `dread <b>${fmt(owner.dread)}</b>`, `awe <b>${fmt(owner.awe)}</b>`, `faith <b>${fmt(owner.faith)}</b>`, `power <b>${fmt(owner.power ?? 0, 0)}</b>`);
     if (r.capital) facts.push('<b>capital</b>');
     if (owner.overlord) facts.push(`vassal of <b>${factionTitle(owner.overlord)}</b>`);
     if (owner.at_war_with.length) facts.push(`at war with <b>${owner.at_war_with.map(factionTitle).join(', ')}</b>`);
@@ -1506,7 +1517,7 @@ function act(name, params = {}) {
   const target = params.target ?? r.owner;
   if (!confirmLethal(name, region)) return null;
   const shown = woundCost(name, region);
-  const witnesses = keptWitnesses(witnessesFor(region, target), region);
+  const witnesses = witnessesFor(region, target);
   const before = snapshot();
   const nb = narrationBefore();
   const story = { kind: name, target, region, against: params.against, person: params.person, spell: params.spell, pred: params.pred, terror: !!params.terror, gold: params.gold };
@@ -1529,7 +1540,7 @@ function act(name, params = {}) {
     if (!attacker || !spend(killStamina())) return null;
     const g = armies.get(attacker + '|' + r.owner + '|' + region);
     if (g) puff(g.position, factionColor3(attacker));
-    res = applyActs([{ type: 'kill', target: attacker, region, magnitude: killMagnitude(params.magnitude ?? 0.3), witnesses: keptWitnesses(witnessesFor(region, attacker), region), payload: { soldiers: 1 } }]);
+    res = applyActs([{ type: 'kill', target: attacker, region, magnitude: killMagnitude(params.magnitude ?? 0.3), witnesses: witnessesFor(region, attacker), payload: { soldiers: 1 } }]);
     story.target = attacker;
   } else if (name === 'crush') {
     if (!target || !spend(CRUSH.cost)) return null;
@@ -1599,7 +1610,7 @@ function actOutcome(res, region, ctx = {}) {
 
 function snapshot() {
   const s = {};
-  for (const f of world.factions) s[f.id] = { fear: f.fear, faith: f.faith, wealth: f.wealth };
+  for (const f of world.factions) s[f.id] = { dread: f.dread, awe: f.awe, faith: f.faith, wealth: f.wealth };
   return s;
 }
 
@@ -1610,8 +1621,9 @@ function showDeltas(before, region) {
     const b = before[f.id];
     if (!b) continue;
     const parts = [];
-    const dFear = f.fear - b.fear, dFaith = f.faith - b.faith, dWealth = f.wealth - b.wealth;
-    if (Math.abs(dFear) > 0.004) parts.push(['fear', dFear]);
+    const dDread = f.dread - b.dread, dAwe = f.awe - b.awe, dFaith = f.faith - b.faith, dWealth = f.wealth - b.wealth;
+    if (Math.abs(dDread) > 0.004) parts.push(['dread', dDread]);
+    if (Math.abs(dAwe) > 0.004) parts.push(['awe', dAwe]);
     if (Math.abs(dFaith) > 0.004) parts.push(['faith', dFaith]);
     if (Math.abs(dWealth) > 0.4) parts.push(['wealth', dWealth]);
     if (!parts.length) continue;
@@ -1722,7 +1734,7 @@ function renderLair() {
         ${hasHealth() ? `<div class="box"><h3>Health</h3>${bar(health().left, health().max, 'hunger')}<div>${Math.round(health().left)} of ${Math.round(health().max)} · ${numText(health().wounds)} wounds, healed by sleep${d.hoard.embers !== undefined ? ` · embers ${fmt(d.hoard.embers, 1)} (what you burned; they feed Flame as you sleep)` : ''}</div></div>` : ''}
       </div><div>
         <div class="box"><h3>Tags and lineages</h3><div>${d.tags.join(' ') || '<span class="muted">none</span>'}</div><div class="muted">lineages: ${d.lineages.join(', ') || 'none'}</div></div>
-        <div class="box"><h3>Factions</h3>${world.factions.map((f) => `<div><span style="color:${factionCss(f.id)}">■</span> <b>${escapeHtml(factionTitle(f.id))}</b> ${f.dominant_race} ${f.era_name} · ${f.regions.length} regions · wealth ${fmt(f.wealth, 0)} · fear ${fmt(f.fear)} · faith ${fmt(f.faith)}${f.overlord ? ' · vassal of ' + factionTitle(f.overlord) : ''}${f.at_war_with.length ? ' · war: ' + f.at_war_with.map(factionTitle).join(', ') : ''}</div>`).join('')}</div>
+        <div class="box"><h3>Factions</h3>${world.factions.map((f) => `<div><span style="color:${factionCss(f.id)}">■</span> <b>${escapeHtml(factionTitle(f.id))}</b> ${f.dominant_race} ${f.era_name} · ${f.regions.length} regions · wealth ${fmt(f.wealth, 0)} · dread ${fmt(f.dread)} · awe ${fmt(f.awe)} · faith ${fmt(f.faith)}${f.overlord ? ' · vassal of ' + factionTitle(f.overlord) : ''}${f.at_war_with.length ? ' · war: ' + f.at_war_with.map(factionTitle).join(', ') : ''}</div>`).join('')}</div>
         <div class="box"><h3>Remnants</h3>${(world.remnants ?? []).map((r) => `${racePlural(r.race)} ${fmt(r.strength)} near ${regionTitle(r.origin)}`).join(' · ') || '<span class="muted">none</span>'}</div>
       </div></div>`;
     },
@@ -1822,15 +1834,15 @@ function clauseText(c) {
     case 'tribute': return p.target !== undefined ? `${who} pay ${fmt(p.amount, 1)} wealth per decade once you burn their rival (a tribute clause; the rival is implied)` : `${who} pay tribute of ${fmt(p.amount, 1)} wealth per decade while their faith stays above ${CONSTANTS.oath_tribute_min_faith ?? 0.2} and their wealth covers it`;
     case 'no_harm': return `${who} will not burn, kill or take from them`;
     case 'defend': return `${who} will defend them when they are invaded (a region taken while you sleep breaks it)`;
-    case 'no_walls': return `${who} build no walls and stay below era 2 while fear holds`;
-    case 'no_settle': return `${who} do not settle new land while fear holds`;
+    case 'no_walls': return `${who} build no walls and stay below era 2 while they remember you`;
+    case 'no_settle': return `${who} do not settle new land while they remember you`;
     case 'hostage': return `${who} keep a hostage of their line`;
     default: return `${who} ${c.pred} ${JSON.stringify(p)}`;
   }
 }
 function offerTitle(key) { return { 'offer.protect': 'tribute for your protection', 'offer.tribute': 'an oath of worship', 'offer.burn_rival': 'gold to burn a rival', 'offer.rite': 'the rite (an exit)', 'offer.return_hostage': 'a ransom for their hostage', 'offer.hide_heir': 'an heir to hide in your lair', 'offer.teach': 'to be taught', 'offer.bless': 'a blessing', 'offer.judge': 'a judgement', 'offer.purge': 'a purge of the dead', 'offer.ward': 'a ward on their altar', 'offer.elope': 'an elopement' }[key] ?? key.replace('offer.', '').replace(/_/g, ' '); }
 function offerRite(key) { return key === 'offer.rite' ? 'a rite without clauses: they would open a way out of the valley for you (not in this build)' : 'a rite without clauses'; }
-function stakeText(s) { return { betrayal: 'betrayal (their faith drops to 0.02, fear +0.3, faith stops regrowing)', curse: 'a curse (their cohesion decays ×2 for 10 decades)', none: 'nothing' }[s] ?? s; }
+function stakeText(s) { return { betrayal: 'betrayal (their faith drops to 0.02, dread +0.3, faith stops regrowing)', curse: 'a curse (their cohesion decays ×2 for 10 decades)', none: 'nothing' }[s] ?? s; }
 function oathStatus(s) { return { active: 'active', expired: 'expired', breached_by_dragon: 'broken by you (betrayal)', breached_by_them: 'broken by them' }[s] ?? s; }
 
 // ===================================================================================================
@@ -1854,7 +1866,7 @@ function sleep(years) {
   montage.active = true; montage.done = false;
   montage.events = res.chronicle.filter((e) => e.kind !== 'sleep_begin');
   montage.index = 0; montage.year = before.year; montage.fromYear = before.year; montage.endYear = res.year; montage.result = res; montage.before = before; montage.paused = false;
-  montage.final = sim({ cmd: 'world' });
+  montage.final = readView(sim({ cmd: 'world' }));
   indexNames(montage.final);
   montage.you = youContext([world, montage.final]);
   montage.speed = play.montageSpeed ?? 20;
@@ -1892,7 +1904,7 @@ function playEvent(e) {
   const s = e.subject, o = e.object;
   const text = eventText(e);
   const bad = eventClass(e) === 'bad';
-  const ensureFaction = (id, race) => { if (!m.factions.has(id)) m.factions.set(id, { id, race: race ?? raceOf(id) ?? 'human', era: 0, capital: '', overlord: '', altar: false, hostage_taken: false, at_war_with: [], allies: [], faith: 0, fear: 0, wealth: 0, tags: new Set(), regions: [] }); return m.factions.get(id); };
+  const ensureFaction = (id, race) => { if (!m.factions.has(id)) m.factions.set(id, { id, race: race ?? raceOf(id) ?? 'human', era: 0, capital: '', overlord: '', altar: false, hostage_taken: false, at_war_with: [], allies: [], faith: 0, dread: 0, awe: 0, wealth: 0, tags: new Set(), regions: [] }); return m.factions.get(id); };
   const setOwner = (regionId, owner) => {
     const r = m.regions.get(regionId); if (!r) return;
     const prev = m.factions.get(r.owner); if (prev) prev.regions = prev.regions.filter((x) => x !== regionId);
@@ -1909,7 +1921,7 @@ function playEvent(e) {
     case 'region_settled': case 'race_returned': case 'orcs_spawned': case 'undead_raised': { ensureFaction(s, e.kind === 'race_returned' ? [...e.tags][0] : e.kind === 'orcs_spawned' ? 'orc' : e.kind === 'undead_raised' ? 'undead' : undefined); setOwner(o, s); settleEffect(o, s); floatText(...regionCentre(o), e.kind === 'orcs_spawned' ? 'orcs rise' : e.kind === 'region_settled' ? 'settled' : e.kind === 'undead_raised' ? 'the dead rise' : 'they return', 'info'); break; }
     case 'region_abandoned': case 'elves_withdrew': case 'elves_departed': setOwner(o, ''); floatText(...regionCentre(o), 'abandoned', 'info'); break;
     case 'successor_founded': { ensureFaction(s, raceOf([...e.tags][0])); setOwner(o, s); puff(new THREE.Vector3(...regionCentre(o).flatMap((v, i) => i ? [0, v] : [v])), factionColor3(s)); break; }
-    case 'collapse': { collapseEffect(s); const f = m.factions.get(s); if (f && f.capital) floatText(...regionCentre(f.capital), `${factionTitle(s)} collapses`, 'fear'); break; }
+    case 'collapse': { collapseEffect(s); const f = m.factions.get(s); if (f && f.capital) floatText(...regionCentre(f.capital), `${factionTitle(s)} collapses`, 'dread'); break; }
     case 'faction_destroyed': { const f = m.factions.get(s); if (f) { collapseEffect(s); for (const rid of [...f.regions]) setOwner(rid, ''); } m.factions.delete(s); removeArmies(s, null); removeWarArrows(s, null); break; }
     case 'era_advance': { const f = ensureFaction(s); f.era = e.magnitude; for (const rid of f.regions) { syncTile(m.regions.get(rid)); eraEffect(rid, e.magnitude); } break; }
     case 'wasteland_formed': { const r = m.regions.get(s); if (r) { r.tags.add('wasteland'); r.burn = Math.max(r.burn, 0.8); syncTile(r); } break; }
@@ -1918,12 +1930,12 @@ function playEvent(e) {
     case 'vassal_sworn': { const f = ensureFaction(s); f.overlord = o; f.at_war_with = []; removeArmies(s, null); removeWarArrows(s, null); for (const rid of f.regions) { syncTile(m.regions.get(rid)); flashTile(rid, factionColor3(o)); } break; }
     case 'vassal_freed': case 'vassal_revolt': { const f = m.factions.get(s); if (f) { f.overlord = ''; for (const rid of f.regions) syncTile(m.regions.get(rid)); } break; }
     case 'vassal_absorbed': { const f = m.factions.get(s); if (f) { for (const rid of [...f.regions]) setOwner(rid, o); m.factions.delete(s); } break; }
-    case 'plague': { const f = m.factions.get(s); if (f) for (const rid of f.regions) { plagueEffect(rid); } if (f?.capital) floatText(...regionCentre(f.capital), 'plague', 'fear'); break; }
+    case 'plague': { const f = m.factions.get(s); if (f) for (const rid of f.regions) { plagueEffect(rid); } if (f?.capital) floatText(...regionCentre(f.capital), 'plague', 'dread'); break; }
     case 'volcanic_winter': for (const r of m.regions.values()) flashTile(r.id, new THREE.Color(0x888888)); break;
     case 'spell_expired': { const t = m.regions.has(o) ? o : m.factions.get(o)?.capital; if (t) floatText(...regionCentre(t), `${s} fades`, 'faith'); const tag = { ward: 'warded', bless: 'blessed', curse: 'cursed', teach: 'taught', incite: 'incited' }[s]; const r = m.regions.get(o), f = m.factions.get(o); if (r && tag) { r.tags.delete(tag); syncTile(r); } if (f && tag) { f.tags.delete(tag); for (const rid of f.regions) syncTile(m.regions.get(rid)); } labelsDirty = true; break; }
     case 'spell_cast': { const t = m.regions.has(o) ? o : m.factions.get(o)?.capital; if (t) flashTile(t, new THREE.Color(PALETTE.ward)); break; }
-    case 'oath_breached_by_them': case 'oath_expired': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), e.kind === 'oath_expired' ? 'oath expires' : 'oath broken', 'fear'); break; }
-    case 'oath_breached_by_dragon': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), 'betrayed', 'fear'); redFlash(); break; }
+    case 'oath_breached_by_them': case 'oath_expired': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), e.kind === 'oath_expired' ? 'oath expires' : 'oath broken', 'dread'); break; }
+    case 'oath_breached_by_dragon': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), 'betrayed', 'dread'); redFlash(); break; }
     case 'slay_attempt_failed': case 'dragon_starving': case 'dragon_slain': case 'slayers_ready': case 'slayers_coming': redFlash(); break;
   }
   if (e.kind === 'act_burn') { spawnFlames(o || m.factions.get(s)?.capital, 8, 2); }
@@ -1966,7 +1978,6 @@ function finishMontage() {
   const res = montage.result, before = montage.before;
   const hooksLast = closeHookAge(res.chronicle);
   play.age += 1;
-  play.fury = false;
   resetDefenceWarnings();
   refreshWorld();
   for (const t of tiles.values()) t.key = '';
@@ -2070,7 +2081,7 @@ function eventText(e) {
     undead_raised: () => `the dead rise at ${o} as ${s}`,
     terraformed: () => `the dragon reshapes ${s} into ${o}`,
     spell_expired: () => `the dragon's ${s} on ${o} fades`,
-    demand_refused: () => `${s} refuses the dragon's demand of ${o} (fear ${fmt(m)})`,
+    demand_refused: () => `${s} refuses the dragon's demand of ${o} (dread ${fmt(m)})`,
     talent_taken: () => `you take the talent ${talentById(e.object)?.name ?? cap(e.object)}`,
     dragon_wounded: () => `the ${tags.map((t) => DEF_WORD[t] ?? t.replace(/_/g, ' ')).join(' and ')} of ${s} wound you at ${o} (${fmt(m, 1)})`,
     hook_resolved: () => `you answer the call at ${o}`,
@@ -2143,7 +2154,7 @@ function newGame(seed, opts = {}) {
   closeDeath(); closeGrowth();
   $('system').classList.add('hidden'); $('lair').classList.add('hidden'); $('wake').classList.add('hidden');
   $('dim').style.opacity = '0';
-  world = sim({ cmd: 'world' });
+  world = readView(sim({ cmd: 'world' }));
   indexNames(world);
   model = buildModel(world);
   if (valley && valley.key !== valleyKey()) buildValleyScene();
@@ -2153,7 +2164,7 @@ function newGame(seed, opts = {}) {
 }
 
 function startAge() {
-  play.focusFaction = ''; play.landOnArrival = false; play.fury = false;
+  play.focusFaction = ''; play.landOnArrival = false;
   resetDefenceWarnings();
   closeHookAge([]);
   clearNarration();
@@ -2243,7 +2254,7 @@ async function main() {
   loadUi();
   const restored = loadAutosave();
   if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true });   // a fresh start: a generated valley, its legends first
-  world = sim({ cmd: 'world' });
+  world = readView(sim({ cmd: 'world' }));
   indexNames(world);
   model = buildModel(world);
   await loadModels();
@@ -2263,7 +2274,7 @@ window.game = {
   act, land() { if (dragonRegion() !== 'lair') window.game.flyTo('lair'); landAtLair(); }, takeOff,
   sleep(years) { const res = sleep(years); return res; },
   finishMontage, acceptOffer(i = 0) { if (!(model.offers ?? []).length) return false; const r = sim({ cmd: 'accept_offer', index: i }); if (r.ok) play.ageEvents.push(...(r.events ?? [])); refreshWorld(); spawnEnvoysSettled(); if (play.landed) renderLair(); return r.ok; },
-  state() { return { frame: frameCount, year: model.year, age: play.age, stamina: play.stamina, landed: play.landed, montage: montage.active, region: dragonRegion(), dragon: model.dragon, dragonScale: dragon.group.scale.x, factions: world.factions.map((f) => ({ id: f.id, race: f.race, wealth: f.wealth, fear: f.fear, faith: f.faith, regions: f.regions, era: f.era, capital: f.capital, at_war_with: f.at_war_with })), offers: (model.offers ?? []).length, ages: play.ages.map((a) => ({ age: a.age, from: a.from, to: a.to, wake_reason: a.wake_reason, events: a.chronicle.length, acts: a.acts.length })), armies: model.armies.length, armyGroups: armies.size, arrows: warArrows.size, camps: camps.size, envoys: envoys.length, tiles: tiles.size, pendingEvents: play.ageEvents.length, ageEvents: play.ageEvents.map((e) => e.kind), oaths: (world.oaths ?? []).map((o) => ({ id: o.id, status: o.status, party: o.parties[1] })), modifiers: (world.modifiers ?? []).map((m) => m.source + '>' + m.target), montageYear: montage.year, lairTab, pos: [dragon.pos.x, dragon.pos.z], dragonPos: [dragon.pos.x, dragon.pos.z] }; },
+  state() { return { frame: frameCount, year: model.year, age: play.age, stamina: play.stamina, landed: play.landed, montage: montage.active, region: dragonRegion(), dragon: model.dragon, dragonScale: dragon.group.scale.x, factions: world.factions.map((f) => ({ id: f.id, race: f.race, wealth: f.wealth, dread: f.dread, awe: f.awe, memory_tier: f.memory_tier, faith: f.faith, regions: f.regions, era: f.era, capital: f.capital, at_war_with: f.at_war_with })), offers: (model.offers ?? []).length, ages: play.ages.map((a) => ({ age: a.age, from: a.from, to: a.to, wake_reason: a.wake_reason, events: a.chronicle.length, acts: a.acts.length })), armies: model.armies.length, armyGroups: armies.size, arrows: warArrows.size, camps: camps.size, envoys: envoys.length, tiles: tiles.size, pendingEvents: play.ageEvents.length, ageEvents: play.ageEvents.map((e) => e.kind), oaths: (world.oaths ?? []).map((o) => ({ id: o.id, status: o.status, party: o.parties[1] })), modifiers: (world.modifiers ?? []).map((m) => m.source + '>' + m.target), montageYear: montage.year, lairTab, pos: [dragon.pos.x, dragon.pos.z], dragonPos: [dragon.pos.x, dragon.pos.z] }; },
   actions() { return selectedRegion ? actionsFor(selectedRegion).map((a) => ({ id: a.id, ok: a.ok, why: a.why, cost: a.costText ?? a.cost })) : []; },
   setLairTab(t) { lairTab = t; if (play.landed) renderLair(); },
   pauseMontage() { if (montage.active && !montage.paused) toggleMontagePause(); },

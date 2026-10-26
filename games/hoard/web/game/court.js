@@ -46,12 +46,12 @@ function personVerbs(p, fid) {
   const stam = (c) => (play.stamina >= c ? '' : `needs ${c} stamina (${play.stamina} left)`);
   if (p.role === 'ruler' || p.role === 'heir') {
     const why = !f ? 'no court' : here !== f.capital ? `only at the capital, ${regionTitle(f.capital)}` : f.hostage_taken ? 'you already hold a hostage of this house' : stam(COST.hostage);
-    verbs.push({ id: 'hostage', label: 'Take hostage', cost: `${COST.hostage} st`, why, title: `carry ${p.name} to the lair; ${factionTitle(fid)} grieves and fears you` });
+    verbs.push({ id: 'hostage', label: 'Take hostage', cost: `${COST.hostage} st`, why, title: `carry ${p.name} to the lair; ${factionTitle(fid)} grieves and dreads you` });
   }
   const oath = oathBinds(fid);
   const killWhy = !f ? 'no court' : !f.regions.includes(here) ? `fly over ${factionTitle(fid)}'s land` : stam(COST.kill_person);
   verbs.push({ id: 'kill', label: 'Kill', cost: `${COST.kill_person} st`, why: killWhy, danger: true,
-    title: `${factionTitle(fid)} remembers it as murder: fear +${CONSTANTS.offers?.envoy_kill_fear ?? 0.3}, cohesion drops${oath ? '; it breaks your oath with them (betrayal)' : ''}` });
+    title: `${factionTitle(fid)} remembers it as murder: dread +${CONSTANTS.offers?.envoy_kill_dread ?? 0.3}, cohesion drops${oath ? '; it breaks your oath with them (betrayal)' : ''}` });
   return verbs;
 }
 
@@ -76,12 +76,12 @@ function renderCourt() {
   const oaths = (world.oaths ?? []).filter((o) => o.status === 'active' && o.parties[1] === fid);
   el.dataset.faction = fid;
   el.innerHTML = `<h3><span class="sw" style="background:${factionCss(fid)}"></span>The court of ${factionTitle(fid)}</h3>
-    <div class="meta">${f.dominant_race} · ${eraWord(f.era)} age · capital ${regionTitle(f.capital)} · fear ${fmt(f.fear)} · faith ${fmt(f.faith)}${oaths.length ? ` · <b class="up">sworn to you</b>` : ''}</div>
+    <div class="meta">${f.dominant_race} · ${eraWord(f.era)} age · capital ${regionTitle(f.capital)} · dread ${fmt(f.dread)} · awe ${fmt(f.awe)}${f.memory_tier ? ` (${f.memory_tier})` : ""} · faith ${fmt(f.faith)}${oaths.length ? ` · <b class="up">sworn to you</b>` : ''}</div>
     ${armsCourtHtml(fid)}
     ${atCourt.map((p) => personRowHtml(p, fid)).join('') || '<div class="muted">no one of name</div>'}
     ${inLair.length ? `<div class="meta" style="margin-top:4px">in your lair: ${inLair.map((p) => `<b>${escapeHtml(p.name)}</b> (${roleWord(p.role)}, ${yearsNum(world.year - p.hostage_since)}${p.tags.includes('dragon_raised') ? ', raised as yours' : ''})`).join(', ')}
       <button data-pverb="release" data-pid="${inLair[0].id}" style="font-size:11px;padding:1px 7px;margin-left:4px" ${play.stamina >= COST.release ? '' : 'disabled'} title="send ${escapeHtml(inLair[0].name)} home">Release <small>${COST.release} st</small></button></div>` : ''}
-    ${atCourt.length ? `<div class="cost-note">A kill costs ${COST.kill_person} stamina and is never forgotten: ${factionTitle(fid)} remembers the murder (fear +${CONSTANTS.offers?.envoy_kill_fear ?? 0.3}, cohesion drops)${oaths.length ? ', and you are sworn to them: it is a betrayal' : ''}.</div>` : ''}`;
+    ${atCourt.length ? `<div class="cost-note">A kill costs ${COST.kill_person} stamina and is never forgotten: ${factionTitle(fid)} remembers the murder (dread +${CONSTANTS.offers?.envoy_kill_dread ?? 0.3}, cohesion drops)${oaths.length ? ', and you are sworn to them: it is a betrayal' : ''}.</div>` : ''}`;
   el.classList.remove('hidden');
   el.querySelectorAll('[data-pverb]').forEach((b) => b.addEventListener('click', () => personVerb(b.dataset.pverb, b.dataset.pid)));
 }

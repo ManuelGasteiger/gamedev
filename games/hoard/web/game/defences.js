@@ -18,7 +18,7 @@ function defenceArmor(d) { return effect('armor_mult') * (d.radius > 0 ? effect(
 function round1(v) { return Math.round(v * 10) / 10; }
 function numText(v) { return Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1); }
 
-// the wound a harmful act costs here: per_act after fear and hero (from the sim) × armor from the talents
+// the wound a harmful act costs here: per_act after dread and hero (from the sim) × armor from the talents
 function actWound(regionId) { return round1(liveDefences(regionId).reduce((s, d) => s + d.per_act * defenceArmor(d), 0)); }
 function passiveHere(regionId) { return round1(rangedDefences(regionId).reduce((s, d) => s + d.passive * defenceArmor(d), 0)); }
 // as the sim's burn_mult_at: wards halve your burns unless your fire breaks them
