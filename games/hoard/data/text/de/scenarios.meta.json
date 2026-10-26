@@ -1,0 +1,1232 @@
+{
+ "scn.scribe_among_hostages.headline": {
+  "src": "ab77081bdfeb",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.body": {
+  "src": "191e9fa80155",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.because": {
+  "src": "a5687e425695",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.variant.scribe.body": {
+  "src": "6eabeaff42cc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.option.keep": {
+  "src": "f07a08da1d07",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.option.release": {
+  "src": "fcae407aad4d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.option.kill": {
+  "src": "12a4eec1305f",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.option.ignore": {
+  "src": "40ff9616f6cb",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.scribe_among_hostages.reveal.keep": {
+  "src": "2dd450b8fd6e",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.burned_library_scribes.headline": {
+  "src": "355eaf19c9e1",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.body": {
+  "src": "2e1b7c7b58fb",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.because": {
+  "src": "f0a78c3a3f2f",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.variant.sage.body": {
+  "src": "9c5abebf8f14",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.option.books": {
+  "src": "614bf4f52127",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.option.teach": {
+  "src": "2722730ec053",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.option.eat": {
+  "src": "f69eafd55202",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.burned_library_scribes.option.ignore": {
+  "src": "89af707bec3b",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.headline": {
+  "src": "173a4c3867b8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.body": {
+  "src": "709c54ddb4d6",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.because": {
+  "src": "12d6a50b245a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.option.fight": {
+  "src": "388501482204",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.option.haunt": {
+  "src": "49a65da6ed1c",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.option.demand": {
+  "src": "bea113e6049e",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.hero_at_dawn.option.ignore": {
+  "src": "ce495e25b4ea",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.headline": {
+  "src": "7a7e25fd5c5b",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.body": {
+  "src": "cf17f058d265",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.because": {
+  "src": "d4e1d9a224de",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.option.reveal": {
+  "src": "f37d44210caf",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.option.spy": {
+  "src": "d8a591b9a856",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.option.haunt": {
+  "src": "b6fba8a3a637",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.option.gold": {
+  "src": "1e8944c7540d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.princess_returns.option.ignore": {
+  "src": "18b23a78920a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.headline": {
+  "src": "c41157faee65",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.body": {
+  "src": "18cf1a1e16b4",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.because": {
+  "src": "b51ac6be7ef0",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.variant.agent.body": {
+  "src": "4a77a9577726",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.option.gift": {
+  "src": "b7c93c7f3d65",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.option.judge": {
+  "src": "a038b32deed6",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.option.incite": {
+  "src": "04aa6d7504dc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.inquisition_opens.option.ignore": {
+  "src": "656bd275a711",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.headline": {
+  "src": "8eb242ac65b6",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.body": {
+  "src": "008394e3a2cc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.because": {
+  "src": "7d785031283b",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.variant.thief.body": {
+  "src": "3ada32fa83b0",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.option.take": {
+  "src": "57f026760249",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.option.demand": {
+  "src": "69a78c9776a1",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.option.gift": {
+  "src": "c38961ff5d85",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.option.ignore": {
+  "src": "bd2ec06e8450",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.thief_with_the_cup.reveal.gift": {
+  "src": "b516eedca1b1",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.two_crowns.headline": {
+  "src": "563534cba7ce",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.body": {
+  "src": "d4016b87c709",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.because": {
+  "src": "d7db679b1424",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.variant.envoy.body": {
+  "src": "28da51280f1a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.option.broker": {
+  "src": "efb4bd80f1ac",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.option.release": {
+  "src": "780462f2a419",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.two_crowns.option.ignore": {
+  "src": "9d09c575523b",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.headline": {
+  "src": "b6ff7b366dfd",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.body": {
+  "src": "0f0718b725e9",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.because": {
+  "src": "9a8c93595298",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.variant.leader.body": {
+  "src": "d5a8a75db837",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.variant.dread.body": {
+  "src": "aec0a16c11c8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.option.receive": {
+  "src": "bc584e95c386",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.option.bless": {
+  "src": "108b9d529625",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.option.eat": {
+  "src": "42159db79ed8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.pilgrims_in_winter.option.ignore": {
+  "src": "0ca25c06b3dc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.headline": {
+  "src": "975feca98f86",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.body": {
+  "src": "b8f1ad809169",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.because": {
+  "src": "9b60013c8f33",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.variant.armed.body": {
+  "src": "a87db4745d72",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.variant.dead.body": {
+  "src": "681261f06333",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.option.ask": {
+  "src": "0eb7d5c507d3",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.option.accept": {
+  "src": "dbfdd457011e",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.option.refuse": {
+  "src": "21554048312f",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.option.gift": {
+  "src": "42a7b00c5fe1",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.lich_crown_speaks.option.ignore": {
+  "src": "2f1b95aeb82e",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.headline": {
+  "src": "9783332e9389",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.body": {
+  "src": "4bc7818c045c",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.because": {
+  "src": "4fd71ce45867",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.variant.zealot.body": {
+  "src": "49e3dc7f25e3",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.option.consecrate": {
+  "src": "30bee61a2003",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.option.destroy": {
+  "src": "92615ac6fe80",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.option.defend": {
+  "src": "7dd944c5d05a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.option.ignore": {
+  "src": "e8daca0ec033",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.door_in_the_temple.reveal.ignore": {
+  "src": "8eafdcfe07f3",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.headline": {
+  "src": "c8c67b37a407",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.body": {
+  "src": "9a68dc774368",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.because": {
+  "src": "e8668c0676cc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.option.teach": {
+  "src": "247af4156400",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.option.gift": {
+  "src": "0105245cf6fc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.option.burn": {
+  "src": "fa45b6f1d553",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.option.ignore": {
+  "src": "5bf19aed12b0",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.dwarves_ask_for_fire.reveal.teach": {
+  "src": "33cdcf9b2d0b",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.quiet_valley.headline": {
+  "src": "14d2d6167b6a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.body": {
+  "src": "3f9b8b5715fc",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.because": {
+  "src": "56f3e59ffc6d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.variant.third.body": {
+  "src": "57077ffd7c4c",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.variant.late_era.body": {
+  "src": "e56793b11f6f",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.option.show": {
+  "src": "1e8931b5efb5",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.option.preach": {
+  "src": "bff209fafa6a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.option.ignore": {
+  "src": "c407063ebbe3",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.quiet_valley.reveal.ignore": {
+  "src": "7ef308337bbe",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_mountain.headline": {
+  "src": "293d60cc5292",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.body": {
+  "src": "2bb21d3cfac7",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.because": {
+  "src": "4880e3728a14",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.variant.settlers.body": {
+  "src": "ea11df585206",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.option.terraform": {
+  "src": "98a08c4e72aa",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.option.demand": {
+  "src": "5e6f37f6c2b8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.option.sleep": {
+  "src": "72b45346b43a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_mountain.option.ignore": {
+  "src": "8de95fd5b412",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.headline": {
+  "src": "2c62165815f7",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.body": {
+  "src": "518b019ee0b7",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.because": {
+  "src": "48b552deaf05",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.option.keep": {
+  "src": "ef9b6725a841",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.option.dismiss": {
+  "src": "5d43f8af593a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.option.release": {
+  "src": "9aea601f289c",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_consort.option.ignore": {
+  "src": "95c40a181079",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.headline": {
+  "src": "925e4b1baa91",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.body": {
+  "src": "271d1b5b1af7",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.because": {
+  "src": "ef35706cd771",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.option.judge": {
+  "src": "41b098c395a2",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.option.preach": {
+  "src": "457745fcce74",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.option.miracle": {
+  "src": "2a30c44f7861",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.option.burn": {
+  "src": "dd0e405acd6f",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.false_dragon.option.ignore": {
+  "src": "896664e3fb34",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.headline": {
+  "src": "8a160f8117da",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.body": {
+  "src": "61fc176081b5",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.because": {
+  "src": "ae7d45f20cf2",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.variant.keen_eyes.body": {
+  "src": "148296c1bcc4",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.variant.dread.body": {
+  "src": "3a9ef51fb134",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.option.swear": {
+  "src": "b17812d8fdf1",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.option.reveal": {
+  "src": "98397829e4ac",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.option.eat": {
+  "src": "30ed54b3a4a5",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.envoy_who_lies.option.ignore": {
+  "src": "44f5116349a6",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.headline": {
+  "src": "6ef2863103b4",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.body": {
+  "src": "6119a8ad3813",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.because": {
+  "src": "f6bf94da496a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.variant.elder.body": {
+  "src": "05671fe971ae",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.variant.orc_taker.body": {
+  "src": "711ed16489e4",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.option.receive": {
+  "src": "1b305aff8638",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.option.land": {
+  "src": "b4e247d43e77",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.option.defend": {
+  "src": "eb65d71849e8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.option.ignore": {
+  "src": "05c2975acaa8",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.refugee_column.option.skip": {
+  "src": "1f578fa5b37d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.headline": {
+  "src": "57dd661940ff",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.body": {
+  "src": "278e6e5ad530",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.because": {
+  "src": "e689161d3349",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.option.receive": {
+  "src": "707dfa72cf77",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.option.teach": {
+  "src": "199e78ed5779",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.option.keep": {
+  "src": "ccd6aeeb7392",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.option.ignore": {
+  "src": "4287566036f3",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.prophet_with_the_prophecy.reveal.receive": {
+  "src": "784b73080594",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.headline": {
+  "src": "e6c59498b726",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.body": {
+  "src": "8372cc58e5f7",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.because": {
+  "src": "66f2f0eb32a1",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.variant.bold.body": {
+  "src": "28aebfdee275",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.variant.awe.body": {
+  "src": "1c0d0126e54d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.option.release": {
+  "src": "259191613396",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.option.demand": {
+  "src": "05daf9faf31d",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.option.keep": {
+  "src": "a96f0eb69f6a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.kin_of_a_hostage.option.ignore": {
+  "src": "d11afe5f02e3",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.headline": {
+  "src": "ece8d5e48bbe",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.body": {
+  "src": "8be9df61742a",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.because": {
+  "src": "195b06455e6c",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.variant.order_ready.body": {
+  "src": "2e2ba38e568b",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.variant.wounded.body": {
+  "src": "056109f97c61",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.option.fight": {
+  "src": "bb54db510a92",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.option.haunt": {
+  "src": "ef54cf831853",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.option.reveal": {
+  "src": "9585914a0798",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.slayer_at_the_ledge.option.ignore": {
+  "src": "0025d5297125",
+  "by": "claude-draft-2026-10-24",
+  "rev": null
+ },
+ "scn.the_walls_went_up.headline": {
+  "src": "24684bfc972a",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.body": {
+  "src": "c6a835276f86",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.because": {
+  "src": "f375023c9745",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.variant.mason.body": {
+  "src": "4ecfa0a61117",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.option.walls": {
+  "src": "82c3640ff680",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.option.demand": {
+  "src": "520ada3f6d1f",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.option.show": {
+  "src": "55742c76f5b8",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.option.ignore": {
+  "src": "3e819eead20e",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_walls_went_up.reveal.ignore": {
+  "src": "982165b353e8",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.headline": {
+  "src": "a2103b8b058f",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.body": {
+  "src": "87ae546b84b1",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.because": {
+  "src": "f0794754533a",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.option.give": {
+  "src": "e2889a2d6a6b",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.option.defend": {
+  "src": "4efc25022cb5",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.option.incite": {
+  "src": "25f9d21db293",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_gold_you_took.option.ignore": {
+  "src": "33b1e5d54613",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.headline": {
+  "src": "64835786af54",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.body": {
+  "src": "4227b617d1ae",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.because": {
+  "src": "51a0798451ba",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.variant.general.body": {
+  "src": "58954e1c76cf",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.option.crush": {
+  "src": "63ce756076cb",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.option.judge": {
+  "src": "85bd7ea89248",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.option.give": {
+  "src": "568ad05711ee",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_army_you_broke.option.ignore": {
+  "src": "305255df840f",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.headline": {
+  "src": "b2051f16a8a7",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.body": {
+  "src": "b37feb73488c",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.because": {
+  "src": "c7ac17d01df8",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.variant.attacker.body": {
+  "src": "35c78f49fcb7",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.option.consecrate": {
+  "src": "acc99f287032",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.option.show": {
+  "src": "19a1553b87b7",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.option.demand": {
+  "src": "39d53a17fd5f",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_city_you_saved.option.ignore": {
+  "src": "ff0657a87243",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.headline": {
+  "src": "0a00b3a3e428",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.body": {
+  "src": "cdf8a6f09b2c",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.because": {
+  "src": "8b096bdbc7c4",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.option.show": {
+  "src": "ae0a11e65e02",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.option.release": {
+  "src": "0166958fa003",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.option.demand": {
+  "src": "0989a32065f2",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_oath_they_remember.option.ignore": {
+  "src": "d34223761325",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.headline": {
+  "src": "e48ad460806d",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.body": {
+  "src": "2f95752eb9ae",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.because": {
+  "src": "e658ea2b08e8",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.option.teach": {
+  "src": "c8d67aed3db5",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.option.burn": {
+  "src": "416ef96fba94",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.option.keep": {
+  "src": "b849d737a4fb",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_pupils.option.ignore": {
+  "src": "53d46e19dfe8",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.headline": {
+  "src": "a4e6329277df",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.body": {
+  "src": "78c79592afe4",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.because": {
+  "src": "fa0d2a88bd14",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.variant.vengeful.body": {
+  "src": "223f0fb8d981",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.option.broker": {
+  "src": "af7a9478dfe4",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.option.haunt": {
+  "src": "4fa906cc57f5",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.option.show": {
+  "src": "f032429a7d45",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_one_you_spared.option.ignore": {
+  "src": "2bf38fca5a33",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.headline": {
+  "src": "6e6ea8cc2832",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.body": {
+  "src": "e91857983496",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.because": {
+  "src": "2afe3dd9f888",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.variant.child.body": {
+  "src": "553ace47562e",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.variant.late_era.body": {
+  "src": "ead8e9614a3e",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.option.land": {
+  "src": "7830a747e90b",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.option.bless": {
+  "src": "47ecd7a15905",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_road_of_your_shadow.option.ignore": {
+  "src": "bade86f3dde9",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.headline": {
+  "src": "217fd27c7612",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.body": {
+  "src": "7751628c11a5",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.because": {
+  "src": "b6c4e647f8a7",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.option.release": {
+  "src": "b278a43a4315",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.option.sponsor": {
+  "src": "21b64f189205",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.option.keep": {
+  "src": "b667018413a6",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_heir_who_grew_up_here.option.ignore": {
+  "src": "8de95fd5b412",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.headline": {
+  "src": "badd4a3ebd0e",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.body": {
+  "src": "6e059c3119b3",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.because": {
+  "src": "08b2d88b6656",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.variant.priest.body": {
+  "src": "7c6bf5fb88f1",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.option.destroy": {
+  "src": "43e67fe8cbaa",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.option.commune": {
+  "src": "5cf757a61e2b",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.option.defend": {
+  "src": "f56e3ba761b3",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ },
+ "scn.the_dead_you_raised.option.ignore": {
+  "src": "fc66226de688",
+  "by": "claude-opus-5.5-2026-10-26",
+  "rev": null
+ }
+}
