@@ -1,0 +1,18 @@
+{
+  "bands": [
+    {"metric": "idle.outcome_entropy_bits", "min": 4.5, "source": "v0.4", "note": "core-loop 7: entropy on generated worlds"},
+    {"metric": "played.outcome_entropy_bits", "min": 4.5, "source": "v0.4", "note": "core-loop 7: entropy on generated worlds"},
+    {"metric": "idle.first_three_top_share", "max": 0.10, "source": "v0.4", "note": "core-loop 7: no identical first three events in more than 10% of seeds"},
+    {"metric": "played.first_three_top_share", "max": 0.10, "source": "v0.4", "note": "core-loop 7"},
+    {"metric": "played.death_share", "min": 0.05, "max": 0.25, "source": "v0.4", "note": "core-loop 7: played deaths in 3000 years"},
+    {"metric": "idle.death_share", "max": 0.0499, "source": "v0.4", "note": "core-loop 7: idle deaths under 5%"},
+    {"metric": "played.hook_coverage", "min": 0.95, "source": "v0.4", "note": "core-loop 7: hooks on 95% of wakings"},
+    {"metric": "played.unwarned_deaths", "max": 0, "source": "v0.4", "note": "core-loop 8: deaths with no warning in the previous briefing"},
+    {"metric": "sweep.survival_buckets_winning_10pct", "min": 4, "source": "proposal", "note": "research book 4.3: buckets best in at least 10% of wake states, of 7"},
+    {"metric": "sweep.growth_buckets_winning_10pct", "min": 4, "source": "proposal", "note": "research book 4.3"},
+    {"metric": "sweep.survival_top_bucket_share", "max": 0.40, "source": "proposal", "note": "research book 4.3: most-often-best bucket"},
+    {"metric": "sweep.growth_top_bucket_share", "max": 0.40, "source": "proposal", "note": "research book 4.3"},
+    {"metric": "sweep.perturb_flip_share", "min": 0.05, "max": 0.30, "source": "proposal", "note": "research book 4.3: ending-class flips under a one-act perturbation"},
+    {"metric": "sweep.hatchling_deaths_before_80", "max": 0, "source": "proposal", "note": "first-hour 4, 11: no death before 80 years after the hatching under any policy"}
+  ]
+}

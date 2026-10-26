@@ -52,6 +52,8 @@ def run_binary(binary, data, seed, years, policy, sleep, out, narrate=False, gen
         cmd += ["--narrate"]
     if genesis:
         cmd += ["--genesis"]
+    os.makedirs(out, exist_ok=True)
+    cmd += ["--wakings", os.path.join(out, "wakings.jsonl")]
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0:
         raise RuntimeError(f"seed {seed} policy {policy}: {res.stderr.strip()}")
@@ -61,6 +63,8 @@ def run_binary(binary, data, seed, years, policy, sleep, out, narrate=False, gen
         world = json.load(f)
     with open(os.path.join(out, "stats.json")) as f:
         stats = json.load(f)
+    with open(os.path.join(out, "wakings.jsonl")) as f:
+        stats["wakings_log"] = [json.loads(line) for line in f if line.strip()]
     if narrate:   # the sim's own narrator (data/text/en.json), cause clauses included, one sentence per chronicle event
         with open(os.path.join(out, "narrated.json")) as f:
             for e, text in zip(chron, json.load(f)):
@@ -289,14 +293,57 @@ def agency(idle_events, events):
 
 
 def first_three(events):
+    setup = events[0]["year"] if events else 0   # the founding instant (world_began, court_founded, vassal_sworn) is the same in every world
     out = []
     for e in events:
-        if e["kind"] in META_KINDS or e["kind"].startswith("act_"):
+        if e["kind"] in META_KINDS or e["kind"].startswith("act_") or e["year"] == setup:
             continue
         out.append((e["kind"], e["subject"]))
         if len(out) == 3:
             break
     return tuple(out)
+
+
+def is_dragon_act(e):
+    return e["kind"].startswith("act_") or e["kind"] == "hook_resolved"
+
+
+def reaches_dragon(by_id, refs, hops=3):
+    frontier, seen = list(refs), set()
+    for _ in range(hops):
+        nxt = []
+        for r in frontier:
+            if r in seen or r not in by_id:
+                continue
+            seen.add(r)
+            if is_dragon_act(by_id[r]):
+                return True
+            nxt += by_id[r]["cause"]["refs"]
+        frontier = nxt
+    return False
+
+
+def agency_chain(events, wakings_log, hatched):
+    """(a) hooks whose refs reach a dragon act, (b) events after the hatching whose cause chain does, (c) wakings whose
+    headline (the most important event since the last waking) does; all within 3 hops."""
+    by_id = {e["id"]: e for e in events}
+    hooks = [h for w in wakings_log for h in w.get("hooks", [])]
+    hook_dragon = sum(1 for h in hooks if reaches_dragon(by_id, h["refs"]))
+    played = [e for e in events if e["year"] >= hatched and e["kind"] not in META_KINDS and not is_dragon_act(e)]
+    chained = sum(1 for e in played if reaches_dragon(by_id, e["cause"]["refs"]))
+    heads, best = [], None
+    for e in events:
+        if e["year"] < hatched:
+            continue
+        if e["kind"] == "wake":
+            if best:
+                heads.append(best)
+            best = None
+        elif e["kind"] not in META_KINDS and not is_dragon_act(e) and (best is None or e["importance"] >= best["importance"]):
+            best = e
+    return {"hooks": len(hooks), "hooks_with_refs": sum(1 for h in hooks if h["refs"]), "hooks_dragon": hook_dragon,
+            "events": len(played), "events_dragon": chained,
+            "headlines": len(heads), "headlines_dragon": sum(1 for e in heads if reaches_dragon(by_id, e["cause"]["refs"]))}
 
 
 def seed_metrics(events, world, stats, idle_events, numbers=None):
@@ -319,6 +366,7 @@ def seed_metrics(events, world, stats, idle_events, numbers=None):
         "death": stats.get("dragon_death"),   # v0.4 (S1): {cause: wounds | slaying, year, court, warned} or None
         "hooks": stats.get("hooks"),          # v0.4 hooks (S3): wakings, with_hook, offered, answered, by_kind, fights, reward_growth
         "growth": (stats.get("dragon_growth") or {}).get("points"),
+        "agency_chain": agency_chain(events, stats.get("wakings_log", []), (world.get("genesis") or {}).get("hatched_year", 0)),
     }
     if numbers:
         out["world"] = world_metrics(events, world, numbers)
@@ -573,6 +621,9 @@ def summarise_policy(policy, per_seed):
         "persistence": mean("persistence"),
         "agency": mean("agency"),
         "events_mean": statistics.fmean(per_seed[s]["events"] for s in seeds),
+        "first_three_top_share": top_count / n,
+        "agency_chain": agency_summary([per_seed[s]["agency_chain"] for s in seeds]),
+        "death_share": sum(1 for s in seeds if per_seed[s].get("death")) / n,
         "dragon_slain_seeds": sum(1 for s in seeds if per_seed[s]["outcome"]["dragon_slain"]),
         "deaths": deaths_summary([per_seed[s].get("death") for s in seeds]),   # v0.4 (S1)
         "hooks": hooks_summary([per_seed[s].get("hooks") for s in seeds], [per_seed[s].get("growth") for s in seeds]),   # v0.4 hooks (S3)
@@ -583,6 +634,53 @@ def summarise_policy(policy, per_seed):
         "weights": WEIGHTS,
         "world": summarise_world(per_seed) if all("world" in per_seed[s] for s in seeds) else None,
     }
+
+
+def agency_summary(rows):
+    tot = Counter()
+    for r in rows:
+        tot.update(r)
+
+    def share(a, b):
+        return tot[a] / tot[b] if tot[b] else 0.0
+    return {"hook_dragon_share": share("hooks_dragon", "hooks"), "hook_with_refs_share": share("hooks_with_refs", "hooks"),
+            "event_chain_share": share("events_dragon", "events"), "headline_chain_share": share("headlines_dragon", "headlines")}
+
+
+def band_metrics(summaries, sweep_path):
+    m = {}
+    for s in summaries:
+        p = s["policy"]
+        m[f"{p}.outcome_entropy_bits"] = s["outcome_entropy_bits"]
+        m[f"{p}.first_three_top_share"] = s["first_three_top_share"]
+        m[f"{p}.death_share"] = s["death_share"]
+        m[f"{p}.unwarned_deaths"] = s["deaths"]["unwarned"]
+        if s.get("hooks"):
+            m[f"{p}.hook_coverage"] = s["hooks"]["coverage"]
+    if sweep_path and os.path.exists(sweep_path):
+        with open(sweep_path) as f:
+            for k, v in json.load(f).get("bands", {}).items():
+                m[f"sweep.{k}"] = v
+    return m
+
+
+def check_bands(path, metrics):
+    with open(path) as f:
+        bands = json.load(f)["bands"]
+    failed_hard = False
+    print(f"{'metric':44s} {'value':>8s} {'band':>14s} {'source':>8s}  result")
+    for b in bands:
+        v = metrics.get(b["metric"])
+        lo, hi = b.get("min"), b.get("max")
+        band = f"{'' if lo is None else lo}..{'' if hi is None else hi}"
+        if v is None:
+            print(f"{b['metric']:44s} {'-':>8s} {band:>14s} {b['source']:>8s}  not measured")
+            continue
+        ok = (lo is None or v >= lo) and (hi is None or v <= hi)
+        result = "pass" if ok else ("FAIL" if b["source"] == "v0.4" else "warn")
+        failed_hard |= not ok and b["source"] == "v0.4"
+        print(f"{b['metric']:44s} {v:8.3f} {band:>14s} {b['source']:>8s}  {result}")
+    return failed_hard
 
 
 def deaths_summary(deaths):
@@ -675,6 +773,10 @@ def print_table(summaries):
         d = s.get("deaths")
         if d:   # v0.4 (S1)
             print(f"[{s['policy']}] dragon deaths: wounds {d['wounds']}, slaying {d['slaying']} (unwarned {d['unwarned']}), median year {fmt(d['median_year'], 0)}")
+        a = s.get("agency_chain")
+        if a and s["policy"] != "idle":
+            print(f"[{s['policy']}] agency: hooks reaching a dragon act {100 * a['hook_dragon_share']:.1f}% (with any refs {100 * a['hook_with_refs_share']:.1f}%), "
+                  f"events {100 * a['event_chain_share']:.1f}%, waking headlines {100 * a['headline_chain_share']:.1f}%, Jaccard vs idle {s['agency']:.3f}")
         h = s.get("hooks")
         if h:   # v0.4 hooks (S3)
             print(f"[{s['policy']}] hooks: {h['per_waking']:.2f} per waking, coverage {100 * h['coverage']:.1f}%, answered {100 * h['answered_share']:.1f}%, "
@@ -896,7 +998,7 @@ def main():
     ap.add_argument("--seeds", default="1-100")
     ap.add_argument("--years", type=int, default=3000)
     ap.add_argument("--sleep", type=int, default=100)
-    ap.add_argument("--policies", default=",".join(DEFAULT_POLICIES))
+    ap.add_argument("--policies", default=None, help=f"default {','.join(DEFAULT_POLICIES)}; with --bands idle,raze_all and --policy")
     ap.add_argument("--out", default="out/interest")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--chronicle", type=int, metavar="SEED", help="print a narrated chronicle for this seed and exit")
@@ -905,6 +1007,9 @@ def main():
                     help="after the run, write the N most and N least interesting narrated chronicles for idle and played to <out>/read/")
     ap.add_argument("--read", action="store_true", help="print the table (and --read-set chronicles) from an existing <out>/summary.json")
     ap.add_argument("--genesis", action="store_true", help="generated worlds: pass --genesis to the binary")
+    ap.add_argument("--bands", nargs="?", const="data/bands.json", default=None,
+                    help="check the bands file (generated worlds, played-style policies; sweep bands from --sweep); exit 1 on a failed v0.4 band")
+    ap.add_argument("--sweep", default="out/sweep/summary.json", help="sweep.py summary for the sweep.* bands")
     args = ap.parse_args()
 
     if args.read:
@@ -914,6 +1019,8 @@ def main():
         if args.read_set:
             for path in write_read_set(args, summaries, args.read_set):
                 print("wrote", path)
+        if args.bands and check_bands(args.bands, band_metrics(summaries, args.sweep)):
+            sys.exit(1)
         return
 
     if args.chronicle is not None:
@@ -926,7 +1033,11 @@ def main():
         print(narrate(events, world, args.chronicle, args.policy, args.years))
         return
 
-    policies = [p for p in args.policies.split(",") if p]
+    if args.bands:
+        args.genesis = True
+        if args.policies is None:
+            args.policies = ",".join(dict.fromkeys(["idle", "raze_all", args.policy if args.policy != "idle" else "played"]))
+    policies = [p for p in (args.policies or ",".join(DEFAULT_POLICIES)).split(",") if p]
     seeds = list(parse_range(args.seeds))
     per_policy = {p: {} for p in policies}
     jobs = [(args.bin, args.data, s, args.years, args.sleep, policies, args.genesis) for s in seeds]
@@ -958,6 +1069,8 @@ def main():
     if args.read_set:
         for path in write_read_set(args, summaries, args.read_set):
             print("wrote", path)
+    if args.bands and check_bands(args.bands, band_metrics(summaries, args.sweep)):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
