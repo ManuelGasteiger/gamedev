@@ -517,6 +517,7 @@ struct Policy {
     std::vector<std::string> sleep_open;   // played once before the cycle starts (item 01: long_1000, newcomer)
     int min_sleep = 0;
     bool avoid_rings = false;              // drop acts where a defence beyond levies would strike (newcomer)
+    int act_wakings = 0;                   // acts only at the first N wakings (0: every waking; raid_then_1000)
     // v0.4 hooks (S3): the acts the policy answers hooks with (empty: none), its choice for choice hooks, the magnitude
     // and take payload of a synthesised act, and the share of health its wounds may reach with the answer's damage
     std::vector<std::string> hook_acts;

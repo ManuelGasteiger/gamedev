@@ -122,6 +122,7 @@ std::vector<Act> resolve_policy(const World& w, const Params& p, const Policy& p
         if (!load_policy(data_dir, name, sub, err) || !sub.cycle.empty()) return acts;
         return resolve_policy(w, p, sub, sleep_index, data_dir);
     }
+    if (policy.act_wakings > 0 && sleep_index >= policy.act_wakings) return acts;
     for (auto& t : policy.acts) expand(w, p, t, acts);
     if (policy.avoid_rings)
         acts.erase(std::remove_if(acts.begin(), acts.end(), [&](const Act& a) { return inside_ring(w, p, a); }), acts.end());
