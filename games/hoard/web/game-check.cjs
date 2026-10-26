@@ -170,7 +170,12 @@ async function finishSleep() {
   const readOffers = () => page.evaluate(() => game.world().offers.map((o) => ({ key: o.text_key, party: o.oath.parties[1], clauses: o.oath.clauses.map((c) => c.pred) })));
   let s3 = await state();
   let offers = await readOffers();
-  let defOffer = offers.findIndex((o) => /protect/.test(o.key));
+  // a protect offer from a court that an army is marching on (the defend check below needs that army)
+  const besieged = () => page.evaluate(() => {
+    const w = game.world();
+    return w.offers.findIndex((o) => /protect/.test(o.text_key) && (w.armies ?? []).some((a) => a.defender === o.oath.parties[1] && (w.factions.find((f) => f.id === a.defender)?.at_war_with ?? []).includes(a.attacker)));
+  });
+  let defOffer = await besieged();
   // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
   for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
     await sleepThrough(100);
@@ -181,7 +186,7 @@ async function finishSleep() {
     await frames(2);
     s3 = await state();
     offers = await readOffers();
-    defOffer = offers.findIndex((o) => /protect/.test(o.key));
+    defOffer = await besieged();
   }
   check('d.envoys', s3.offers > 0 && s3.envoys === s3.offers && defOffer >= 0 && s3.armies > 0, `${s3.offers} offers (${offers.map((o) => o.key.slice(6) + ':' + o.party).join(', ')}), ${s3.envoys} envoy figures, ${s3.armies} armies, ${s3.arrows} war arrows`);
   await page.waitForTimeout(800);
@@ -377,7 +382,7 @@ async function finishSleep() {
           w.wars = (w.wars ?? []).filter((x) => alive.has(x.a) && alive.has(x.b) && ![x.a, x.b].includes(A.id) && ![x.a, x.b].includes(B.id));
           w.wars.push({ a: A.id, b: B.id, started: w.year, decades: 0, taken_from_a: 0, taken_from_b: 0, allies_a: [], allies_b: [], coalition: false, years_fought: 0, declared: 0, thread: `war:${A.id}:${B.id}:${w.year}` });
           A.at_war_with = [B.id]; B.at_war_with = [A.id];
-          A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.15;
+          B.wealth = Math.max(B.wealth, 20); A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
           game.loadWorld(w);
           return `${A.id} at war with ${B.id}, which also holds ${X.id}`;
         }
@@ -402,7 +407,7 @@ async function finishSleep() {
   const told = (k, re) => captured[k] && (captured[k].worthy ? re.test(captured[k].ticker) : true);
   check('c.war', have('war_started') && captured.war_started && captured.war_started.arrows > 0 && told('war_started', /declared war/), `arrows ${captured.war_started?.arrows}, army groups ${captured.war_started?.armies}, ticker "${captured.war_started?.ticker}"`);
   check('c.conquest', have('region_taken') && captured.region_taken && recoloured.length > 0, `"${captured.region_taken?.ticker}"; rings recoloured since age 2: ${recoloured.join(', ')}${conquestLab ? ` (lab: ${conquestLab})` : ''}`);
-  check('c.collapse', have('collapse') && told('collapse', /collapsed/), captured.collapse?.ticker);
+  check('c.collapse', have('collapse') && told('collapse', /fell/), captured.collapse?.ticker);   // narrator.json: "fell apart into" / "fell, and a new house"
   check('c.era', have('era_advance') && told('era_advance', /entered the \w+ age/) && eraAfter !== eraBefore, `"${captured.era_advance?.ticker}"; hill_hold settlement meshes ${eraBefore} -> ${eraAfter}`);
   check('c.plague', have('plague') && told('plague', /plague/i), `${captured.plague?.ticker}${more}`);
   check('c.settled', have('region_settled') && told('region_settled', /settled/), `${captured.region_settled?.ticker}${captured.region_settled?.worthy ? '' : ' (below the ticker threshold: map only)'}${settleLab ? ` (lab: ${settleLab} left open)` : ''}${more}`);

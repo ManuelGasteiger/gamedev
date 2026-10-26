@@ -76,7 +76,7 @@ function renderCourt() {
   const oaths = (world.oaths ?? []).filter((o) => o.status === 'active' && o.parties[1] === fid);
   el.dataset.faction = fid;
   el.innerHTML = `<h3><span class="sw" style="background:${factionCss(fid)}"></span>The court of ${factionTitle(fid)}</h3>
-    <div class="meta">${f.dominant_race} · ${eraWord(f.era)} age · capital ${regionTitle(f.capital)} · dread ${fmt(f.dread)} · awe ${fmt(f.awe)}${f.memory_tier ? ` (${f.memory_tier})` : ""} · faith ${fmt(f.faith)}${oaths.length ? ` · <b class="up">sworn to you</b>` : ''}</div>
+    <div class="meta">${f.dominant_race} · ${eraWord(f.era)} age · capital ${regionTitle(f.capital)} · dread ${fmt(f.dread_eff)} · awe ${fmt(f.awe_eff)}${f.memory_tier ? ` (${f.memory_tier})` : ""} · faith ${fmt(f.faith)}${oaths.length ? ` · <b class="up">sworn to you</b>` : ''}</div>
     ${armsCourtHtml(fid)}
     ${atCourt.map((p) => personRowHtml(p, fid)).join('') || '<div class="muted">no one of name</div>'}
     ${inLair.length ? `<div class="meta" style="margin-top:4px">in your lair: ${inLair.map((p) => `<b>${escapeHtml(p.name)}</b> (${roleWord(p.role)}, ${yearsNum(world.year - p.hostage_since)}${p.tags.includes('dragon_raised') ? ', raised as yours' : ''})`).join(', ')}

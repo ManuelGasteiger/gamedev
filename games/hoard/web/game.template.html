@@ -415,17 +415,6 @@ function factionHsl(id) {
 function factionCss(id) { const c = factionHsl(id); return `hsl(${c.h} ${c.s}% ${c.l}%)`; }
 function factionColor3(id) { const c = factionHsl(id); return new THREE.Color().setHSL(c.h / 360, c.s / 100, c.l / 100); }
 
-// a court's dread and awe arrive as tiers plus effective values; the page reads the effective ones as numbers
-function readView(v) {
-  for (const f of v.factions ?? []) {
-    f.dread_tiers = f.dread;
-    f.awe_tiers = f.awe;
-    f.dread = f.dread_eff ?? 0;
-    f.awe = f.awe_eff ?? 0;
-  }
-  return v;
-}
-
 function regionById(id) { return world.regions.find((r) => r.id === id); }
 function factionById(id) { return world.factions.find((f) => f.id === id); }
 function witnessesFor(regionId, targetId) {
@@ -439,7 +428,7 @@ function buildModel(view) {
   const m = { year: view.year, regions: new Map(), factions: new Map(), armies: view.armies ?? [], remnants: view.remnants ?? [], dragon: view.dragon, offers: view.offers ?? [], wars: view.wars ?? [], modifiers: view.modifiers ?? [] };
   for (const f of view.factions) {
     m.factions.set(f.id, { id: f.id, race: f.dominant_race ?? f.race, era: f.era, capital: f.capital, overlord: f.overlord || '', altar: !!f.altar,
-      hostage_taken: !!f.hostage_taken, at_war_with: [...f.at_war_with], allies: f.allies ?? [], faith: f.faith, dread: f.dread, awe: f.awe, wealth: f.wealth, power: f.power ?? 0, tags: new Set(f.tags), regions: [...f.regions] });
+      hostage_taken: !!f.hostage_taken, at_war_with: [...f.at_war_with], allies: f.allies ?? [], faith: f.faith, dread: f.dread_eff ?? 0, awe: f.awe_eff ?? 0, wealth: f.wealth, power: f.power ?? 0, tags: new Set(f.tags), regions: [...f.regions] });
   }
   for (const r of view.regions) {
     m.regions.set(r.id, { id: r.id, owner: r.owner || '', terrain: r.terrain, burn: r.burn, tags: new Set(r.tags), wealth_share: r.wealth_share ?? 0,
@@ -482,7 +471,7 @@ function armyPosition(army, m) {
 
 function refreshWorld() {
   const prev = model;
-  world = readView(sim({ cmd: 'world' }));
+  world = sim({ cmd: 'world' });
   indexNames(world);
   model = buildModel(world);
   if (valley && valley.key !== valleyKey()) buildValleyScene();   // a cataclysm changed a region's terrain
@@ -1610,7 +1599,7 @@ function actOutcome(res, region, ctx = {}) {
 
 function snapshot() {
   const s = {};
-  for (const f of world.factions) s[f.id] = { dread: f.dread, awe: f.awe, faith: f.faith, wealth: f.wealth };
+  for (const f of world.factions) s[f.id] = { dread: f.dread_eff, awe: f.awe_eff, faith: f.faith, wealth: f.wealth };
   return s;
 }
 
@@ -1621,7 +1610,7 @@ function showDeltas(before, region) {
     const b = before[f.id];
     if (!b) continue;
     const parts = [];
-    const dDread = f.dread - b.dread, dAwe = f.awe - b.awe, dFaith = f.faith - b.faith, dWealth = f.wealth - b.wealth;
+    const dDread = f.dread_eff - b.dread, dAwe = f.awe_eff - b.awe, dFaith = f.faith - b.faith, dWealth = f.wealth - b.wealth;
     if (Math.abs(dDread) > 0.004) parts.push(['dread', dDread]);
     if (Math.abs(dAwe) > 0.004) parts.push(['awe', dAwe]);
     if (Math.abs(dFaith) > 0.004) parts.push(['faith', dFaith]);
@@ -1734,7 +1723,7 @@ function renderLair() {
         ${hasHealth() ? `<div class="box"><h3>Health</h3>${bar(health().left, health().max, 'hunger')}<div>${Math.round(health().left)} of ${Math.round(health().max)} · ${numText(health().wounds)} wounds, healed by sleep${d.hoard.embers !== undefined ? ` · embers ${fmt(d.hoard.embers, 1)} (what you burned; they feed Flame as you sleep)` : ''}</div></div>` : ''}
       </div><div>
         <div class="box"><h3>Tags and lineages</h3><div>${d.tags.join(' ') || '<span class="muted">none</span>'}</div><div class="muted">lineages: ${d.lineages.join(', ') || 'none'}</div></div>
-        <div class="box"><h3>Factions</h3>${world.factions.map((f) => `<div><span style="color:${factionCss(f.id)}">■</span> <b>${escapeHtml(factionTitle(f.id))}</b> ${f.dominant_race} ${f.era_name} · ${f.regions.length} regions · wealth ${fmt(f.wealth, 0)} · dread ${fmt(f.dread)} · awe ${fmt(f.awe)} · faith ${fmt(f.faith)}${f.overlord ? ' · vassal of ' + factionTitle(f.overlord) : ''}${f.at_war_with.length ? ' · war: ' + f.at_war_with.map(factionTitle).join(', ') : ''}</div>`).join('')}</div>
+        <div class="box"><h3>Factions</h3>${world.factions.map((f) => `<div><span style="color:${factionCss(f.id)}">■</span> <b>${escapeHtml(factionTitle(f.id))}</b> ${f.dominant_race} ${f.era_name} · ${f.regions.length} regions · wealth ${fmt(f.wealth, 0)} · dread ${fmt(f.dread_eff)} · awe ${fmt(f.awe_eff)} · faith ${fmt(f.faith)}${f.overlord ? ' · vassal of ' + factionTitle(f.overlord) : ''}${f.at_war_with.length ? ' · war: ' + f.at_war_with.map(factionTitle).join(', ') : ''}</div>`).join('')}</div>
         <div class="box"><h3>Remnants</h3>${(world.remnants ?? []).map((r) => `${racePlural(r.race)} ${fmt(r.strength)} near ${regionTitle(r.origin)}`).join(' · ') || '<span class="muted">none</span>'}</div>
       </div></div>`;
     },
@@ -1866,7 +1855,7 @@ function sleep(years) {
   montage.active = true; montage.done = false;
   montage.events = res.chronicle.filter((e) => e.kind !== 'sleep_begin');
   montage.index = 0; montage.year = before.year; montage.fromYear = before.year; montage.endYear = res.year; montage.result = res; montage.before = before; montage.paused = false;
-  montage.final = readView(sim({ cmd: 'world' }));
+  montage.final = sim({ cmd: 'world' });
   indexNames(montage.final);
   montage.you = youContext([world, montage.final]);
   montage.speed = play.montageSpeed ?? 20;
@@ -2154,7 +2143,7 @@ function newGame(seed, opts = {}) {
   closeDeath(); closeGrowth();
   $('system').classList.add('hidden'); $('lair').classList.add('hidden'); $('wake').classList.add('hidden');
   $('dim').style.opacity = '0';
-  world = readView(sim({ cmd: 'world' }));
+  world = sim({ cmd: 'world' });
   indexNames(world);
   model = buildModel(world);
   if (valley && valley.key !== valleyKey()) buildValleyScene();
@@ -2254,7 +2243,7 @@ async function main() {
   loadUi();
   const restored = loadAutosave();
   if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true });   // a fresh start: a generated valley, its legends first
-  world = readView(sim({ cmd: 'world' }));
+  world = sim({ cmd: 'world' });
   indexNames(world);
   model = buildModel(world);
   await loadModels();
@@ -2274,7 +2263,7 @@ window.game = {
   act, land() { if (dragonRegion() !== 'lair') window.game.flyTo('lair'); landAtLair(); }, takeOff,
   sleep(years) { const res = sleep(years); return res; },
   finishMontage, acceptOffer(i = 0) { if (!(model.offers ?? []).length) return false; const r = sim({ cmd: 'accept_offer', index: i }); if (r.ok) play.ageEvents.push(...(r.events ?? [])); refreshWorld(); spawnEnvoysSettled(); if (play.landed) renderLair(); return r.ok; },
-  state() { return { frame: frameCount, year: model.year, age: play.age, stamina: play.stamina, landed: play.landed, montage: montage.active, region: dragonRegion(), dragon: model.dragon, dragonScale: dragon.group.scale.x, factions: world.factions.map((f) => ({ id: f.id, race: f.race, wealth: f.wealth, dread: f.dread, awe: f.awe, memory_tier: f.memory_tier, faith: f.faith, regions: f.regions, era: f.era, capital: f.capital, at_war_with: f.at_war_with })), offers: (model.offers ?? []).length, ages: play.ages.map((a) => ({ age: a.age, from: a.from, to: a.to, wake_reason: a.wake_reason, events: a.chronicle.length, acts: a.acts.length })), armies: model.armies.length, armyGroups: armies.size, arrows: warArrows.size, camps: camps.size, envoys: envoys.length, tiles: tiles.size, pendingEvents: play.ageEvents.length, ageEvents: play.ageEvents.map((e) => e.kind), oaths: (world.oaths ?? []).map((o) => ({ id: o.id, status: o.status, party: o.parties[1] })), modifiers: (world.modifiers ?? []).map((m) => m.source + '>' + m.target), montageYear: montage.year, lairTab, pos: [dragon.pos.x, dragon.pos.z], dragonPos: [dragon.pos.x, dragon.pos.z] }; },
+  state() { return { frame: frameCount, year: model.year, age: play.age, stamina: play.stamina, landed: play.landed, montage: montage.active, region: dragonRegion(), dragon: model.dragon, dragonScale: dragon.group.scale.x, factions: world.factions.map((f) => ({ id: f.id, race: f.race, wealth: f.wealth, dread: f.dread_eff, awe: f.awe_eff, memory_tier: f.memory_tier, faith: f.faith, regions: f.regions, era: f.era, capital: f.capital, at_war_with: f.at_war_with })), offers: (model.offers ?? []).length, ages: play.ages.map((a) => ({ age: a.age, from: a.from, to: a.to, wake_reason: a.wake_reason, events: a.chronicle.length, acts: a.acts.length })), armies: model.armies.length, armyGroups: armies.size, arrows: warArrows.size, camps: camps.size, envoys: envoys.length, tiles: tiles.size, pendingEvents: play.ageEvents.length, ageEvents: play.ageEvents.map((e) => e.kind), oaths: (world.oaths ?? []).map((o) => ({ id: o.id, status: o.status, party: o.parties[1] })), modifiers: (world.modifiers ?? []).map((m) => m.source + '>' + m.target), montageYear: montage.year, lairTab, pos: [dragon.pos.x, dragon.pos.z], dragonPos: [dragon.pos.x, dragon.pos.z] }; },
   actions() { return selectedRegion ? actionsFor(selectedRegion).map((a) => ({ id: a.id, ok: a.ok, why: a.why, cost: a.costText ?? a.cost })) : []; },
   setLairTab(t) { lairTab = t; if (play.landed) renderLair(); },
   pauseMontage() { if (montage.active && !montage.paused) toggleMontagePause(); },

@@ -13,13 +13,13 @@ Docs copied: brief, act-api.md, talents-v2.md, pacing-model.md. research-faith-a
 
 ## Steps
 
-- [ ] state, reactions.json, deposit, decay, saves
-- [ ] every fear read mapped
-- [ ] research spend, unlocks
-- [ ] monuments and cards
-- [ ] talents v2 (nodes 0 to 3) and flight block
-- [ ] forecast, briefing, wasm export, narrator rows
-- [ ] page and game-check fields
-- [ ] tests
-- [ ] tuning, bands, sweep
-- [ ] goldens
+- [x] state, reactions.json, deposit, decay, saves
+- [x] every fear read mapped
+- [x] research spend, unlocks
+- [x] monuments and cards
+- [x] talents v2 (nodes 0 to 3) and flight block
+- [x] forecast, briefing, wasm export, narrator rows
+- [x] page and game-check fields
+- [x] tests
+- [x] tuning, bands, sweep
+- [x] goldens

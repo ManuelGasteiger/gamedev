@@ -13,7 +13,7 @@ function oathBinds(fid) {
 
 function narrationBefore() {
   const factions = {};
-  for (const f of world.factions) factions[f.id] = { dread: f.dread, awe: f.awe, faith: f.faith, wealth: f.wealth, power: f.power ?? 0, race: f.dominant_race ?? f.race, at_war_with: [...f.at_war_with], oath: oathBinds(f.id) };
+  for (const f of world.factions) factions[f.id] = { dread: f.dread_eff, awe: f.awe_eff, faith: f.faith, wealth: f.wealth, power: f.power ?? 0, race: f.dominant_race ?? f.race, at_war_with: [...f.at_war_with], oath: oathBinds(f.id) };
   const known = new Map((world.dragon.known_people ?? []).map((k) => [k.id, k.relationship]));
   return { factions, known, threat: world.dragon.threat ?? 0 };
 }
@@ -127,7 +127,7 @@ function reactionLines(a, before) {
   for (const f of world.factions) {
     const b = before.factions[f.id];
     if (!b) continue;
-    const d = { dread: f.dread - b.dread, awe: f.awe - b.awe, faith: f.faith - b.faith, wealth: f.wealth - b.wealth };
+    const d = { dread: f.dread_eff - b.dread, awe: f.awe_eff - b.awe, faith: f.faith - b.faith, wealth: f.wealth - b.wealth };
     const moved = Math.abs(d.dread) >= 0.005 || Math.abs(d.awe) >= 0.005 || Math.abs(d.faith) >= 0.005 || Math.abs(d.wealth) >= 0.4;
     if (!moved && !(forced && f.id === a.target)) continue;
     const mood = moodOf(a, f, b, before);
