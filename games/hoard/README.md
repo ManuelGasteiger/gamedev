@@ -61,7 +61,11 @@ data/regions.json               12 regions with terrain: lair, east/west vales a
 data/factions.json              bronze-age start: aldmere, vessary (human, 2 regions each), dorun (dwarf, hill_hold + deep_hold), ilvareth (elf, elder_wood + deep_wood)
 data/shocks.json                plague, bad century, volcanic winter (now a chance per mega raze)
 data/events/*.json              event cards, one file per catalogue entry (docs/ages-sim.md 18.3)
-data/text/en.json               narrator templates: events (text, brief, importance), causes, reactions, words
+data/importance.json            importance per event kind for the briefing and the storyteller (language-neutral)
+data/text/<lang>/               per language: narrator.json (the narrator, English only for now), ui.json, lexicon.json,
+                                names.json, locale.json (CLDR via Babel, tools/text/cldr.py), scenarios.json and .meta,
+                                patterns.json; one bundle per language, hashed into data_hash
+sim/text/                       the renderer: tokens, lexicon, names, numbers, render, bundle (+ pseudo), batch, reason
 data/names.json, offers.json    17.2 name syllables, 17.3 offer kinds
 data/policies/*.json            idle, raze_all, protect_one, alternate
 sim/ages/ages.h                 public API: load_data(_from_json), apply_acts, sleep, chronicle_hash, offers, JSON in/out, run_scenario
@@ -74,7 +78,7 @@ sim/ages/data_io.cpp            file loaders: load_data, load_params, load_world
 sim/ages/world_util.h           lookups, power/threat/affinity formulas, dominant race, vassal and realm helpers, losing(), memory helpers, emit()
 sim/ages/names.h/.cpp           deterministic successor and orc faction names
 sim/ages/acts.cpp               apply act log: immediate deltas, reactions, witnesses, rage, feeding, the sponsor_remnant spell
-sim/ages/reaction_lines.h/.cpp  the `lines` of apply_acts from en.json "reactions" (row that fired, offers, known people, card marks)
+sim/ages/reaction_lines.h/.cpp  the `lines` of apply_acts from narrator.json "reactions" (row that fired, offers, known people, card marks)
 sim/ages/importance.h/.cpp      importance per event (template value plus known/oath/hostage boosts), template variants
 sim/ages/briefing.cpp           17.5 narrator: briefing blocks, event_sentence (cause clauses, threads)
 sim/ages/cards.h, card_data.cpp event card definitions and their JSON loader (the trigger language is documented in cards.h)

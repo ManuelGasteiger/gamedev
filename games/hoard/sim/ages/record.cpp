@@ -56,6 +56,8 @@ uint64_t data_hash(const DataJson& d) {
     add("constants", d.constants); add("races", d.races); add("reactions", d.reactions); add("regions", d.regions);
     add("factions", d.factions); add("shocks", d.shocks); add("names", d.names); add("offers", d.offers); add("text", d.text);
     add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("genesis", d.genesis);
+    add("importance", d.importance);
+    for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }
 

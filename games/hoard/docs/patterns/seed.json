@@ -1,0 +1,857 @@
+[
+  {
+    "id": "vengeance_for_burning",
+    "level": 2,
+    "window_years": 500,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "dragon_burn",
+        "subject": "dragon",
+        "object": "?site",
+        "tags_any": [
+          "city",
+          "capital"
+        ],
+        "magnitude_gte": 0.3,
+        "bind": {
+          "?court": "a.object.court"
+        }
+      },
+      {
+        "as": "b",
+        "kind": "slayers_founded",
+        "subject": "?court",
+        "object": "?order",
+        "caused_by": {
+          "ref": "a",
+          "max_hops": 3
+        },
+        "within_years": 200
+      },
+      {
+        "as": "c",
+        "kind": [
+          "slay_attempt",
+          "order_disbanded",
+          "slayer_killed"
+        ],
+        "subject": "?order",
+        "within_years": 300
+      }
+    ],
+    "unless": [
+      {
+        "between": [
+          "a",
+          "b"
+        ],
+        "kind": "collapse",
+        "subject": "?court"
+      }
+    ],
+    "unless_forever": [
+      {
+        "kind": "oath_sworn",
+        "subject": "?court",
+        "object": "dragon"
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "slayer_killed": "fell",
+        "slay_attempt": "struck",
+        "order_disbanded": "faded"
+      }
+    },
+    "emit": {
+      "kind": "story.vengeance",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "max(a.magnitude, c.magnitude)",
+      "tags": [
+        "grudge",
+        "dragon",
+        "slayer"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.9,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "oath_of_recovery",
+    "level": 2,
+    "window_years": 800,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "dragon_take",
+        "subject": "dragon",
+        "object": "?court",
+        "tags_any": [
+          "elf"
+        ],
+        "magnitude_gte": 0.2,
+        "bind": {
+          "?item": "a.payload.item"
+        }
+      },
+      {
+        "as": "b",
+        "kind": "grudge_sworn",
+        "subject": "?court",
+        "object": "dragon",
+        "caused_by": {
+          "ref": "a",
+          "max_hops": 2
+        },
+        "within_years": 50
+      },
+      {
+        "as": "c",
+        "kind": [
+          "dragon_give",
+          "slay_attempt",
+          "theft_from_hoard",
+          "elves_departed"
+        ],
+        "within_years": 700
+      }
+    ],
+    "unless": [
+      {
+        "between": [
+          "b",
+          "c"
+        ],
+        "kind": "collapse",
+        "subject": "?court"
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "dragon_give": "returned",
+        "slay_attempt": "war",
+        "theft_from_hoard": "stolen_back",
+        "elves_departed": "unfulfilled"
+      }
+    },
+    "emit": {
+      "kind": "story.oath_of_recovery",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "a.magnitude",
+      "tags": [
+        "elf",
+        "oath",
+        "theft",
+        "dragon"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.7,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "prophecy_read_and_answered",
+    "level": 2,
+    "window_years": 400,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "prophecy_spoken",
+        "subject": "?court",
+        "bind": {
+          "?priest": "a.actor"
+        }
+      },
+      {
+        "as": "b",
+        "kind": [
+          "dragon_burn",
+          "dragon_show",
+          "dragon_give",
+          "dragon_defend"
+        ],
+        "subject": "dragon",
+        "object": "?court",
+        "within_years": 150
+      },
+      {
+        "as": "c",
+        "kind": [
+          "prophecy_fulfilled",
+          "prophecy_refuted"
+        ],
+        "subject": "?court",
+        "caused_by": {
+          "ref": "b",
+          "max_hops": 2
+        },
+        "within_years": 50
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "prophecy_fulfilled": "fulfilled",
+        "prophecy_refuted": "refuted"
+      }
+    },
+    "emit": {
+      "kind": "story.prophecy_answered",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "b.magnitude",
+      "tags": [
+        "prophecy",
+        "faith",
+        "dragon"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.8,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "hostage_came_home",
+    "level": 2,
+    "window_years": 200,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "dragon_take_hostage",
+        "subject": "dragon",
+        "object": "?person",
+        "bind": {
+          "?court": "a.object.court"
+        }
+      },
+      {
+        "as": "b",
+        "kind": "dragon_release",
+        "subject": "dragon",
+        "object": "?person",
+        "within_years": 150
+      },
+      {
+        "as": "c",
+        "kind": [
+          "person_crowned",
+          "civil_war",
+          "slayers_founded",
+          "pretender_landed"
+        ],
+        "subject": "?court",
+        "caused_by": {
+          "ref": "b",
+          "max_hops": 2
+        },
+        "within_years": 40
+      }
+    ],
+    "unless": [
+      {
+        "between": [
+          "a",
+          "b"
+        ],
+        "kind": "person_died",
+        "object": "?person"
+      }
+    ],
+    "survives_death": false,
+    "once_per": [
+      "?person"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "person_crowned": "ruled",
+        "civil_war": "divided",
+        "slayers_founded": "betrayed",
+        "pretender_landed": "claimed"
+      }
+    },
+    "emit": {
+      "kind": "story.hostage_came_home",
+      "subject": "?person",
+      "object": "?court",
+      "magnitude": "0.6",
+      "tags": [
+        "hostage",
+        "royal",
+        "dragon"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.6,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "order_rise_and_fall",
+    "level": 1,
+    "window_years": 600,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "slayers_founded",
+        "subject": "?court",
+        "object": "?order"
+      },
+      {
+        "as": "b",
+        "kind": "slayers_ready",
+        "subject": "?order",
+        "within_years": 400
+      },
+      {
+        "as": "c",
+        "kind": [
+          "slay_attempt",
+          "order_disbanded"
+        ],
+        "subject": "?order",
+        "within_years": 200
+      }
+    ],
+    "once_per": [
+      "?order"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "slay_attempt": "marched",
+        "order_disbanded": "dissolved"
+      }
+    },
+    "emit": {
+      "kind": "episode.order",
+      "subject": "?order",
+      "object": "dragon",
+      "magnitude": "c.magnitude",
+      "tags": [
+        "slayer",
+        "dragon"
+      ],
+      "importance": 3
+    },
+    "stakes_for_dragon": 0.9,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "dragon_blood_dynasty",
+    "level": 2,
+    "window_years": 600,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "person_crowned",
+        "subject": "?court",
+        "object": "?ruler",
+        "tags_all": [
+          "dragon_blood"
+        ]
+      },
+      {
+        "as": "b",
+        "kind": [
+          "shrine_raised",
+          "temple_raised",
+          "oath_sworn"
+        ],
+        "subject": "?court",
+        "within_years": 100
+      },
+      {
+        "as": "c",
+        "kind": [
+          "cult_schism",
+          "civil_war",
+          "collapse",
+          "hegemony"
+        ],
+        "subject": "?court",
+        "within_years": 500
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "cult_schism": "schism",
+        "civil_war": "war",
+        "collapse": "fell",
+        "hegemony": "rose"
+      }
+    },
+    "emit": {
+      "kind": "story.dragon_blood",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "0.7",
+      "tags": [
+        "royal",
+        "faith",
+        "dragon"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.5,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_fading",
+    "level": 2,
+    "window_years": 1500,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "fading_begins",
+        "subject": "?court"
+      },
+      {
+        "as": "b",
+        "kind": [
+          "elves_departed",
+          "fading_ends",
+          "collapse"
+        ],
+        "subject": "?court",
+        "within_years": 1400
+      }
+    ],
+    "unless": [
+      {
+        "between": [
+          "a",
+          "b"
+        ],
+        "kind": "dragon_swear",
+        "subject": "dragon",
+        "object": "?court"
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "b.kind": {
+        "elves_departed": "sailed",
+        "fading_ends": "recovered",
+        "collapse": "fell"
+      }
+    },
+    "emit": {
+      "kind": "story.fading",
+      "subject": "?court",
+      "magnitude": "0.8",
+      "tags": [
+        "elf",
+        "irreversible"
+      ],
+      "importance": 5
+    },
+    "stakes_for_dragon": 0.3,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "sack_and_revenge",
+    "level": 1,
+    "window_years": 350,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "sack",
+        "subject": "?winner",
+        "object": "?loser"
+      },
+      {
+        "as": "b",
+        "kind": "war_started",
+        "subject": "?loser",
+        "object": "?winner",
+        "caused_by": {
+          "ref": "a",
+          "max_hops": 3
+        },
+        "within_years": 250
+      },
+      {
+        "as": "c",
+        "kind": [
+          "sack",
+          "war_ended"
+        ],
+        "subject": "?loser",
+        "same_thread_as": "b",
+        "within_years": 100
+      }
+    ],
+    "once_per": [
+      "?winner",
+      "?loser"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "sack": "repaid",
+        "war_ended": "spent"
+      }
+    },
+    "emit": {
+      "kind": "episode.revenge",
+      "subject": "?loser",
+      "object": "?winner",
+      "magnitude": "a.magnitude",
+      "tags": [
+        "grudge",
+        "city"
+      ],
+      "importance": 3
+    },
+    "stakes_for_dragon": 0.2,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "forgotten_and_remembered",
+    "level": 2,
+    "window_years": 1200,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "dragon_sleep",
+        "subject": "dragon",
+        "magnitude_gte": 0.5
+      },
+      {
+        "as": "b",
+        "kind": [
+          "walls_built",
+          "region_settled",
+          "tribute_stopped"
+        ],
+        "within_years": 600,
+        "bind": {
+          "?court": "b.subject"
+        }
+      },
+      {
+        "as": "c",
+        "kind": [
+          "dragon_burn",
+          "dragon_show",
+          "dragon_demand"
+        ],
+        "subject": "dragon",
+        "object": "?court",
+        "within_years": 600
+      }
+    ],
+    "unless": [
+      {
+        "between": [
+          "a",
+          "c"
+        ],
+        "kind": "dragon_wake",
+        "subject": "dragon"
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "dragon_burn": "fire",
+        "dragon_show": "shadow",
+        "dragon_demand": "voice"
+      }
+    },
+    "emit": {
+      "kind": "story.forgotten_dragon",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "c.magnitude",
+      "tags": [
+        "dragon",
+        "oath"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.6,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "cult_shrine_to_schism",
+    "level": 2,
+    "window_years": 500,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "cult_founded",
+        "subject": "?court",
+        "object": "dragon"
+      },
+      {
+        "as": "b",
+        "kind": [
+          "shrine_raised",
+          "temple_raised"
+        ],
+        "subject": "?court",
+        "within_years": 200
+      },
+      {
+        "as": "c",
+        "kind": [
+          "cult_schism",
+          "cult_persecuted",
+          "false_dragon",
+          "holy_war_declared"
+        ],
+        "subject": "?court",
+        "within_years": 300
+      }
+    ],
+    "once_per": [
+      "?court"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "cult_schism": "split",
+        "cult_persecuted": "hunted",
+        "false_dragon": "usurped",
+        "holy_war_declared": "crusade"
+      }
+    },
+    "emit": {
+      "kind": "story.cult",
+      "subject": "?court",
+      "object": "dragon",
+      "magnitude": "0.6",
+      "tags": [
+        "cult",
+        "faith",
+        "dragon"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.7,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "thief_rises",
+    "level": 1,
+    "window_years": 150,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "theft_from_hoard",
+        "subject": "?court",
+        "object": "dragon",
+        "bind": {
+          "?thief": "a.actor"
+        }
+      },
+      {
+        "as": "b",
+        "kind": [
+          "person_rose",
+          "thief_hanged",
+          "dragon_kill",
+          "dragon_take"
+        ],
+        "within_years": 120
+      }
+    ],
+    "once_per": [
+      "?thief"
+    ],
+    "outcome_by": {
+      "b.kind": {
+        "person_rose": "ennobled",
+        "thief_hanged": "hanged",
+        "dragon_kill": "eaten",
+        "dragon_take": "robbed_back"
+      }
+    },
+    "emit": {
+      "kind": "episode.thief",
+      "subject": "?thief",
+      "object": "dragon",
+      "magnitude": "0.4",
+      "tags": [
+        "theft",
+        "dragon"
+      ],
+      "importance": 3
+    },
+    "stakes_for_dragon": 0.4,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "exiles_return",
+    "level": 2,
+    "window_years": 900,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "exodus",
+        "subject": "?people",
+        "object": "?region"
+      },
+      {
+        "as": "b",
+        "kind": "exiles_returned",
+        "subject": "?people",
+        "object": "?region",
+        "within_years": 800
+      },
+      {
+        "as": "c",
+        "kind": [
+          "war_ended",
+          "region_taken",
+          "collapse"
+        ],
+        "subject": "?people",
+        "within_years": 100
+      }
+    ],
+    "once_per": [
+      "?people",
+      "?region"
+    ],
+    "outcome_by": {
+      "c.kind": {
+        "war_ended": "home",
+        "region_taken": "home",
+        "collapse": "scattered"
+      }
+    },
+    "emit": {
+      "kind": "story.exiles",
+      "subject": "?people",
+      "object": "?region",
+      "magnitude": "0.7",
+      "tags": [
+        "irreversible"
+      ],
+      "importance": 4
+    },
+    "stakes_for_dragon": 0.2,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "war_won_by_dragon_act",
+    "level": 1,
+    "window_years": 70,
+    "clauses": [
+      {
+        "as": "a",
+        "kind": "war_started",
+        "subject": "?attacker",
+        "object": "?defender"
+      },
+      {
+        "as": "b",
+        "kind": [
+          "dragon_defend",
+          "dragon_burn",
+          "dragon_kill"
+        ],
+        "subject": "dragon",
+        "object": "?attacker",
+        "within_years": 50
+      },
+      {
+        "as": "c",
+        "kind": "war_ended",
+        "subject": "?defender",
+        "object": "?attacker",
+        "caused_by": {
+          "ref": "b",
+          "max_hops": 2
+        },
+        "within_years": 20
+      }
+    ],
+    "once_per": [
+      "?attacker",
+      "?defender"
+    ],
+    "emit": {
+      "kind": "episode.war_turned",
+      "subject": "?defender",
+      "object": "?attacker",
+      "magnitude": "b.magnitude",
+      "tags": [
+        "dragon",
+        "city"
+      ],
+      "importance": 3
+    },
+    "stakes_for_dragon": 0.5,
+    "provenance": {
+      "gen": "hand",
+      "bank": "seed",
+      "reviewed": true
+    }
+  }
+]

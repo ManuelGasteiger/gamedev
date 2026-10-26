@@ -46,12 +46,12 @@ function mainSentences(a, res) {
   } else if (a.kind === 'kill') {
     out.push(`You fell on the army of ${F} at ${nameOf(a.region)} and fed.`);
   } else if (a.kind === 'demand') {
-    out.push(res.sworn ? `${F} swore ${(TEXT.words?.[a.pred] ?? a.pred).replace(/_/g, ' ')} under your shadow.` : `${F} refused your demand (${res.reason}).`);
+    out.push(res.sworn ? `${F} swore ${(TEXT.words?.[a.pred] ?? a.pred).replace(/_/g, ' ')} under your shadow.` : `${F} refused your demand (${res.reason_text ?? res.reason}).`);
   } else if (a.kind === 'cast') {
     const c = ev('spell_cast') ?? ev('undead_raised');
-    out.push(res.cast ? (c ? eventSentence(c) : `Your ${a.spell.replace(/_/g, ' ')} took hold.`) : `Your ${a.spell.replace(/_/g, ' ')} failed: ${res.reason}.`);
+    out.push(res.cast ? (c ? eventSentence(c) : `Your ${a.spell.replace(/_/g, ' ')} took hold.`) : `Your ${a.spell.replace(/_/g, ' ')} failed: ${res.reason_text ?? res.reason}.`);
   } else if (a.kind === 'terraform') {
-    out.push(res.done ? `You reshaped ${nameOf(a.region)} into ${res.tag}.` : `The land would not change: ${res.reason}.`);
+    out.push(res.done ? `You reshaped ${nameOf(a.region)} into ${res.tag}.` : `The land would not change: ${res.reason_text ?? res.reason}.`);
   } else if (a.kind === 'accept_offer' || a.kind === 'decline_offer') {
     const e = ev(a.kind === 'accept_offer' ? 'oath_sworn' : 'offer_declined');
     out.push(e ? eventSentence(e) : `You answered the envoy of ${F}.`);

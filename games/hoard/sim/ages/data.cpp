@@ -300,7 +300,6 @@ static void load_texts(const json& j, Texts& t) {
             else {
                 get(v, "text", tt.text);
                 get(v, "brief", tt.brief);
-                get(v, "importance", tt.importance);
             }
             t.events[it.key()] = tt;
         }
@@ -397,6 +396,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
     if (!d.names.empty()) { if (!parse_json(d.names, "names", j, err)) return false; load_names(j, p.names); }
     if (!d.offers.empty()) { if (!parse_json(d.offers, "offers", j, err)) return false; load_offers(j, p.offers); }
     if (!d.text.empty()) { if (!parse_json(d.text, "text", j, err)) return false; load_texts(j, p.texts); }
+    if (!d.importance.empty()) { if (!parse_json(d.importance, "importance", j, err)) return false; get(j, "events", p.importance); }
     if (!cards_from_json(d.events, p.cards, err)) return false;
     if (!genesis_from_json(d.genesis, p.genesis, err)) return false;
 

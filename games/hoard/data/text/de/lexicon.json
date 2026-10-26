@@ -1,0 +1,594 @@
+{
+ "nouns": {
+  "envoy": {
+   "m": {
+    "g": "m",
+    "def.nom": "Gesandte",
+    "def.acc": "Gesandten",
+    "def.dat": "Gesandten",
+    "def.gen": "Gesandten",
+    "indef.nom": "Gesandter",
+    "indef.acc": "Gesandten",
+    "indef.dat": "Gesandten",
+    "indef.gen": "Gesandten",
+    "none.nom": "Gesandter",
+    "none.acc": "Gesandten",
+    "none.dat": "Gesandtem",
+    "none.gen": "Gesandten",
+    "nom": "Gesandter"
+   },
+   "f": {
+    "g": "f",
+    "def.nom": "Gesandte",
+    "def.acc": "Gesandte",
+    "def.dat": "Gesandten",
+    "def.gen": "Gesandten",
+    "indef.nom": "Gesandte",
+    "indef.acc": "Gesandte",
+    "indef.dat": "Gesandten",
+    "indef.gen": "Gesandten",
+    "none.nom": "Gesandte",
+    "none.acc": "Gesandte",
+    "none.dat": "Gesandter",
+    "none.gen": "Gesandter",
+    "nom": "Gesandte"
+   }
+  },
+  "hostage": {
+   "*": {
+    "g": "f",
+    "nom": "Geisel",
+    "acc": "Geisel",
+    "dat": "Geisel",
+    "gen": "Geisel"
+   }
+  },
+  "scribe": {
+   "m": {
+    "g": "m",
+    "nom": "Schreiber",
+    "acc": "Schreiber",
+    "dat": "Schreiber",
+    "gen": "Schreibers"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Schreiberin",
+    "acc": "Schreiberin",
+    "dat": "Schreiberin",
+    "gen": "Schreiberin"
+   }
+  },
+  "historian": {
+   "m": {
+    "g": "m",
+    "nom": "Chronist",
+    "acc": "Chronisten",
+    "dat": "Chronisten",
+    "gen": "Chronisten"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Chronistin",
+    "acc": "Chronistin",
+    "dat": "Chronistin",
+    "gen": "Chronistin"
+   }
+  },
+  "heir": {
+   "m": {
+    "g": "m",
+    "nom": "Erbe",
+    "acc": "Erben",
+    "dat": "Erben",
+    "gen": "Erben"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Erbin",
+    "acc": "Erbin",
+    "dat": "Erbin",
+    "gen": "Erbin"
+   }
+  },
+  "hero": {
+   "m": {
+    "g": "m",
+    "nom": "Held",
+    "acc": "Helden",
+    "dat": "Helden",
+    "gen": "Helden"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Heldin",
+    "acc": "Heldin",
+    "dat": "Heldin",
+    "gen": "Heldin"
+   }
+  },
+  "sage": {
+   "m": {
+    "g": "m",
+    "def.nom": "Weise",
+    "def.acc": "Weisen",
+    "def.dat": "Weisen",
+    "def.gen": "Weisen",
+    "indef.nom": "Weiser",
+    "indef.acc": "Weisen",
+    "indef.dat": "Weisen",
+    "indef.gen": "Weisen",
+    "none.nom": "Weiser",
+    "none.acc": "Weisen",
+    "none.dat": "Weisem",
+    "none.gen": "Weisen",
+    "nom": "Weiser"
+   },
+   "f": {
+    "g": "f",
+    "def.nom": "Weise",
+    "def.acc": "Weise",
+    "def.dat": "Weisen",
+    "def.gen": "Weisen",
+    "indef.nom": "Weise",
+    "indef.acc": "Weise",
+    "indef.dat": "Weisen",
+    "indef.gen": "Weisen",
+    "none.nom": "Weise",
+    "none.acc": "Weise",
+    "none.dat": "Weiser",
+    "none.gen": "Weiser",
+    "nom": "Weise"
+   }
+  },
+  "priest": {
+   "m": {
+    "g": "m",
+    "nom": "Priester",
+    "acc": "Priester",
+    "dat": "Priester",
+    "gen": "Priesters"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Priesterin",
+    "acc": "Priesterin",
+    "dat": "Priesterin",
+    "gen": "Priesterin"
+   }
+  },
+  "ruler": {
+   "m": {
+    "g": "m",
+    "nom": "Herrscher",
+    "acc": "Herrscher",
+    "dat": "Herrscher",
+    "gen": "Herrschers"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Herrscherin",
+    "acc": "Herrscherin",
+    "dat": "Herrscherin",
+    "gen": "Herrscherin"
+   }
+  },
+  "monarch": {
+   "m": {
+    "g": "m",
+    "nom": "König",
+    "acc": "König",
+    "dat": "König",
+    "gen": "Königs"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Königin",
+    "acc": "Königin",
+    "dat": "Königin",
+    "gen": "Königin"
+   }
+  },
+  "courtier": {
+   "m": {
+    "g": "m",
+    "nom": "Höfling",
+    "acc": "Höfling",
+    "dat": "Höfling",
+    "gen": "Höflings"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Hofdame",
+    "acc": "Hofdame",
+    "dat": "Hofdame",
+    "gen": "Hofdame"
+   }
+  },
+  "thief": {
+   "m": {
+    "g": "m",
+    "nom": "Dieb",
+    "acc": "Dieb",
+    "dat": "Dieb",
+    "gen": "Diebes"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Diebin",
+    "acc": "Diebin",
+    "dat": "Diebin",
+    "gen": "Diebin"
+   }
+  },
+  "consort": {
+   "m": {
+    "g": "m",
+    "nom": "Gefährte",
+    "acc": "Gefährten",
+    "dat": "Gefährten",
+    "gen": "Gefährten"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Gefährtin",
+    "acc": "Gefährtin",
+    "dat": "Gefährtin",
+    "gen": "Gefährtin"
+   }
+  },
+  "pretender": {
+   "m": {
+    "g": "m",
+    "nom": "Hochstapler",
+    "acc": "Hochstapler",
+    "dat": "Hochstapler",
+    "gen": "Hochstaplers"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Hochstaplerin",
+    "acc": "Hochstaplerin",
+    "dat": "Hochstaplerin",
+    "gen": "Hochstaplerin"
+   }
+  },
+  "liar": {
+   "m": {
+    "g": "m",
+    "nom": "Lügner",
+    "acc": "Lügner",
+    "dat": "Lügner",
+    "gen": "Lügners"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Lügnerin",
+    "acc": "Lügnerin",
+    "dat": "Lügnerin",
+    "gen": "Lügnerin"
+   }
+  },
+  "elder": {
+   "m": {
+    "g": "m",
+    "def.nom": "Älteste",
+    "def.acc": "Ältesten",
+    "def.dat": "Ältesten",
+    "def.gen": "Ältesten",
+    "indef.nom": "Ältester",
+    "indef.acc": "Ältesten",
+    "indef.dat": "Ältesten",
+    "indef.gen": "Ältesten",
+    "none.nom": "Ältester",
+    "none.acc": "Ältesten",
+    "none.dat": "Ältestem",
+    "none.gen": "Ältesten",
+    "nom": "Ältester"
+   },
+   "f": {
+    "g": "f",
+    "def.nom": "Älteste",
+    "def.acc": "Älteste",
+    "def.dat": "Ältesten",
+    "def.gen": "Ältesten",
+    "indef.nom": "Älteste",
+    "indef.acc": "Älteste",
+    "indef.dat": "Ältesten",
+    "indef.gen": "Ältesten",
+    "none.nom": "Älteste",
+    "none.acc": "Älteste",
+    "none.dat": "Ältester",
+    "none.gen": "Ältester",
+    "nom": "Älteste"
+   }
+  },
+  "prophet": {
+   "m": {
+    "g": "m",
+    "nom": "Prophet",
+    "acc": "Propheten",
+    "dat": "Propheten",
+    "gen": "Propheten"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Prophetin",
+    "acc": "Prophetin",
+    "dat": "Prophetin",
+    "gen": "Prophetin"
+   }
+  },
+  "reader": {
+   "m": {
+    "g": "m",
+    "nom": "Leser",
+    "acc": "Leser",
+    "dat": "Leser",
+    "gen": "Lesers"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Leserin",
+    "acc": "Leserin",
+    "dat": "Leserin",
+    "gen": "Leserin"
+   }
+  },
+  "kin": {
+   "m": {
+    "g": "m",
+    "def.nom": "Verwandte",
+    "def.acc": "Verwandten",
+    "def.dat": "Verwandten",
+    "def.gen": "Verwandten",
+    "indef.nom": "Verwandter",
+    "indef.acc": "Verwandten",
+    "indef.dat": "Verwandten",
+    "indef.gen": "Verwandten",
+    "none.nom": "Verwandter",
+    "none.acc": "Verwandten",
+    "none.dat": "Verwandtem",
+    "none.gen": "Verwandten",
+    "nom": "Verwandter"
+   },
+   "f": {
+    "g": "f",
+    "def.nom": "Verwandte",
+    "def.acc": "Verwandte",
+    "def.dat": "Verwandten",
+    "def.gen": "Verwandten",
+    "indef.nom": "Verwandte",
+    "indef.acc": "Verwandte",
+    "indef.dat": "Verwandten",
+    "indef.gen": "Verwandten",
+    "none.nom": "Verwandte",
+    "none.acc": "Verwandte",
+    "none.dat": "Verwandter",
+    "none.gen": "Verwandter",
+    "nom": "Verwandte"
+   }
+  },
+  "slayer": {
+   "m": {
+    "g": "m",
+    "nom": "Drachentöter",
+    "acc": "Drachentöter",
+    "dat": "Drachentöter",
+    "gen": "Drachentöters"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Drachentöterin",
+    "acc": "Drachentöterin",
+    "dat": "Drachentöterin",
+    "gen": "Drachentöterin"
+   }
+  },
+  "mason": {
+   "m": {
+    "g": "m",
+    "nom": "Baumeister",
+    "acc": "Baumeister",
+    "dat": "Baumeister",
+    "gen": "Baumeisters"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Baumeisterin",
+    "acc": "Baumeisterin",
+    "dat": "Baumeisterin",
+    "gen": "Baumeisterin"
+   }
+  },
+  "drillmaster": {
+   "m": {
+    "g": "m",
+    "nom": "Waffenmeister",
+    "acc": "Waffenmeister",
+    "dat": "Waffenmeister",
+    "gen": "Waffenmeisters"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Waffenmeisterin",
+    "acc": "Waffenmeisterin",
+    "dat": "Waffenmeisterin",
+    "gen": "Waffenmeisterin"
+   }
+  },
+  "regent": {
+   "m": {
+    "g": "m",
+    "nom": "Regent",
+    "acc": "Regenten",
+    "dat": "Regenten",
+    "gen": "Regenten"
+   },
+   "f": {
+    "g": "f",
+    "nom": "Regentin",
+    "acc": "Regentin",
+    "dat": "Regentin",
+    "gen": "Regentin"
+   }
+  }
+ },
+ "articles": {
+  "def": {
+   "m": {
+    "nom": "der",
+    "acc": "den",
+    "dat": "dem",
+    "gen": "des"
+   },
+   "f": {
+    "nom": "die",
+    "acc": "die",
+    "dat": "der",
+    "gen": "der"
+   },
+   "n": {
+    "nom": "das",
+    "acc": "das",
+    "dat": "dem",
+    "gen": "des"
+   },
+   "pl": {
+    "nom": "die",
+    "acc": "die",
+    "dat": "den",
+    "gen": "der"
+   }
+  },
+  "indef": {
+   "m": {
+    "nom": "ein",
+    "acc": "einen",
+    "dat": "einem",
+    "gen": "eines"
+   },
+   "f": {
+    "nom": "eine",
+    "acc": "eine",
+    "dat": "einer",
+    "gen": "einer"
+   },
+   "n": {
+    "nom": "ein",
+    "acc": "ein",
+    "dat": "einem",
+    "gen": "eines"
+   }
+  },
+  "poss2": {
+   "m": {
+    "nom": "dein",
+    "acc": "deinen",
+    "dat": "deinem",
+    "gen": "deines"
+   },
+   "f": {
+    "nom": "deine",
+    "acc": "deine",
+    "dat": "deiner",
+    "gen": "deiner"
+   },
+   "n": {
+    "nom": "dein",
+    "acc": "dein",
+    "dat": "deinem",
+    "gen": "deines"
+   },
+   "pl": {
+    "nom": "deine",
+    "acc": "deine",
+    "dat": "deinen",
+    "gen": "deiner"
+   }
+  }
+ },
+ "pronouns": {
+  "m": {
+   "subj": "er",
+   "obj.acc": "ihn",
+   "obj.dat": "ihm",
+   "obj": "ihn",
+   "refl": "sich",
+   "poss": "sein"
+  },
+  "f": {
+   "subj": "sie",
+   "obj.acc": "sie",
+   "obj.dat": "ihr",
+   "obj": "sie",
+   "refl": "sich",
+   "poss": "ihr"
+  },
+  "n": {
+   "subj": "es",
+   "obj.acc": "es",
+   "obj.dat": "ihm",
+   "obj": "es",
+   "refl": "sich",
+   "poss": "sein"
+  },
+  "pl": {
+   "subj": "sie",
+   "obj.acc": "sie",
+   "obj.dat": "ihnen",
+   "obj": "sie",
+   "refl": "sich",
+   "poss": "ihr"
+  }
+ },
+ "obj_case": "acc",
+ "poss_endings": {
+  "m": {
+   "nom": "",
+   "acc": "en",
+   "dat": "em",
+   "gen": "es"
+  },
+  "f": {
+   "nom": "e",
+   "acc": "e",
+   "dat": "er",
+   "gen": "er"
+  },
+  "n": {
+   "nom": "",
+   "acc": "",
+   "dat": "em",
+   "gen": "es"
+  },
+  "pl": {
+   "nom": "e",
+   "acc": "e",
+   "dat": "en",
+   "gen": "er"
+  }
+ },
+ "units": {
+  "year": {
+   "one": {
+    "nom": "ein Jahr",
+    "acc": "ein Jahr",
+    "dat": "einem Jahr",
+    "gen": "eines Jahres"
+   },
+   "other": {
+    "nom": "{n} Jahre",
+    "acc": "{n} Jahre",
+    "dat": "{n} Jahren",
+    "gen": "{n} Jahre"
+   }
+  }
+ },
+ "noun_gen_suffix": {
+  "m": "s",
+  "n": "s",
+  "f": "",
+  "pl": ""
+ }
+}

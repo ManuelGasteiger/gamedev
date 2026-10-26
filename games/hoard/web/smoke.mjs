@@ -8,7 +8,13 @@ const data = Object.fromEntries(['constants', 'races', 'reactions', 'regions', '
   .map(k => [k, readFileSync(join(root, 'data', k + '.json'), 'utf8')]));
 for (const k of ['talents', 'defences']) data[k] = readFileSync(join(root, 'data', k + '.json'), 'utf8');   // v0.4 (S1)
 data.hooks = readFileSync(join(root, 'data/hooks.json'), 'utf8');   // v0.4 hooks (S3)
-data.text = readFileSync(join(root, 'data/text/en.json'), 'utf8');
+data.text = readFileSync(join(root, 'data/text/en/narrator.json'), 'utf8');
+data.importance = readFileSync(join(root, 'data/importance.json'), 'utf8');
+data.text_bundles = Object.fromEntries(readdirSync(join(root, 'data/text'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {
+  const b = { lang: d.name };
+  for (const f of readdirSync(join(root, 'data/text', d.name)).filter((f) => f.endsWith('.json')).sort()) b[f.slice(0, -5)] = JSON.parse(readFileSync(join(root, 'data/text', d.name, f), 'utf8'));
+  return [d.name, JSON.stringify(b)];
+}));
 // the event cards, joined in file-name order into one JSON array as data_io.cpp does
 data.events = '[' + readdirSync(join(root, 'data/events')).filter((f) => f.endsWith('.json')).sort()
   .map((f) => readFileSync(join(root, 'data/events', f), 'utf8')).join(',\n') + ']';
@@ -129,6 +135,23 @@ while (remaining > 0) {
 const hashRaze = cmd({ cmd: 'hash' }).hash;
 console.log(`golden raze: wasm ${hashRaze} native ${goldenRaze} ${hashRaze === goldenRaze ? 'MATCH' : 'MISMATCH'}`);
 let ok = hash === golden && hashRaze === goldenRaze;
+
+// node web/smoke.mjs --render-batch tests/text/five.json: the text renderer in wasm; prints the hash `hoard-sim --render-batch` prints
+const ri = process.argv.indexOf('--render-batch');
+if (ri > 0) {
+  const jobs = JSON.parse(readFileSync(process.argv[ri + 1], 'utf8'));
+  const r = cmd({ cmd: 'render_batch', jobs });
+  const bad = r.renders.filter((x, i) => (jobs[i].expect !== undefined && x.text !== jobs[i].expect) || x.problems.length);
+  for (const x of bad) console.log('text mismatch:', x.text, x.problems.join('; '));
+  console.log(`render batch: ${r.renders.length} strings, hash ${r.hash}, ${bad.length} wrong`);
+  ok = ok && bad.length === 0;
+  for (const lang of ['de', 'en']) {   // a refusal worded in the session's language
+    cmd({ cmd: 'lang', lang });
+    const d = cmd({ cmd: 'demand', target: 'nobody', pred: 'tribute' });
+    console.log(`demand refused (${lang}): ${d.reason} -> ${d.reason_text}`);
+    ok = ok && !!d.reason_text && d.reason_text !== d.reason;
+  }
+}
 
 // node web/smoke.mjs --golden 1-60 --out hashes.txt: the state-hash golden, the same lines as `hoard-sim --golden`
 const gi = process.argv.indexOf('--golden');

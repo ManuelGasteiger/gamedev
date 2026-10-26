@@ -6,7 +6,7 @@
 #include "offers.h"
 #include "world_util.h"
 
-// 17.5: the narrator. Every sentence is a template from data/text/en.json filled with names and numbers; a cause clause
+// 17.5: the narrator. Every sentence is a template from data/text/en/narrator.json filled with names and numbers; a cause clause
 // is appended when the event's refs point at an earlier event (a "<cause>@<kind>" text, keyed by the kind of the cited
 // event, wins over the plain cause text). Threads collapse to one paragraph. "While you slept" keeps the events at or
 // above importance_min and every event of a thread that holds one.
@@ -35,6 +35,11 @@ struct Narrator {
     }
     std::string role(const std::string& k) const { auto it = t.roles.find(k); return it == t.roles.end() ? k : it->second; }
     std::string misc(const std::string& k) const { auto it = t.misc.find(k); return it == t.misc.end() ? "" : it->second; }
+    std::string misc_with(const std::string& k, const std::string& token, const std::string& v) const {
+        std::string s = misc(k);
+        replace_all(s, token, v);
+        return s;
+    }
     std::string list(const std::vector<std::string>& v) const {
         std::string s;
         for (size_t i = 0; i < v.size(); ++i) s += (i == 0 ? "" : (i + 1 == v.size() ? misc("and") : ", ")) + v[i];
@@ -120,7 +125,7 @@ struct Narrator {
             for (auto& x : e.tags) if (x.rfind("successor:", 0) == 0) ids.push_back(name(x.substr(10)));
             replace_all(s, "{successors}", list(ids));
         }
-        if (s.find("{led_by}") != std::string::npos) replace_all(s, "{led_by}", e.object.empty() ? "" : ", led by " + name(e.object) + ",");
+        if (s.find("{led_by}") != std::string::npos) replace_all(s, "{led_by}", e.object.empty() ? "" : misc_with("led_by", "{name}", name(e.object)));
         fill_params(s, e.cause.params);
         return s;
     }
@@ -134,7 +139,11 @@ struct Narrator {
 
     std::string brief(const Event& e) const {
         const TextTemplate* tt = tmpl(ages::template_key(e));
-        if (!tt || tt->brief.empty()) return "the " + e.kind + " of " + std::to_string(e.year);
+        if (!tt || tt->brief.empty()) {
+            std::string s = misc_with("brief_fallback", "{kind}", e.kind);
+            replace_all(s, "{year}", std::to_string(e.year));
+            return s;
+        }
         return fill(tt->brief, e);
     }
 
@@ -412,7 +421,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     json opps = json::array();
     for (auto& of : w.offers) {
         std::string s = n.misc("opportunity_offer");
-        Narrator::replace_all(s, "{envoy}", of.envoy.empty() ? "An envoy" : n.name(of.envoy));
+        Narrator::replace_all(s, "{envoy}", of.envoy.empty() ? n.misc("an_envoy") : n.name(of.envoy));
         Narrator::replace_all(s, "{faction}", Narrator::cap(of.from_faction));
         auto ask = p.texts.asks.find(of.kind);
         std::string a = ask == p.texts.asks.end() ? of.kind : ask->second;

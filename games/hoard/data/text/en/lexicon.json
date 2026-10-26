@@ -1,0 +1,252 @@
+{
+ "nouns": {
+  "envoy": {
+   "*": {
+    "g": "n",
+    "nom": "envoy",
+    "gen": "envoy's"
+   }
+  },
+  "hostage": {
+   "*": {
+    "g": "n",
+    "nom": "hostage",
+    "gen": "hostage's"
+   }
+  },
+  "scribe": {
+   "*": {
+    "g": "n",
+    "nom": "scribe",
+    "gen": "scribe's"
+   }
+  },
+  "historian": {
+   "*": {
+    "g": "n",
+    "nom": "historian",
+    "gen": "historian's"
+   }
+  },
+  "heir": {
+   "*": {
+    "g": "n",
+    "nom": "heir",
+    "gen": "heir's"
+   }
+  },
+  "hero": {
+   "*": {
+    "g": "n",
+    "nom": "hero",
+    "gen": "hero's"
+   }
+  },
+  "sage": {
+   "*": {
+    "g": "n",
+    "nom": "sage",
+    "gen": "sage's"
+   }
+  },
+  "priest": {
+   "*": {
+    "g": "n",
+    "nom": "priest",
+    "gen": "priest's"
+   }
+  },
+  "ruler": {
+   "*": {
+    "g": "n",
+    "nom": "ruler",
+    "gen": "ruler's"
+   }
+  },
+  "courtier": {
+   "*": {
+    "g": "n",
+    "nom": "courtier",
+    "gen": "courtier's"
+   }
+  },
+  "thief": {
+   "*": {
+    "g": "n",
+    "nom": "thief",
+    "gen": "thief's"
+   }
+  },
+  "consort": {
+   "*": {
+    "g": "n",
+    "nom": "consort",
+    "gen": "consort's"
+   }
+  },
+  "pretender": {
+   "*": {
+    "g": "n",
+    "nom": "pretender",
+    "gen": "pretender's"
+   }
+  },
+  "liar": {
+   "*": {
+    "g": "n",
+    "nom": "liar",
+    "gen": "liar's"
+   }
+  },
+  "elder": {
+   "*": {
+    "g": "n",
+    "nom": "elder",
+    "gen": "elder's"
+   }
+  },
+  "prophet": {
+   "*": {
+    "g": "n",
+    "nom": "prophet",
+    "gen": "prophet's"
+   }
+  },
+  "reader": {
+   "*": {
+    "g": "n",
+    "nom": "reader",
+    "gen": "reader's"
+   }
+  },
+  "slayer": {
+   "*": {
+    "g": "n",
+    "nom": "slayer",
+    "gen": "slayer's"
+   }
+  },
+  "mason": {
+   "*": {
+    "g": "n",
+    "nom": "mason",
+    "gen": "mason's"
+   }
+  },
+  "regent": {
+   "*": {
+    "g": "n",
+    "nom": "regent",
+    "gen": "regent's"
+   }
+  },
+  "monarch": {
+   "m": {
+    "g": "n",
+    "nom": "king",
+    "gen": "king's"
+   },
+   "f": {
+    "g": "n",
+    "nom": "queen",
+    "gen": "queen's"
+   }
+  },
+  "kin": {
+   "m": {
+    "g": "n",
+    "nom": "kinsman",
+    "gen": "kinsman's"
+   },
+   "f": {
+    "g": "n",
+    "nom": "kinswoman",
+    "gen": "kinswoman's"
+   }
+  },
+  "drillmaster": {
+   "m": {
+    "g": "n",
+    "nom": "drill-master",
+    "gen": "drill-master's"
+   },
+   "f": {
+    "g": "n",
+    "nom": "drill-mistress",
+    "gen": "drill-mistress's"
+   }
+  }
+ },
+ "articles": {
+  "def": {
+   "*": {
+    "*": "the"
+   }
+  },
+  "indef": {
+   "*": {
+    "*": "a"
+   }
+  },
+  "poss2": {
+   "*": {
+    "*": "your"
+   }
+  }
+ },
+ "vowel_forms": {
+  "a": "an"
+ },
+ "vowel_start": "aeiouAEIOU",
+ "vowel_words": [
+  "heir",
+  "hour",
+  "honest",
+  "honour"
+ ],
+ "consonant_words": [
+  "one",
+  "uni",
+  "use",
+  "eu"
+ ],
+ "pronouns": {
+  "m": {
+   "subj": "he",
+   "obj": "him",
+   "poss": "his",
+   "refl": "himself"
+  },
+  "f": {
+   "subj": "she",
+   "obj": "her",
+   "poss": "her",
+   "refl": "herself"
+  },
+  "n": {
+   "subj": "it",
+   "obj": "it",
+   "poss": "its",
+   "refl": "itself"
+  },
+  "pl": {
+   "subj": "they",
+   "obj": "them",
+   "poss": "their",
+   "refl": "themselves"
+  }
+ },
+ "units": {
+  "year": {
+   "one": {
+    "*": "{n} year"
+   },
+   "other": {
+    "*": "{n} years"
+   }
+  }
+ },
+ "noun_gen_suffix": {
+  "*": "'s"
+ }
+}

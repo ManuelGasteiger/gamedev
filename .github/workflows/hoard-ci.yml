@@ -27,6 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: false }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: python for text_lint_seeds
+        shell: bash
+        run: python -m pip install --quiet jsonschema
       - name: configure
         shell: bash
         env: { CC: "${{ matrix.cc }}", CXX: "${{ matrix.cxx }}" }
@@ -36,7 +41,13 @@ jobs:
         run: cmake --build build --config Release -j 4
       - name: fast tests
         shell: bash
-        run: ctest --test-dir build -C Release -L fast --output-on-failure --no-tests=error
+        run: |
+          set +e
+          ctest --test-dir build -C Release -L fast --output-on-failure --no-tests=error > ctest.log 2>&1
+          status=$?
+          cat ctest.log
+          [ $status -eq 0 ] || grep -E "Failed|FAIL|Error|error|Traceback|problem" ctest.log | head -40 | sed 's/^/::error::/'
+          exit $status
       - name: state hashes, seeds 1-60
         shell: bash
         run: |

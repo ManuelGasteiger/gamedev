@@ -128,9 +128,9 @@ bool answer_hook_unrecorded(World& w, const Params& p, const std::string& id, co
     if (dragon_dead(w)) { reason = "dragon_slain"; return false; }
     const Hook* found = nullptr;
     for (auto& h : w.hooks) if (h.id == id) found = &h;
-    if (!found) { reason = "no such hook"; return false; }
-    if (found->choices.empty()) { reason = "this hook is answered by an act"; return false; }
-    if (!contains(found->choices, choice)) { reason = "no such choice"; return false; }
+    if (!found) { reason = "no_hook"; return false; }
+    if (found->choices.empty()) { reason = "hook_by_act"; return false; }
+    if (!contains(found->choices, choice)) { reason = "no_choice"; return false; }
     Hook h = *found;
     drop(w, id);
     resolve(w, p, h, choice);

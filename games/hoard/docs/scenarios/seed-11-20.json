@@ -1,0 +1,1399 @@
+[
+  {
+    "id": "dwarves_ask_for_fire",
+    "kind": "audience",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "arrival": {
+      "who": "envoy",
+      "from": "$hold",
+      "needs": [
+        "court.knows_lair",
+        "court.dares",
+        "court.motive"
+      ]
+    },
+    "roles": {
+      "hold": {
+        "faction": {
+          "race": "dwarf",
+          "era_min": 2,
+          "openness": [
+            0.5,
+            1.0
+          ],
+          "choose": "by_score:wealth"
+        }
+      },
+      "foe": {
+        "faction": {
+          "race": "orc",
+          "choose": "by_score:power"
+        }
+      },
+      "envoy": {
+        "person": {
+          "court": "$hold",
+          "role": "envoy",
+          "choose": "by_score:cunning"
+        },
+        "noun": "envoy",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "hold.at_war == true",
+      "hold.dread <= 0.5"
+    ],
+    "salience": [
+      {
+        "if": "hold.awe >= 0.3",
+        "w": 3
+      },
+      {
+        "if": "dragon.flame >= 8",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:dwarves",
+      "theme:war",
+      "theme:orcs",
+      "faction:$hold",
+      "race:dwarf"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "The dwarves ask for fire",
+      "body": "{envoy.name} of {hold.name} has brought a block of the hold's best steel as a gift and a request written in the Book: the orcs of {foe.name} have the lower galleries, and the hold's forges cannot make a heat that holds them. The dwarves do not ask you to burn anyone. They ask how fire is made to stay.",
+      "because": "{hold.name} is at war with {foe.name} and open enough to ask a dragon for craft."
+    },
+    "options": [
+      {
+        "id": "teach",
+        "label": "Teach their smiths the craft of lasting fire",
+        "act": {
+          "type": "teach",
+          "target": "$hold",
+          "payload": {
+            "subject": "craft"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "gift",
+        "label": "Give them a fire-touched relic",
+        "act": {
+          "type": "give",
+          "target": "$hold",
+          "payload": {
+            "artifacts": 1
+          }
+        }
+      },
+      {
+        "id": "burn",
+        "label": "Burn the orcs out of the galleries yourself",
+        "act": {
+          "type": "burn",
+          "target": "$foe",
+          "magnitude": 0.4
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Keep the steel, give nothing",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "teach": [
+        {
+          "reveal_to_player": "Dwarves who learn fire from a dragon will one day sell engines that reach the clouds."
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:dwarves",
+        "theme:grudge"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "iron/audience/envoy/dwarf",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "quiet_valley",
+    "kind": "omen",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 6,
+      "years": 100
+    },
+    "exclusive_group": null,
+    "roles": {
+      "i1": {
+        "act": {
+          "type": "ignore",
+          "age_wakings": [
+            0,
+            0
+          ]
+        }
+      },
+      "i2": {
+        "act": {
+          "type": "ignore",
+          "age_wakings": [
+            1,
+            1
+          ]
+        }
+      },
+      "i3": {
+        "act": {
+          "type": "ignore",
+          "age_wakings": [
+            2,
+            2
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "dread": [
+            0.0,
+            0.1
+          ],
+          "awe": [
+            0.0,
+            0.1
+          ],
+          "choose": "by_score:wealth"
+        }
+      }
+    },
+    "require": [
+      "world.ignored_streak >= 3",
+      "court.memory_tier <= oral"
+    ],
+    "salience": [
+      {
+        "if": "world.wakings >= 10",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:quiet",
+      "theme:forgetting",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "Nobody is looking at the mountain",
+      "body": "Three wakings, three hooks left where they hung. In {court.name} the children are told the mountain has a dragon in it the way they are told the lake has a woman in it. A shepherd grazes goats on the lower slopes. The valley has stopped watching the sky, and it has stopped building things that point at it, too.",
+      "because": "You have answered nothing for three wakings; what is not seen is not remembered.",
+      "variants": [
+        {
+          "id": "third",
+          "if": "bound(i3)",
+          "body": "Three wakings, three hooks left where they hung. {court.name} tells its children the mountain has a dragon in it the way it tells them the lake has a woman in it. A shepherd grazes goats on your slopes. Nobody is building anything that points at the sky."
+        },
+        {
+          "id": "late_era",
+          "if": "court.era >= 3",
+          "body": "Three wakings, three hooks left where they hung. {court.name} has stone walls and a clock tower now and does not look up at the mountain at all. Nobody is building anything that points at the sky. The engineers have other work."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "show",
+        "label": "Land in their square at noon",
+        "act": {
+          "type": "show",
+          "target": "$court",
+          "payload": {
+            "kind": "land"
+          }
+        }
+      },
+      {
+        "id": "preach",
+        "label": "Walk among them and start a rumour",
+        "act": {
+          "type": "guise",
+          "target": "$court",
+          "payload": {
+            "purpose": "preach"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "ignore",
+        "label": "Let them forget",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "reveal_to_player": "A forgotten dragon's next act is read as a first act; the forgetting is also an opening."
+        }
+      ]
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/omen/quiet",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_mountain",
+    "kind": "lair",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "settlers": {
+        "faction": {
+          "is": "neighbour_of(lair)",
+          "choose": "by_score:awe"
+        },
+        "optional": true
+      }
+    },
+    "require": [
+      "dragon.might >= 400",
+      "dragon.phase >= 4"
+    ],
+    "salience": [
+      {
+        "if": "bound(settlers)",
+        "w": 3
+      },
+      {
+        "if": "dragon.might >= 600",
+        "w": 9
+      }
+    ],
+    "tags": [
+      "theme:mountain",
+      "ending:mountain",
+      "tone:solemn"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "The slopes are your shoulders",
+      "body": "You have not fitted through the cave mouth for a hundred years. Snow stays on your back between wakings now. Goats graze on your tail. If you slept the long sleep here, the valley would build on you and call the mountain by your name, and no engine they ever make would reach your heart.",
+      "because": "Might past a threshold and a long sleep make a dragon into a mountain.",
+      "variants": [
+        {
+          "id": "settlers",
+          "if": "bound(settlers)",
+          "body": "You have not fitted through the cave mouth for a hundred years. {settlers.name} has a village on your lower slopes already; they think it is a hill. If you slept the long sleep here they would build a city on you and call the mountain by your name."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "terraform",
+        "label": "Raise the ground around you and settle in",
+        "act": {
+          "type": "terraform",
+          "target": "$settlers",
+          "payload": {
+            "kind": "mountain"
+          }
+        },
+        "gate": "dragon.might >= 600"
+      },
+      {
+        "id": "demand",
+        "label": "Demand that they come as pilgrims, not squatters",
+        "act": {
+          "type": "demand",
+          "target": "$settlers",
+          "payload": {
+            "clause": "pilgrimage"
+          }
+        },
+        "gate": "bound(settlers)"
+      },
+      {
+        "id": "sleep",
+        "label": "Sleep the long sleep, here, now",
+        "act": {
+          "type": "sleep",
+          "payload": {
+            "years": 3000,
+            "wake_on": []
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Not yet",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "arcane/lair/mountain",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "the_consort",
+    "kind": "lair",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "a": {
+        "act": {
+          "type": "guise",
+          "payload_has": [
+            "purpose"
+          ],
+          "age_wakings": [
+            0,
+            0
+          ]
+        }
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($a.target)"
+        }
+      },
+      "willing": {
+        "person": {
+          "court": "$court",
+          "tag": "willing",
+          "knows_dragon": true,
+          "choose": "most_recent"
+        },
+        "noun": "consort",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "lair.has_consort == false",
+      "willing.trait != craven"
+    ],
+    "salience": [
+      {
+        "if": "willing.trait == bold",
+        "w": 3
+      },
+      {
+        "if": "court.awe >= 0.5",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:consort",
+      "faction:$court",
+      "tone:tender"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{willing.name} has followed you up the mountain",
+      "body": "You walked {court.name}'s streets in a borrowed shape and {willing.name} walked with you, and knew, and came anyway. {willing.subj} is standing at the cave mouth now, with a travelling bag and the expression of someone who has already decided. Mortals age while you sleep. {willing.subj} knows that too.",
+      "because": "You went among them in guise this waking; one of them saw through it and chose you."
+    },
+    "options": [
+      {
+        "id": "keep",
+        "label": "Keep {willing.name} as {willing.noun:poss2}",
+        "act": {
+          "type": "keep",
+          "target": "$willing",
+          "payload": {
+            "role": "consort"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "dismiss",
+        "label": "Send {willing.obj} down the mountain, kindly",
+        "act": {
+          "type": "dismiss",
+          "target": "$willing"
+        }
+      },
+      {
+        "id": "release",
+        "label": "Send {willing.obj} home under your protection",
+        "act": {
+          "type": "release",
+          "target": "$willing",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "dragon",
+                  "pred": "defend"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Leave {willing.obj} at the cave mouth",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "keep": [
+        {
+          "history": {
+            "person": "$willing",
+            "line": "chose_the_dragon",
+            "severity": 3
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:consort",
+        "theme:succession"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/lair/consort",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "false_dragon",
+    "kind": "world",
+    "stakes": "major",
+    "weight": 100,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "roles": {
+      "court": {
+        "faction": {
+          "has_tag": [
+            "false_dragon"
+          ],
+          "choose": "most_recent"
+        }
+      },
+      "pretender": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "tag": "false_dragon",
+          "choose": "most_recent"
+        },
+        "noun": "pretender",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "court.faith_share >= 0.2",
+      "court.awe >= 0.2"
+    ],
+    "salience": [
+      {
+        "if": "court.has_temple == true",
+        "w": 3
+      },
+      {
+        "if": "dragon.dominion >= 8",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:false_dragon",
+      "theme:faith",
+      "faction:$court",
+      "tone:wry"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{pretender.name} speaks for the mountain",
+      "body": "{pretender.name} of {court.name} has announced that the mountain speaks to {pretender.obj} alone, and has raised the tithe in its name. The shrine's offerings go to the palace now. The faithful are uneasy and quiet. The sky has not confirmed or denied anything, which {pretender.name} calls agreement.",
+      "because": "A long absence and a faithful court leave room for someone to hold your worship for you."
+    },
+    "options": [
+      {
+        "id": "judge",
+        "label": "Descend and judge {pretender.noun:def}",
+        "act": {
+          "type": "judge",
+          "target": "$pretender",
+          "payload": {
+            "verdict": "guilty"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "preach",
+        "label": "Walk the city and correct the story",
+        "act": {
+          "type": "guise",
+          "target": "$court",
+          "payload": {
+            "purpose": "preach"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "miracle",
+        "label": "Answer the faithful with a miracle",
+        "act": {
+          "type": "miracle",
+          "target": "$court",
+          "payload": {
+            "kind": "protector"
+          }
+        },
+        "gate": "dragon.dominion >= 3"
+      },
+      {
+        "id": "burn",
+        "label": "Burn the palace that collects your tithe",
+        "act": {
+          "type": "burn",
+          "target": "$court",
+          "magnitude": 0.3
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Let {pretender.noun:def} keep the tithe",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "history": {
+            "person": "$pretender",
+            "line": "unchallenged_by_dragon",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:faith",
+        "theme:false_dragon"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/world/false_dragon",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "envoy_who_lies",
+    "kind": "audience",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 5,
+      "years": 60
+    },
+    "exclusive_group": null,
+    "arrival": {
+      "who": "envoy",
+      "from": "$court",
+      "needs": [
+        "court.knows_lair",
+        "court.dares",
+        "court.motive"
+      ]
+    },
+    "roles": {
+      "court": {
+        "faction": {
+          "at_war": true,
+          "choose": "by_score:power"
+        }
+      },
+      "rival": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "choose": "by_score:power"
+        }
+      },
+      "envoy": {
+        "person": {
+          "court": "$court",
+          "role": "envoy",
+          "is_lie": true,
+          "choose": "by_score:cunning"
+        },
+        "noun": "envoy",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "court.cohesion >= 0.4",
+      "rival.has_slayers == false"
+    ],
+    "salience": [
+      {
+        "if": "envoy.cunning >= 0.7",
+        "w": 3
+      },
+      {
+        "if": "court.dread >= 0.3",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:war",
+      "theme:intrigue",
+      "faction:$court",
+      "faction:$rival"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{envoy.name} brings news of a plot",
+      "body": "{envoy.name} of {court.name} has climbed the pass to warn you: {rival.name} is forging engines to slay you and has sworn it at its altar. {court.name} asks only that you strike first, and offers forty gold a year in gratitude. {envoy.subj} does not meet your eye when naming the altar.",
+      "because": "A court at war with a stronger neighbour has a reason to want you angry at it.",
+      "variants": [
+        {
+          "id": "keen_eyes",
+          "if": "dragon.talents == keen_eyes",
+          "body": "{envoy.name} of {court.name} warns you that {rival.name} is forging engines to slay you. {envoy.noun:def.gen} eyes say otherwise: {rival.name} has no slayers and no engines. {court.name} is losing a war and would like you to win it."
+        },
+        {
+          "id": "dread",
+          "if": "court.dread >= 0.5",
+          "body": "{envoy.name} of {court.name} has climbed the pass and stands as far from the cave as the ledge allows. {rival.name} is forging engines to slay you, {envoy.noun:def} says, too quickly, and {court.name} would pay forty gold a year to see them burned first. The hands shake. The story does not."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "swear",
+        "label": "Swear to burn the rival for forty a year",
+        "act": {
+          "type": "swear",
+          "target": "$court",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "dragon",
+                  "pred": "no_harm"
+                },
+                {
+                  "who": "them",
+                  "pred": "tribute"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "reveal",
+        "label": "Name the lie to {envoy.noun:def.gen} face",
+        "act": {
+          "type": "reveal",
+          "target": "$court",
+          "payload": {
+            "secret": "lie",
+            "about": "$envoy"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "eat",
+        "label": "Eat {envoy.noun:liar.def}",
+        "act": {
+          "type": "kill",
+          "target": "$envoy",
+          "magnitude": 0.05
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Send {envoy.noun:def} home with no answer",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "reveal": [
+        {
+          "history": {
+            "person": "$envoy",
+            "line": "caught_lying_to_dragon",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/envoy",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "refugee_column",
+    "kind": "audience",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 4,
+      "years": 40
+    },
+    "exclusive_group": null,
+    "arrival": {
+      "who": "refugee",
+      "from": "$lost",
+      "needs": [
+        "court.lost_region",
+        "court.awe_min"
+      ]
+    },
+    "roles": {
+      "lost": {
+        "faction": {
+          "awe": [
+            0.1,
+            1.0
+          ],
+          "choose": "most_recent"
+        }
+      },
+      "taker": {
+        "faction": {
+          "is": "neighbour_of($lost)",
+          "at_war": true,
+          "choose": "by_score:power"
+        }
+      },
+      "empty": {
+        "region": {
+          "owner": "none",
+          "terrain": [
+            "vale",
+            "marches",
+            "fen"
+          ],
+          "choose": "random"
+        },
+        "optional": true
+      },
+      "elder": {
+        "person": {
+          "court": "$lost",
+          "role": "sage",
+          "choose": "by_score:age"
+        },
+        "noun": "elder",
+        "sex": "any",
+        "optional": true
+      }
+    },
+    "require": [
+      "lost.cohesion <= 0.5",
+      "taker.dread <= 0.6"
+    ],
+    "salience": [
+      {
+        "if": "bound(empty)",
+        "w": 3
+      },
+      {
+        "if": "lost.awe >= 0.3",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:refugees",
+      "theme:war",
+      "faction:$lost",
+      "faction:$taker",
+      "tone:solemn"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "A column on the pass road",
+      "body": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. {taker.name} has their valley. They have come to the mountain because the mountain is the one thing in the valley {taker.name} is afraid of. They will plant anywhere you point.",
+      "because": "{lost.name} lost its land to {taker.name} and holds you in some awe; the mountain is the last door.",
+      "variants": [
+        {
+          "id": "elder",
+          "if": "bound(elder)",
+          "body": "Two hundred of {lost.name}'s people are on the road below, led by {elder.name}, who remembers when you last flew over {lost.name} and has been telling the children about it for a week to keep them walking. They will plant anywhere you point."
+        },
+        {
+          "id": "orc_taker",
+          "if": "taker.race == orc",
+          "body": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. The orcs of {taker.name} have their valley and, by the smoke, their harvest. They have come to the mountain because the orcs will not. They will plant anywhere you point."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "receive",
+        "label": "Let them settle your slopes",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "receive"
+          }
+        }
+      },
+      {
+        "id": "land",
+        "label": "Give them the empty vale",
+        "act": {
+          "type": "give",
+          "target": "$lost",
+          "payload": {
+            "region": "$empty"
+          }
+        },
+        "gate": "bound(empty)"
+      },
+      {
+        "id": "defend",
+        "label": "Take their valley back for them",
+        "act": {
+          "type": "defend",
+          "target": "$lost",
+          "secondary": "$taker"
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Turn them away",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "turn_away"
+          }
+        }
+      },
+      {
+        "id": "skip",
+        "label": "Do nothing; they will move on",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:refugees",
+        "theme:exile"
+      ],
+      "after_wakings": 2
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/refugee",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "prophet_with_the_prophecy",
+    "kind": "audience",
+    "stakes": "major",
+    "weight": 50,
+    "once": "run",
+    "cooldown": null,
+    "exclusive_group": null,
+    "arrival": {
+      "who": "prophet",
+      "from": "$court",
+      "needs": [
+        "court.knows_prophecy",
+        "court.awe_min"
+      ]
+    },
+    "roles": {
+      "court": {
+        "faction": {
+          "knows_prophecy": true,
+          "piety": [
+            0.5,
+            1.0
+          ],
+          "choose": "by_score:piety"
+        }
+      },
+      "prophet": {
+        "person": {
+          "court": "$court",
+          "role": "priest",
+          "trait": "devout",
+          "choose": "by_score:renown"
+        },
+        "noun": "prophet",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "court.awe >= 0.3",
+      "world.prophecy_ending == ascension"
+    ],
+    "salience": [
+      {
+        "if": "court.has_temple == true",
+        "w": 3
+      },
+      {
+        "if": "world.chronicle_level <= 1",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:prophecy",
+      "theme:faith",
+      "ending:ascension",
+      "faction:$court",
+      "tone:solemn"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{prophet.name} has read the lines",
+      "body": "{prophet.name} of {court.name} has walked up the mountain with the book open. {prophet.subj} has read the prophecy forty times and believes it is about you and about now. {prophet.subj} wants to tell you what the four peoples and the house of stone mean, and what {court.name} must build. {prophet.subj} also wants to be the one living voice.",
+      "because": "{court.name} holds the prophecy and holds you in awe; a devout priest draws the obvious conclusion."
+    },
+    "options": [
+      {
+        "id": "receive",
+        "label": "Hear {prophet.noun:def} out",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "receive"
+          }
+        }
+      },
+      {
+        "id": "teach",
+        "label": "Teach {prophet.noun:def} what dragons really are",
+        "act": {
+          "type": "teach",
+          "target": "$prophet",
+          "payload": {
+            "subject": "dragon_lore"
+          }
+        },
+        "gate": "dragon.lore >= 8"
+      },
+      {
+        "id": "keep",
+        "label": "Keep {prophet.noun:def} as {prophet.noun:priest.poss2}",
+        "act": {
+          "type": "keep",
+          "target": "$prophet",
+          "payload": {
+            "role": "priest"
+          }
+        },
+        "gate": "dragon.dominion >= 3"
+      },
+      {
+        "id": "ignore",
+        "label": "Send the book and {prophet.noun:reader.def} home",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "receive": [
+        {
+          "reveal_to_player": "{prophet.noun:def.gen} reading of the four conditions is shown on the Endings page from now on, with {prophet.poss} bias."
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:prophecy",
+        "theme:cult"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/prophet",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "kin_of_a_hostage",
+    "kind": "audience",
+    "stakes": "minor",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 3,
+      "years": 30
+    },
+    "exclusive_group": null,
+    "arrival": {
+      "who": "kin",
+      "from": "$court",
+      "needs": [
+        "court.kin_alive",
+        "court.knows_lair",
+        "court.motive"
+      ]
+    },
+    "roles": {
+      "hostage": {
+        "person": {
+          "court": "lair",
+          "role": "hostage",
+          "choose": "by_score:renown"
+        },
+        "noun": "hostage",
+        "sex": "any"
+      },
+      "court": {
+        "faction": {
+          "is": "owner_of($hostage)"
+        }
+      },
+      "kin": {
+        "person": {
+          "court": "$court",
+          "role": "ruler",
+          "choose": "most_recent"
+        },
+        "noun": "kin",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "court.dread <= 0.7",
+      "hostage.age >= 12"
+    ],
+    "salience": [
+      {
+        "if": "kin.trait == bold",
+        "w": 3
+      },
+      {
+        "if": "court.awe >= 0.3",
+        "w": 1
+      }
+    ],
+    "tags": [
+      "theme:hostage",
+      "theme:succession",
+      "faction:$court",
+      "tone:tender"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{kin.name} has come for {hostage.name}",
+      "body": "{kin.name} of {court.name} has come up the pass alone, which took some courage, and stands at the ledge asking to see {hostage.name}. {kin.subj} has brought a ransom and a speech. The speech is about how long {hostage.name} has been gone and how the court needs {hostage.noun:heir.def}. The ransom is less than you would have asked.",
+      "because": "{kin.name} knows where you are and is not too afraid to come.",
+      "variants": [
+        {
+          "id": "bold",
+          "if": "kin.trait == bold",
+          "body": "{kin.name} of {court.name} has come up the pass alone and stands at the ledge demanding, not asking, to see {hostage.name}. {kin.subj} has brought a ransom and no speech. The ransom is fair."
+        },
+        {
+          "id": "awe",
+          "if": "court.awe >= 0.3",
+          "body": "{kin.name} of {court.name} has come up the pass with a small offering for the shrine and a larger one for you, and asks to see {hostage.name} before anything is said about ransom. {kin.subj} kneels at the ledge, which {hostage.name} finds very funny."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "release",
+        "label": "Take the ransom and release {hostage.noun:def}",
+        "act": {
+          "type": "release",
+          "target": "$hostage",
+          "payload": {
+            "terms": {
+              "parties": [
+                "dragon",
+                "$court"
+              ],
+              "clauses": [
+                {
+                  "who": "them",
+                  "pred": "tribute"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "demand",
+        "label": "Name a higher price",
+        "act": {
+          "type": "demand",
+          "target": "$court",
+          "payload": {
+            "clause": "tribute"
+          }
+        },
+        "gate": "dragon.lore >= 3"
+      },
+      {
+        "id": "keep",
+        "label": "Keep {hostage.noun:def}; let {kin.noun:def} see {hostage.obj}",
+        "act": {
+          "type": "receive",
+          "payload": {
+            "outcome": "receive",
+            "who": "$kin"
+          }
+        }
+      },
+      {
+        "id": "ignore",
+        "label": "Send {kin.noun:def} away without seeing {hostage.name}",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "followup": {
+      "seek": [
+        "theme:hostage"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/kin",
+      "bank": "seed",
+      "reviewed": true
+    }
+  },
+  {
+    "id": "slayer_at_the_ledge",
+    "kind": "audience",
+    "stakes": "major",
+    "weight": 100,
+    "once": "never",
+    "cooldown": {
+      "wakings": 4,
+      "years": 50
+    },
+    "exclusive_group": "hero_challenge",
+    "arrival": {
+      "who": "hero",
+      "from": "$court",
+      "needs": [
+        "court.order_alive",
+        "court.grievance",
+        "court.knows_lair_exact"
+      ]
+    },
+    "roles": {
+      "court": {
+        "faction": {
+          "has_slayers": true,
+          "choose": "by_score:dread"
+        }
+      },
+      "slayer": {
+        "person": {
+          "court": "$court",
+          "role": "hero",
+          "tag": "slayer",
+          "choose": "by_score:renown"
+        },
+        "noun": "slayer",
+        "sex": "any"
+      }
+    },
+    "require": [
+      "court.slayer_stage >= forming",
+      "dragon.health >= 60"
+    ],
+    "salience": [
+      {
+        "if": "slayer.renown >= 0.7",
+        "w": 3
+      },
+      {
+        "if": "court.slayer_stage == ready",
+        "w": 3
+      }
+    ],
+    "tags": [
+      "theme:slayers",
+      "faction:$court",
+      "tone:grim"
+    ],
+    "text": {
+      "lang": "en",
+      "headline": "{slayer.name} asks for single combat",
+      "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate with a sealed letter from the grandmaster and a challenge: fight here, now, one against one, and whoever lives keeps the mountain. {slayer.subj} has a burn scar down one side that did not come from you. Not yet.",
+      "because": "An order with a grievance and your exact location sends its best before it sends everyone.",
+      "variants": [
+        {
+          "id": "order_ready",
+          "if": "court.slayer_stage == ready",
+          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate while the rest of the order waits a day's march back, ready. The challenge is single combat, here, now. If you refuse, {slayer.subj} says, they all come, and soon."
+        },
+        {
+          "id": "wounded",
+          "if": "dragon.wounds_share >= 0.3",
+          "body": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate and has clearly been told you are hurt. The challenge is single combat, here, now. {slayer.subj} looks at the way you hold your wing and smiles."
+        }
+      ]
+    },
+    "options": [
+      {
+        "id": "fight",
+        "label": "Accept",
+        "act": {
+          "type": "fight",
+          "target": "$slayer"
+        }
+      },
+      {
+        "id": "haunt",
+        "label": "Fill {slayer.noun:def.gen} night with what fire does",
+        "act": {
+          "type": "haunt",
+          "target": "$slayer",
+          "payload": {
+            "message": "nightmare"
+          }
+        },
+        "gate": "dragon.arcana >= 15"
+      },
+      {
+        "id": "reveal",
+        "label": "Tell {slayer.noun:def} what the order plans for {slayer.obj}",
+        "act": {
+          "type": "reveal",
+          "target": "$court",
+          "payload": {
+            "secret": "slayer_plan",
+            "about": "$slayer"
+          }
+        },
+        "gate": "dragon.lore >= 15"
+      },
+      {
+        "id": "ignore",
+        "label": "Leave the challenge on the ledge",
+        "act": {
+          "type": "ignore",
+          "target": "$self"
+        }
+      }
+    ],
+    "outcomes": {
+      "ignore": [
+        {
+          "history": {
+            "person": "$slayer",
+            "line": "challenge_refused_by_dragon",
+            "severity": 2
+          }
+        }
+      ]
+    },
+    "followup": {
+      "seek": [
+        "theme:slayers"
+      ],
+      "after_wakings": 1
+    },
+    "provenance": {
+      "gen": "hand",
+      "model": "",
+      "cell": "any/audience/hero",
+      "bank": "seed",
+      "reviewed": true
+    }
+  }
+]

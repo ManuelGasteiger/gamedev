@@ -46,18 +46,18 @@ function wakeHtml(w) {
     people.push(escapeHtml(p.text));
   }
   const threads = (b.threads ?? []).filter((t) => t.kind !== 'hostage').map((t) => `<span class="tk">${THREAD_WORD[t.kind] ?? t.kind}</span> ${escapeHtml(t.text)}`);
-  const opps = (b.opportunities ?? []).map((o, i) => `${escapeHtml(o.text)} <button class="go" data-go="${i}" title="${o.kind === 'offer' ? 'land at the lair and hear the envoy' : 'fly there'}">go</button>`);
+  const opps = (b.opportunities ?? []).map((o, i) => `${escapeHtml(o.text)} <button class="go" data-go="${i}" title="${o.kind === 'offer' ? t('wake.go.envoy', 'land at the lair and hear the envoy') : t('wake.go.fly', 'fly there')}">${t('wake.go', 'go')}</button>`);
   const hungry = w.wake_reason === 'hunger' ? ' Starving: the dragon wakes smaller and weaker.' : '';
   return `<article class="page">
-    <div class="kicker"><span>While you slept</span><span class="sep">·</span><span>year ${w.from} to ${w.to}</span><span class="sep">·</span><span>woke: ${reason}</span><span class="spacer"></span><button id="wake-skip" class="ghost" title="Enter or Esc">begin ⏎</button></div>
+    <div class="kicker"><span>${t('wake.slept', 'While you slept')}</span><span class="sep">·</span><span>${tf('wake.span', 'year {w.from} to {w.to}', { roles: { w: { fields: { from: String(w.from), to: String(w.to) } } } })}</span><span class="sep">·</span><span>${t('wake.woke', 'woke:')} ${reason}</span><span class="spacer"></span><button id="wake-skip" class="ghost" title="${t('wake.begin.title', 'Enter or Esc')}">${t('wake.begin', 'begin ⏎')}</button></div>
     ${hooksWakeHtml(w)}
     <h2 class="headline">${escapeHtml(b.headline?.text ?? TEXT.misc?.headline_none ?? 'A quiet age.')}</h2>
     <div class="dragonline">You slept ${yearsNum(w.years_slept)}.${hungry}${w.atrophy ? ` Atrophy −${fmt(w.atrophy, 3)} size.` : ''} ${growthHtml(w.growth)}<br>${escapeHtml(rhythmLine(phaseInfo()))}${phaseInfo().stiff ? ' You woke stiff from the moult: this raid\'s stamina is halved.' : ''}</div>
     <section class="slept">${groups || `<div class="row2"><div class="margin">${w.from}–${w.to}</div><p class="quiet">${escapeHtml(TEXT.misc?.quiet ?? 'Nothing the chroniclers thought worth a line.')}</p></div>`}</section>
     ${armsWakeHtml(w)}
     ${growthWakeHtml(w)}
-    <section><div class="row2"><div class="margin">people</div>${wakeListHtml(people, 'No one you know died, rose or was crowned.')}</div></section>
-    <section><div class="row2"><div class="margin">threads</div>${wakeListHtml(threads, 'No oaths, spells or remnants are running.')}</div></section>
+    <section><div class="row2"><div class="margin">${t('wake.people', 'people')}</div>${wakeListHtml(people, 'No one you know died, rose or was crowned.')}</div></section>
+    <section><div class="row2"><div class="margin">${t('wake.threads', 'threads')}</div>${wakeListHtml(threads, 'No oaths, spells or remnants are running.')}</div></section>
     <section><div class="row2"><div class="margin">opportunities</div>${wakeListHtml(opps, 'Nothing calls for you.')}</div></section>
     <footer><button id="wake-ok" class="primary">Begin the raid</button><span class="muted">Enter or Esc · “Last sleep” in the bar reopens this page · ${w.offers ?? 0} envoys on their way · stamina ${w.stamina ?? play.stamina}</span></footer>
   </article>`;

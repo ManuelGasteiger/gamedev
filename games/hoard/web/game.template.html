@@ -25,7 +25,7 @@
   .hidden { display: none !important; }
 
   /* HUD */
-  #hud { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 11px; align-items: center; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 5; overflow: hidden; }
+  #hud { position: fixed; top: 0; left: 0; right: 0; display: flex; flex-wrap: wrap; gap: 4px 11px; align-items: center; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 5; overflow: hidden; }
   #hud h1 { font-size: 15px; margin: 0 6px 0 0; letter-spacing: .04em; }
   #hud .stat { color: var(--dim); white-space: nowrap; }
   #hud .stat.warn b { color: var(--bad); }
@@ -51,8 +51,8 @@
   #legend { position: fixed; left: 10px; bottom: 10px; z-index: 5; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; font-size: 11px; color: var(--dim); width: 224px; line-height: 1.6; overflow: hidden; }
   #legend b { color: var(--fg); font-weight: 600; }
   #legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; border: 1px solid #0006; }
-  #legend .row { display: block; margin: 0; white-space: nowrap; }
-  #legend .row span.it { margin-right: 8px; }
+  #legend .row { display: block; margin: 0; }
+  #legend .row span.it { margin-right: 8px; white-space: nowrap; display: inline-block; }
   #legend-toggle { position: fixed; left: 10px; bottom: 10px; z-index: 5; font-size: 11px; padding: 2px 7px; }
   #ticker { color: var(--fg); font-size: 13px; margin-top: 2px; min-height: 18px; text-shadow: 0 1px 3px #000; }
 
@@ -87,7 +87,7 @@
   #floats { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
   .float { position: absolute; transform: translate(-50%, -50%); font-weight: 600; font-size: 10.5px; text-shadow: 0 1px 3px #000; white-space: nowrap; }
   .float.fear { color: var(--fear); } .float.faith { color: var(--faith); } .float.wealth { color: var(--wealth); } .float.info { color: var(--fg); }
-  #toasts { position: fixed; top: 48px; left: 12px; width: 360px; z-index: 7; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+  #toasts { position: fixed; top: calc(var(--hud-h, 38px) + 10px); left: 12px; width: 360px; z-index: 7; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
   .toast { background: var(--panel); border-left: 3px solid var(--accent); padding: 5px 8px; border-radius: 3px; font-size: 12px; opacity: 0; animation: toast 5s forwards; }
   .toast.bad { border-left-color: var(--bad); }
   .toast .y { color: var(--dim); font-family: ui-monospace, monospace; margin-right: 6px; }
@@ -123,7 +123,7 @@
   #lair-foot { flex-wrap: wrap; } #lair-foot .lair-narr { color: #efe7d4; font-family: Georgia, 'Palatino Linotype', 'DejaVu Serif', serif; font-size: 13px; }
 
   /* montage */
-  #montage-hud { position: fixed; top: 44px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 9; pointer-events: none; }
+  #montage-hud { position: fixed; top: calc(var(--hud-h, 38px) + 6px); left: 50%; transform: translateX(-50%); text-align: center; z-index: 9; pointer-events: none; }
   #montage-hud .year { font-size: 34px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 2px 6px #000; }
   #montage-hud .hint { color: var(--dim); font-size: 12px; }
   #montage-ctl { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 9; background: var(--panel); padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
@@ -157,7 +157,7 @@
   #narration .nl.react { border-left-color: #555b68; margin-left: 16px; color: #cfd3dc; }
   #narration .nl em { font-style: normal; font-weight: 600; margin: 0 2px; }
   .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: 0; border: 1px solid #0006; }
-  #side { position: fixed; top: 46px; right: 10px; width: 300px; z-index: 5; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  #side { position: fixed; top: calc(var(--hud-h, 38px) + 8px); right: 10px; width: 300px; z-index: 5; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
   #side .card { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; font-size: 12px; overflow: auto; min-height: 0; flex: 0 1 auto; }
   #side .card h3, .box h3.plain { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); }
   #side #court h3 { color: var(--fg); }
@@ -190,7 +190,7 @@
   #hud #h-phase-stat.ready b, #hud #h-phase-note { color: var(--accent); }
 
   /* chronicle drawer */
-  #chron { position: fixed; top: 38px; right: 0; bottom: 0; width: 420px; background: var(--panel); border-left: 1px solid var(--line); z-index: 6; display: flex; flex-direction: column; }
+  #chron { position: fixed; top: calc(var(--hud-h, 38px) + 0px); right: 0; bottom: 0; width: 420px; background: var(--panel); border-left: 1px solid var(--line); z-index: 6; display: flex; flex-direction: column; }
   #chron .head { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); align-items: center; }
   #chron .head input { flex: 1; }
   #chron .list { overflow: auto; flex: 1; padding: 6px 8px; }
@@ -209,26 +209,26 @@
 
 <div id="hud">
   <h1>HOARD</h1>
-  <span class="stat">year <b id="h-year">0</b></span>
-  <span class="stat">age <b id="h-age">1</b></span>
-  <span class="stat">stamina <span class="bar"><i id="h-stamina-bar"></i></span> <b id="h-stamina">0</b></span>
-  <span class="stat hidden" id="h-health-stat">health <span class="bar health"><i id="h-health-bar"></i></span> <b id="h-health">0</b></span>
-  <span class="stat">size <b id="h-size">0</b></span>
-  <span class="stat">knowledge <b id="h-knowledge">0</b></span>
-  <span class="stat">magic <b id="h-magic">0</b></span>
-  <span class="stat">faith <b id="h-faith">0</b></span>
-  <span class="stat" id="h-hunger-stat">hunger <span class="bar hunger"><i id="h-hunger-bar"></i></span> <b id="h-hunger">0</b></span>
-  <span class="stat">threat <b id="h-threat">0</b></span>
+  <span class="stat"><span data-t="hud.year">year</span> <b id="h-year">0</b></span>
+  <span class="stat"><span data-t="hud.age">age</span> <b id="h-age">1</b></span>
+  <span class="stat"><span data-t="hud.stamina">stamina</span> <span class="bar"><i id="h-stamina-bar"></i></span> <b id="h-stamina">0</b></span>
+  <span class="stat hidden" id="h-health-stat"><span data-t="hud.health">health</span> <span class="bar health"><i id="h-health-bar"></i></span> <b id="h-health">0</b></span>
+  <span class="stat"><span data-t="hud.size">size</span> <b id="h-size">0</b></span>
+  <span class="stat"><span data-t="hud.knowledge">knowledge</span> <b id="h-knowledge">0</b></span>
+  <span class="stat"><span data-t="hud.magic">magic</span> <b id="h-magic">0</b></span>
+  <span class="stat"><span data-t="hud.faith">faith</span> <b id="h-faith">0</b></span>
+  <span class="stat" id="h-hunger-stat"><span data-t="hud.hunger">hunger</span> <span class="bar hunger"><i id="h-hunger-bar"></i></span> <b id="h-hunger">0</b></span>
+  <span class="stat"><span data-t="hud.threat">threat</span> <b id="h-threat">0</b></span>
   <span class="chips hidden" id="h-growth"></span>
-  <button id="h-picks" class="picks hidden" title="choose a talent">talent ready</button>
+  <button id="h-picks" class="picks hidden" data-t-title="hud.picks.title" title="choose a talent" data-t="hud.picks">talent ready</button>
   <span class="stat" id="h-phase-stat"><b id="h-phase">hatchling</b> <span class="bar phase"><i id="h-phase-bar"></i></span> <span id="h-phase-note"></span></span>
   <span class="stat" id="h-tags"></span>
   <span class="spacer"></span>
   <span id="status">loading</span>
-  <button id="btn-last" title="the last wake briefing">Last sleep</button>
-  <button id="btn-land" title="land at the lair (L)">Land</button>
-  <button id="btn-chron" title="the chronicle (C)">Chronicle</button>
-  <button id="btn-system">Game</button>
+  <button id="btn-last" data-t-title="hud.last.title" title="the last wake briefing" data-t="hud.last">Last sleep</button>
+  <button id="btn-land" data-t-title="hud.land.title" title="land at the lair (L)" data-t="hud.land">Land</button>
+  <button id="btn-chron" data-t-title="hud.chron.title" title="the chronicle (C)" data-t="hud.chron">Chronicle</button>
+  <button id="btn-system" data-t="hud.game">Game</button>
 </div>
 
 <div id="labels"></div>
@@ -237,36 +237,36 @@
 <div id="narration" class="hidden"></div>
 <div id="side"><div id="hooks" class="card hidden"></div><div id="tasks" class="card hidden"></div><div id="court" class="card hidden"></div></div>
 <div id="legend">
-  <b>Legend</b> <span class="muted" style="float:right;cursor:pointer;pointer-events:auto" id="legend-hide">hide</span>
-  <div class="row"><span class="it"><span class="sw" style="background:hsl(30 55% 50%)"></span>human</span><span class="it"><span class="sw" style="background:hsl(210 55% 50%)"></span>dwarf</span><span class="it"><span class="sw" style="background:hsl(120 55% 45%)"></span>elf</span><span class="it"><span class="sw" style="background:hsl(0 55% 50%)"></span>orc</span></div>
-  <div class="row"><span class="it"><span class="sw" style="background:hsl(280 55% 50%)"></span>undead</span><span class="it"><span class="sw" style="background:#e0b24a"></span>capital ring</span><span class="it"><span class="sw" style="background:#f0d9b5"></span>envoy</span></div>
-  <div class="row"><span class="it"><span class="sw" style="background:#151515"></span>burn (char)</span><span class="it"><span class="sw" style="background:#ff8a2a"></span>flames</span><span class="it"><span class="sw" style="background:#6b6b66"></span>wasteland</span></div>
-  <div class="row"><span class="it"><span class="sw" style="background:#ff4040"></span>war arrow</span><span class="it"><span class="sw" style="background:#fff"></span>army cubes</span><span class="it"><span class="sw" style="background:#3a5a2a"></span>plague</span></div>
-  <div class="row"><span class="it"><span class="sw" style="background:#5ea0ff"></span>ward</span><span class="it"><span class="sw" style="background:#fff0a0"></span>bless</span><span class="it"><span class="sw" style="background:#8a3ad0"></span>curse</span><span class="it"><span class="sw" style="background:#c9b58a"></span>remnant camp</span></div>
-  <div class="row hidden" id="legend-v04"><span class="it"><span class="sw" style="background:#ff4a32"></span>tower range</span><span class="it"><span class="sw" style="background:#5ea0ff"></span>ward dome</span><span class="it" id="legend-hook"><span class="sw" style="background:#ffc940"></span>hook</span></div>
-  <div class="row muted">tile ring = owner · flag = overlord</div>
+  <b data-t="legend.title">Legend</b> <span class="muted" style="float:right;cursor:pointer;pointer-events:auto" id="legend-hide" data-t="legend.hide">hide</span>
+  <div class="row"><span class="it"><span class="sw" style="background:hsl(30 55% 50%)"></span><span data-t="legend.human">human</span></span><span class="it"><span class="sw" style="background:hsl(210 55% 50%)"></span><span data-t="legend.dwarf">dwarf</span></span><span class="it"><span class="sw" style="background:hsl(120 55% 45%)"></span><span data-t="legend.elf">elf</span></span><span class="it"><span class="sw" style="background:hsl(0 55% 50%)"></span><span data-t="legend.orc">orc</span></span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:hsl(280 55% 50%)"></span><span data-t="legend.undead">undead</span></span><span class="it"><span class="sw" style="background:#e0b24a"></span><span data-t="legend.capital">capital ring</span></span><span class="it"><span class="sw" style="background:#f0d9b5"></span><span data-t="legend.envoy">envoy</span></span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#151515"></span><span data-t="legend.burn">burn (char)</span></span><span class="it"><span class="sw" style="background:#ff8a2a"></span><span data-t="legend.flames">flames</span></span><span class="it"><span class="sw" style="background:#6b6b66"></span><span data-t="legend.wasteland">wasteland</span></span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#ff4040"></span><span data-t="legend.war">war arrow</span></span><span class="it"><span class="sw" style="background:#fff"></span><span data-t="legend.armies">army cubes</span></span><span class="it"><span class="sw" style="background:#3a5a2a"></span><span data-t="legend.plague">plague</span></span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#5ea0ff"></span><span data-t="legend.ward">ward</span></span><span class="it"><span class="sw" style="background:#fff0a0"></span><span data-t="legend.bless">bless</span></span><span class="it"><span class="sw" style="background:#8a3ad0"></span><span data-t="legend.curse">curse</span></span><span class="it"><span class="sw" style="background:#c9b58a"></span><span data-t="legend.camp">remnant camp</span></span></div>
+  <div class="row hidden" id="legend-v04"><span class="it"><span class="sw" style="background:#ff4a32"></span><span data-t="legend.towers">tower range</span></span><span class="it"><span class="sw" style="background:#5ea0ff"></span><span data-t="legend.dome">ward dome</span></span><span class="it" id="legend-hook"><span class="sw" style="background:#ffc940"></span><span data-t="legend.hook">hook</span></span></div>
+  <div class="row muted" data-t="legend.rings">tile ring = owner · flag = overlord</div>
 </div>
-<button id="legend-toggle" class="hidden">Legend</button>
+<button id="legend-toggle" class="hidden" data-t="legend.title">Legend</button>
 
-<div id="montage-hud" class="hidden"><div class="year" id="m-year">0</div><div class="hint" id="m-hint">Space pause · + / - speed · Esc skip</div><div id="ticker"></div></div>
+<div id="montage-hud" class="hidden"><div class="year" id="m-year">0</div><div class="hint" id="m-hint" data-t="montage.hint">Space pause · + / - speed · Esc skip</div><div id="ticker"></div></div>
 <div id="montage-ctl" class="hidden">
-  <button id="m-pause">Pause</button><button id="m-slower">-</button><span id="m-speed" class="muted" style="align-self:center">20 y/s</span><button id="m-faster">+</button><button id="m-skip" class="primary">Skip to wake (Esc)</button>
+  <button id="m-pause" data-t="montage.pause">Pause</button><button id="m-slower">-</button><span id="m-speed" class="muted" style="align-self:center">20 y/s</span><button id="m-faster">+</button><button id="m-skip" class="primary" data-t="montage.skip">Skip to wake (Esc)</button>
 </div>
 <div id="wake" class="overlay hidden"></div>
 
 <div id="chron" class="hidden">
-  <div class="head"><b>Chronicle</b><input id="chron-filter" type="text" placeholder="filter (kind, faction, region, text)"><button id="chron-close">×</button></div>
+  <div class="head"><b data-t="chron.title">Chronicle</b><input id="chron-filter" type="text" data-t-placeholder="chron.filter" placeholder="filter (kind, faction, region, text)"><button id="chron-close">×</button></div>
   <div class="list" id="chron-list"></div>
 </div>
 
 <div id="lair" class="overlay hidden">
   <div class="sheet">
-    <header><h2>The lair</h2><span class="muted" id="lair-year"></span>
+    <header><h2 data-t="lair.title">The lair</h2><span class="muted" id="lair-year"></span>
       <div class="tabs" id="lair-tabs">
-        <button data-tab="hoard" class="on">Hoard</button><button data-tab="growth" id="lair-tab-growth" class="hidden">Growth</button><button data-tab="envoys">Envoys</button><button data-tab="oaths">Oaths and tasks</button>
-        <button data-tab="known">Known people</button><button data-tab="spells">Spells</button><button data-tab="sleep">Sleep</button><button data-tab="chronicle">Chronicle</button>
+        <button data-tab="hoard" class="on" data-t="lair.tab.hoard">Hoard</button><button data-tab="growth" id="lair-tab-growth" class="hidden" data-t="lair.tab.growth">Growth</button><button data-tab="envoys" data-t="lair.tab.envoys">Envoys</button><button data-tab="oaths" data-t="lair.tab.oaths">Oaths and tasks</button>
+        <button data-tab="known" data-t="lair.tab.known">Known people</button><button data-tab="spells" data-t="lair.tab.spells">Spells</button><button data-tab="sleep" data-t="lair.tab.sleep">Sleep</button><button data-tab="chronicle" data-t="lair.tab.chronicle">Chronicle</button>
       </div>
-      <span class="spacer" style="flex:1"></span><button id="lair-takeoff">Take off</button>
+      <span class="spacer" style="flex:1"></span><button id="lair-takeoff" data-t="lair.takeoff">Take off</button>
     </header>
     <div class="body" id="lair-body"></div>
     <footer class="muted" id="lair-foot"></footer>
@@ -275,25 +275,25 @@
 
 <div id="system" class="overlay hidden">
   <div class="sheet" style="width:620px">
-    <header><h2>Game</h2><span class="spacer" style="flex:1"></span><button id="system-close">Close</button></header>
+    <header><h2 data-t="game.title">Game</h2><span class="spacer" style="flex:1"></span><button id="system-close" data-t="game.close">Close</button></header>
     <div class="body">
-      <div class="box"><h3>New world</h3>
-        <div class="row" id="seed-row"><label>seed <input id="seed" type="number" value="1"></label><button id="new-game" class="danger">New world</button><span class="muted">a new valley and its history; the autosave is replaced</span><button id="btn-legends" class="hidden">Legends</button></div>
+      <div class="box"><h3 data-t="game.new.title">New world</h3>
+        <div class="row" id="seed-row"><label><span data-t="game.seed">seed</span> <input id="seed" type="number" value="1"></label><button id="new-game" class="danger" data-t="game.new">New world</button><span class="muted" data-t="game.new.note">a new valley and its history; the autosave is replaced</span><button id="btn-legends" class="hidden" data-t="game.legends">Legends</button></div>
       </div>
-      <div class="box"><h3>Save</h3>
-        <div class="muted">The game autosaves to this browser after every age. Export writes the world as JSON; the artifact viewer blocks downloads, so the JSON is also shown below to copy.</div>
-        <div class="row"><button id="export">Export world</button><button id="import-btn">Import world</button><input id="import" type="file" accept=".json"><button id="export-copy">Copy JSON</button></div>
+      <div class="box"><h3 data-t="game.save.title">Save</h3>
+        <div class="muted" data-t="game.save.note">The game autosaves to this browser after every age. Export writes the world as JSON; the artifact viewer blocks downloads, so the JSON is also shown below to copy.</div>
+        <div class="row"><button id="export" data-t="game.export">Export world</button><button id="import-btn" data-t="game.import">Import world</button><input id="import" type="file" accept=".json"><button id="export-copy" data-t="game.copy">Copy JSON</button></div>
         <textarea id="export-text" class="hidden" readonly></textarea>
       </div>
-      <div class="box"><h3>Report a problem</h3>
-        <div class="muted" id="report-note">Bundles the replay of this session, the current save and the build into one block of text for a bug report. Nothing is sent.</div>
-        <div class="row"><button id="report-btn">Report a problem</button></div>
+      <div class="box"><h3 data-t="game.report.title">Report a problem</h3>
+        <div class="muted" id="report-note" data-t="game.report.note">Bundles the replay of this session, the current save and the build into one block of text for a bug report. Nothing is sent.</div>
+        <div class="row"><button id="report-btn" data-t="game.report">Report a problem</button></div>
         <textarea id="report-text" class="hidden" readonly></textarea>
       </div>
-      <div class="box"><h3>Controls</h3>
-        <div class="muted">WASD / arrows fly · click a tile to fly there · wheel zoom · right-drag pan · hold B to burn (release to breathe) · L land at the lair · C chronicle · Space / + / - / Esc in the sleep montage</div>
+      <div class="box"><h3 data-t="game.controls.title">Controls</h3>
+        <div class="muted" data-t="game.controls">WASD / arrows fly · click a tile to fly there · wheel zoom · right-drag pan · hold B to burn (release to breathe) · L land at the lair · C chronicle · Space / + / - / Esc in the sleep montage</div>
       </div>
-      <div class="box"><h3>Credits</h3>
+      <div class="box"><h3 data-t="game.credits.title">Credits</h3>
         <div class="muted">Dragon model by MattBas (dragon.best/3d), CC BY-SA 4.0. three.js, MIT.</div>
       </div>
     </div>
@@ -1458,7 +1458,7 @@ function renderActions() {
   const id = selectedRegion;
   labelsDirty = true;
   panel.classList.toggle('flying', !id);
-  if (!id) { panel.innerHTML = `<h2>Flying</h2><div class="muted">fly over a region to act · ${play.stamina} stamina left · L to land at the lair</div><div id="keys">WASD / arrows / click to fly · hold B to burn · wheel zoom · right-drag pan · Esc closes panels</div>`; renderNarration(); return; }
+  if (!id) { panel.innerHTML = `<h2>${t('fly.title', 'Flying')}</h2><div class="muted">${tf('fly.note', 'fly over a region to act · {d.stamina} stamina left · L to land at the lair', { roles: { d: { numbers: { stamina: Math.round(play.stamina) } } } })}</div><div id="keys">${t('fly.keys', 'WASD / arrows / click to fly · hold B to burn · wheel zoom · right-drag pan · Esc closes panels')}</div>`; renderNarration(); return; }
   const r = model.regions.get(id);
   const owner = r.owner ? model.factions.get(r.owner) : null;
   const list = actionsFor(id);
@@ -1874,7 +1874,7 @@ function montageKey(e) {
   if (e.key === '-') montageSpeed(0.5);
   if (e.key === 'Escape') finishMontage();
 }
-function toggleMontagePause() { montage.paused = !montage.paused; $('m-pause').textContent = montage.paused ? 'Resume' : 'Pause'; }
+function toggleMontagePause() { montage.paused = !montage.paused; $('m-pause').textContent = montage.paused ? t('montage.resume', 'Resume') : t('montage.pause', 'Pause'); }
 function montageSpeed(k) { montage.speed = clamp(montage.speed * k, 2.5, 640); $('m-speed').textContent = montage.speed + ' y/s'; }
 
 function updateMontage(dt) {
@@ -2240,6 +2240,7 @@ async function main() {
   sim = await loadSim();
   const r = sim({ cmd: 'load', data: DATA, seed: 1 });
   if (!r.ok) return;
+  loadUi();
   const restored = loadAutosave();
   if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true });   // a fresh start: a generated valley, its legends first
   world = sim({ cmd: 'world' });
@@ -2310,6 +2311,7 @@ window.game = {
   },
 };
 </script>
+<script src="game/ui.js"></script>
 <script src="game/models.js"></script>
 <script src="game/terrain.js"></script>
 <script src="game/text.js"></script>

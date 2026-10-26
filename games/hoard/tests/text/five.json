@@ -1,0 +1,314 @@
+[
+ {
+  "lang": "de",
+  "template": "{envoy.noun:def.nom} {envoy.name} steht am Felsvorsprung. Du antwortest {envoy.noun:def.dat} {envoy.name}.",
+  "ctx": {
+   "roles": {
+    "envoy": {
+     "kind": "person",
+     "name": "Aldric",
+     "sex": "m",
+     "noun": "envoy"
+    }
+   }
+  },
+  "expect": "Der Gesandte Aldric steht am Felsvorsprung. Du antwortest dem Gesandten Aldric."
+ },
+ {
+  "lang": "de",
+  "template": "{envoy.noun:def.nom} {envoy.name} steht am Felsvorsprung. Du antwortest {envoy.noun:def.dat} {envoy.name}.",
+  "ctx": {
+   "roles": {
+    "envoy": {
+     "kind": "person",
+     "name": "Marta",
+     "sex": "f",
+     "noun": "envoy"
+    }
+   }
+  },
+  "expect": "Die Gesandte Marta steht am Felsvorsprung. Du antwortest der Gesandten Marta."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Kell"
+    }
+   }
+  },
+  "expect": "Kells Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Voss"
+    }
+   }
+  },
+  "expect": "Voss’ Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Kerz"
+    }
+   }
+  },
+  "expect": "Kerz’ Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Hax"
+    }
+   }
+  },
+  "expect": "Hax’ Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Weiß"
+    }
+   }
+  },
+  "expect": "Weiß’ Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name:gen} Schreiber haben keine Chronik mehr.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Dorun"
+    }
+   }
+  },
+  "expect": "Doruns Schreiber haben keine Chronik mehr."
+ },
+ {
+  "lang": "de",
+  "template": "{cup.name:def.nom} lag unter deinem linken Flügel. Jetzt ist {cup.subj} der Mittelpunkt der Festtafel.",
+  "ctx": {
+   "roles": {
+    "cup": {
+     "kind": "item",
+     "name": "Aschenkelch",
+     "gender": "m"
+    }
+   }
+  },
+  "expect": "Der Aschenkelch lag unter deinem linken Flügel. Jetzt ist er der Mittelpunkt der Festtafel."
+ },
+ {
+  "lang": "de",
+  "template": "{cup.name:def.nom} lag unter deinem linken Flügel. Jetzt ist {cup.subj} der Mittelpunkt der Festtafel.",
+  "ctx": {
+   "roles": {
+    "cup": {
+     "kind": "item",
+     "name": "Aschenschale",
+     "gender": "f"
+    }
+   }
+  },
+  "expect": "Die Aschenschale lag unter deinem linken Flügel. Jetzt ist sie der Mittelpunkt der Festtafel."
+ },
+ {
+  "lang": "de",
+  "template": "{cup.name:def.nom} lag unter deinem linken Flügel. Jetzt ist {cup.subj} der Mittelpunkt der Festtafel.",
+  "ctx": {
+   "roles": {
+    "cup": {
+     "kind": "item",
+     "name": "Aschenhorn",
+     "gender": "n"
+    }
+   }
+  },
+  "expect": "Das Aschenhorn lag unter deinem linken Flügel. Jetzt ist es der Mittelpunkt der Festtafel."
+ },
+ {
+  "lang": "de",
+  "template": "vor {a.years_ago:year.dat}",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 1
+     }
+    }
+   }
+  },
+  "expect": "vor einem Jahr"
+ },
+ {
+  "lang": "de",
+  "template": "vor {a.years_ago:year.dat}",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 2
+     }
+    }
+   }
+  },
+  "expect": "vor 2 Jahren"
+ },
+ {
+  "lang": "de",
+  "template": "vor {a.years_ago:year.dat}",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 40
+     }
+    }
+   }
+  },
+  "expect": "vor 40 Jahren"
+ },
+ {
+  "lang": "de",
+  "template": "vor {a.years_ago:year.dat}",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 1200
+     }
+    }
+   }
+  },
+  "expect": "vor 1.200 Jahren"
+ },
+ {
+  "lang": "en",
+  "template": "{a.years_ago:year} ago",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 1
+     }
+    }
+   }
+  },
+  "expect": "1 year ago"
+ },
+ {
+  "lang": "en",
+  "template": "{a.years_ago:year} ago",
+  "ctx": {
+   "roles": {
+    "a": {
+     "kind": "act",
+     "numbers": {
+      "years_ago": 1200
+     }
+    }
+   }
+  },
+  "expect": "1,200 years ago"
+ },
+ {
+  "lang": "de",
+  "template": "{court.name} fordert Tribut{why}.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Kell"
+    },
+    "a": {
+     "kind": "act",
+     "fields": {
+      "place": "Dorun"
+     }
+    }
+   },
+   "vars": {
+    "why": ", weil du die Bibliothek bei {a.place} verbrannt hast"
+   }
+  },
+  "expect": "Kell fordert Tribut, weil du die Bibliothek bei Dorun verbrannt hast."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name} fordert Tribut{why}.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Kell"
+    },
+    "a": {
+     "kind": "act",
+     "fields": {
+      "place": "Dorun"
+     }
+    }
+   },
+   "vars": {
+    "why": ", denn du hast die Bibliothek bei {a.place} verbrannt"
+   }
+  },
+  "expect": "Kell fordert Tribut, denn du hast die Bibliothek bei Dorun verbrannt."
+ },
+ {
+  "lang": "de",
+  "template": "{court.name} fordert Tribut{why}.",
+  "ctx": {
+   "roles": {
+    "court": {
+     "kind": "faction",
+     "name": "Kell"
+    },
+    "a": {
+     "kind": "act",
+     "fields": {
+      "place": "Dorun"
+     }
+    }
+   },
+   "vars": {
+    "why": ""
+   }
+  },
+  "expect": "Kell fordert Tribut."
+ },
+ {
+  "lang": "de",
+  "template": "Weiß ẞ „Äpfel“ »Öl«",
+  "ctx": {},
+  "expect": "Weiß ẞ „Äpfel“ »Öl«"
+ }
+]

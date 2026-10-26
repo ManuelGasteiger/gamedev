@@ -12,6 +12,7 @@
 #include "ages/talents.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
+#include "text_api.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -37,6 +38,7 @@ Session g;
 std::string g_out;
 
 json fail(const std::string& msg) { return {{"ok", false}, {"error", msg}}; }
+json fail_reason(const std::string& reason) { return {{"ok", false}, {"reason", reason}, {"error", text_reason(reason)}}; }
 
 void start_recording(bool genesis) {
     g.recorder = Recorder();
@@ -73,8 +75,15 @@ json cmd_load(const json& in) {
     g.data.defences = text_of(d, "defences");
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
+    g.data.importance = text_of(d, "importance");
+    g.data.text_bundles.clear();
+    if (d.contains("text_bundles") && d["text_bundles"].is_object())
+        for (auto it = d["text_bundles"].begin(); it != d["text_bundles"].end(); ++it)
+            g.data.text_bundles[it.key()] = it->is_string() ? it->get<std::string>() : it->dump();
     LoadResult r = load_data_from_json(g.data, in.value("seed", uint64_t{1}));
     if (!r.ok) return fail(r.error);
+    if (!g.data.text_bundles.empty() && !text_load(g.data.text_bundles, r.error)) return fail(r.error);
+    text_set_lang(in.value("lang", std::string("en")));
     if (in.value("genesis", false) && !make_genesis(r.world, r.params, r.error)) return fail(r.error);   // v0.4 world (S2)
     g.params = r.params;
     g.world = r.world;
@@ -150,7 +159,7 @@ json cmd_kill_person(const json& in) {
     size_t first_event = g.world.chronicle.size();
     std::string reason;
     std::vector<ReactionLine> lines;
-    if (!kill_person(g.world, g.params, id, reason, &lines)) return fail(reason);
+    if (!kill_person(g.world, g.params, id, reason, &lines)) return fail_reason(reason);
     return {{"ok", true}, {"events", events_since(first_event)}, {"lines", json::parse(reaction_lines_to_json(lines), nullptr, false)}};
 }
 
@@ -233,7 +242,7 @@ json cmd_apply_acts_wounded(const json& in) {
 json cmd_pick_talent(const json& in) {
     std::string id = in.value("id", ""), reason;
     size_t first_event = g.world.chronicle.size();
-    if (!pick_talent(g.world, g.params, id, reason)) return fail(reason);
+    if (!pick_talent(g.world, g.params, id, reason)) return fail_reason(reason);
     return {{"ok", true}, {"events", events_since(first_event)}};
 }
 
@@ -273,7 +282,7 @@ json cmd_answer_hook(const json& in) {
     std::vector<Hook> before = g.world.hooks;
     size_t first_event = g.world.chronicle.size();
     double wounds = g.world.dragons[kPlayer].wounds;
-    if (!answer_hook(g.world, g.params, id, choice, reason)) return fail(reason);
+    if (!answer_hook(g.world, g.params, id, choice, reason)) return fail_reason(reason);
     return {{"ok", true}, {"events", events_since(first_event)}, {"hooks_resolved", hooks_resolved_json(before)},
             {"wounds", {{"taken", g.world.dragons[kPlayer].wounds - wounds}, {"total", g.world.dragons[kPlayer].wounds}, {"max", health_max(g.world, g.params)}}},
             {"slain", dragon_dead(g.world)}};
@@ -317,6 +326,7 @@ json dispatch(const json& in) {
     if (!g.loaded) return fail("not loaded");
     if (json out; hooks_dispatch(cmd, in, out)) return out;    // v0.4 hooks (S3)
     if (json out; dragon_dispatch(cmd, in, out)) return out;   // v0.4 (S1)
+    if (json out; text_dispatch(cmd, in, out)) return out;     // item 19
     if (cmd == "reset") return cmd_reset(in);
     if (cmd == "world") return json::parse(world_view_json(g.world, g.params), nullptr, false);
     if (cmd == "apply_acts") return cmd_apply_acts(in);
@@ -354,6 +364,7 @@ extern "C" {
 const char* ages_cmd(const char* json_in) {
     json in = json::parse(json_in ? json_in : "", nullptr, false);
     json out = in.is_object() ? dispatch(in) : fail("input must be a json object");
+    text_word_reason(out);
     g_out = out.dump();
     return g_out.c_str();
 }

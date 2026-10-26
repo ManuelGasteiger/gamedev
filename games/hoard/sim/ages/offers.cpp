@@ -240,9 +240,9 @@ void note_act(World& w, const Params& p, const Act& a, double m) {
 bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, std::string& reason, std::vector<ReactionLine>* lines) {
     const Constants& c = p.c;
     Person* x = find_person(w, id);
-    if (!x) { reason = "no such person"; return false; }
+    if (!x) { reason = "no_person"; return false; }
     Faction* f = find_faction(w, x->faction);
-    if (!f) { reason = "no court to answer for it"; return false; }
+    if (!f) { reason = "no_court"; return false; }
     Act a;
     a.type = "kill";
     a.target = f->id;

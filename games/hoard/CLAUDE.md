@@ -24,6 +24,12 @@ You are the last dragon. Burn the valley, carry its gold home, sleep on the heap
 - Goldens: `tests/golden/state_hashes.txt` (300 seeds, `hoard-sim --golden`) and the two chronicle hashes. Platforms must agree with each other first; a deliberate change regenerates them in its own commit titled `golden: <why>`, after reading the diff, and bumps `kRulesVersion` in `sim/ages/record.h`.
 - A new API verb that changes state gets a wrapper in `sim/ages/recorded.cpp` and a case in `apply_input`, or replays break.
 
+## Text
+
+- Player text comes from `data/text/<lang>/` through the renderer in `sim/text/`; the sim emits codes and records (refusal reasons are `code|key=value`, `ages.h` reason_code). `tools/check_literals.py` lists English left in `sim/`.
+- Scenario text: English in the scenario file, every language in `data/text/<lang>/scenarios.json`; tokens and the `noun` rule in `docs/scenario-spec.md` §12. `ctest -R text_lint_seeds` lints and renders the seeds; `web/l10n-check.cjs` checks the page in `pseudo` and `de`.
+- Never upper-case generated names (Weiß would become WEISS).
+
 ## Work
 
 - One branch per item (`item/NN-slug`), a commit per step, `reports/NN-slug.progress.md` while working, `reports/NN-slug.md` at the end. Build and test: `cmake -S . -B build && cmake --build build -j && ctest --test-dir build -L fast`; wasm: `WASI_SDK=... bash web/build.sh` then `node web/smoke.mjs --golden 1-60`.

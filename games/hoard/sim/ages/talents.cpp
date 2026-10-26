@@ -126,15 +126,15 @@ std::vector<Pick> pending_picks(const World& w, const Params& p) {
 
 bool pick_talent_unrecorded(World& w, const Params& p, const std::string& id, std::string& reason) {
     const TalentDef* t = def_of(p.talents, id);
-    if (!t) { reason = "unknown talent " + id; return false; }
+    if (!t) { reason = "unknown_talent|id=" + id; return false; }
     for (auto& pk : pending_picks(w, p)) {
         if (pk.axis != t->axis || pk.node != t->node) continue;
-        if (!pk.open) { reason = "needs phase " + std::to_string(pk.needs_phase); return false; }
+        if (!pk.open) { reason = "needs_phase|n=" + std::to_string(pk.needs_phase); return false; }
         w.dragons[kPlayer].talents.push_back(id);
         emit(w, "talent_taken", "dragon", id, pk.points, {t->axis}, because("growth", {}, {{"points", growth_of(w.dragons[kPlayer], t->axis)}}));
         return true;
     }
-    reason = taken_at(w.dragons[kPlayer], p.talents, t->axis, t->node) ? "node already chosen" : "node not reached";
+    reason = taken_at(w.dragons[kPlayer], p.talents, t->axis, t->node) ? "node_taken" : "node_not_reached";
     return false;
 }
 

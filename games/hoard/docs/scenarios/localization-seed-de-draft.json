@@ -1,0 +1,820 @@
+{
+ "about": "Unreviewed German draft of the 20 seed scenarios, written by Claude in one pass on 2026-10-24 for research/localization.md. German uses the proposed token notation (noun/subj/obj modifiers, gender selects); English is the unchanged seed text. Not native-reviewed.",
+ "entries": [
+  {
+   "key": "scn.scribe_among_hostages.headline",
+   "en": "A scribe among the hostages",
+   "de": "{hostage.noun:scribe.indef.nom} unter den Geiseln"
+  },
+  {
+   "key": "scn.scribe_among_hostages.body",
+   "en": "{hostage.name} of {court.name} has spent the days since the taking writing on the cave wall with a burnt stick: the names of the dead at {a.place}, the year, the weather. Asked why, {hostage.pronoun} says someone should keep the record, and that nobody else here can read.",
+   "de": "{hostage.name} von {court.name} verbringt die Tage seit der Gefangennahme damit, mit einem verbrannten Stock an die Höhlenwand zu schreiben: die Namen der Toten von {a.place}, das Jahr, das Wetter. Nach dem Grund gefragt, sagt {hostage.subj}, jemand müsse Buch führen, und sonst könne hier niemand lesen."
+  },
+  {
+   "key": "scn.scribe_among_hostages.because",
+   "en": "You took {hostage.name} at {a.place} {a.years_ago} years ago; {court.name} keeps a library, so its people are lettered.",
+   "de": "Du hast {hostage.name} vor {a.years_ago:year.dat} bei {a.place} gefangen genommen; {court.name} besitzt eine Bibliothek, also können die Leute dort lesen."
+  },
+  {
+   "key": "scn.scribe_among_hostages.variant0.body",
+   "en": "{scribe.name} of {court.name} has covered the cave wall in charcoal: the names of the dead at {a.place}, the year, the weather. {scribe.pronoun} offers, without being asked, to keep your chronicle. Nobody else here can read.",
+   "de": "{scribe.name} von {court.name} hat die Höhlenwand mit Kohle bedeckt: die Namen der Toten von {a.place}, das Jahr, das Wetter. {scribe.subj} bietet ungefragt an, deine Chronik zu führen. Sonst kann hier niemand lesen."
+  },
+  {
+   "key": "scn.scribe_among_hostages.option.keep",
+   "en": "Keep the scribe as your historian",
+   "de": "{hostage.noun:scribe.def.acc} als {hostage.noun:historian.poss2.acc} behalten"
+  },
+  {
+   "key": "scn.scribe_among_hostages.option.release",
+   "en": "Send the scribe home",
+   "de": "{hostage.noun:scribe.def.acc} nach Hause schicken"
+  },
+  {
+   "key": "scn.scribe_among_hostages.option.kill",
+   "en": "Silence the record",
+   "de": "Die Aufzeichnung zum Schweigen bringen"
+  },
+  {
+   "key": "scn.scribe_among_hostages.option.ignore",
+   "en": "Let the writing stay on the wall",
+   "de": "Die Schrift an der Wand lassen"
+  },
+  {
+   "key": "scn.burned_library_scribes.headline",
+   "en": "The scribes of {court.name}",
+   "de": "Die Schreiber von {court.name}"
+  },
+  {
+   "key": "scn.burned_library_scribes.body",
+   "en": "{envoy.name} stands at the ledge with a satchel of ash. {a.years_ago} years after you burned the library at {a.place}, {court.name} has no record of its own kings, and the young are taught from memory by the old. The envoy asks for what you took, or for someone to teach them letters again.",
+   "de": "{envoy.name} steht mit einer Tasche voll Asche auf dem Felsvorsprung. Seit du vor {a.years_ago:year.dat} die Bibliothek bei {a.place} verbrannt hast, besitzt {court.name} keine Aufzeichnung der eigenen Könige mehr, und die Jungen lernen alles aus dem Gedächtnis der Alten. {envoy.noun:def.nom} bittet um das, was du genommen hast, oder darum, dass jemand die Schrift wieder lehrt."
+  },
+  {
+   "key": "scn.burned_library_scribes.because",
+   "en": "The court lost its written memory at {a.place}; what it knows of you is now told, not read.",
+   "de": "{court.name} verlor bei {a.place} das geschriebene Gedächtnis; was man dort von dir weiß, wird jetzt erzählt und nicht mehr gelesen."
+  },
+  {
+   "key": "scn.burned_library_scribes.variant0.body",
+   "en": "{sage.name}, the last sage of {court.name}, has sent {envoy.name} with a satchel of ash from {a.place}. The hold has no record of its own kings now. The sage asks for the books you took, or for letters to be taught again.",
+   "de": "{sage.name}, {sage.gender?m=der letzte Weise|f=die letzte Weise} von {court.name}, hat {envoy.name} mit einer Tasche voll Asche aus {a.place} geschickt. Die Feste besitzt keine Aufzeichnung ihrer eigenen Könige mehr. {sage.subj} bittet um die Bücher, die du genommen hast, oder darum, dass die Schrift wieder gelehrt wird."
+  },
+  {
+   "key": "scn.burned_library_scribes.option.books",
+   "en": "Give back the books",
+   "de": "Die Bücher zurückgeben"
+  },
+  {
+   "key": "scn.burned_library_scribes.option.teach",
+   "en": "Teach them letters",
+   "de": "Ihnen die Schrift beibringen"
+  },
+  {
+   "key": "scn.burned_library_scribes.option.eat",
+   "en": "Eat the envoy",
+   "de": "{envoy.noun:def.acc} fressen"
+  },
+  {
+   "key": "scn.burned_library_scribes.option.ignore",
+   "en": "Send them away",
+   "de": "Die Gesandtschaft wegschicken"
+  },
+  {
+   "key": "scn.hero_at_dawn.headline",
+   "en": "{hero.name} comes alone",
+   "de": "{hero.name} kommt allein"
+  },
+  {
+   "key": "scn.hero_at_dawn.body",
+   "en": "{hero.name} of {court.name} stands on the lair's border at first light with a banner planted in the scree and no army behind it. {hero.pronoun} was a child at {a.place} when it burned, {a.years_ago} years ago, and has sworn on that fire. The order waits a day's march back. This one wants it settled face to face.",
+   "de": "{hero.name} von {court.name} steht im ersten Licht an der Grenze deiner Höhle, ein Banner im Geröll, kein Heer im Rücken. {hero.subj} war als Kind bei {a.place}, als es brannte, vor {a.years_ago:year.dat}, und hat auf dieses Feuer geschworen. Der Orden wartet einen Tagesmarsch entfernt. {hero.subj} will es von Angesicht zu Angesicht klären."
+  },
+  {
+   "key": "scn.hero_at_dawn.because",
+   "en": "The burning of {a.place} is written in {court.name}'s chronicle; {hero.name} is sworn to that memory.",
+   "de": "Der Brand von {a.place} steht in der Chronik von {court.name}; {hero.name} ist diesem Gedächtnis verpflichtet."
+  },
+  {
+   "key": "scn.hero_at_dawn.option.fight",
+   "en": "Meet the challenge",
+   "de": "Die Herausforderung annehmen"
+  },
+  {
+   "key": "scn.hero_at_dawn.option.haunt",
+   "en": "Send a nightmare instead",
+   "de": "Stattdessen einen Albtraum schicken"
+  },
+  {
+   "key": "scn.hero_at_dawn.option.demand",
+   "en": "Demand the order be disbanded",
+   "de": "Die Auflösung des Ordens fordern"
+  },
+  {
+   "key": "scn.hero_at_dawn.option.ignore",
+   "en": "Let the banner stand",
+   "de": "Das Banner stehen lassen"
+  },
+  {
+   "key": "scn.princess_returns.headline",
+   "en": "A letter in a hand you taught",
+   "de": "Ein Brief in einer Schrift, die du gelehrt hast"
+  },
+  {
+   "key": "scn.princess_returns.body",
+   "en": "A kestrel drops a letter on the ledge. {agent.name} writes from {court.name}'s throne that the priests have begun asking where the new queen learned her craft, and that two of them have gone to the archive. {agent.pronoun} asks whether you would like the priests to find something, or nothing.",
+   "de": "Ein Turmfalke lässt einen Brief auf den Felsvorsprung fallen. {agent.name} schreibt vom Thron von {court.name}, dass die Priester zu fragen begonnen haben, wo die neue Königin ihr Handwerk gelernt hat, und dass zwei von ihnen ins Archiv gegangen sind. {agent.subj} fragt, ob die Priester etwas finden sollen oder nichts."
+  },
+  {
+   "key": "scn.princess_returns.because",
+   "en": "You released {agent.name} {a.years_ago} years ago, schooled in intrigue and touched by your magic; a devout court notices.",
+   "de": "Du hast {agent.name} vor {a.years_ago:year.dat} freigelassen, in Ränken geschult und von deiner Magie berührt; ein frommer Hof wird aufmerksam."
+  },
+  {
+   "key": "scn.princess_returns.option.reveal",
+   "en": "Expose the priests' own plot",
+   "de": "Das eigene Komplott der Priester enthüllen"
+  },
+  {
+   "key": "scn.princess_returns.option.spy",
+   "en": "Walk the city yourself, unseen",
+   "de": "Selbst und ungesehen durch die Stadt gehen"
+  },
+  {
+   "key": "scn.princess_returns.option.haunt",
+   "en": "Warn her to burn the archive",
+   "de": "{agent.obj:dat} raten, das Archiv zu verbrennen"
+  },
+  {
+   "key": "scn.princess_returns.option.gold",
+   "en": "Send gold to the keeper of the archive",
+   "de": "Den Hütern des Archivs Gold schicken"
+  },
+  {
+   "key": "scn.princess_returns.option.ignore",
+   "en": "Let her manage her own court",
+   "de": "{agent.obj:dat} den Hof selbst überlassen"
+  },
+  {
+   "key": "scn.inquisition_opens.headline",
+   "en": "The inquisition of {court.name}",
+   "de": "Die Inquisition von {court.name}"
+  },
+  {
+   "key": "scn.inquisition_opens.body",
+   "en": "{priest.name} has the court's mages in chains and its archive under seal. The charge is dark craft at the throne; the proof is thin and the fires are not. The mage guild's work has stopped. A court that burns its own scholars is weaker for a generation, and it knows who it blames.",
+   "de": "{priest.name} hat die Magier des Hofes in Ketten und sein Archiv unter Siegel. Der Vorwurf lautet auf dunkle Künste am Thron; der Beweis ist dünn, die Feuer sind es nicht. Die Arbeit der Magiergilde ruht. Ein Hof, der die eigenen Gelehrten verbrennt, ist für eine Generation schwächer, und er weiß, wem er die Schuld gibt."
+  },
+  {
+   "key": "scn.inquisition_opens.because",
+   "en": "The secret you planted in {court.name} surfaced; a devout court with a weak crown answers with fire.",
+   "de": "Das Geheimnis, das du in {court.name} gepflanzt hast, ist ans Licht gekommen; ein frommer Hof mit schwacher Krone antwortet mit Feuer."
+  },
+  {
+   "key": "scn.inquisition_opens.variant0.body",
+   "en": "{priest.name} has {agent.name}'s tutors in chains and the archive under seal. The charge is dark craft at the throne, and this time the proof is not thin. The mages' work has stopped. {agent.pronoun} has not been named yet.",
+   "de": "{priest.name} hat die Lehrer von {agent.name} in Ketten und das Archiv unter Siegel. Der Vorwurf lautet auf dunkle Künste am Thron, und diesmal ist der Beweis nicht dünn. Die Arbeit der Magier ruht. {agent.subj} ist noch nicht genannt worden."
+  },
+  {
+   "key": "scn.inquisition_opens.option.gift",
+   "en": "Send the priest a relic to look at instead",
+   "de": "{priest.noun:def.dat} stattdessen ein Relikt zum Ansehen schicken"
+  },
+  {
+   "key": "scn.inquisition_opens.option.judge",
+   "en": "Descend and spare the accused in judgement",
+   "de": "Hinabsteigen und die Angeklagten im Urteil verschonen"
+  },
+  {
+   "key": "scn.inquisition_opens.option.incite",
+   "en": "Set the neighbour on them while they purge",
+   "de": "Den Nachbarn auf sie hetzen, solange sie säubern"
+  },
+  {
+   "key": "scn.inquisition_opens.option.ignore",
+   "en": "Let them burn their own",
+   "de": "Sie die eigenen Leute verbrennen lassen"
+  },
+  {
+   "key": "scn.thief_with_the_cup.headline",
+   "en": "The cup is on their table",
+   "de": "Der Kelch steht auf ihrem Tisch"
+  },
+  {
+   "key": "scn.thief_with_the_cup.body",
+   "en": "The {cup.name} that lay under your left wing is now the centrepiece of {court.name}'s feast table, and the whole city has been quieter since. The thief has a street named after the walk back down. The city is rich, pleased with itself, and watching the sky more than it used to.",
+   "de": "{cup.name:def.nom} lag unter deinem linken Flügel. Jetzt ist {cup.subj} der Mittelpunkt der Festtafel von {court.name}, und die ganze Stadt ist seither stiller geworden. Der Dieb hat eine Gasse, die nach seinem Rückweg benannt ist. Die Stadt ist reich, mit sich zufrieden und schaut häufiger zum Himmel als früher."
+  },
+  {
+   "key": "scn.thief_with_the_cup.because",
+   "en": "A court that does not fear you sent a thief while you slept; it remembers the theft with pride.",
+   "de": "Ein Hof, der dich nicht fürchtet, hat einen Dieb geschickt, während du schliefst; er erinnert sich mit Stolz an den Diebstahl."
+  },
+  {
+   "key": "scn.thief_with_the_cup.variant0.body",
+   "en": "{thief.name} came out of your mountain with the {cup.name} and has not bought a drink since. The cup stands on {court.name}'s feast table and the city watches the sky more than it used to.",
+   "de": "{thief.name} kam mit {cup.name:def.dat} aus deinem Berg und hat seither keinen Schluck mehr bezahlt. {cup.subj} steht auf der Festtafel von {court.name}, und die Stadt schaut häufiger zum Himmel als früher."
+  },
+  {
+   "key": "scn.thief_with_the_cup.option.take",
+   "en": "Take it back, and more",
+   "de": "{cup.obj} zurückholen, und mehr"
+  },
+  {
+   "key": "scn.thief_with_the_cup.option.demand",
+   "en": "Demand the thief as hostage",
+   "de": "{thief.noun:def.acc} als Geisel fordern"
+  },
+  {
+   "key": "scn.thief_with_the_cup.option.gift",
+   "en": "Send them exactly what else was taken",
+   "de": "Ihnen genau das schicken, was sonst noch genommen wurde"
+  },
+  {
+   "key": "scn.thief_with_the_cup.option.ignore",
+   "en": "Let them keep the cup",
+   "de": "Sie {cup.obj} behalten lassen"
+  },
+  {
+   "key": "scn.two_crowns.headline",
+   "en": "Two crowns and one heir",
+   "de": "Zwei Kronen und {heir.noun:indef.nom}"
+  },
+  {
+   "key": "scn.two_crowns.body",
+   "en": "{court.name} has no heir but the one asleep in your hoard, and {match.name} has a widowed queen and a long border. Both courts have written to each other; neither has written to you. A marriage would make one realm of two, and the mountain would stand between it and nothing.",
+   "de": "Für den Thron von {court.name} bleibt nur {heir.name}, und {heir.subj} schläft in deinem Hort. {match.name} hat eine verwitwete Königin und eine lange Grenze. Beide Höfe haben einander geschrieben, keiner hat dir geschrieben. Eine Heirat würde aus zwei Reichen eines machen, und nur der Berg stünde dann noch zwischen diesem Reich und dem Nichts."
+  },
+  {
+   "key": "scn.two_crowns.because",
+   "en": "You hold {heir.name}; a marriage between the two courts needs the heir you have.",
+   "de": "Du hältst {heir.name}; eine Heirat zwischen den beiden Höfen braucht {heir.noun:def.acc} in deinem Hort."
+  },
+  {
+   "key": "scn.two_crowns.variant0.body",
+   "en": "{envoy.name} of {match.name} has come to ask, very carefully, whether {heir.name} is well, and whether the mountain has views on marriage.",
+   "de": "{envoy.name} von {match.name} ist gekommen, um sehr vorsichtig zu fragen, ob es {heir.name} gut geht und ob der Berg eine Meinung zur Heirat hat."
+  },
+  {
+   "key": "scn.two_crowns.option.broker",
+   "en": "Broker the marriage yourself",
+   "de": "Die Heirat selbst vermitteln"
+  },
+  {
+   "key": "scn.two_crowns.option.release",
+   "en": "Send the heir home under oath",
+   "de": "{heir.noun:def.acc} unter Eid heimschicken"
+  },
+  {
+   "key": "scn.two_crowns.option.ignore",
+   "en": "Keep the heir and the border open",
+   "de": "{heir.noun:def.acc} behalten und die Grenze offen halten"
+  },
+  {
+   "key": "scn.pilgrims_in_winter.headline",
+   "en": "Pilgrims at the foot of the mountain",
+   "de": "Pilger am Fuß des Berges"
+  },
+  {
+   "key": "scn.pilgrims_in_winter.body",
+   "en": "Eleven of {court.name}'s faithful have come up the pass in the snow with a cart of {home.name}'s last apples and a child who will not stop looking at the cave. They do not ask for anything. They have come to be looked at.",
+   "de": "Elf Gläubige aus {court.name} sind im Schnee den Pass heraufgekommen, mit einem Karren der letzten Äpfel von {home.name} und einem Kind, das nicht aufhört, die Höhle anzusehen. Sie bitten um nichts. Sie sind gekommen, um angesehen zu werden."
+  },
+  {
+   "key": "scn.pilgrims_in_winter.because",
+   "en": "{court.name} holds you in awe and the road from {home.name} is open.",
+   "de": "{court.name} hält dich in Ehrfurcht, und die Straße von {home.name} ist offen."
+  },
+  {
+   "key": "scn.pilgrims_in_winter.variant0.body",
+   "en": "{leader.name} has led eleven of {court.name}'s faithful up the pass in the snow with a cart of {home.name}'s last apples. They do not ask for anything. They have come to be looked at, and {leader.pronoun} has brought a book to write down what they see.",
+   "de": "{leader.name} hat elf Gläubige aus {court.name} im Schnee den Pass hinaufgeführt, mit einem Karren der letzten Äpfel von {home.name}. Sie bitten um nichts. Sie sind gekommen, um angesehen zu werden, und {leader.subj} hat ein Buch mitgebracht, um aufzuschreiben, was sie sehen."
+  },
+  {
+   "key": "scn.pilgrims_in_winter.variant1.body",
+   "en": "Eleven of {court.name}'s faithful have come up the pass in the snow. They walk slowly and keep the children at the back. They have brought the last apples from {home.name}, and they have not decided whether this is a gift or a tribute.",
+   "de": "Elf Gläubige aus {court.name} sind im Schnee den Pass heraufgekommen. Sie gehen langsam und halten die Kinder hinten. Sie haben die letzten Äpfel aus {home.name} mitgebracht und sind sich nicht einig, ob das ein Geschenk ist oder ein Tribut."
+  },
+  {
+   "key": "scn.pilgrims_in_winter.option.receive",
+   "en": "Land and receive them",
+   "de": "Landen und sie empfangen"
+  },
+  {
+   "key": "scn.pilgrims_in_winter.option.bless",
+   "en": "Bless their fields instead of appearing",
+   "de": "Ihre Felder segnen, statt zu erscheinen"
+  },
+  {
+   "key": "scn.pilgrims_in_winter.option.eat",
+   "en": "Eat them",
+   "de": "Sie fressen"
+  },
+  {
+   "key": "scn.pilgrims_in_winter.option.ignore",
+   "en": "Let them wait and go home",
+   "de": "Sie warten und heimgehen lassen"
+  },
+  {
+   "key": "scn.lich_crown_speaks.headline",
+   "en": "The {crown.name} speaks",
+   "de": "{crown.name:def.nom} spricht"
+  },
+  {
+   "key": "scn.lich_crown_speaks.body",
+   "en": "It waits until the cave is quiet. The living will always build cannon, it says, in the voice of the king who drowned wearing it. It can make you something cannon cannot reach. It does not say what that costs. It never does.",
+   "de": "{crown.subj} wartet, bis die Höhle still ist. Die Lebenden werden immer Kanonen bauen, sagt {crown.subj}, mit der Stimme des Königs, der ertrank, als er {crown.obj} trug. {crown.subj} kann dich zu etwas machen, das keine Kanone erreicht. Was das kostet, sagt {crown.subj} nicht. Das tut {crown.subj} nie."
+  },
+  {
+   "key": "scn.lich_crown_speaks.because",
+   "en": "An artifact with its own purpose has been in the hoard long enough to learn your fears.",
+   "de": "Ein Artefakt mit eigenem Willen liegt lange genug im Hort, um deine Ängste zu kennen."
+  },
+  {
+   "key": "scn.lich_crown_speaks.variant0.body",
+   "en": "It waits until the cave is quiet. {armed.name} has cannon now, it says, in the voice of the king who drowned wearing it, and the living will always build more. It can make you something cannon cannot reach. It does not say what that costs.",
+   "de": "{crown.subj} wartet, bis die Höhle still ist. {armed.name} hat jetzt Kanonen, sagt {crown.subj}, mit der Stimme des Königs, der ertrank, als er {crown.obj} trug, und die Lebenden werden immer mehr bauen. {crown.subj} kann dich zu etwas machen, das keine Kanone erreicht. Was das kostet, sagt {crown.subj} nicht."
+  },
+  {
+   "key": "scn.lich_crown_speaks.variant1.body",
+   "en": "It waits until the cave is quiet. The dead of {dead.name} have priests now, it says, and the priests have a rite. It can make you something the living cannot kill. It does not say what you would be afterwards.",
+   "de": "{crown.subj} wartet, bis die Höhle still ist. Die Toten von {dead.name} haben jetzt Priester, sagt {crown.subj}, mit der Stimme des Königs, der ertrank, als er {crown.obj} trug, und die Priester haben einen Ritus. {crown.subj} kann dich zu etwas machen, das die Lebenden nicht töten können. Was du danach wärst, sagt {crown.subj} nicht."
+  },
+  {
+   "key": "scn.lich_crown_speaks.option.ask",
+   "en": "Ask what it wants",
+   "de": "Fragen, was {crown.subj} will"
+  },
+  {
+   "key": "scn.lich_crown_speaks.option.accept",
+   "en": "Accept the crown's bargain",
+   "de": "Den Handel der Krone annehmen"
+  },
+  {
+   "key": "scn.lich_crown_speaks.option.refuse",
+   "en": "Refuse it",
+   "de": "Ablehnen"
+  },
+  {
+   "key": "scn.lich_crown_speaks.option.gift",
+   "en": "Give it to the dead and be rid of it",
+   "de": "{crown.obj} den Toten geben und {crown.obj} los sein"
+  },
+  {
+   "key": "scn.lich_crown_speaks.option.ignore",
+   "en": "Say nothing",
+   "de": "Nichts sagen"
+  },
+  {
+   "key": "scn.door_in_the_temple.headline",
+   "en": "A door in the temple of {temple.name}",
+   "de": "Eine Tür im Tempel von {temple.name}"
+  },
+  {
+   "key": "scn.door_in_the_temple.body",
+   "en": "The cult of {cult.name} has built a door in the temple at {temple.name} that opens onto nowhere yet. The priests say it opens for you. The neighbours say it opens for something else, and have sent soldiers to find out. Within two wakings it will open one way or the other, whether you are there or not.",
+   "de": "Der Kult von {cult.name} hat im Tempel von {temple.name} eine Tür gebaut, die noch ins Nichts führt. Die Priester sagen, sie öffne sich für dich. Die Nachbarn sagen, sie öffne sich für etwas anderes, und haben Soldaten geschickt, um es herauszufinden. Innerhalb von zwei Erwachen öffnet sie sich so oder so, ob du dort bist oder nicht."
+  },
+  {
+   "key": "scn.door_in_the_temple.because",
+   "en": "Faith, magic and time have met in one court; a door is the shape they take.",
+   "de": "Glaube, Magie und Zeit sind in einem Hof zusammengetroffen; eine Tür ist die Gestalt, die sie annehmen."
+  },
+  {
+   "key": "scn.door_in_the_temple.variant0.body",
+   "en": "The cult of {cult.name} has built a door at {temple.name} that opens onto nowhere yet. {zealot.name}'s soldiers are already in the valley below it with torches. Within two wakings it opens one way or the other, whether you are there or not.",
+   "de": "Der Kult von {cult.name} hat bei {temple.name} eine Tür gebaut, die noch ins Nichts führt. Die Soldaten von {zealot.name} stehen schon mit Fackeln im Tal darunter. Innerhalb von zwei Erwachen öffnet sie sich so oder so, ob du dort bist oder nicht."
+  },
+  {
+   "key": "scn.door_in_the_temple.option.consecrate",
+   "en": "Consecrate the temple as your own",
+   "de": "Den Tempel als deinen eigenen weihen"
+  },
+  {
+   "key": "scn.door_in_the_temple.option.destroy",
+   "en": "Break the altar and the door with it",
+   "de": "Den Altar zerbrechen, und die Tür mit ihm"
+  },
+  {
+   "key": "scn.door_in_the_temple.option.defend",
+   "en": "Hold the pass against the soldiers",
+   "de": "Den Pass gegen die Soldaten halten"
+  },
+  {
+   "key": "scn.door_in_the_temple.option.ignore",
+   "en": "Let the door decide",
+   "de": "Die Tür entscheiden lassen"
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.headline",
+   "en": "The dwarves ask for fire",
+   "de": "Die Zwerge bitten um Feuer"
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.body",
+   "en": "{envoy.name} of {hold.name} has brought a block of the hold's best steel as a gift and a request written in the Book: the orcs of {foe.name} have the lower galleries, and the hold's forges cannot make a heat that holds them. The dwarves do not ask you to burn anyone. They ask how fire is made to stay.",
+   "de": "{envoy.name} von {hold.name} hat einen Block des besten Stahls der Festung als Geschenk mitgebracht, dazu eine Bitte, im Buch niedergeschrieben: Die Orks von {foe.name} halten die unteren Stollen, und die Schmieden der Festung können keine Hitze erzeugen, die sie aufhält. Die Zwerge bitten dich nicht, jemanden zu verbrennen. Sie fragen, wie man Feuer zum Bleiben bringt."
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.because",
+   "en": "{hold.name} is at war with {foe.name} and open enough to ask a dragon for craft.",
+   "de": "{hold.name} führt Krieg gegen {foe.name} und ist offen genug, einen Drachen um Handwerk zu bitten."
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.option.teach",
+   "en": "Teach their smiths the craft of lasting fire",
+   "de": "Ihre Schmiede die Kunst des beständigen Feuers lehren"
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.option.gift",
+   "en": "Give them a fire-touched relic",
+   "de": "Ihnen ein feuergeküsstes Relikt geben"
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.option.burn",
+   "en": "Burn the orcs out of the galleries yourself",
+   "de": "Die Orks selbst aus den Stollen brennen"
+  },
+  {
+   "key": "scn.dwarves_ask_for_fire.option.ignore",
+   "en": "Keep the steel, give nothing",
+   "de": "Den Stahl behalten und nichts geben"
+  },
+  {
+   "key": "scn.quiet_valley.headline",
+   "en": "Nobody is looking at the mountain",
+   "de": "Niemand sieht den Berg an"
+  },
+  {
+   "key": "scn.quiet_valley.body",
+   "en": "Three wakings, three hooks left where they hung. In {court.name} the children are told the mountain has a dragon in it the way they are told the lake has a woman in it. A shepherd grazes goats on the lower slopes. The valley has stopped watching the sky, and it has stopped building things that point at it, too.",
+   "de": "Drei Erwachen, drei Aufhänger, die dort hängen blieben, wo sie hingen. In {court.name} erzählt man den Kindern, im Berg wohne ein Drache, so wie man ihnen erzählt, im See wohne eine Frau. Ein Hirte weidet Ziegen an den unteren Hängen. Das Tal schaut nicht mehr zum Himmel, und es baut auch nichts mehr, das darauf zeigt."
+  },
+  {
+   "key": "scn.quiet_valley.because",
+   "en": "You have answered nothing for three wakings; what is not seen is not remembered.",
+   "de": "Du hast drei Erwachen lang nichts beantwortet; was nicht gesehen wird, wird nicht erinnert."
+  },
+  {
+   "key": "scn.quiet_valley.variant0.body",
+   "en": "Three wakings, three hooks left where they hung. {court.name} tells its children the mountain has a dragon in it the way it tells them the lake has a woman in it. A shepherd grazes goats on your slopes. Nobody is building anything that points at the sky.",
+   "de": "Drei Erwachen, drei Aufhänger, die dort hängen blieben, wo sie hingen. {court.name} erzählt den Kindern, im Berg wohne ein Drache, so wie man ihnen erzählt, im See wohne eine Frau. Ein Hirte weidet Ziegen an deinen Hängen. Niemand baut etwas, das zum Himmel zeigt."
+  },
+  {
+   "key": "scn.quiet_valley.variant1.body",
+   "en": "Three wakings, three hooks left where they hung. {court.name} has stone walls and a clock tower now and does not look up at the mountain at all. Nobody is building anything that points at the sky. The engineers have other work.",
+   "de": "Drei Erwachen, drei Aufhänger, die dort hängen blieben, wo sie hingen. {court.name} hat jetzt Steinmauern und einen Uhrturm und schaut gar nicht mehr zum Berg hinauf. Niemand baut etwas, das zum Himmel zeigt. Die Ingenieure haben anderes zu tun."
+  },
+  {
+   "key": "scn.quiet_valley.option.show",
+   "en": "Land in their square at noon",
+   "de": "Mittags auf ihrem Platz landen"
+  },
+  {
+   "key": "scn.quiet_valley.option.preach",
+   "en": "Walk among them and start a rumour",
+   "de": "Unter ihnen gehen und ein Gerücht streuen"
+  },
+  {
+   "key": "scn.quiet_valley.option.ignore",
+   "en": "Let them forget",
+   "de": "Sie vergessen lassen"
+  },
+  {
+   "key": "scn.the_mountain.headline",
+   "en": "The slopes are your shoulders",
+   "de": "Die Hänge sind deine Schultern"
+  },
+  {
+   "key": "scn.the_mountain.body",
+   "en": "You have not fitted through the cave mouth for a hundred years. Snow stays on your back between wakings now. Goats graze on your tail. If you slept the long sleep here, the valley would build on you and call the mountain by your name, and no engine they ever make would reach your heart.",
+   "de": "Seit hundert Jahren passt du nicht mehr durch den Höhleneingang. Schnee bleibt zwischen den Erwachen auf deinem Rücken liegen. Ziegen weiden auf deinem Schwanz. Wenn du hier den langen Schlaf schlafen würdest, würde das Tal auf dir bauen und den Berg bei deinem Namen nennen, und keine Maschine, die es je baut, würde dein Herz erreichen."
+  },
+  {
+   "key": "scn.the_mountain.because",
+   "en": "Might past a threshold and a long sleep make a dragon into a mountain.",
+   "de": "Macht über einer Schwelle und ein langer Schlaf machen aus einem Drachen einen Berg."
+  },
+  {
+   "key": "scn.the_mountain.variant0.body",
+   "en": "You have not fitted through the cave mouth for a hundred years. {settlers.name} has a village on your lower slopes already; they think it is a hill. If you slept the long sleep here they would build a city on you and call the mountain by your name.",
+   "de": "Seit hundert Jahren passt du nicht mehr durch den Höhleneingang. {settlers.name} hat schon ein Dorf an deinen unteren Hängen; man hält es dort für einen Hügel. Wenn du hier den langen Schlaf schlafen würdest, würden sie eine Stadt auf dir bauen und den Berg bei deinem Namen nennen."
+  },
+  {
+   "key": "scn.the_mountain.option.terraform",
+   "en": "Raise the ground around you and settle in",
+   "de": "Den Boden um dich erheben und dich niederlassen"
+  },
+  {
+   "key": "scn.the_mountain.option.demand",
+   "en": "Demand that they come as pilgrims, not squatters",
+   "de": "Fordern, dass sie als Pilger kommen und nicht als Besetzer"
+  },
+  {
+   "key": "scn.the_mountain.option.sleep",
+   "en": "Sleep the long sleep, here, now",
+   "de": "Den langen Schlaf schlafen, hier, jetzt"
+  },
+  {
+   "key": "scn.the_mountain.option.ignore",
+   "en": "Not yet",
+   "de": "Noch nicht"
+  },
+  {
+   "key": "scn.the_consort.headline",
+   "en": "{willing.name} has followed you up the mountain",
+   "de": "{willing.name} ist dir auf den Berg gefolgt"
+  },
+  {
+   "key": "scn.the_consort.body",
+   "en": "You walked {court.name}'s streets in a borrowed shape and {willing.name} walked with you, and knew, and came anyway. {willing.pronoun} is standing at the cave mouth now, with a travelling bag and the expression of someone who has already decided. Mortals age while you sleep. {willing.pronoun} knows that too.",
+   "de": "Du bist in geborgter Gestalt durch die Straßen von {court.name} gegangen, und {willing.name} ging mit dir, wusste es und kam trotzdem. {willing.subj} steht jetzt am Höhleneingang, mit einer Reisetasche und dem Ausdruck eines Menschen, der sich längst entschieden hat. Sterbliche altern, während du schläfst. Das weiß {willing.subj} auch."
+  },
+  {
+   "key": "scn.the_consort.because",
+   "en": "You went among them in guise this waking; one of them saw through it and chose you.",
+   "de": "Du bist dieses Mal in Verkleidung unter ihnen gegangen; einer von ihnen hat dich durchschaut und dich gewählt."
+  },
+  {
+   "key": "scn.the_consort.option.keep",
+   "en": "Keep {willing.name} as your consort",
+   "de": "{willing.name} als {willing.noun:poss2.acc} behalten"
+  },
+  {
+   "key": "scn.the_consort.option.dismiss",
+   "en": "Send them down the mountain, kindly",
+   "de": "{willing.obj} freundlich den Berg hinunterschicken"
+  },
+  {
+   "key": "scn.the_consort.option.release",
+   "en": "Send them home under your protection",
+   "de": "{willing.obj} unter deinem Schutz heimschicken"
+  },
+  {
+   "key": "scn.the_consort.option.ignore",
+   "en": "Leave them at the cave mouth",
+   "de": "{willing.obj} am Höhleneingang stehen lassen"
+  },
+  {
+   "key": "scn.false_dragon.headline",
+   "en": "{pretender.name} speaks for the mountain",
+   "de": "{pretender.name} spricht für den Berg"
+  },
+  {
+   "key": "scn.false_dragon.body",
+   "en": "{pretender.name} of {court.name} has announced that the mountain speaks to {pretender.pronoun} alone, and has raised the tithe in its name. The shrine's offerings go to the palace now. The faithful are uneasy and quiet. The sky has not confirmed or denied anything, which {pretender.name} calls agreement.",
+   "de": "{pretender.name} von {court.name} hat verkündet, der Berg spreche zu {pretender.obj:dat} allein, und hat den Zehnt in seinem Namen erhöht. Die Gaben des Schreins gehen nun an den Palast. Die Gläubigen sind unruhig und still. Der Himmel hat nichts bestätigt oder bestritten, was {pretender.name} Zustimmung nennt."
+  },
+  {
+   "key": "scn.false_dragon.because",
+   "en": "A long absence and a faithful court leave room for someone to hold your worship for you.",
+   "de": "Eine lange Abwesenheit und ein gläubiger Hof lassen Raum dafür, dass jemand deine Verehrung für dich verwaltet."
+  },
+  {
+   "key": "scn.false_dragon.option.judge",
+   "en": "Descend and judge the pretender",
+   "de": "Hinabsteigen und {pretender.noun:def.acc} richten"
+  },
+  {
+   "key": "scn.false_dragon.option.preach",
+   "en": "Walk the city and correct the story",
+   "de": "Durch die Stadt gehen und die Geschichte richtigstellen"
+  },
+  {
+   "key": "scn.false_dragon.option.miracle",
+   "en": "Answer the faithful with a miracle",
+   "de": "Die Gläubigen mit einem Wunder antworten"
+  },
+  {
+   "key": "scn.false_dragon.option.burn",
+   "en": "Burn the palace that collects your tithe",
+   "de": "Den Palast niederbrennen, der deinen Zehnt einsammelt"
+  },
+  {
+   "key": "scn.false_dragon.option.ignore",
+   "en": "Let the pretender keep the tithe",
+   "de": "{pretender.noun:def.dat} den Zehnt lassen"
+  },
+  {
+   "key": "scn.envoy_who_lies.headline",
+   "en": "{envoy.name} brings news of a plot",
+   "de": "{envoy.name} bringt Nachricht von einem Komplott"
+  },
+  {
+   "key": "scn.envoy_who_lies.body",
+   "en": "{envoy.name} of {court.name} has climbed the pass to warn you: {rival.name} is forging engines to slay you and has sworn it at its altar. {court.name} asks only that you strike first, and offers forty gold a year in gratitude. {envoy.pronoun} does not meet your eye when naming the altar.",
+   "de": "{envoy.name} von {court.name} ist den Pass heraufgestiegen, um dich zu warnen: {rival.name} schmiedet Maschinen, um dich zu töten, und hat es am eigenen Altar geschworen. {court.name} bittet nur darum, dass du zuerst zuschlägst, und bietet vierzig Gold im Jahr als Dank. {envoy.subj} weicht deinem Blick aus, wenn der Altar genannt wird."
+  },
+  {
+   "key": "scn.envoy_who_lies.because",
+   "en": "A court at war with a stronger neighbour has a reason to want you angry at it.",
+   "de": "Ein Hof im Krieg mit einem stärkeren Nachbarn hat einen Grund, dich gegen diesen Nachbarn aufzubringen."
+  },
+  {
+   "key": "scn.envoy_who_lies.variant0.body",
+   "en": "{envoy.name} of {court.name} warns you that {rival.name} is forging engines to slay you. The envoy's eyes say otherwise: {rival.name} has no slayers and no engines. {court.name} is losing a war and would like you to win it.",
+   "de": "{envoy.name} von {court.name} warnt dich, dass {rival.name} Maschinen schmiedet, um dich zu töten. Die Augen {envoy.noun:def.gen} sagen etwas anderes: {rival.name} hat weder Drachentöter noch Maschinen. {court.name} verliert einen Krieg und möchte, dass du ihn gewinnst."
+  },
+  {
+   "key": "scn.envoy_who_lies.variant1.body",
+   "en": "{envoy.name} of {court.name} has climbed the pass and stands as far from the cave as the ledge allows. {rival.name} is forging engines to slay you, the envoy says, too quickly, and {court.name} would pay forty gold a year to see them burned first. The hands shake. The story does not.",
+   "de": "{envoy.name} von {court.name} ist den Pass heraufgestiegen und steht so weit von der Höhle entfernt, wie der Felsvorsprung es zulässt. {rival.name} schmiede Maschinen, um dich zu töten, sagt {envoy.noun:def.nom}, zu schnell, und {court.name} würde vierzig Gold im Jahr zahlen, um sie zuerst brennen zu sehen. Die Hände zittern. Die Geschichte nicht."
+  },
+  {
+   "key": "scn.envoy_who_lies.option.swear",
+   "en": "Swear to burn the rival for forty a year",
+   "de": "Schwören, den Rivalen für vierzig im Jahr zu verbrennen"
+  },
+  {
+   "key": "scn.envoy_who_lies.option.reveal",
+   "en": "Name the lie to the envoy's face",
+   "de": "{envoy.noun:def.dat} die Lüge ins Gesicht sagen"
+  },
+  {
+   "key": "scn.envoy_who_lies.option.eat",
+   "en": "Eat the liar",
+   "de": "{envoy.noun:liar.def.acc} fressen"
+  },
+  {
+   "key": "scn.envoy_who_lies.option.ignore",
+   "en": "Send the envoy home with no answer",
+   "de": "{envoy.noun:def.acc} ohne Antwort heimschicken"
+  },
+  {
+   "key": "scn.refugee_column.headline",
+   "en": "A column on the pass road",
+   "de": "Ein Zug auf der Passstraße"
+  },
+  {
+   "key": "scn.refugee_column.body",
+   "en": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. {taker.name} has their valley. They have come to the mountain because the mountain is the one thing in the valley {taker.name} is afraid of. They will plant anywhere you point.",
+   "de": "Zweihundert Menschen aus {lost.name} sind mit Karren und ohne Soldaten auf der Straße unterhalb. {taker.name} hält ihr Tal. Sie sind zum Berg gekommen, weil der Berg das Einzige im Tal ist, wovor sich {taker.name} fürchtet. Sie werden anpflanzen, wo immer du hinzeigst."
+  },
+  {
+   "key": "scn.refugee_column.because",
+   "en": "{lost.name} lost its land to {taker.name} and holds you in some awe; the mountain is the last door.",
+   "de": "{lost.name} hat das eigene Land an {taker.name} verloren und hält dich in einiger Ehrfurcht; der Berg ist die letzte Tür."
+  },
+  {
+   "key": "scn.refugee_column.variant0.body",
+   "en": "Two hundred of {lost.name}'s people are on the road below, led by {elder.name}, who remembers when you last flew over {lost.name} and has been telling the children about it for a week to keep them walking. They will plant anywhere you point.",
+   "de": "Zweihundert Menschen aus {lost.name} sind auf der Straße unterhalb, angeführt von {elder.name}, {elder.gender?m=der|f=die} sich erinnert, wann du zuletzt über {lost.name} geflogen bist, und es den Kindern seit einer Woche erzählt, damit sie weitergehen. Sie werden anpflanzen, wo immer du hinzeigst."
+  },
+  {
+   "key": "scn.refugee_column.variant1.body",
+   "en": "Two hundred of {lost.name}'s people are on the road below with carts and no soldiers. The orcs of {taker.name} have their valley and, by the smoke, their harvest. They have come to the mountain because the orcs will not. They will plant anywhere you point.",
+   "de": "Zweihundert Menschen aus {lost.name} sind mit Karren und ohne Soldaten auf der Straße unterhalb. Die Orks von {taker.name} haben ihr Tal und, nach dem Rauch zu urteilen, ihre Ernte. Sie sind zum Berg gekommen, weil die Orks es nicht tun. Sie werden anpflanzen, wo immer du hinzeigst."
+  },
+  {
+   "key": "scn.refugee_column.option.receive",
+   "en": "Let them settle your slopes",
+   "de": "Sie deine Hänge besiedeln lassen"
+  },
+  {
+   "key": "scn.refugee_column.option.land",
+   "en": "Give them the empty vale",
+   "de": "Ihnen das leere Tal geben"
+  },
+  {
+   "key": "scn.refugee_column.option.defend",
+   "en": "Take their valley back for them",
+   "de": "Ihr Tal für sie zurückholen"
+  },
+  {
+   "key": "scn.refugee_column.option.ignore",
+   "en": "Turn them away",
+   "de": "Sie abweisen"
+  },
+  {
+   "key": "scn.refugee_column.option.skip",
+   "en": "Do nothing; they will move on",
+   "de": "Nichts tun; sie ziehen weiter"
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.headline",
+   "en": "{prophet.name} has read the lines",
+   "de": "{prophet.name} hat die Zeilen gelesen"
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.body",
+   "en": "{prophet.name} of {court.name} has walked up the mountain with the book open. {prophet.pronoun} has read the prophecy forty times and believes it is about you and about now. {prophet.pronoun} wants to tell you what the four peoples and the house of stone mean, and what {court.name} must build. {prophet.pronoun} also wants to be the one living voice.",
+   "de": "{prophet.name} von {court.name} ist mit aufgeschlagenem Buch den Berg heraufgekommen. {prophet.subj} hat die Prophezeiung vierzigmal gelesen und glaubt, dass sie von dir handelt und von jetzt. {prophet.subj} will dir sagen, was die vier Völker und das Haus aus Stein bedeuten und was {court.name} bauen muss. {prophet.subj} will außerdem die eine lebende Stimme sein."
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.because",
+   "en": "{court.name} holds the prophecy and holds you in awe; a devout priest draws the obvious conclusion.",
+   "de": "{court.name} besitzt die Prophezeiung und hält dich in Ehrfurcht; wer fromm ist, zieht den naheliegenden Schluss."
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.option.receive",
+   "en": "Hear the prophet out",
+   "de": "{prophet.noun:def.acc} anhören"
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.option.teach",
+   "en": "Teach the prophet what dragons really are",
+   "de": "{prophet.noun:def.dat} beibringen, was Drachen wirklich sind"
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.option.keep",
+   "en": "Keep the prophet as your priest",
+   "de": "{prophet.noun:def.acc} als {prophet.noun:priest.poss2.acc} behalten"
+  },
+  {
+   "key": "scn.prophet_with_the_prophecy.option.ignore",
+   "en": "Send the book and its reader home",
+   "de": "Das Buch und {prophet.noun:reader.def.acc} heimschicken"
+  },
+  {
+   "key": "scn.kin_of_a_hostage.headline",
+   "en": "{kin.name} has come for {hostage.name}",
+   "de": "{kin.name} ist gekommen, um {hostage.name} zu holen"
+  },
+  {
+   "key": "scn.kin_of_a_hostage.body",
+   "en": "{kin.name} of {court.name} has come up the pass alone, which took some courage, and stands at the ledge asking to see {hostage.name}. {kin.pronoun} has brought a ransom and a speech. The speech is about how long {hostage.name} has been gone and how the court needs its heir. The ransom is less than you would have asked.",
+   "de": "{kin.name} von {court.name} ist allein den Pass heraufgekommen, was einigen Mut verlangte, und steht am Felsvorsprung und bittet, {hostage.name} zu sehen. {kin.subj} hat ein Lösegeld und eine Rede mitgebracht. Die Rede handelt davon, wie lange {hostage.name} schon fort ist und dass der Hof {hostage.noun:heir.def.acc} braucht. Das Lösegeld ist geringer, als du verlangt hättest."
+  },
+  {
+   "key": "scn.kin_of_a_hostage.because",
+   "en": "The hostage's kin know where you are and are not too afraid to come.",
+   "de": "Die Verwandten {hostage.noun:def.gen} wissen, wo du bist, und fürchten sich nicht zu sehr, um zu kommen."
+  },
+  {
+   "key": "scn.kin_of_a_hostage.variant0.body",
+   "en": "{kin.name} of {court.name} has come up the pass alone and stands at the ledge demanding, not asking, to see {hostage.name}. {kin.pronoun} has brought a ransom and no speech. The ransom is fair.",
+   "de": "{kin.name} von {court.name} ist allein den Pass heraufgekommen und verlangt, nicht bittet, {hostage.name} zu sehen. {kin.subj} hat ein Lösegeld mitgebracht und keine Rede. Das Lösegeld ist fair."
+  },
+  {
+   "key": "scn.kin_of_a_hostage.variant1.body",
+   "en": "{kin.name} of {court.name} has come up the pass with a small offering for the shrine and a larger one for you, and asks to see {hostage.name} before anything is said about ransom. {kin.pronoun} kneels at the ledge, which {hostage.name} finds very funny.",
+   "de": "{kin.name} von {court.name} ist den Pass heraufgekommen, mit einer kleinen Gabe für den Schrein und einer größeren für dich, und bittet darum, {hostage.name} zu sehen, bevor vom Lösegeld die Rede ist. {kin.subj} kniet am Felsvorsprung, was {hostage.name} sehr komisch findet."
+  },
+  {
+   "key": "scn.kin_of_a_hostage.option.release",
+   "en": "Take the ransom and release the hostage",
+   "de": "Das Lösegeld nehmen und {hostage.noun:def.acc} freilassen"
+  },
+  {
+   "key": "scn.kin_of_a_hostage.option.demand",
+   "en": "Name a higher price",
+   "de": "Einen höheren Preis nennen"
+  },
+  {
+   "key": "scn.kin_of_a_hostage.option.keep",
+   "en": "Keep the hostage; let the kin see them",
+   "de": "{hostage.noun:def.acc} behalten; die Verwandten dürfen {hostage.obj} sehen"
+  },
+  {
+   "key": "scn.kin_of_a_hostage.option.ignore",
+   "en": "Send the kin away unseen",
+   "de": "Die Verwandten wegschicken, ohne dass sie {hostage.name} sehen"
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.headline",
+   "en": "{slayer.name} asks for single combat",
+   "de": "{slayer.name} fordert den Zweikampf"
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.body",
+   "en": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate with a sealed letter from the grandmaster and a challenge: fight here, now, one against one, and whoever lives keeps the mountain. {slayer.pronoun} has a burn scar down one side that did not come from you. Not yet.",
+   "de": "{slayer.name} vom Orden in {court.name} ist in voller Rüstung zum Felsvorsprung gegangen, mit einem versiegelten Brief des Großmeisters und einer Herausforderung: hier und jetzt, eins gegen eins, und wer überlebt, behält den Berg. {slayer.subj} trägt eine Brandnarbe an einer Seite, die nicht von dir stammt. Noch nicht."
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.because",
+   "en": "An order with a grievance and your exact location sends its best before it sends everyone.",
+   "de": "Ein Orden mit einer Beschwerde und deinem genauen Aufenthaltsort schickt seinen Besten, bevor er alle schickt."
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.variant0.body",
+   "en": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate while the rest of the order waits a day's march back, ready. The challenge is single combat, here, now. If you refuse, {slayer.pronoun} says, they all come, and soon.",
+   "de": "{slayer.name} vom Orden in {court.name} ist in voller Rüstung zum Felsvorsprung gegangen, während der Rest des Ordens einen Tagesmarsch entfernt bereitsteht. Die Herausforderung lautet auf Zweikampf, hier und jetzt. Lehnst du ab, sagt {slayer.subj}, kommen sie alle, und bald."
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.variant1.body",
+   "en": "{slayer.name} of the order at {court.name} has walked up to the ledge in full plate and has clearly been told you are hurt. The challenge is single combat, here, now. {slayer.pronoun} looks at the way you hold your wing and smiles.",
+   "de": "{slayer.name} vom Orden in {court.name} ist in voller Rüstung zum Felsvorsprung gegangen und hat offenbar gehört, dass du verletzt bist. Die Herausforderung lautet auf Zweikampf, hier und jetzt. {slayer.subj} sieht, wie du den Flügel hältst, und lächelt."
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.option.fight",
+   "en": "Accept",
+   "de": "Annehmen"
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.option.haunt",
+   "en": "Fill the slayer's night with what fire does",
+   "de": "Die Nacht {slayer.noun:def.gen} mit dem füllen, was Feuer anrichtet"
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.option.reveal",
+   "en": "Tell the slayer what the order plans for them",
+   "de": "{slayer.noun:def.dat} sagen, was der Orden mit {slayer.obj:dat} vorhat"
+  },
+  {
+   "key": "scn.slayer_at_the_ledge.option.ignore",
+   "en": "Leave the challenge on the ledge",
+   "de": "Die Herausforderung auf dem Felsvorsprung liegen lassen"
+  }
+ ]
+}

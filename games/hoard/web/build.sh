@@ -8,13 +8,13 @@ CXX="$WASI_SDK/bin/clang++"
 SYSROOT="$WASI_SDK/share/wasi-sysroot"
 
 if [ "${1:-}" != "--html" ]; then
-  SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp | grep -v data_io.cpp)
+  SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp sim/text/*.cpp | grep -v -e data_io.cpp -e bundle_io.cpp)
   "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 -ffp-contract=off -fno-fast-math -DHOARD_BUILD="\"$(git rev-parse --short HEAD 2>/dev/null || echo dev)\"" \
     -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor \
     -Isim \
     -Wl,--export=ages_cmd -Wl,--export=ages_alloc -Wl,--export=ages_free \
     -Wl,--strip-all \
-    $SOURCES sim/wasm/api.cpp -o web/ages.wasm
+    $SOURCES sim/wasm/api.cpp sim/wasm/text_api.cpp -o web/ages.wasm
 fi
 [ "${1:-}" = "--wasm" ] && exit 0
 
@@ -25,7 +25,11 @@ wasm = base64.b64encode((root / 'web/ages.wasm').read_bytes()).decode()
 data = {k: (root / f'data/{k}.json').read_text() for k in ['constants', 'races', 'reactions', 'regions', 'factions', 'shocks', 'names', 'offers']}
 data.update({k: (root / f'data/{k}.json').read_text() for k in ['talents', 'defences']})   # v0.4 (S1)
 data['hooks'] = (root / 'data/hooks.json').read_text()   # v0.4 hooks (S3)
-data['text'] = (root / 'data/text/en.json').read_text()
+data['text'] = (root / 'data/text/en/narrator.json').read_text()
+data['importance'] = (root / 'data/importance.json').read_text()
+# item 19: one bundle per language as sim/text/bundle_io.cpp merges it
+data['text_bundles'] = {d.name: json.dumps({'lang': d.name, **{f.name[:-5]: json.loads(f.read_text()) for f in sorted(d.glob('*.json'))}}, ensure_ascii=False)
+                        for d in sorted((root / 'data/text').iterdir()) if d.is_dir()}
 # the event cards, joined in file-name order into one JSON array as data_io.cpp does
 data['events'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/events').glob('*.json'))) + ']'
 data['genesis'] = (root / 'data/genesis.json').read_text()   # v0.4 world (S2)

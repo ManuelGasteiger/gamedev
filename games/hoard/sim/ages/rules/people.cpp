@@ -53,6 +53,7 @@ static void bury(World& w, const Person& person) {
     d.race = person.race;
     d.faction = person.faction;
     d.role = person.role;
+    d.sex = person.sex;
     d.born = person.born;
     d.died = w.year;
     w.dead_people.push_back(d);

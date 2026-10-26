@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hoard/pattern/v1",
+  "title": "Hoard story pattern v1",
+  "description": "A Winnow-style sifting pattern over the event log (research-story-sifting.md s2, prompts/14-story-sifting.md). Clauses are in time order; other events may fall between. ?x variables bind on first use. A completed pattern emits a compound event at its level.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "level",
+    "clauses",
+    "emit",
+    "provenance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{2,63}$"
+    },
+    "level": {
+      "enum": [
+        1,
+        2
+      ],
+      "description": "1 episode, 2 story; a level-n pattern sees only events below n"
+    },
+    "window_years": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3000,
+      "description": "the whole match must complete within this many years of its first clause"
+    },
+    "clauses": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/clause"
+      }
+    },
+    "unless": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unless"
+      }
+    },
+    "unless_forever": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/eventMatch"
+          }
+        ],
+        "unevaluatedProperties": false
+      }
+    },
+    "once_per": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/var"
+      }
+    },
+    "survives_death": {
+      "type": "boolean",
+      "default": false
+    },
+    "outcome_by": {
+      "type": "object",
+      "description": "clause field → mapping of its value to an outcome word used in the emitted event and the text key",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "emit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "subject"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^(episode|story)\\.[a-z][a-z0-9_]*$"
+        },
+        "subject": {
+          "$ref": "#/$defs/varOrConst"
+        },
+        "object": {
+          "$ref": "#/$defs/varOrConst"
+        },
+        "magnitude": {
+          "type": "string",
+          "description": "expression over clause fields, e.g. max(a.magnitude, c.magnitude)"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "importance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        }
+      },
+      "description": "the compound event; its text is data/text/<lang>/patterns.json under pat.<id>.title, pat.<id>.line and pat.<id>.line.<outcome>"
+    },
+    "stakes_for_dragon": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "T_thread for the arc-fit multiplier"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gen",
+        "bank"
+      ],
+      "properties": {
+        "gen": {
+          "enum": [
+            "hand",
+            "llm",
+            "llm_edited"
+          ]
+        },
+        "model": {
+          "type": "string"
+        },
+        "bank": {
+          "type": "string"
+        },
+        "reviewed": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "var": {
+      "type": "string",
+      "pattern": "^\\?[a-z][a-z0-9_]*$"
+    },
+    "varOrConst": {
+      "type": "string",
+      "pattern": "^(\\?[a-z][a-z0-9_]*|dragon|[a-z][a-z0-9_]*\\.[a-z][a-z0-9_.]*)$"
+    },
+    "eventMatch": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "subject": {
+          "$ref": "#/$defs/varOrConst"
+        },
+        "object": {
+          "$ref": "#/$defs/varOrConst"
+        },
+        "tags_all": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags_any": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags_none": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "magnitude_gte": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "same_thread_as": {
+          "type": "string",
+          "pattern": "^[a-z]$"
+        },
+        "caused_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "pattern": "^[a-z]$"
+            },
+            "max_hops": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            }
+          }
+        },
+        "not_caused_by": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ref"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string",
+              "pattern": "^[a-z]$"
+            },
+            "max_hops": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            }
+          }
+        },
+        "within_years": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bind": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^\\?[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "clause": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/eventMatch"
+        },
+        {
+          "type": "object",
+          "required": [
+            "as"
+          ],
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z]$"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "unless": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/eventMatch"
+        },
+        {
+          "type": "object",
+          "required": [
+            "between"
+          ],
+          "properties": {
+            "between": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z]$"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

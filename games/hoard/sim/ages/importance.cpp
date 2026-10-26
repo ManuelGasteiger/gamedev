@@ -19,9 +19,9 @@ std::string template_key(const Event& e) {
 }
 
 static double base_of(const Params& p, const Event& e) {
-    auto it = p.texts.events.find(template_key(e));
-    if (it == p.texts.events.end()) it = p.texts.events.find(e.kind);
-    return it == p.texts.events.end() ? p.c.importance_default : it->second.importance;
+    auto it = p.importance.find(template_key(e));
+    if (it == p.importance.end()) it = p.importance.find(e.kind);
+    return it == p.importance.end() ? p.c.importance_default : it->second;
 }
 
 static bool under_oath(const World& w, const std::string& id) {

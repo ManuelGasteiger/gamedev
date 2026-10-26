@@ -41,9 +41,10 @@ LoadSave load_save(const std::string& text, World& out, std::string& err, bool* 
     for (int v = version; v < kSaveFormat; ++v)
         if (v >= 1 && kMigrate[v - 1]) j = kMigrate[v - 1](j);
     World w;
-    if (!j.contains("world") || !world_from_json(j["world"].dump(), w, err)) { if (err.empty()) err = "no world"; return LoadSave::bad_world; }
+    if (!j.contains("world") || !world_from_json_as_saved(j["world"].dump(), w, err)) { if (err.empty()) err = "no world"; return LoadSave::bad_world; }
     if (hash_hex(state_hash(w).root) != j.value("state_hash", "")) { err = "state hash mismatch: the save is damaged"; return LoadSave::hash_mismatch; }
     if (replay_verifiable) *replay_verifiable = j.value("rules_version", 0) == kRulesVersion;
+    fill_person_sex(w);   // rules 1 had no sex field
     out = w;
     return LoadSave::ok;
 }

@@ -5,8 +5,9 @@ $WasiSdk = if ($env:WASI_SDK) { $env:WASI_SDK } else { 'D:\tools\wasi-sdk' }
 $Cxx = Join-Path $WasiSdk 'bin\clang++.exe'
 $Sysroot = Join-Path $WasiSdk 'share\wasi-sysroot'
 
-$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' } | ForEach-Object { $_.FullName })
+$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\text\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
 $Sources += (Resolve-Path sim\wasm\api.cpp).Path
+$Sources += (Resolve-Path sim\wasm\text_api.cpp).Path
 
 & $Cxx --target=wasm32-wasi --sysroot=$Sysroot -std=c++17 -O2 -ffp-contract=off -fno-fast-math `
   -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor `
@@ -23,7 +24,16 @@ foreach ($k in 'constants', 'races', 'reactions', 'regions', 'factions', 'shocks
 }
 foreach ($k in 'talents', 'defences') { $Data[$k] = Get-Content -Raw "data\$k.json" }   # v0.4 (S1)
 $Data['hooks'] = Get-Content -Raw 'data\hooks.json'   # v0.4 hooks (S3)
-$Data['text'] = Get-Content -Raw 'data\text\en.json'
+$Data['text'] = Get-Content -Raw 'data\text\en\narrator.json'
+$Data['importance'] = Get-Content -Raw 'data\importance.json'
+# item 19: one bundle per language as sim/text/bundle_io.cpp merges it
+$Bundles = @{}
+foreach ($d in Get-ChildItem data\text -Directory | Sort-Object Name) {
+    $Parts = @("`"lang`":`"$($d.Name)`"")
+    foreach ($f in Get-ChildItem "$($d.FullName)\*.json" | Sort-Object Name) { $Parts += "`"$($f.BaseName)`":" + (Get-Content -Raw -Encoding UTF8 $f.FullName) }
+    $Bundles[$d.Name] = '{' + ($Parts -join ',') + '}'
+}
+$Data['text_bundles'] = $Bundles
 # the event cards, joined in file-name order into one JSON array as data_io.cpp does
 $Cards = Get-ChildItem data\events\*.json | Sort-Object Name | ForEach-Object { Get-Content -Raw $_.FullName }
 $Data['events'] = '[' + ($Cards -join ",`n") + ']'

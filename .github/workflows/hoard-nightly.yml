@@ -22,6 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: false }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: python for text_lint_seeds
+        shell: bash
+        run: python -m pip install --quiet jsonschema
       - name: build
         shell: bash
         env: { CXX: "${{ matrix.cxx }}" }
@@ -79,6 +84,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: false }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m pip install --quiet jsonschema
       - name: build with ASan and UBSan
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \

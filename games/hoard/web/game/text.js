@@ -1,10 +1,11 @@
-// Names and sentences. The narrator's templates live in data/text/en.json (embedded as DATA.text); this file fills them
+// Names and sentences. The narrator's templates live in data/text/en/narrator.json (embedded as DATA.text); this file fills them
 // the way sim/ages/briefing.cpp (Narrator::fill) does, so the ticker, the chronicle, the narration strip and the
 // known-people ledger read like the briefing instead of ids.
 const TEXT = JSON.parse(DATA.text);
+const IMPORTANCE = JSON.parse(DATA.importance ?? '{}').events ?? {};   // data/importance.json
 const NAMES = { people: new Map(), dead: new Map() };
 const ROLE_TAGS = new Set(['ruler', 'heir', 'hero', 'sage', 'priest', 'hostage_ruler']);
-// when neither the event nor en.json weighs an event: the kinds worth a line in the time-lapse ticker
+// when neither the event nor data/importance.json weighs an event: the kinds worth a line in the time-lapse ticker
 const TICKER_KINDS = new Set([
   'war_started', 'war_ended', 'coalition_formed', 'coalition_ended', 'region_taken', 'region_settled', 'region_abandoned',
   'collapse', 'faction_destroyed', 'era_advance', 'plague', 'volcanic_winter', 'vassal_sworn', 'vassal_freed', 'vassal_revolt',
@@ -62,12 +63,12 @@ function yearsWord(n) {
 function eraWord(e) { return TEXT.misc?.era_names?.[e] ?? ERA_NAMES[e] ?? String(e); }
 function yearsNum(n) { return `${n} year${n === 1 ? '' : 's'}`; }
 function ordinal(n) { return ['zeroth', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'][n] ?? `${n}th`; }
-// an id in words, as briefing.cpp words it: en.json's words, a talent's name, else the id in plain letters
+// an id in words, as briefing.cpp words it: narrator.json's words, a talent's name, else the id in plain letters
 function wordFor(k) { return TEXT.words?.[k] ?? (typeof talentById === 'function' ? talentById(k)?.name : null) ?? String(k ?? '').replace(/_/g, ' '); }
 function signed(v, digits = 2) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(digits); }
 
 // ---- the narrator's templates ---------------------------------------------------------------------------------------
-// mirrors template_key in sim/ages/importance.cpp; a variant is used only when en.json has it
+// mirrors template_key in sim/ages/importance.cpp; a variant is used only when narrator.json has it
 function templateKey(e) {
   const tags = e.tags ?? [];
   const has = (k) => !!TEXT.events?.[k];
@@ -147,7 +148,7 @@ function eventSentence(e) {
 }
 
 // ---- sim text that reaches the page with placeholders -----------------------------------------------------------------
-// en.json and the wasm can be from different builds; a template the wasm does not know arrives half filled. The page fills
+// narrator.json and the wasm can be from different builds; a template the wasm does not know arrives half filled. The page fills
 // what it can from the event (by id) and from `extra`, then drops what is left, so no "{...}" reaches the player.
 function cleanSimText(text, e = null, extra = {}) {
   let s = String(text ?? '');
@@ -211,10 +212,10 @@ function involvesYou(e, ctx) {
   return ctx.oath.has(e.subject) || ctx.oath.has(e.object);
 }
 
-// the sim's score when the event carries one, else the per-kind weight in en.json, else null (the kind list decides)
+// the sim's score when the event carries one, else the per-kind weight in data/importance.json, else null (the kind list decides)
 function importanceOf(e) {
   if (hasImportance(e)) return e.importance;
-  const w = TEXT.events?.[templateKey(e)]?.importance ?? TEXT.events?.[e.kind]?.importance;
+  const w = IMPORTANCE[templateKey(e)] ?? IMPORTANCE[e.kind];
   return typeof w === 'number' ? w : null;
 }
 

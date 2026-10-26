@@ -1,0 +1,11 @@
+{
+ "lang": "en",
+ "source": "CLDR via Babel 2.18.0",
+ "group": ",",
+ "decimal": ".",
+ "grouping": 3,
+ "min_grouping": 1,
+ "plural": {
+  "one": "i in 1 and v in 0"
+ }
+}

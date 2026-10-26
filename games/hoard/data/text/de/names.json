@@ -1,0 +1,15 @@
+{
+ "gen": {
+  "suffix": "s",
+  "apostrophe": "’",
+  "apostrophe_after": [
+   "s",
+   "ß",
+   "x",
+   "z"
+  ],
+  "overrides": {
+   "Dorun": "Doruns"
+  }
+ }
+}
