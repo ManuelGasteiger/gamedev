@@ -1,0 +1,11 @@
+{
+  "fear_damp": 0.5,
+  "hero_bonus": 5,
+  "defences": [
+    { "id": "levies",        "label": "Levies",        "per_act": 2,  "era_scale": 1.0 },
+    { "id": "bolt_throwers", "label": "Bolt-throwers", "min_era": 2, "min_anti_dragon": 0.2, "tags_any": ["slayers"], "per_act": 8, "passive": 3, "radius": 40 },
+    { "id": "slayer_band",   "label": "Slayer band",   "tags_any": ["slayers"], "per_act": 10, "fearless": true },
+    { "id": "wards",         "label": "Wards",         "min_era": 2, "races_any": ["elf"], "ward_modifier": true, "burn_mult": 0.5 },
+    { "id": "cannons",       "label": "Cannons",       "min_era": 2, "min_anti_dragon": 4, "per_act": 14, "passive": 5, "radius": 55 }
+  ]
+}

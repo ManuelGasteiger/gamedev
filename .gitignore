@@ -1,0 +1,32 @@
+# not ours, read only
+/reference/
+/scratch/
+/setup-report.txt
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# python, node
+__pycache__/
+.venv*/
+node_modules/
+
+# blender backups
+*.blend1
+*.blend2
+
+# unreal build output and caches (any project under games/)
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+.idea/
+*.sln
+*.slnx
+*.VC.db
+
+# raw simulation output; commit only the picked exports
+_raw/

@@ -1,0 +1,41 @@
+[
+  {
+    "id": "the_queen_who_does_not_die",
+    "kind": "undying_rose",
+    "major": true,
+    "once": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "race", "eq": "elf"},
+      {"field": "regions", "gte": 3},
+      {"field": "authority", "gte": 0.55},
+      {"field": "piety", "gte": 0.5},
+      {"field": "ruler_class", "ne": "immortal"},
+      {"tag": "undying", "absent": true},
+      {"person": "ruler", "bind": "person"}
+    ],
+    "chance": 0.003,
+    "object": "$person",
+    "effects": [{"do": "undying", "on": "self"}]
+  },
+  {
+    "id": "the_king_who_stopped_dying",
+    "kind": "undying_rose",
+    "major": true,
+    "once": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"tag": "age_of_magic", "on": "world"},
+      {"field": "magic", "on": "world", "gte": 0.5},
+      {"field": "race", "eq": "human"},
+      {"field": "regions", "gte": 3},
+      {"field": "authority", "gte": 0.6},
+      {"field": "ruler_class", "ne": "immortal"},
+      {"tag": "undying", "absent": true},
+      {"person": "ruler", "bind": "person"}
+    ],
+    "chance": 0.004,
+    "object": "$person",
+    "effects": [{"do": "undying", "on": "self"}]
+  }
+]

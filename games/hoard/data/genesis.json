@@ -1,0 +1,171 @@
+{
+  "terrain": {
+    "vale":    {"land": 0.8,  "jitter": 0.08, "name_a": ["Ash", "Barrow", "Corn", "Elm", "Gold", "Hay", "Mill", "Oak", "Rye", "Sun", "Wheat", "Lark", "Fair", "Apple", "Hart"], "name_b": ["dale", "vale", "field", "mead", "holm", "stead", "lea", "fold"]},
+    "marches": {"land": 0.6,  "jitter": 0.08, "name_a": ["Grey", "Wolf", "Stone", "Wind", "Thorn", "Raven", "Iron", "Long", "Burnt", "Hollow", "Crow", "Flint", "Gallow", "Bleak"], "name_b": ["march", "reach", "moor", "heath", "down", "fell", "wold"]},
+    "hills":   {"land": 0.65, "jitter": 0.07, "name_a": ["Khaz", "Dun", "Grim", "Bal", "Thar", "Kor", "Az", "Mor", "Bar", "Gund", "Durn", "Hel", "Brom", "Zir"], "name_b": ["hold", "delve", "mound", "crag", "tor", "deep", "barrow"]},
+    "wood":    {"land": 0.6,  "jitter": 0.06, "name_a": ["Sil", "Ael", "Lor", "Elen", "Thal", "Ith", "Mir", "Cal", "Nim", "Gwen", "Lith", "Fael", "Ouen", "Ser"], "name_b": ["wood", "shade", "glade", "weald", "holt", "dell", "grove"]},
+    "fen":     {"land": 0.4,  "jitter": 0.06, "name_a": ["Mire", "Reed", "Black", "Sedge", "Murk", "Eel", "Bog", "Drown", "Willow", "Mist", "Rush", "Heron", "Fog"], "name_b": ["fen", "marsh", "mire", "carr", "slough", "moss", "water"]},
+    "scar":    {"land": 0.4,  "jitter": 0.05, "name_a": ["Cinder", "Blight", "Gall", "Skull", "Rot", "Bone", "Ember", "Gorge", "Rust", "Ash", "Char", "Slag", "Grue"], "name_b": ["scar", "waste", "rift", "pits", "barrens", "gulch", "maw"]},
+    "lake":    {"land": 0.3,  "jitter": 0.05, "name_a": ["Still", "Silver", "Deep", "Moon", "Glass", "Cold", "Swan", "Grey", "Long", "Star", "Pale"], "name_b": ["water", "mere", "lake", "loch", "pool", "tarn"]},
+    "lair":    {"land": 0.3,  "jitter": 0.0,  "name_a": ["Ember", "Grim", "Smoke", "Thunder", "Old", "Black", "Fire", "Storm", "Iron", "Red"], "name_b": ["peak", "fang", "horn", "crown", "spire", "mount"]}
+  },
+  "deal": {
+    "base": {"vale": 2, "marches": 1, "hills": 2, "wood": 2, "fen": 1, "scar": 1},
+    "wild": {"vale": 3, "marches": 3, "hills": 2, "wood": 2, "fen": 1.2, "scar": 0.8, "lake": 0.5},
+    "max": {"vale": 4, "marches": 3, "hills": 4, "wood": 4, "fen": 2, "scar": 2, "lake": 1},
+    "cluster": ["hills", "wood", "scar"],
+    "lair_max": {"scar": 0, "lake": 0, "fen": 1},
+    "lair_min": {"vale": 1},
+    "tries": 20
+  },
+  "rim": ["east_marches", "west_marches", "deep_hold", "old_wood", "north_scar", "south_fen"],
+  "courts": [3, 6],
+  "fallback_court": {"id": "settlers", "race": {"human": 2, "dwarf": 1, "elf": 1}, "regions": 1, "wealth": [20, 35], "cohesion": [0.75, 0.9]},
+  "prehistory": [300, 900],
+  "legends": {"max": 10, "per_kind": 2, "per_century": 2, "skip": ["court_founded", "person_rose", "person_died", "person_crowned", "reign_named", "successor_founded", "remnant_formed"]},
+  "templates": [
+    {
+      "id": "rival_kingdoms",
+      "deal": {"vale": 3, "marches": 2},
+      "courts": [
+        {"id": "crown", "count": 3, "race": {"human": 1}, "regions": 2, "wealth": [40, 70], "cohesion": [0.75, 0.9], "traits": {"militarism": 0.1}},
+        {"id": "hold", "race": {"dwarf": 1}, "regions": [1, 2], "wealth": [30, 50], "chance": 0.85},
+        {"id": "wood", "race": {"elf": 1}, "regions": [1, 2], "wealth": [25, 40], "chance": 0.6}
+      ],
+      "relations": [
+        {"kind": "war", "a": "crown.0", "b": "crown.1", "chance": 0.8},
+        {"kind": "old_enemies", "a": "crown.0", "b": "crown.1", "decades": 60},
+        {"kind": "old_enemies", "a": "crown.1", "b": "crown.2", "decades": 60, "chance": 0.5}
+      ]
+    },
+    {
+      "id": "dwarf_empire",
+      "deal": {"hills": 3},
+      "courts": [
+        {"id": "empire", "race": {"dwarf": 1}, "regions": [4, 5], "any_terrain": true, "wealth": [120, 180], "cohesion": [0.38, 0.5], "era": 1,
+         "mix": {"human": 1}, "mix_share": [0.2, 0.35], "traits": {"authority": 0.15}, "tags": ["old_empire"]},
+        {"id": "vassal", "race": {"human": 1}, "regions": 1, "near": "empire", "wealth": [20, 30], "cohesion": [0.8, 0.9]},
+        {"id": "rival", "race": {"human": 1}, "regions": [1, 2], "wealth": [30, 50], "chance": 0.9, "traits": {"militarism": 0.15}},
+        {"id": "wood", "race": {"elf": 1}, "regions": [1, 2], "wealth": [25, 40], "chance": 0.5}
+      ],
+      "relations": [
+        {"kind": "vassal", "a": "empire", "b": "vassal"},
+        {"kind": "war", "a": "rival", "b": "empire", "chance": 0.5},
+        {"kind": "mark", "a": "empire", "b": "rival", "tag": "grudge:$b", "decades": 50, "chance": 0.5}
+      ]
+    },
+    {
+      "id": "elven_realm",
+      "deal": {"wood": 3},
+      "courts": [
+        {"id": "realm", "race": {"elf": 1}, "regions": [3, 4], "any_terrain": true, "wealth": [80, 120], "cohesion": [0.8, 0.95],
+         "mix": {"human": 1}, "mix_share": [0.2, 0.35], "traits": {"openness": 0.15}, "tags": ["host_of:human"]},
+        {"id": "colony", "race": {"human": 1}, "regions": 1, "near": "realm", "wealth": [15, 25], "cohesion": [0.85, 0.95]},
+        {"id": "kingdom", "race": {"human": 1}, "regions": [1, 2], "wealth": [30, 50], "chance": 0.8},
+        {"id": "hold", "race": {"dwarf": 1}, "regions": [1, 2], "wealth": [30, 45], "chance": 0.6}
+      ],
+      "relations": [
+        {"kind": "vassal", "a": "realm", "b": "colony"},
+        {"kind": "old_enemies", "a": "realm", "b": "kingdom", "decades": 40, "chance": 0.4}
+      ]
+    },
+    {
+      "id": "orc_horde",
+      "deal": {"scar": 2},
+      "courts": [
+        {"id": "horde", "race": {"orc": 1}, "regions": [2, 3], "terrain": ["scar"], "any_terrain": true, "wealth": [50, 80], "cohesion": [0.7, 0.85]},
+        {"id": "crown", "count": 2, "race": {"human": 1}, "regions": [1, 2], "wealth": [35, 60], "cohesion": [0.75, 0.9]},
+        {"id": "hold", "race": {"dwarf": 1}, "regions": [1, 2], "wealth": [30, 50], "chance": 0.8}
+      ],
+      "relations": [
+        {"kind": "war", "a": "horde", "b": "neighbour", "chance": 0.8},
+        {"kind": "alliance", "a": "crown.0", "b": "hold", "chance": 0.5},
+        {"kind": "mark", "a": "hold", "b": "horde", "tag": "grudge:$b", "decades": 50, "chance": 0.6}
+      ]
+    },
+    {
+      "id": "free_cities",
+      "courts": [
+        {"id": "city", "count": [4, 6], "race": {"human": 3, "dwarf": 1, "elf": 1}, "regions": 1, "wealth": [25, 45], "cohesion": [0.75, 0.9], "era": 1,
+         "mix": {"human": 1, "dwarf": 1, "elf": 1}, "mix_share": [0.2, 0.4], "traits": {"openness": 0.2, "authority": -0.2, "militarism": -0.1}, "tags": ["free_city"]}
+      ],
+      "relations": [
+        {"kind": "alliance", "a": "city.0", "b": "neighbour"},
+        {"kind": "alliance", "a": "city.1", "b": "neighbour", "chance": 0.7},
+        {"kind": "alliance", "a": "city.2", "b": "neighbour", "chance": 0.5}
+      ]
+    },
+    {
+      "id": "fallen_kingdom",
+      "fallen": {"human": 2, "dwarf": 1, "elf": 1},
+      "ruins": [2, 4], "ruin_burn": [0.25, 0.6], "ruin_age": [10, 60], "ruin_wasteland": 0.25, "fallen_reign": [300, 800], "fallen_era": 1,
+      "courts": [
+        {"id": "heir", "count": [2, 3], "race": {"fallen": 1}, "regions": 1, "near": "ruins", "wealth": [20, 35], "cohesion": [0.6, 0.75], "tags": ["successor_of:$fallen"]},
+        {"id": "outsider", "count": [1, 2], "race": {"human": 2, "dwarf": 1, "elf": 1, "orc": 0.5}, "regions": [1, 2], "wealth": [25, 45]}
+      ],
+      "relations": [
+        {"kind": "war", "a": "heir.0", "b": "heir.1", "chance": 0.7}
+      ],
+      "remnants": [{"race": {"fallen": 1}, "strength": [0.3, 0.5]}]
+    },
+    {
+      "id": "the_exodus",
+      "deal": {"wood": 3, "hills": 2},
+      "courts": [
+        {"id": "realm", "count": 2, "race": {"elf": 1}, "regions": [2, 3], "wealth": [60, 100], "cohesion": [0.8, 0.95], "era": 1, "tags": ["host_of:human"]},
+        {"id": "hold", "count": [1, 2], "race": {"dwarf": 1}, "regions": [1, 2], "wealth": [40, 60], "era": 1},
+        {"id": "exiles", "count": [1, 2], "race": {"human": 1}, "regions": 1, "terrain": ["marches", "vale", "fen"], "near": "realm", "wealth": [10, 20], "cohesion": [0.9, 1.0], "tags": ["from_beyond"]}
+      ],
+      "relations": [
+        {"kind": "vassal", "a": "realm.0", "b": "exiles.0"},
+        {"kind": "vassal", "a": "realm.1", "b": "exiles.1", "chance": 0.6},
+        {"kind": "old_enemies", "a": "realm.0", "b": "hold.0", "decades": 60, "chance": 0.6}
+      ]
+    },
+    {
+      "id": "the_undying_queen",
+      "courts": [
+        {"id": "throne", "race": {"elf": 2, "human": 1}, "regions": [4, 5], "any_terrain": true, "wealth": [140, 200], "cohesion": [0.85, 0.95], "era": 1,
+         "undying": true, "traits": {"authority": 0.2}},
+        {"id": "vassal", "count": [1, 2], "race": {"human": 2, "dwarf": 1}, "regions": 1, "near": "throne", "wealth": [20, 35]},
+        {"id": "free", "race": {"human": 1, "dwarf": 1, "orc": 0.5}, "regions": [1, 2], "wealth": [30, 50], "chance": 0.8}
+      ],
+      "relations": [
+        {"kind": "vassal", "a": "throne", "b": "vassal.0"},
+        {"kind": "vassal", "a": "throne", "b": "vassal.1"}
+      ]
+    },
+    {
+      "id": "the_empty_valley",
+      "courts": [
+        {"id": "village", "count": 3, "race": {"human": 2, "dwarf": 1, "elf": 1}, "regions": 1, "wealth": [10, 20], "cohesion": [0.85, 0.95],
+         "mix": {"human": 1, "dwarf": 1, "elf": 1}, "mix_share": [0.1, 0.3]}
+      ],
+      "remnants": [
+        {"race": {"human": 1, "dwarf": 1, "elf": 1}, "strength": [0.3, 0.5]},
+        {"race": {"human": 1, "dwarf": 1, "elf": 1}, "strength": [0.3, 0.5]}
+      ]
+    }
+  ],
+  "extinction": {"races": ["human", "dwarf", "elf", "saurian"], "strength": 0.3, "pop": 0.15, "gone_years": 20, "assimilate": 0.2, "chance": 0.2},
+  "undying": {"cohesion_floor": 0.42, "fall_chance": 0.006, "fall_cohesion": -0.3, "empire_years": 1000},
+  "magic": {"start": 0.3, "rise": 0.04, "cap": 0.8, "ebb": 0.01},
+  "empty_land": {"razed_burn": 0.3},
+  "storyteller": {
+    "major_importance": 0.5,
+    "chance_base": 0.15, "chance_per_window": 0.25, "chance_max": 0.8,
+    "forced_after": 3, "forced_years": 200, "second_chance": 0.5, "near_end_share": 0.2, "prehistory_waking_years": 100,
+    "grace_years": 60, "major_per_year": 0.01, "major_max": 3, "breather_mult": 0.5,
+    "deck": [
+      {"card": "great_plague", "weight": 1.5}, {"card": "comet", "weight": 1.5}, {"card": "long_winter", "weight": 1.5},
+      {"card": "the_dance_of_claimants", "weight": 3}, {"card": "hero_unites", "weight": 3}, {"card": "holy_war", "weight": 2},
+      {"card": "the_dead_walk", "weight": 1.2}, {"card": "the_plague_dead", "weight": 1.2},
+      {"card": "age_of_magic", "weight": 0.12}, {"card": "people_from_beyond_men", "weight": 0.07},
+      {"card": "people_from_beyond_horde", "weight": 0.05}, {"card": "people_from_beyond_fen", "weight": 0.03}, {"card": "vale_broke", "weight": 0.017},
+      {"card": "fen_drowned", "weight": 0.017}
+    ],
+    "wake_deck": [
+      {"card": "festival", "weight": 1}, {"card": "temple_raised", "weight": 1}, {"card": "town_founded", "weight": 1}, {"card": "royal_birth", "weight": 1}
+    ]
+  }
+}

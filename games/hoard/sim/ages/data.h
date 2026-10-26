@@ -1,0 +1,548 @@
+#pragma once
+#include <map>
+#include <string>
+#include <vector>
+#include "cards.h"
+#include "genesis_data.h"
+#include "state.h"
+
+namespace ages {
+
+struct Constants {
+    int step_years = 10;
+    double land_wealth_scale = 100;
+    double wealth_upkeep = 0.01;
+    double power_cap = 40;
+    double cohesion_decay_floor = 0.25;
+    std::vector<double> era_mult;
+    std::vector<double> era_threshold;
+    double era_diffusion = 4;
+    int era_diffusion_gap = 2;
+
+    double anti_dragon_fear = 0.5;
+    int anti_dragon_min_era = 2;
+    double anti_dragon_rate = 0.02;
+    double slayers_at = 1.0;
+    double war_siege_anti_dragon = 0.005;
+
+    double war_penalty = 0.4;
+    double war_chance = 0.15;
+    double war_power_ratio = 1.5;
+    double war_target_cohesion = 0.5;
+    double war_take_chance = 0.3;
+    double war_loser_wealth_loss = 0.1;
+    int war_end_regions = 2;
+    int war_max_decades = 5;
+    double orc_war_cohesion = 0.4;
+    double orc_plunder = 0.15;
+
+    double collapse_cohesion = 0.2;
+    double successor_cohesion = 0.6;
+    double succession_bonus_mortal = 0.15;
+    double succession_bonus_longlived = 0.05;
+    double immortal_decay_mult = 0.1;
+    double immortal_era_rate_mult = 0.5;
+    double warlord_death_cohesion = 0.2;
+    double warlord_lifespan = 40;
+    double succession_jitter = 0.25;
+
+    double memory_drop = 0.02;
+    double betrayal_decay_mult = 0.5;
+    double betrayal_block_weight = 0.1;
+
+    double tribute_faith = 0.5;
+    double tribute_faith_no_oath = 0.8;
+    double tribute_rate = 0.02;
+    double tribute_faith_pool = 0.1;
+    double slay_fear = 0.6;
+    double slay_attempt_rate = 0.05;
+    double slay_success_div = 3;
+    double slay_fail_wealth_loss = 0.3;
+    double slay_fail_fear = 0.2;
+
+    double elf_withdraw_ratio = 2.0;
+    double dug_in_invasion_mult = 0.5;
+    double orc_spawn_burn = 0.5;
+    double orc_spawn_chance = 0.1;
+    double orc_spawn_weak_cohesion = 0.5;
+    double orc_spawn_weak_power = 10;
+    double orc_spawn_wealth = 20;
+    double orc_spawn_cohesion = 0.8;
+    double abandon_burn = 0.8;
+    double settle_chance = 0.1;
+    double settle_max_burn = 0.5;
+    double settle_min_cohesion = 0.5;
+
+    double burn_recovery = 0.02;
+    double burn_recovery_wasteland = 0.005;
+    double wasteland_burn = 0.8;
+    int wasteland_decades = 10;
+    double wasteland_clear_burn = 0.2;
+    int wasteland_clear_decades = 30;
+
+    double oath_tribute_min_faith = 0.2;
+    int oath_walls_era = 2;
+    double oath_fade_fear = 0.2;
+
+    double act_kill_cohesion = 0.05;
+    double act_defend_attacker_loss = 0.15;
+    double act_accept_offering_faith_pool = 0.1;
+    double act_give_era_share = 1.0;
+    double act_kill_soldier_wealth = 0.5;
+    double act_give_wealth_floor = 10;
+    double act_miracle_faith_cost = 1.0;
+
+    double reaction_faith_high = 0.5;
+    double reaction_weak_ratio = 0.5;
+    int losing_window_decades = 2;
+
+    std::map<std::string, double> hoard_halflife;
+    std::map<std::string, double> hoard_per_unit;
+    double threat_base = 1.0;
+    double threat_k_size = 0.5;
+    double threat_k_magic = 2.0;
+    double threat_scale = 20;
+
+    double rage_burn_mult = 1.3;
+    double rage_show_as_burn = 0.2;
+    double forgotten_show_as_burn = 0.3;   // world tag dragon_forgotten: a show is read as a burn of this magnitude
+
+    double offer_faith = 0.7;
+    double offer_rival_cohesion = 0.5;
+    int offer_exit_era = 4;
+    double offer_exit_faith = 0.8;
+    int offer_expiry_years = 500;
+    double offer_tribute_defence = 0.1;
+    double offer_tribute_worship = 0.05;
+    double offer_tribute_rival = 0.1;
+
+    // demand (section 8): a knowledge-gated oath the dragon imposes on a cowed court
+    double demand_knowledge = 0.5;
+    double demand_fear = 0.3;
+    double demand_tribute_rate = 0.1;
+    double demand_refused_resolve = 0.05;
+
+    // 15.1 terrain
+    double home_land_mult = 1.2;
+
+    // 15.2 vassalage
+    double vassal_tribute = 0.2;
+    double vassal_independence_chance = 0.2;
+    double vassal_overlord_cohesion = 0.4;
+    double vassal_wealth_weight = 0.5;
+    std::string vassal_absorb = "same_race";
+
+    // 15.3 population and remnants
+    double conquest_pop_shift = 0.15;
+    double refugee_share = 0.1;
+    double remnant_start_strength = 0.3;
+    double remnant_halflife = 1000;
+    double remnant_min_strength = 0.1;
+    double remnant_refound_chance = 0.05;
+    double remnant_refound_wealth = 10;
+    double remnant_refound_cohesion = 0.7;
+    double remnant_sponsor_knowledge = 0;
+
+    // 15.4 regime traits
+    double trait_jitter = 0.15;
+    double trait_mult_base = 0.5;
+    double trait_authority_decay = 0.4;
+    double trait_authority_high = 0.6;
+    double trait_succession_halved = 0.5;
+    double drift_militarism_war = 0.02;
+    double drift_militarism_peace = -0.01;
+    int drift_peace_decades = 10;
+    double drift_burned_authority = 0.05;
+    double drift_burned_piety = 0.05;
+    double drift_openness_border = 0.01;
+    double affinity_alliance = 0.5;
+    double coalition_power_ratio = 2.0;
+    double coalition_region_share = 0.4;
+    double coalition_affinity = 0.3;
+    double coalition_join_chance = 0.1;
+    double alliance_join_chance = 0.3;
+    double hegemony_share = 0.5;
+
+    // 15.5 fading
+    double fading_human_share = 0.6;
+    int fading_decades = 10;
+    double fading_end_share = 0.4;
+    double fading_growth_mult = 0.5;
+    double fading_decay_mult = 0.5;
+    double fading_depart_chance = 0.03;
+    double fading_remnant_gain = 0.05;
+
+    // 15.6 hunger
+    double hunger_need = 0.4;
+    double hunger_need_per_size = 0.1;
+    double hunger_rate = 0.05;
+    double hunger_atrophy_at = 0.5;
+    double hunger_atrophy = 0.01;
+    double hunger_wake_at = 0.9;
+    double hunger_kill_feed = 0.5;
+    double hunger_food_feed = 0.1;
+    double forecast_noise = 0.5;
+
+    // 15.7 rare events
+    double great_ruler_chance = 0.02;
+    double golden_age_growth_mult = 1.5;
+    double golden_age_cohesion = 0.2;
+    double tyrant_authority = 0.3;
+    double tyrant_militarism = 0.3;
+    double tyrant_death_cohesion = -0.1;
+    double succession_crisis_chance = 0.15;
+    double succession_crisis_cohesion = -0.3;
+
+    // 17.2 people
+    double accession_jitter = 0.25;
+    double epithet_trait = 0.75;
+    double hero_chance = 0.02;
+    int hero_max = 3;
+    double hero_slay_bold_base = 0.5;
+    double hero_unite_cohesion = 0.2;
+    double hero_usurp_bold = 0.7;
+    double hero_usurp_cohesion = 0.4;
+    double hero_usurp_chance = 0.2;
+    int sage_min_era = 2;
+    double sage_openness = 0.5;
+    double priest_piety = 0.5;
+    double sage_memory_mult = 0.5;
+    double keeper_min_weight = 0.1;   // a dragon memory this faint is not taken up by a new sage or priest
+    int keeper_named_years = 200;     // the chronicle names a kept memory only when it is at least this old
+    int hostage_raise_years = 20;
+    double betrothal_chance = 0.3;
+    double tyrant_greedy = 0.3;
+    double golden_pious = 0.2;
+    double known_harm = -0.3;
+    double known_help = 0.3;
+    double known_show = -0.1;
+    double known_accept = 0.3;
+    double known_decline = -0.1;
+    double known_deceived = -0.5;
+    double known_release = 0.5;
+    double known_kill_envoy = -0.6;
+
+    // 17.3 offers
+    double offer_lie_base = 0.1;
+    double offer_lie_authority = 0.3;
+    double offer_lie_cunning = 0.4;
+    double offer_truth_knowledge = 2.0;
+    int offer_act_years = 100;
+    double offer_honest_faith_mult = 1.5;
+    double offer_consent_faith = 0.2;
+    double offer_elope_bold = 0.6;
+    double offer_ward_piety = 0.6;
+    double offer_teach_openness = 0.5;
+    double envoy_kill_magnitude = 0.05;
+    double envoy_kill_fear = 0.3;
+    double offer_bless_faith = 0.3;
+    double offer_affinity_rival = 0.0;
+    double offer_elope_affinity = 0.0;
+    double offer_judge_bold = 0.5;
+
+    // 17.4 phases and tempo
+    std::vector<double> phase_thresholds;    // score = size + knowledge + magic; 4 entries for phases 2..5
+    std::vector<int> phase_short_sleep;      // years, 5 entries
+    std::vector<int> phase_long_sleep;
+    std::vector<double> hunger_phase_mult;   // 5 entries
+    double moult_digest_mult = 2.0;
+    int moult_stiff_sleeps = 1;
+
+    // 17.5 briefing
+    int briefing_group_years = 100;
+    double briefing_rich_fear = 0.2;
+    double briefing_slayers_forming = 0.5;
+    int briefing_rich_count = 3;
+    double importance_default = 0.2;   // kinds en.json does not list
+    double importance_min = 0.25;      // "while you slept" keeps an event at or above this, or one on a thread that has one
+    double importance_known = 0.3;     // the subject or object is a person the dragon knows
+    double importance_oath = 0.2;      // ... a court under an active oath with the dragon
+    double importance_hostage = 0.3;   // ... a hostage, or a court whose heir is in the lair
+
+    // 17.7
+    double elf_withdraw_affinity = 0.2;
+    double elf_withdraw_fear = 0.6;
+    double elf_withdraw_chance = 0.3;
+    double tribute_food = 0.3;
+
+    // 17.8
+    double hegemony_end_share = 0.4;
+    int cause_window_years = 100;   // how far back a rule looks for the event that explains the one it emits
+
+    // v0.4 (S1) constants.json "dragon": digestion on the phase clock (half-life = share x the phase's long sleep),
+    // growth points per digested unit, the gold bed, phases from total points, health, talent mechanics
+    std::map<std::string, double> growth_halflife;   // books, art, royals, artifacts, embers, food
+    std::map<std::string, double> growth_points;     // books, royals, artifacts, art, tribute, embers, food
+    double bed_rate = 0.4;                           // might per sqrt(gold) per long window slept
+    double bed_overtime = 1;                         // the bed's rate past the sleep's first long window
+    double size_per_might = 0.05;
+    std::vector<double> phase_points;                // total points that open phases 2..5; empty: the old thresholds
+    double health_base = 100;
+    double health_per_might = 3;
+    int premonition_decades = 5;                     // slayers_coming:<court> stays on the world this long
+    double molten_gold_burn = 0.3;
+    double clinging_recovery_mult = 0.5;
+    double hex_anti_dragon_mult = 0.5;
+    double cult_faith = 0.5;
+    double brood_faith = 0.6;
+    // "slayers": the band's lapse, its threat points and odds against health (strength / (health x health_div)), the
+    // adaptation factor (adapt_base + adapt_step x adaptation, clamped), the wounds share that makes a sleep a near death
+    double slay_lapse_fear = 0.4;
+    double slay_ready_rate = 0.05;   // per decade, once a waking has passed since the band formed
+    double slay_health_div = 1;
+    double slay_points_base = 2;
+    double slay_points_hoard = 0.1;
+    double slay_points_growth = 0.02;
+    double adapt_gain = 1, adapt_gain_negative = 3, adapt_loss = 3;
+    double adapt_base = 0.8, adapt_step = 0.1, adapt_min = 0.4, adapt_max = 1.6;
+    double near_death_wounds = 0.7;
+    std::vector<double> anti_dragon_marks;   // shares of the way to the next defence the chronicle reports
+    double dread_research = 0;               // research per decade below anti_dragon_min_era (x fear x burn memory)
+    std::map<std::string, double> start_hoard;   // the hoard the egg lies on (gold, books, artifacts, art, food)
+};
+
+struct NameTable {
+    std::vector<std::string> a, b;
+};
+
+struct Names {
+    std::map<std::string, NameTable> factions;
+    std::map<std::string, NameTable> people;
+    std::map<std::string, std::string> epithets;   // trait -> " the Bold"
+};
+
+// one row of data/offers.json: what the kind asks, who carries it, what it may hide behind
+struct OfferDef {
+    std::string kind;
+    std::string motive;
+    std::vector<std::string> pretexts;
+    bool can_lie = true;
+    std::string pred;        // the clause the dragon is asked for ("defend", "burn", "release", ...) or "" for nothing
+    std::string gives;       // "tribute" | "ransom" | "none"
+    double price_rate = 0.1;
+    std::string envoy = "heir";   // sage | priest | heir | hero | ruler | self (the person the offer is about)
+    std::vector<std::string> clauses;   // clause preds of the oath draft ("tribute", "no_harm", "defend")
+    int expires_years = 100;
+    bool enabled = true;
+    Tags tags;               // copied onto the oath_sworn event (e.g. exit_not_implemented)
+};
+
+// data/text/en.json: templates and importances per event kind, plus cause, motive and pretext texts
+struct TextTemplate {
+    std::string text, brief;
+    double importance = 1;
+};
+
+struct Texts {
+    std::map<std::string, TextTemplate> events;
+    std::map<std::string, std::string> causes, motives, pretexts, asks, roles, words, misc;
+    std::map<std::string, std::string> reactions;   // apply_acts lines: "<act>.<relationship>[.<race>]", "extra.*", "tag.*"
+    std::vector<std::string> era_names, phase_names, numbers;   // numbers: words for 0..n ("no", "one", ...)
+};
+
+struct Reaction {
+    std::vector<std::string> acts;
+    std::string relationship;
+    double fear_per_m = 0, fear_flat = 0;
+    double faith_per_m = 0, faith_flat = 0;
+    double anti_dragon_per_m = 0;
+    bool has_faith_set = false;
+    double faith_set = 0;
+    Tags tags;
+};
+
+struct Shocks {
+    double plague_chance = 0.01, plague_wealth_mult = 0.7, plague_cohesion = -0.1;
+    double bad_century_chance = 0.005, bad_century_land_mult = 0.7;
+    int bad_century_decades = 10;
+    double volcanic_trigger_burn_total = 3.0, volcanic_chance = 1.0, volcanic_land_mult = 0.5;
+    int volcanic_decades = 5;
+};
+
+struct OathEffect {
+    bool has_faith_set = false;
+    double faith_set = 0;
+    double fear_add = 0;
+    Tags tags;
+    bool has_modifier = false;
+    std::string mod_var, mod_op;
+    double mod_value = 0;
+    int mod_decades = 0;
+};
+
+struct ModifierDef {
+    bool present = false;
+    std::string var, op = "mul";
+    double value = 1;
+    int decades = 10;
+};
+
+// section 8 verbs that resolve to a modifier or a spawn; gate names a dragon axis (magic, knowledge, faith_pool,
+// knowledge_or_magic), target is "region" or "faction"
+struct SpellDef {
+    std::string id;
+    bool enabled = true;
+    std::string gate = "magic";
+    std::string target = "region";
+    double gate_min = 0;
+    double cost = 0;
+    ModifierDef modifier;
+    std::string spawn_race;
+    double spawn_wealth_per_magic = 0;
+    double spawn_cohesion = 0.8;
+    int spawn_era = 0;
+    double site_min_burn = 0.5;
+};
+
+struct TerraformKind {
+    std::string tag;
+    ModifierDef modifier;
+};
+
+struct TerraformDef {
+    double gate_size = 2;
+    double cost_size_fraction = 0.1;
+    std::map<std::string, TerraformKind> kinds;
+};
+
+// v0.4 (S1): data/talents.json and data/defences.json
+struct TalentLook {
+    std::map<std::string, double> num;
+    std::map<std::string, std::string> str;
+};
+
+struct TalentDef {
+    std::string id, axis, name, text;
+    int node = 0;                              // index into TalentBook.nodes
+    std::map<std::string, double> effects;
+    TalentLook look;
+};
+
+struct TalentAxis {
+    std::string id, name, fed_by;
+    double rank_every = 25;                    // points of the first rank after the axis' last authored node
+    double rank_growth = 1;                    // each further rank costs this much more
+    std::map<std::string, double> rank_effects;
+    TalentLook rank_look;                      // numbers add once per rank
+    std::string rank_text;
+    int milestone_every = 0;                   // every this many ranks the milestone effects and look apply once more
+    std::map<std::string, double> milestone_effects;
+    TalentLook milestone_look;
+};
+
+struct TalentBook {
+    std::vector<TalentAxis> axes;
+    std::vector<double> nodes;                 // points per node
+    std::vector<int> node_phase;               // phase a node needs
+    std::vector<TalentDef> talents;            // file order
+    std::map<std::string, size_t> index;       // id -> talents[i]
+};
+
+// opens at min_era for races_any (any race when empty) when anti_dragon >= min_anti_dragon or a tag of tags_any is on
+// the court (always when neither is given), or wherever a ward modifier holds the region if ward_modifier; a defence
+// with a radius is ranged (arcane armor applies); a fearless one is not damped by the court's fear
+struct DefenceDef {
+    std::string id, label;
+    int min_era = 0;
+    double min_anti_dragon = 0;
+    std::vector<std::string> tags_any, races_any;
+    bool ward_modifier = false;
+    double per_act = 0, passive = 0, radius = 0, burn_mult = 1, era_scale = 0;
+    bool fearless = false;   // fear does not damp it
+};
+
+struct DefenceBook {
+    std::vector<DefenceDef> defences;
+    double fear_damp = 0.6;
+    double hero_bonus = 5;
+};
+
+// v0.4 hooks (S3): data/hooks.json. A template's `when` is a card trigger (cards.h) evaluated per self of its scope;
+// `where` names the hook's region (capital | near_lair | lair | largest | $region); reward and ignore are flat maps of
+// the keys hook_resolve.cpp applies; a fight wounds the dragon through the named defence's armor
+struct HookDef {
+    std::string id, kind, scope = "faction";
+    std::vector<CardPred> when, force_if;
+    std::string where = "capital", pick;
+    std::vector<std::string> acts, choices;
+    double priority = 10;
+    bool fallback = false;
+    int cooldown_years = 0;
+    std::map<std::string, double> reward, ignore;
+    std::map<std::string, std::map<std::string, double>> choice_reward;   // per choice
+    std::map<std::string, std::string> text;   // title, text, reward_text, ignore_text, choice texts
+    double fight_damage = 0, fight_era_scale = 0, fight_strength_mult = 0, fight_health_share = 0;   // flat x (1 + era_scale x era), plus the court's slayer strength x mult, plus health_max x share
+    std::string fight_defence;
+};
+
+struct HookBook {
+    std::vector<HookDef> templates;
+    int max_hooks = 3;
+    double second = 0.6, third = 0.15;   // chance of a second and a third hook per waking
+    double repeat_mult = 0.5;            // priority of a kind offered on the previous waking
+};
+
+struct Params {
+    Constants c;
+    std::map<std::string, Race> races;
+    std::map<std::string, std::map<std::string, double>> race_affinity;
+    std::vector<Reaction> reactions;
+    Shocks shocks;
+    std::map<std::string, OathEffect> oath_effects;
+    std::map<std::string, SpellDef> spells;
+    TerraformDef terraform;
+    Names names;
+    std::vector<OfferDef> offers;
+    Texts texts;
+    std::vector<CardDef> cards;   // data/events, sorted by id
+    TalentBook talents;           // v0.4 (S1)
+    DefenceBook defences;         // v0.4 (S1)
+    HookBook hooks;               // v0.4 hooks (S3)
+    GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
+};
+
+struct PolicyAct {
+    std::string type, target, region, against;
+    double magnitude = 0;
+    std::map<std::string, double> payload_share;
+};
+
+struct Policy {
+    std::vector<std::string> cycle;
+    std::vector<PolicyAct> acts;
+    // v0.4 (S1): talent preference (ids, first wins), sleep rhythm ("short" | "long" | years, cycled), shortest sleep
+    std::vector<std::string> talents;
+    std::vector<std::string> sleep_cycle;
+    int min_sleep = 0;
+    // v0.4 hooks (S3): the acts the policy answers hooks with (empty: none), its choice for choice hooks, the magnitude
+    // and take payload of a synthesised act, and the share of health its wounds may reach with the answer's damage
+    std::vector<std::string> hook_acts;
+    std::string hook_choice = "receive";
+    double hook_magnitude = 0.3;
+    std::map<std::string, double> hook_payload;
+    double hook_wound_cap = 0.4;
+    int hook_reach = 0;   // regions from the lair the raid flies to answer a hook (0: any)
+    int hook_max = 0;     // hooks answered per waking (0: all it can)
+};
+
+struct DataJson {
+    std::string constants, races, reactions, regions, factions, shocks;
+    std::string names, offers, text;   // v0.2; optional (defaults compiled in are empty, so the files are expected)
+    std::string events;                // data/events/*.json joined into one array; optional
+    std::string talents, defences;     // v0.4 (S1); optional
+    std::string hooks;                 // v0.4 hooks (S3); optional
+    std::string genesis;               // v0.4 world (S2): data/genesis.json; optional
+};
+
+bool params_from_json(const DataJson& d, Params& out, std::string& err);
+bool world_from_data_json(const DataJson& d, const Params& p, World& out, std::string& err);
+bool dragon_data_from_json(const DataJson& d, Params& out, std::string& err);   // v0.4 (S1), dragon_data.cpp
+bool hooks_from_json(const DataJson& d, Params& out, std::string& err);         // v0.4 hooks (S3), hook_data.cpp
+
+// file IO, data_io.cpp (not part of the wasm build)
+bool load_data_json(const std::string& dir, DataJson& out, std::string& err);
+bool load_params(const std::string& dir, Params& out, std::string& err);
+bool load_world(const std::string& dir, const Params& p, World& out, std::string& err);
+bool load_policy(const std::string& dir, const std::string& name, Policy& out, std::string& err);
+
+}

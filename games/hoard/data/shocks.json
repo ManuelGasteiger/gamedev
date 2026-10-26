@@ -1,0 +1,5 @@
+{
+  "plague":          { "chance": 0.01,  "wealth_mult": 0.7, "cohesion_delta": -0.1 },
+  "bad_century":     { "chance": 0.005, "land_mult": 0.7, "decades": 10 },
+  "volcanic_winter": { "trigger_burn_total": 3.0, "chance": 0.1, "land_mult": 0.5, "decades": 5 }
+}

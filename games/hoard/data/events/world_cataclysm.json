@@ -1,0 +1,42 @@
+[
+  {
+    "id": "vale_broke",
+    "kind": "cataclysm",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "terrain", "on": "region", "in": ["vale", "marches"]},
+      {"tag": "cataclysm", "on": "region", "absent": true}
+    ],
+    "chance": 0.00009,
+    "chance_mult": [{"if": [{"tag": "age_of_magic", "on": "world"}], "mult": 2}],
+    "object": "$owner",
+    "tags": ["scar"],
+    "effects": [
+      {"do": "terrain", "on": "region", "to": "scar", "burn": 0.6},
+      {"do": "field", "on": "owner", "field": "wealth", "mul": 0.7},
+      {"do": "field", "on": "owner", "field": "cohesion", "add": -0.1}
+    ]
+  },
+  {
+    "id": "fen_drowned",
+    "kind": "cataclysm",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "terrain", "on": "region", "eq": "fen"},
+      {"tag": "cataclysm", "on": "region", "absent": true}
+    ],
+    "chance": 0.000135,
+    "chance_mult": [{"if": [{"tag": "age_of_magic", "on": "world"}], "mult": 2}],
+    "object": "$owner",
+    "tags": ["lake"],
+    "effects": [
+      {"do": "terrain", "on": "region", "to": "lake"},
+      {"do": "field", "on": "owner", "field": "wealth", "mul": 0.8},
+      {"do": "field", "on": "owner", "field": "cohesion", "add": -0.05}
+    ]
+  }
+]

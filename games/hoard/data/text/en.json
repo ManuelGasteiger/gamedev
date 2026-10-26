@@ -1,0 +1,1554 @@
+{
+  "events": {
+    "world_began": {
+      "text": "In the first years {m_word} courts shared the valley.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_rival_kingdoms": {
+      "text": "In the first years the crowns of men divided the vales between them, and no crown would bow to another.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_dwarf_empire": {
+      "text": "In the first years a dwarf empire still held the valley from its halls, though its lords had grown old and its vassals restless.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_elven_realm": {
+      "text": "In the first years the elves ruled the woods and the land around them, and men lived under their trees on sufferance.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_orc_horde": {
+      "text": "In the first years an orc horde already held the scar, and every spring the valley counted its dead.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_free_cities": {
+      "text": "In the first years there were no kings in the valley: free cities of every people traded, quarrelled and kept their own walls.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_fallen_kingdom": {
+      "text": "In the first years the valley was a field of ruins: the kingdom of {O} had fallen, and its heirs fought over the stones.",
+      "brief": "the fall of {o}",
+      "importance": 0.9
+    },
+    "genesis_the_exodus": {
+      "text": "In the first years men came over the rim with nothing, and the elder peoples of the valley gave them leave to stay.",
+      "brief": "the coming of men",
+      "importance": 0.9
+    },
+    "genesis_the_undying_queen": {
+      "text": "In the first years one throne held most of the valley, and its ruler had held it longer than anyone could remember.",
+      "brief": "the first years",
+      "importance": 0.9
+    },
+    "genesis_the_empty_valley": {
+      "text": "In the first years the valley was nearly empty: a sickness had passed through, and only a few villages kept their fires.",
+      "brief": "the empty years",
+      "importance": 0.9
+    },
+    "court_founded": {
+      "text": "In those days {S} held {o}.",
+      "brief": "the founding of {s}",
+      "importance": 0.2
+    },
+    "war_started_genesis": {
+      "text": "{S} and {O} were at war, as they had been for as long as anyone remembered.",
+      "brief": "the old war of {s} and {o}",
+      "importance": 0.3
+    },
+    "vassal_sworn_genesis": {
+      "text": "{S} had long been sworn to {O}.",
+      "brief": "{s}'s old oath to {o}",
+      "importance": 0.3
+    },
+    "egg_hatched": {
+      "text": "In {o} an egg cracked, and something looked out at the valley.",
+      "brief": "your hatching in {year}",
+      "importance": 0.2
+    },
+    "undying_rose": {
+      "text": "{O} of {S} did not die when the years came for them, and then did not die at all.",
+      "brief": "the undying reign over {s} from {year}",
+      "importance": 0.7
+    },
+    "undying_fell": {
+      "text": "The undying reign over {S} ended after {m0} years{why}.",
+      "brief": "the end of the undying reign over {s} in {year}",
+      "importance": 0.75
+    },
+    "race_extinct": {
+      "text": "The last of the {s_race} were gone from the valley, and no song says where they went.",
+      "brief": "the passing of the {s_race} in {year}",
+      "importance": 0.85
+    },
+    "people_arrived": {
+      "text": "From beyond the rim came the {t0_race} of {S}, a people no song in the valley had named, and they took {o}.",
+      "brief": "the coming of {s} in {year}",
+      "importance": 0.75
+    },
+    "vale_broke": {
+      "text": "The earth opened under {s}, and the vale became a scar of ash and stone.",
+      "brief": "the breaking of {s} in {year}",
+      "importance": 0.8
+    },
+    "fen_drowned": {
+      "text": "The rains did not stop over {s} until the fen was a lake, and the lake is there still.",
+      "brief": "the drowning of {s} in {year}",
+      "importance": 0.8
+    },
+    "the_queen_who_does_not_die": {
+      "text": "{O} of {S} had ruled for centuries and did not look it, and the court stopped counting her years.",
+      "brief": "the undying reign over {s} from {year}",
+      "importance": 0.75
+    },
+    "the_king_who_stopped_dying": {
+      "text": "{O} of {S} did not die when he should have, and then did not die at all.",
+      "brief": "the undying reign over {s} from {year}",
+      "importance": 0.75
+    },
+    "age_of_magic": {
+      "text": "In {year} the old powers woke: lamps lit themselves in the scholars' towers, and an age of magic began.",
+      "brief": "the waking of magic in {year}",
+      "importance": 0.8
+    },
+    "colleges_of_magic": {
+      "text": "The towers of {S} glowed at night, and the neighbours stopped sleeping.",
+      "brief": "the colleges of {s} from {year}",
+      "importance": 0.45
+    },
+    "wild_surge_fey": {
+      "text": "The sky over {s} turned the wrong colour for a season, and afterwards the fields grew too well.",
+      "brief": "the wild surge over {s} in {year}",
+      "importance": 0.4
+    },
+    "wild_surge_blight": {
+      "text": "The sky over {s} turned the wrong colour for a season, and afterwards nothing grew right.",
+      "brief": "the wild surge over {s} in {year}",
+      "importance": 0.4
+    },
+    "necromancers_tower": {
+      "text": "A scholar of {O} went into the waste, and the dead began to walk out of it: {S}.",
+      "brief": "the tower of {s} from {year}",
+      "importance": 0.7
+    },
+    "restless_dead": {
+      "text": "The dead of {o} would not lie still: {S} rose from the ruins and claimed them.",
+      "brief": "the rising of the dead at {o} in {year}",
+      "importance": 0.65
+    },
+    "the_dead_walk": {
+      "text": "The dead walked out of {o}, and the living called the host {S}.",
+      "brief": "the dead walking at {o} in {year}",
+      "importance": 0.65
+    },
+    "the_plague_dead": {
+      "text": "The plague dead of {O} rose from their pits and took the land they had died on: {S}.",
+      "brief": "the rising of the plague dead in {year}",
+      "importance": 0.65
+    },
+    "great_plague": {
+      "text": "The sickness came up the river, and in three years a third of the valley was in the ground.",
+      "brief": "the great plague of {year}",
+      "importance": 0.6
+    },
+    "comet": {
+      "text": "A comet hung over the valley for a season, and every court read it as a sign of war.",
+      "brief": "the comet of {year}",
+      "importance": 0.5
+    },
+    "the_dance_of_claimants": {
+      "text": "The realm of {S} split between two claimants, and brother burned brother for a generation.",
+      "brief": "the war of the claimants of {s} in {year}",
+      "importance": 0.6
+    },
+    "hero_unites": {
+      "text": "{O} rose in {S} when the realm was falling apart, and the realm rallied to a hero.",
+      "brief": "the rise of {o} in {year}",
+      "importance": 0.5
+    },
+    "festival": {
+      "text": "{S} held a festival that people talked about for a generation.",
+      "brief": "the festival of {s} in {year}",
+      "importance": 0.3
+    },
+    "temple_raised": {
+      "text": "{S} raised a great temple, and pilgrims came from every corner of the valley.",
+      "brief": "the temple of {s} raised in {year}",
+      "importance": 0.3
+    },
+    "town_founded": {
+      "text": "{S} founded a new town, and within a generation it had walls and a market.",
+      "brief": "the founding of a town in {s} in {year}",
+      "importance": 0.3
+    },
+    "royal_birth": {
+      "text": "{O} of {S} had a child, and the bells rang for a week.",
+      "brief": "a royal birth in {s} in {year}",
+      "importance": 0.3
+    },
+    "long_winter": {
+      "text": "The snow did not leave the vales for seven years, and the granaries emptied one by one.",
+      "brief": "the long winter of {year}",
+      "importance": 0.55
+    },
+    "holy_war": {
+      "text": "The priests of {S} declared the altars of {O} abominable, and the swords followed the priests.",
+      "brief": "the holy war of {s} on {o} in {year}",
+      "importance": 0.55
+    },
+    "the_last_of_their_kind": {
+      "text": "{O}, the last realm of the {s_race}, dwindled year by year until its halls stood empty, and there were no more {s_race} in the valley.",
+      "brief": "the passing of the {s_race} in {year}",
+      "importance": 0.85
+    },
+    "people_from_beyond_men": {
+      "text": "Men came over the rim from lands no one in the valley had seen, and took {o}: the people of {S}.",
+      "brief": "the coming of {s} in {year}",
+      "importance": 0.75
+    },
+    "people_from_beyond_horde": {
+      "text": "A horde came down from beyond the rim, and {o} became the camp of {S}.",
+      "brief": "the coming of the horde {s} in {year}",
+      "importance": 0.75
+    },
+    "people_from_beyond_fen": {
+      "text": "A people came out of the fens beyond the rim that no song had mentioned: the saurians of {S}, and they took {o}.",
+      "brief": "the coming of the saurians of {s} in {year}",
+      "importance": 0.75
+    },
+    "act_burn": {
+      "text": "You burned {o} of {s}; {m%} of its wealth went up in smoke.",
+      "brief": "your fire over {o} in {year}",
+      "importance": 0.3
+    },
+    "act_kill": {
+      "text": "You fell on the people of {s}.",
+      "brief": "the killing among {s} in {year}",
+      "importance": 0.3
+    },
+    "act_take": {
+      "text": "You carried {m%} of {s}'s wealth to the hoard.",
+      "brief": "your raid on {s}'s treasury in {year}",
+      "importance": 0.2
+    },
+    "act_show": {
+      "text": "You showed yourself over {s}.",
+      "brief": "your appearance over {s} in {year}",
+      "importance": 0.1
+    },
+    "act_defend": {
+      "text": "You stood over {s} and drove off its attackers.",
+      "brief": "your defence of {s} in {year}",
+      "importance": 0.3
+    },
+    "act_give": {
+      "text": "You gave gifts to {s}.",
+      "brief": "your gift to {s} in {year}",
+      "importance": 0.2
+    },
+    "act_take_hostage": {
+      "text": "You took a hostage from the court of {s}.",
+      "brief": "the hostage you took from {s} in {year}",
+      "importance": 0.3
+    },
+    "act_release": {
+      "text": "You let the hostage of {s} go home.",
+      "brief": "the release of {s}'s hostage in {year}",
+      "importance": 0.2
+    },
+    "act_accept_offering": {
+      "text": "You accepted an offering from {s}.",
+      "brief": "the offering of {s} in {year}",
+      "importance": 0.1
+    },
+    "act_destroy_altar": {
+      "text": "You destroyed the altar of {s}.",
+      "brief": "the altar you broke in {s} in {year}",
+      "importance": 0.2
+    },
+    "act_miracle": {
+      "text": "You worked a miracle for {s}.",
+      "brief": "your miracle in {s} in {year}",
+      "importance": 0.3
+    },
+    "act_spell": {
+      "text": "You cast {s}.",
+      "brief": "your spell {s} in {year}",
+      "importance": 0.2
+    },
+    "act_demand": {
+      "text": "You made a demand of {s}.",
+      "brief": "your demand on {s} in {year}",
+      "importance": 0.2
+    },
+    "war_started": {
+      "text": "{S} declared war on {O}.",
+      "brief": "the war {s} began on {o} in {year}",
+      "importance": 0.3
+    },
+    "war_ended": {
+      "text": "The war of {S} against {O} ended in {t0_word}.",
+      "brief": "the end of the war of {s} on {o} in {year}",
+      "importance": 0.3
+    },
+    "coalition_formed": {
+      "text": "{S} raised a coalition against the hegemon {O}.",
+      "brief": "the coalition against {o} of {year}",
+      "importance": 0.5
+    },
+    "coalition_ended": {
+      "text": "The coalition of {S} against {O} ended in {t0_word}.",
+      "brief": "the end of the coalition against {o} in {year}",
+      "importance": 0.4
+    },
+    "joined_war": {
+      "text": "{S} joined the war on the side of {O}.",
+      "brief": "{s} joining {o}'s war in {year}",
+      "importance": 0.2
+    },
+    "region_taken": {
+      "text": "{S} took {o} from {T0}.",
+      "brief": "the fall of {o} to {s} in {year}",
+      "importance": 0.3
+    },
+    "region_settled": {
+      "text": "{S} settled the empty {o_bare}.",
+      "brief": "the settling of {o} in {year}",
+      "importance": 0.2
+    },
+    "region_abandoned": {
+      "text": "{S} abandoned the scorched {o_bare}.",
+      "brief": "the abandoning of {o} in {year}",
+      "importance": 0.2
+    },
+    "vassal_sworn": {
+      "text": "{S} swore fealty to {O} to keep its last land.",
+      "brief": "{s}'s oath of fealty to {o} in {year}",
+      "importance": 0.4
+    },
+    "vassal_freed": {
+      "text": "{S} broke free of {O} after {p:years0} years.",
+      "brief": "{s}'s break from {o} in {year}",
+      "importance": 0.4
+    },
+    "vassal_revolt": {
+      "text": "{S} revolted against its overlord {O}.",
+      "brief": "{s}'s revolt in {year}",
+      "importance": 0.4
+    },
+    "vassal_absorbed": {
+      "text": "The vassal {S} was absorbed into {O}.",
+      "brief": "the absorption of {s} into {o} in {year}",
+      "importance": 0.3
+    },
+    "collapse": {
+      "text": "{S} fell apart into {m_word} states: {successors}.",
+      "brief": "the collapse of {s} in {year}",
+      "importance": 0.6
+    },
+    "collapse_one": {
+      "text": "{S} fell, and a new house, {successors}, took its last land.",
+      "brief": "the collapse of {s} in {year}",
+      "importance": 0.2
+    },
+    "successor_founded": {
+      "text": "{S} was founded on {o} out of the ruins of {T0}.",
+      "brief": "the founding of {s} in {year}",
+      "importance": 0.2
+    },
+    "faction_destroyed": {
+      "text": "{S} was wiped out; its people scattered as refugees.",
+      "brief": "the destruction of {s} in {year}",
+      "importance": 0.5
+    },
+    "era_advance": {
+      "text": "{S} entered the {era} age.",
+      "brief": "{s}'s {era} age from {year}",
+      "importance": 0.3
+    },
+    "slayers_founded": {
+      "text": "{S} founded an order of dragon slayers.",
+      "brief": "the slayer order of {s} founded in {year}",
+      "importance": 0.7
+    },
+    "slay_attempt_failed": {
+      "text": "The slayers of {S}{led_by} marched on your lair and failed.",
+      "brief": "the failed slaying of {year}",
+      "importance": 0.8
+    },
+    "dragon_slain": {
+      "text": "The slayers of {S}{led_by} killed you in your lair.",
+      "brief": "your death",
+      "importance": 1
+    },
+    "dragon_slain_defences": {
+      "text": "The defences of {S} brought you down over {o}.",
+      "brief": "your death over {o}",
+      "importance": 1
+    },
+    "dragon_wounded": {
+      "text": "The defences of {S} wounded you over {o} ({m0}).",
+      "brief": "your wounds over {o} in {year}",
+      "importance": 0.3
+    },
+    "slayers_coming": {
+      "text": "A premonition woke you: the slayers of {S}{led_by} were on their way to your lair.",
+      "brief": "the slayers of {s} at your door in {year}",
+      "importance": 0.9
+    },
+    "talent_taken": {
+      "text": "Your {t0_word} grew into a new gift: {o_word}.",
+      "brief": "your gift of {o_word} in {year}",
+      "importance": 0.4
+    },
+    "rank_gained": {
+      "text": "Your {o_word} rose to rank {m0}.",
+      "brief": "your {o_word} rank of {year}",
+      "importance": 0.3
+    },
+    "slayers_forming": {
+      "text": "{S} gathered a slayer band{led_by} against you.",
+      "brief": "the slayer band of {s} from {year}",
+      "importance": 0.7
+    },
+    "slayers_ready": {
+      "text": "The slayers of {S}{led_by} were ready to come for you in your next sleep (odds {m%} at your wounds then).",
+      "brief": "the slayers of {s} ready in {year}",
+      "importance": 0.9
+    },
+    "anti_dragon_progress": {
+      "text": "{S}'s work against you stood {m%} of the way to {o_word}.",
+      "brief": "{s}'s work against you in {year}",
+      "importance": 0.4
+    },
+    "tribute_paid": {
+      "text": "{S} sent tribute worth {m0} gold to the lair.",
+      "brief": "{s}'s tribute of {year}",
+      "importance": 0.1
+    },
+    "hegemony": {
+      "text": "{S} now held {m_word} regions, a hegemony over the valley.",
+      "brief": "the hegemony of {s} from {year}",
+      "importance": 0.7
+    },
+    "hegemony_ended": {
+      "text": "The hegemony of {S} ended: {t0_word}.",
+      "brief": "the end of {s}'s hegemony in {year}",
+      "importance": 0.7
+    },
+    "plague": {
+      "text": "Plague swept through {S}.",
+      "brief": "the plague of {year} in {s}",
+      "importance": 0.25
+    },
+    "bad_century": {
+      "text": "A bad century of poor harvests began in {s}.",
+      "brief": "the bad harvests in {s} from {year}",
+      "importance": 0.2
+    },
+    "volcanic_winter": {
+      "text": "Ash darkened the sky over the whole valley: a volcanic winter.",
+      "brief": "the volcanic winter of {year}",
+      "importance": 0.6
+    },
+    "golden_age": {
+      "text": "A great ruler brought {S} a golden age of {m0} years.",
+      "brief": "the golden age of {s} from {year}",
+      "importance": 0.3
+    },
+    "tyrant_rises": {
+      "text": "A tyrant seized {S} for {m0} years.",
+      "brief": "the tyranny over {s} from {year}",
+      "importance": 0.3
+    },
+    "tyrant_died": {
+      "text": "The tyrant of {S} died.",
+      "brief": "the tyrant's death in {s} in {year}",
+      "importance": 0.2
+    },
+    "succession_crisis": {
+      "text": "The succession in {S} was disputed, and the realm shook.",
+      "brief": "the disputed succession of {year} in {s}",
+      "importance": 0.2
+    },
+    "warlord_died": {
+      "text": "The warlord of {S} died and the horde fractured.",
+      "brief": "the warlord's death in {year}",
+      "importance": 0.2
+    },
+    "remnant_formed": {
+      "text": "The last realm of the {s_race} was gone; a remnant lingered around {o}.",
+      "brief": "the vanishing of the {s_race} in {year}",
+      "importance": 0.4
+    },
+    "remnant_formed_off_map": {
+      "text": "Beyond the valley the {s_race} gathered near {o}.",
+      "brief": "the {s} remnant beyond the valley",
+      "importance": 0.1
+    },
+    "race_returned": {
+      "text": "{S} was founded on {o}: the {t0_race} return.",
+      "brief": "the return of the {t0_race} in {year}",
+      "importance": 0.5
+    },
+    "orcs_spawned": {
+      "text": "Orcs gathered on the ruined {o_bare}: the horde {S}.",
+      "brief": "the horde that rose on {o} in {year}",
+      "importance": 0.4
+    },
+    "elves_withdrew": {
+      "text": "The elves of {S} withdrew from {o}.",
+      "brief": "the elves' withdrawal from {o} in {year}",
+      "importance": 0.3
+    },
+    "elves_departed": {
+      "text": "The elves of {S} left {o} for good.",
+      "brief": "the elves' departure from {o} in {year}",
+      "importance": 0.4
+    },
+    "fading_begins": {
+      "text": "The elves of {S} began to fade: the valley belonged to the humans now.",
+      "brief": "the fading of {s} from {year}",
+      "importance": 0.5
+    },
+    "fading_ends": {
+      "text": "The fading of {S} ended as the humans' share of the valley's wealth fell to {m%}.",
+      "brief": "the end of {s}'s fading in {year}",
+      "importance": 0.4
+    },
+    "dug_in": {
+      "text": "{S} dug in deep at {o}.",
+      "brief": "{s} digging in at {o} in {year}",
+      "importance": 0.2
+    },
+    "wasteland_formed": {
+      "text": "{S} turned to wasteland under repeated fire.",
+      "brief": "the wasting of {s} in {year}",
+      "importance": 0.4
+    },
+    "wasteland_healed": {
+      "text": "Green returned to the wasteland of {s}.",
+      "brief": "the healing of {s} in {year}",
+      "importance": 0.3
+    },
+    "oath_sworn": {
+      "text": "{O} swore you an oath of {t0_word}.",
+      "brief": "the oath {o} swore in {year}",
+      "importance": 0.3
+    },
+    "oath_expired": {
+      "text": "Your oath with {O} lapsed.",
+      "brief": "the lapse of your oath with {o} in {year}",
+      "importance": 0.2
+    },
+    "oath_breached_by_dragon": {
+      "text": "You broke your oath of {t0_word} to {O}, and the court will remember the betrayal.",
+      "brief": "your betrayal of {o} in {year}",
+      "importance": 0.6
+    },
+    "oath_breached_by_them": {
+      "text": "{O} broke its oath of {t0_word} to you.",
+      "brief": "{o}'s broken oath of {year}",
+      "importance": 0.5
+    },
+    "demand_refused": {
+      "text": "{S} refused your demand for {o_word}.",
+      "brief": "{s}'s refusal in {year}",
+      "importance": 0.3
+    },
+    "spell_cast": {
+      "text": "Your spell {s} fell on {O}.",
+      "brief": "your spell {s} on {o} in {year}",
+      "importance": 0.2
+    },
+    "spell_failed": {
+      "text": "Your spell failed: {t0_word}.",
+      "brief": "your failed spell in {year}",
+      "importance": 0.1
+    },
+    "spell_expired": {
+      "text": "The spell {s} on {O} faded.",
+      "brief": "the fading of your spell on {o} in {year}",
+      "importance": 0.1
+    },
+    "terraformed": {
+      "text": "You reshaped {s} into {o}.",
+      "brief": "your reshaping of {s} in {year}",
+      "importance": 0.3
+    },
+    "undead_raised": {
+      "text": "An undead host, {S}, rose at {o}.",
+      "brief": "the undead host you raised in {year}",
+      "importance": 0.5
+    },
+    "dragon_raised_lineage": {
+      "text": "{O}, raised in your lair, took the throne of {S}: a dragon-raised line began.",
+      "brief": "the dragon-raised line of {s} from {year}",
+      "importance": 0.6
+    },
+    "raised_in_lair": {
+      "text": "{S}, {p:years0} years in your lair, is yours now more than {O}'s.",
+      "brief": "{s}'s years in your lair",
+      "importance": 0.4
+    },
+    "hostage_taken": {
+      "text": "{S}, {role} of {O}, was carried off to your lair.",
+      "brief": "the taking of {s} in {year}",
+      "importance": 0.4
+    },
+    "hostage_released": {
+      "text": "{S} went home to {O} after {m0} years in your lair.",
+      "brief": "the release of {s} in {year}",
+      "importance": 0.3
+    },
+    "dragon_atrophied": {
+      "text": "In your sleep you wasted a little ({m}).",
+      "brief": "your wasting",
+      "importance": 0.3
+    },
+    "dragon_starving": {
+      "text": "The hoard no longer fed you; hunger stood at {m}.",
+      "brief": "your hunger of {year}",
+      "importance": 0.6
+    },
+    "dragon_moulted": {
+      "text": "You moulted and woke in your {phase_word} phase, stiff from the long sleep.",
+      "brief": "your moult of {year}",
+      "importance": 0.8
+    },
+    "sleep_begin": {
+      "text": "You settled into the lair to sleep {m0} years.",
+      "brief": "your sleep from {year}",
+      "importance": 0
+    },
+    "wake": {
+      "text": "You woke after {m0} years, {wake_word}.",
+      "brief": "your waking in {year}",
+      "importance": 0
+    },
+    "person_died": {
+      "text": "{S}, {role} of {O}, died{why}.",
+      "brief": "the death of {s} in {year}",
+      "importance": 0.2
+    },
+    "person_rose": {
+      "text": "{A_rose_role} rose in {O}: {S}{,why}.",
+      "brief": "the rise of {s} in {year}",
+      "importance": 0.15
+    },
+    "person_rose_heir": {
+      "text": "{S} was named heir of {O}.",
+      "brief": "the naming of {s} as heir",
+      "importance": 0
+    },
+    "person_crowned": {
+      "text": "{S} took the throne of {O} {t0_word}{,why}.",
+      "brief": "the crowning of {s} in {year}",
+      "importance": 0.2
+    },
+    "succession": {
+      "text": "{dead}, ruler of {O}, died; {S} took the throne.",
+      "brief": "the succession of {s} in {year}",
+      "importance": 0.2
+    },
+    "reign_named": {
+      "text": "In {O}, {S} began a reign the chroniclers call {t0_word_the}.",
+      "brief": "the reign of {s}",
+      "importance": 0.2
+    },
+    "offer_fulfilled": {
+      "text": "You did what {O} of {S} asked, and the court's faith deepened.",
+      "brief": "your answer to {o}'s plea in {year}",
+      "importance": 0.4
+    },
+    "deceived_dragon": {
+      "text": "{O} of {S} had lied to you, and you acted on the lie.",
+      "brief": "the lie {o} told you in {year}",
+      "importance": 0.6
+    },
+    "offer_declined": {
+      "text": "You sent {O} of {S} away.",
+      "brief": "your refusal of {s}'s envoy in {year}",
+      "importance": 0.1
+    },
+    "person_died_old_age": {
+      "text": "{S}, {role} of {O}, died at the age of {p:age0}.",
+      "brief": "the death of {s} in {year}",
+      "importance": 0.2
+    },
+    "person_died_deposed": {
+      "text": "{S}, {role} of {O}, lost the throne{why}.",
+      "brief": "the fall of {s} in {year}",
+      "importance": 0.25
+    },
+    "person_died_realm_fell": {
+      "text": "{S}, {role} of {O}, died with the realm{why}.",
+      "brief": "the death of {s} in {year}",
+      "importance": 0.2
+    },
+    "person_died_slain_by_dragon": {
+      "text": "{S}, {role} of {O}, died at your lair{why}.",
+      "brief": "the death of {s} at your lair in {year}",
+      "importance": 0.5
+    },
+    "person_died_killed_by_dragon": {
+      "text": "You killed {S}, {role} of {O}.",
+      "brief": "your killing of {s} in {year}",
+      "importance": 0.5
+    },
+    "person_died_warlord": {
+      "text": "{S}, warlord of {O}, fell to a rival, as warlords do.",
+      "brief": "the fall of the warlord {s} in {year}",
+      "importance": 0.2
+    },
+    "grudge": {
+      "text": "The dwarves of {S} wrote the name of {O} in the book of grudges.",
+      "brief": "the grudge {s} swore against {o} in {year}",
+      "importance": 0.35
+    },
+    "grudge_dragon": {
+      "text": "The dwarves of {S} wrote your name in the book of grudges, and the book is long.",
+      "brief": "the grudge {s} swore against you in {year}",
+      "importance": 0.55
+    },
+    "grudge_war": {
+      "text": "The dwarves of {S} opened the book of grudges at the name of {O}.",
+      "brief": "the grudge war {s} began on {o} in {year}",
+      "importance": 0.5
+    },
+    "grudge_settled": {
+      "text": "The dwarves of {S} struck the name of {O} from the book: the debt was paid in land.",
+      "brief": "the settling of {s}'s grudge in {year}",
+      "importance": 0.45
+    },
+    "grudge_paid": {
+      "text": "The dwarves of {S} struck your name from the book of grudges; your gift had paid the debt.",
+      "brief": "the settling of {s}'s grudge in {year}",
+      "importance": 0.55
+    },
+    "oath_of_recovery": {
+      "text": "The elves of {S} swore to recover what {O} had taken from them, and the witnesses were afraid.",
+      "brief": "the oath of recovery {s} swore in {year}",
+      "importance": 0.55
+    },
+    "oath_of_recovery_dragon": {
+      "text": "The elves of {S} swore to take back what you had carried off, and the witnesses were afraid.",
+      "brief": "the oath of recovery {s} swore in {year}",
+      "importance": 0.7
+    },
+    "oath_of_recovery_war": {
+      "text": "The elves of {S} went to war on {O} to keep their oath.",
+      "brief": "the oath war {s} began on {o} in {year}",
+      "importance": 0.5
+    },
+    "oath_hunts_the_dragon": {
+      "text": "The oath-bound wardens of {S} went looking for the way into your lair.",
+      "brief": "the oath hunt of {s} in {year}",
+      "importance": 0.45
+    },
+    "oath_released": {
+      "text": "The elves of {S} had back what was taken; with the oath fulfilled the old fire went out of them.",
+      "brief": "the end of {s}'s oath in {year}",
+      "importance": 0.5
+    },
+    "prophecy": {
+      "text": "The priests of {S} named the year the mountain would wake, and began counting.",
+      "brief": "the prophecy of {s} in {year}",
+      "importance": 0.5
+    },
+    "prophecy_fulfilled": {
+      "text": "In {S} they said the prophecy was fulfilled.",
+      "brief": "the fulfilment of the prophecy in {s} in {year}",
+      "importance": 0.6
+    },
+    "prophecy_fire": {
+      "text": "In {S} they said the prophecy was fulfilled: the fire had come back, as foretold.",
+      "brief": "the prophecy of fire fulfilled in {s} in {year}",
+      "importance": 0.6
+    },
+    "prophecy_grace": {
+      "text": "In {S} your coming without fire was read as the prophecy's grace, and the temples filled.",
+      "brief": "the prophecy of grace fulfilled in {s} in {year}",
+      "importance": 0.6
+    },
+    "dragon_blood": {
+      "text": "The kings of {S} claimed the mountain as grandfather, and some of them meant it.",
+      "brief": "the dragon blood of {s} from {year}",
+      "importance": 0.6
+    },
+    "dynasty_schism": {
+      "text": "The dragon-blood line of {S} split: one branch kept the mountain's name, the other swore to kill you.",
+      "brief": "the schism of the dragon blood in {s} in {year}",
+      "importance": 0.6
+    },
+    "hostage_came_home": {
+      "text": "{O} came home from your lair to {S}.",
+      "brief": "the homecoming of {o} in {year}",
+      "importance": 0.6
+    },
+    "came_home_rules": {
+      "text": "{O} came home from your lair to {S} and took the throne; the court knelt to a dragon's ward.",
+      "brief": "the homecoming of {o} in {year}",
+      "importance": 0.7
+    },
+    "came_home_rejected": {
+      "text": "{O} came home from your lair to {S}, and the court would not have a dragon's ward on the throne.",
+      "brief": "the rejection of {o} in {year}",
+      "importance": 0.7
+    },
+    "came_home_betrays": {
+      "text": "{O} came home from your lair to {S} and told the court where your lair is weakest.",
+      "brief": "the betrayal of {o} in {year}",
+      "importance": 0.7
+    },
+    "treasure_hunters": {
+      "text": "Three sons of {S} went up the mountain with sacks.",
+      "brief": "the treasure hunt of {s} in {year}",
+      "importance": 0.3
+    },
+    "treasure_hunters_failed": {
+      "text": "Three sons of {S}{,why,} went up the mountain with sacks. None came down.",
+      "brief": "the lost treasure hunters of {s} in {year}",
+      "importance": 0.3
+    },
+    "treasure_hunters_robbed": {
+      "text": "Three sons of {S}{,why,} went up the mountain with sacks. One came down, and the sack was full.",
+      "brief": "the theft from your hoard by {s} in {year}",
+      "importance": 0.5
+    },
+    "dragon_forgotten": {
+      "text": "In {O} you were a story told to children, and the children did not believe it.",
+      "brief": "the long forgetting that began in {year}",
+      "importance": 0.5
+    },
+    "dragon_remembered": {
+      "text": "The story came out of the mountain over {O}, and the valley remembered you.",
+      "brief": "your return to memory in {year}",
+      "importance": 0.6
+    },
+    "pretender_returns": {
+      "text": "A claimant of the old kings of {T0} raised a host in {S} and marched on {O}.",
+      "brief": "the pretender of {s} in {year}",
+      "importance": 0.5
+    },
+    "pretender_hoard": {
+      "text": "A claimant of the old kings of {T0} raised a host in {S} and marched on {O}; the proof of the blood was the heir you hold.",
+      "brief": "the pretender of {s} in {year}",
+      "importance": 0.6
+    },
+    "restored_line": {
+      "text": "{O} was crowned in {S}, and the line of the old kings was restored.",
+      "brief": "the restoration in {s} in {year}",
+      "importance": 0.5
+    },
+    "slayer_order": {
+      "text": "In {S} the slayers took vows and a name: an order, and orders outlive kingdoms.",
+      "brief": "the founding of the slayer order in {s} in {year}",
+      "importance": 0.15
+    },
+    "slayer_order_survives": {
+      "text": "The slayer order of {O} outlived its kingdom and kept its hall in {S}.",
+      "brief": "the order's hall in {s} from {year}",
+      "importance": 0.4
+    },
+    "slayer_order_spreads": {
+      "text": "The slayers of {O} opened a chapter house in {S}.",
+      "brief": "the chapter house in {s} from {year}",
+      "importance": 0.4
+    },
+    "slayer_martyrs": {
+      "text": "The order in {S} buried its dead in sight of your mountain and grew stronger for it.",
+      "brief": "the martyrs of {s} in {year}",
+      "importance": 0.4
+    },
+    "false_dragon": {
+      "text": "{O} of {S} announced that the mountain spoke to the throne alone, and raised taxes in its name.",
+      "brief": "the false voice of the mountain in {s} in {year}",
+      "importance": 0.55
+    },
+    "false_dragon_judged": {
+      "text": "In {S} your strike was read as judgement on {O}, and the temples filled again.",
+      "brief": "your judgement on {o} in {year}",
+      "importance": 0.6
+    },
+    "false_dragon_dies": {
+      "text": "{O}, who had spoken in your name, died.",
+      "brief": "the death of {o} in {year}",
+      "importance": 0.45
+    },
+    "false_dragon_faith_returns": {
+      "text": "{O}, who had spoken in your name, died; in {S} they remembered that the real mountain had been seen.",
+      "brief": "the death of {o} in {year}",
+      "importance": 0.45
+    },
+    "false_dragon_disillusioned": {
+      "text": "{O}, who had spoken in your name, died; in {S} nobody believed in the mountain any more.",
+      "brief": "the death of {o} in {year}",
+      "importance": 0.45
+    },
+    "vein": {
+      "text": "The dwarves of {O} struck a vein under {s}, and every king in the valley remembered an old claim on the hills.",
+      "brief": "the vein struck under {s} in {year}",
+      "importance": 0.35
+    },
+    "claim_on_the_hills": {
+      "text": "{S} remembered an old claim on the hills of {O}.",
+      "brief": "the claim {s} pressed on {o} in {year}",
+      "importance": 0.35
+    },
+    "exodus": {
+      "text": "The people of {S} who lived in {o} would not live under {T0}; they left with what they could carry.",
+      "brief": "the exodus from {o} in {year}",
+      "importance": 0.4
+    },
+    "return_of_the_exiles": {
+      "text": "The {t0_race} who had left {s} came back, and they had not come to ask.",
+      "brief": "the return of the exiles to {s} in {year}",
+      "importance": 0.55
+    },
+    "sack_of_the_capital": {
+      "text": "The host of {O} sacked {t0_name}, the richest land of {S}, and carried off everything that could be lifted.",
+      "brief": "the sack of {t0_name} in {year}",
+      "importance": 0.45
+    },
+    "revenge_for_the_sack": {
+      "text": "{S} marched on {O} for revenge.",
+      "brief": "the war of revenge {s} began on {o} in {year}",
+      "importance": 0.45
+    },
+    "old_enemies": {
+      "text": "{S} and {O} had fought so long that neither remembered the cause.",
+      "brief": "the old feud of {s} and {o} from {year}",
+      "importance": 0.4
+    },
+    "old_enemies_again": {
+      "text": "{S} and {O} went to war again, as they always had.",
+      "brief": "the old feud of {s} and {o} renewed in {year}",
+      "importance": 0.35
+    },
+    "dragon_raised_lineage_digested": {
+      "text": "In {S} a line began that claims your blood: the royals you carried off grew up as yours.",
+      "brief": "the dragon-raised line of {s} from {year}",
+      "importance": 0.6
+    },
+    "grudge_against_the_dragon": {
+      "text": "The dwarves of {S} read your name aloud from the book of grudges, and their engineers built another bolt-thrower.",
+      "brief": "the reading of your name in {s} in {year}",
+      "importance": 0.45
+    },
+    "act_burn_lands": {
+      "text": "You burned the lands of {s}; {m%} of its wealth went up in smoke.",
+      "brief": "your fire over {s} in {year}",
+      "importance": 0.3
+    },
+    "hostage_taken_consent": {
+      "text": "{S}, {role} of {O}, came to your lair as a ward, with the court's consent.",
+      "brief": "the ward {s} gave you in {year}",
+      "importance": 0.4
+    },
+    "hook_thief": {
+      "text": "You caught up with the thieves of {s} at {o} and took the gold back, and more.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_slayers": {
+      "text": "You met the slayers of {s} at the gate of the lair and broke the band.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_army": {
+      "text": "You fell on the host of {s} at {o} under the mountain.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_sack": {
+      "text": "You picked over the burning streets of {o} before {s} could.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_pilgrims_receive": {
+      "text": "You received the pilgrims of {s} at the mouth of the cave and took their offerings.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_pilgrims_eat": {
+      "text": "You ate the pilgrims of {s} at the mouth of the cave.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_dead": {
+      "text": "You drove the dead of {s} back at {o}; the living around them gave thanks.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_hero": {
+      "text": "You answered the challenge of {s}'s hero at {o} and killed him on his own walls.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_royal": {
+      "text": "You caught the court of {s} on the road from {o} and carried a royal to the lair.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_vein": {
+      "text": "You emptied the new halls of {s} under {o} of their artifacts.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_rival_god": {
+      "text": "You burned the pretender's temple of {s} at {o}; the offerings come to you again.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_war": {
+      "text": "You turned the war at {o} against {s}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_fat_city": {
+      "text": "You took the fat of {s}'s new city at {o}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_caravan": {
+      "text": "You emptied the treasury of {s} at {o}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_resolved": {
+      "text": "You answered the call at {o}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_ignored": {
+      "text": "You let {t0_word} at {o} go unanswered.",
+      "brief": "the call you let go in {year}",
+      "importance": 0.35
+    },
+    "hook_herd": {
+      "text": "You fed on the herds of {s} at {o}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_tyrant": {
+      "text": "You killed the tyrant of {s} at {o}; the court gave thanks.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_library": {
+      "text": "You carried off the library of {s} at {o}.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    },
+    "hook_horde": {
+      "text": "You fell on the camp of {s} at {o} and took its plunder.",
+      "brief": "your answer at {o} in {year}",
+      "importance": 0.5
+    }
+  },
+  "causes": {
+    "genesis": "",
+    "genesis_fall": "",
+    "hatching": "",
+    "overthrown": "when the court rose against what sat on its throne",
+    "ruler_gone": "when the undying ruler was gone at last",
+    "died_out": "{p:years0} years after the last of their realms fell",
+    "weak_neighbour": "because {ref} had left {O} weak",
+    "orc_raid": "because the horde smelled weakness after {ref}",
+    "submitted": "because the loser had nothing left to defend",
+    "last_region": "",
+    "regions_lost": "after {ref}",
+    "no_land_left": "after {ref} took its last land",
+    "long_war": "because both sides were spent after {p:years0} years",
+    "party_collapsed": "because {ref}",
+    "dragon_defended": "because you drove the attackers off",
+    "against_hegemon": "because {ref} frightened its neighbours",
+    "friend_attacked": "because it would not see a friend fall",
+    "war": "in the war of {ref_year}",
+    "weakened": "weakened by {ref}",
+    "own_size": "under the weight of its own size",
+    "collapse": "out of {ref}",
+    "successors_quarrel": "because the heirs of the fallen realm would not share it",
+    "succession_crisis": "after {ref}",
+    "landless": "after {ref}",
+    "overlord_gone": "because {ref} left no one to pay fealty to",
+    "overlord_weak": "because its overlord had grown weak after {ref}",
+    "overlord_submitted": "because its own overlord bent the knee",
+    "vassal_collapsed": "because the vassal's house fell apart",
+    "conquest": "after {ref}",
+    "growth": "",
+    "realm_shrank": "after {ref}",
+    "fell": "with {ref}",
+    "progress": "",
+    "dragon_fire": "because {ref} was never forgiven",
+    "fear": "out of fear of you",
+    "slayers": "because {ref} was never forgiven and the order founded after it had grown bold",
+    "slayers_led": "because {ref} was never forgiven; a bold hero led them",
+    "oath": "as {ref} requires",
+    "worship": "out of worship",
+    "chance": "",
+    "mega_raze": "after {ref} set half the valley alight",
+    "reign_ended": "",
+    "great_ruler": "",
+    "disputed_succession": "",
+    "warlord_death": "because its warlord died",
+    "old_age": "aged {p:age0}",
+    "deposed": "",
+    "usurped": "because a bolder hand took the throne of a failing realm",
+    "usurpation": "after {ref}",
+    "founded": "with {ref}",
+    "new_reign": "",
+    "line_continues": "",
+    "heir_in_lair": "because the heir sat in your lair after {ref}",
+    "no_heir": "because {ref} left no heir",
+    "ruler_in_lair": "because the ruler sat in your lair after {ref}",
+    "slayers_founded": "when {ref}",
+    "coalition": "when {ref}",
+    "lost_war": "out of {ref}",
+    "civil_war": "in {ref}",
+    "renown": "",
+    "slay_attempt_failed": "in {ref}",
+    "learning": "as the realm grew learned",
+    "piety": "as the realm grew pious",
+    "faction_destroyed": "when {ref}",
+    "hostage_years": "",
+    "royals_digested": "as the lair's years worked on the hostage from {ref}",
+    "raised_in_lair": "after {ref}",
+    "seized": "",
+    "released": "",
+    "tyrant": "",
+    "golden_age": "",
+    "fading": "because {ref} had thinned its people",
+    "human_wealth": "with humans holding {p:share%} of the valley's wealth",
+    "human_wealth_fell": "",
+    "fear_of_dragon": "out of fear of you after {ref}",
+    "pressed": "under pressure from a cold and stronger neighbour after {ref}",
+    "open_land": "after {ref}",
+    "burned_out": "because {ref} left nothing to live on",
+    "losing": "because {ref} was going badly",
+    "empty_ruin": "because {ref} had left the land empty",
+    "last_faction_gone": "after {ref}",
+    "off_map": "",
+    "open_home": "because its old home stood open since {ref}",
+    "sponsored": "because you sponsored them",
+    "repeated_fire": "after {ref} and the fires before it",
+    "long_calm": "long after {ref}",
+    "slept_through_invasion": "because you slept through {ref}",
+    "line_ended": "because {ref} ended the line you were sworn to",
+    "dragon_harm": "with {ref}",
+    "treasury_empty": "because {ref} had emptied its treasury",
+    "faded_memory": "because the memory of you had faded",
+    "era_outgrew": "because {ref} made the old terms unbearable",
+    "party_gone": "with {ref}",
+    "term_ended": "as its term ran out",
+    "offer_accepted": "",
+    "cowed": "because the court was cowed",
+    "not_cowed": "because the court was not cowed",
+    "declined": "",
+    "acted_on_lie": "after {ref}",
+    "honest_offer": "because {ref} asked honestly and you answered",
+    "envoy_killed": "",
+    "dragon_will": "",
+    "hunger": "because the hoard no longer fed you",
+    "hoard_empty": "because the hoard gave {p:food} against a need of {p:need}",
+    "moult": "",
+    "defences": "",
+    "research": "",
+    "weak_neighbour_noref": "because {O} was weak",
+    "orc_raid_noref": "because the horde smelled weakness",
+    "overlord_weak_noref": "because its overlord had grown weak",
+    "realm_shrank_noref": "as its realm shrank",
+    "empty_ruin_noref": "on land nobody held",
+    "open_land_noref": "",
+    "last_faction_gone_noref": "",
+    "last_region_noref": "because it had nothing left but its last land",
+    "person_died_deposed.collapse": "in {ref}",
+    "person_died_deposed.usurped": "to a bolder hand while the realm was failing",
+    "person_died_realm_fell.faction_destroyed": "in {ref}",
+    "person_died_slain_by_dragon.slay_attempt_failed": "in {ref}",
+    "person_died_old_age.old_age": "",
+    "person_died_warlord.warlord_death": "",
+    "person_crowned.usurpation": "",
+    "person_crowned.succession": "",
+    "person_crowned.founded": "",
+    "person_crowned.no_heir": "after {ref} left no heir",
+    "person_crowned.heir_in_lair": "the heir being in your lair",
+    "person_crowned.ruler_in_lair": "the ruler being in your lair",
+    "person_crowned.collapse": "after {ref}",
+    "person_rose.slayers_founded": "sworn to {ref}",
+    "person_rose.coalition": "to lead {ref}",
+    "person_rose.lost_war": "out of the defeat in {ref}",
+    "person_rose.civil_war": "in {ref}",
+    "person_rose.slay_attempt_failed": "after {ref}",
+    "grudge": "after {ref}",
+    "grudge_war": "{p:years0} years after {ref}",
+    "grudge_settled": "{p:years0} years after {ref_oldest}",
+    "grudge_paid": "{p:years0} years after {ref_oldest}",
+    "oath_of_recovery": "after {ref}",
+    "oath_of_recovery_war": "{p:years0} years after {ref}",
+    "oath_hunts_the_dragon": "{p:years0} years after {ref}",
+    "oath_released": "{p:years0} years after {ref_oldest}",
+    "prophecy": "remembering {ref}",
+    "prophecy_fulfilled": "{p:years0} years after {ref_oldest}",
+    "dragon_blood": "after {ref}",
+    "dynasty_schism": "{p:years0} years after {ref}",
+    "hostage_came_home": "",
+    "treasure_hunters": "remembering {ref}",
+    "treasure_hunters_noref": "drawn by tales of your hoard",
+    "dragon_forgotten": "",
+    "dragon_remembered": "{p:years0} years after {ref_oldest}",
+    "pretender_returns": "{p:years0} years after {ref_oldest}",
+    "restored_line": "",
+    "slayer_order": "",
+    "slayer_order_survives": "{p:years0} years after {ref_oldest}",
+    "slayer_order_spreads": "{p:years0} years after {ref}",
+    "slayer_martyrs": "after {ref}",
+    "false_dragon": "",
+    "false_dragon_judged": "",
+    "false_dragon_dies": "",
+    "vein": "",
+    "claim_on_the_hills": "after {ref}",
+    "exodus": "",
+    "return_of_the_exiles": "{p:years0} years after {ref}",
+    "sack_of_the_capital": "",
+    "revenge_for_the_sack": "{p:years0} years after {ref}",
+    "old_enemies": "after three wars since {ref_oldest}",
+    "old_enemies_again": "",
+    "war_started.grudge_war": "",
+    "war_started.oath_of_recovery_war": "",
+    "war_started.pretender_returns": "",
+    "war_started.claim_on_the_hills": "",
+    "war_started.revenge_for_the_sack": "",
+    "war_started.old_enemies_again": "",
+    "war_started.dynasty_schism": "",
+    "war_started.hostage_came_home": "",
+    "war_started.return_of_the_exiles": "",
+    "person_rose.pretender_returns": "to claim the throne of the old kings",
+    "successor_founded.dynasty_schism": "when the dragon-blood line split",
+    "successor_founded.hostage_came_home": "around the ward of yours the court had rejected",
+    "person_crowned.hostage_came_home": "",
+    "person_crowned.restored_line": "",
+    "person_died_deposed.hostage_came_home": "to the ward who came home from your lair",
+    "person_died_deposed.restored_line": "to the restored line",
+    "race_returned.return_of_the_exiles": "",
+    "person_rose.grudge_war": "to carry the book of grudges to war",
+    "person_rose.revenge_for_the_sack": "to lead the war of revenge",
+    "person_rose.oath_of_recovery_war": "to lead the oath war",
+    "person_rose.old_enemies_again": "to lead the old feud once more",
+    "person_rose.claim_on_the_hills": "to take the hills",
+    "grudge_against_the_dragon": "{p:years0} years after {ref}",
+    "person_rose.keeper": "keeper of the memory of {ref}",
+    "weak_neighbour@successor_founded": "while {O} was new and weak",
+    "weak_neighbour@collapse": "while {O} was new and weak",
+    "weak_neighbour@plague": "while {O} was still weak from the plague of {ref_year}",
+    "weak_neighbour@succession_crisis": "while {O} was torn by a disputed succession",
+    "weak_neighbour@tyrant_died": "while {O} was in disorder after its tyrant's death",
+    "weak_neighbour@warlord_died": "while the horde of {O} was leaderless",
+    "orc_raid@successor_founded": "while {O} was new and weak",
+    "orc_raid@plague": "while plague still ravaged {O}",
+    "treasure_hunters@dragon_forgotten": "in an age that no longer believed in you",
+    "war_started.succession_crisis": "",
+    "sworn_hero": "sworn to the memory of {ref}",
+    "person_rose.keeper_again": "",
+    "dragon_raised_lineage.raised_in_lair": "",
+    "dragon_raised_lineage_digested.royals_digested": "after {ref}",
+    "open_home@remnant_formed_off_map": "out of the wastes beyond the valley",
+    "collapse_one.own_size": "when its rulers could no longer hold it together"
+  },
+  "motives": {
+    "survival": "they fear for their survival",
+    "fear_of_conquest": "they fear being conquered",
+    "revenge": "they want revenge for a taken region",
+    "piety_rival": "they hate a rival creed",
+    "succession": "their line needs its heir back",
+    "protect_the_line": "they want the line kept safe from a usurper",
+    "catch_up": "they want to catch up with the valley",
+    "hunger": "their people are hungry",
+    "legitimacy": "a pretender threatens their throne",
+    "protect_the_altar": "they want their altar guarded",
+    "awe": "they are in awe of you",
+    "escape_marriage": "{envoy} would rather burn than marry",
+    "exit": "they would open the way out for you"
+  },
+  "pretexts": {
+    "orc_friends": "\"they are the orcs' friends\"",
+    "broke_treaty": "\"they broke a treaty\"",
+    "gods_demand": "\"the gods demand it\"",
+    "plan_to_slay": "\"they plan to slay you\"",
+    "realm_will_fall": "\"the realm will fall without {target}\"",
+    "take_the_child": "\"take the child, raise her\"",
+    "build_library": "\"we will build you a library\"",
+    "we_are_your_people": "\"we are your people\"",
+    "lies_in_your_name": "\"he lies in your name\"",
+    "dead_walk": "\"the dead walk\"",
+    "guard_what_is_yours": "\"guard what is yours\"",
+    "rather_burn": "\"I would rather burn\""
+  },
+  "asks": {
+    "protect": "a tribute of {price0} gold for your protection against {target}",
+    "burn_rival": "{price0} gold if you burn {target}",
+    "return_hostage": "a ransom of {price0} gold for {target}",
+    "hide_heir": "that you take {target} into the lair, out of a usurper's reach",
+    "teach": "that you teach them",
+    "bless": "that you bless {target}",
+    "judge": "that you kill {target}",
+    "purge": "that you destroy {target}",
+    "ward": "that you ward {target}",
+    "tribute": "tribute of {price0} gold for your word to do them no harm",
+    "elope": "to be taken into your lair and away from the marriage",
+    "rite": "to perform the rite that opens your way out of the valley (not in this build)"
+  },
+  "roles": {
+    "ruler": "ruler",
+    "heir": "heir",
+    "hero": "hero",
+    "sage": "sage",
+    "priest": "priest",
+    "hostage_ruler": "captive ruler",
+    "slayer": "slayer",
+    "captain": "captain",
+    "general": "general",
+    "claimant": "claimant",
+    "renown": "hero",
+    "usurper": "usurper",
+    "grudgebearer": "grudge-bearer",
+    "avenger": "avenger",
+    "oathbound": "oath-bound warden",
+    "warleader": "war leader",
+    "claimant_general": "claimant's general",
+    "pretender": "pretender"
+  },
+  "words": {
+    "submission": "submission",
+    "exhaustion": "exhaustion",
+    "annihilation": "annihilation",
+    "conquest": "conquest",
+    "collapse": "collapse",
+    "coalition": "the coalition's victory",
+    "defended_by_dragon": "your intervention",
+    "dragon_defended": "your intervention",
+    "shrank": "its realm shrank",
+    "destroyed": "its destruction",
+    "old_age": "of old age",
+    "warlord": "as warlords do",
+    "deposed": "deposed",
+    "slain_by_dragon": "slain by you",
+    "realm_fell": "with its realm",
+    "killed_by_dragon": "by your claw",
+    "heir": "as heir",
+    "founded": "as founder",
+    "regent": "as regent",
+    "claimant": "as claimant",
+    "usurped": "by force",
+    "consent": "by consent",
+    "seized": "seized",
+    "tyrant": "the tyrant's head",
+    "golden": "a golden age",
+    "planned": "as planned",
+    "hunger": "driven by hunger",
+    "dragon_slain": "slain in your lair",
+    "slay_attempt_failed": "to slayers at your door",
+    "premonition": "warned by a premonition",
+    "might": "Might",
+    "flame": "Flame",
+    "arcana": "Arcana",
+    "lore": "Lore",
+    "dominion": "Dominion",
+    "levies": "levies",
+    "bolt_throwers": "bolt-throwers",
+    "slayer_band": "a slayer band",
+    "wards": "wards",
+    "cannons": "cannons",
+    "party_gone": "its party gone",
+    "tribute": "tribute",
+    "no_harm": "no harm",
+    "defend": "defence",
+    "hostage": "hostage",
+    "no_walls": "no walls",
+    "no_settle": "no settling",
+    "offer.protect": "protection",
+    "offer.burn_rival": "a rival's burning",
+    "offer.return_hostage": "a ransom",
+    "offer.hide_heir": "a hidden heir",
+    "offer.teach": "teaching",
+    "offer.bless": "a blessing",
+    "offer.judge": "a judgement",
+    "offer.purge": "a purge",
+    "offer.ward": "a ward",
+    "offer.tribute": "worship",
+    "offer.elope": "an elopement",
+    "offer.rite": "the rite",
+    "knowledge": "you lacked the knowledge",
+    "no_region": "no open region",
+    "no_remnant": "no remnant to sponsor",
+    "hatchling": "hatchling",
+    "young": "young",
+    "grown": "grown",
+    "ancient": "ancient",
+    "elder": "elder",
+    "overlord_weak": "its overlord weak",
+    "overlord_gone": "its overlord gone",
+    "overlord_submitted": "its overlord bent the knee",
+    "returned": "on coming home from your lair",
+    "restored": "as heir of the old kings",
+    "thief": "the thief in the hoard",
+    "slayers": "the slayers at the gate",
+    "army": "the army at the mountain",
+    "sack": "the burning city",
+    "pilgrims": "the pilgrims",
+    "dead": "the walking dead",
+    "hero": "the hero's challenge",
+    "royal": "the royal in flight",
+    "vein": "the struck vein",
+    "rival_god": "the rival god",
+    "war": "the war at its climax",
+    "fat_city": "the fat city",
+    "caravan": "the rich caravan",
+    "herd": "the fat herd",
+    "library": "the library",
+    "horde": "the horde's camp"
+  },
+  "misc": {
+    "and": " and ",
+    "quiet": "Nothing the chroniclers thought worth a line.",
+    "headline_none": "A quiet age.",
+    "thread_more": " Later: ",
+    "people_died": "{name} ({role} of {faction}) died.",
+    "people_rose": "{name} rose in {faction} as {role}.",
+    "people_crowned": "{name} now rules {faction}.",
+    "people_ruler": "{faction} is ruled by {name}{known}.",
+    "known_suffix": ", whom you know: {relation}",
+    "relation_friend": "a friend",
+    "relation_warm": "well disposed",
+    "relation_cold": "wary of you",
+    "relation_enemy": "an enemy",
+    "relation_neutral": "no fixed opinion",
+    "oath_line": "{status} oath with {faction}: {clauses}, until {expires}.",
+    "hostage_line": "{name} ({role} of {faction}) has been in the lair {years} years{raised}.",
+    "hostage_raised": ", raised as yours",
+    "spell_line": "{spell} on {target} until {until}.",
+    "remnant_line": "A remnant of the {race_plural} waits near {origin}.",
+    "tag_line": "{faction} carries the mark {tag}.",
+    "opportunity_offer": "{envoy} of {faction} offers {ask}: {stated}.{eyes}",
+    "eyes_say_otherwise": " The envoy's eyes say otherwise.",
+    "marked_envoy": " This court has lied to you before.",
+    "opportunity_war": "{faction} is losing a war against {enemy}; you could defend it.",
+    "opportunity_rich": "{faction} is rich and does not fear you.",
+    "opportunity_slayers": "{faction} is arming against you; a slayer order could form there.",
+    "phase_line": "Phase {phase} ({phase_word}): a short sleep is {short} years, a moult {long} years.{ready}",
+    "ready_to_moult": " You are ready to moult.",
+    "stiff": " You woke stiff from the moult.",
+    "era_names": [
+      "bronze",
+      "iron",
+      "castle",
+      "gunpowder",
+      "arcane"
+    ],
+    "phase_names": [
+      "hatchling",
+      "young",
+      "grown",
+      "ancient",
+      "elder"
+    ],
+    "numbers": [
+      "no",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven",
+      "twelve"
+    ]
+  },
+  "reactions": {
+    "its_lands": "its lands",
+    "its_ruler": "its ruler",
+    "memory.human": "that memory will last generations",
+    "memory.dwarf": "the dwarves will carry it for five hundred years",
+    "memory.elf": "the elves will never forget it",
+    "memory.orc": "orcs forget within a lifetime, but not this season",
+    "memory.any": "it will be remembered",
+    "oath.defend": "protection",
+    "oath.no_harm": "peace",
+    "oath.tribute": "tribute",
+    "oath.any": "word",
+    "burn.oath_active": "{F} had your oath of {oath}. Its priests now call you the Oathbreaker; {memory}.",
+    "take.oath_active": "{F} had your oath of {oath}, and you carried off its {loot} anyway. Its priests now call you the Oathbreaker; {memory}.",
+    "kill.oath_active": "{F} had your oath of {oath}, and you killed its people anyway. Its priests now call you the Oathbreaker; {memory}.",
+    "burn.faithful": "{F} worshipped you, and you answered with fire; its temples are emptying.",
+    "take.faithful": "{F} worshipped you, and you carried off its {loot}; half its priests now preach against you.",
+    "kill.faithful": "{F} worshipped you, and you killed its people; its temples are emptying.",
+    "burn.weak": "{F} has nothing to answer fire with; it will pay what you ask and hate you quietly.",
+    "take.weak": "{F} could only watch its {loot} go up the mountain.",
+    "loot.gold": "gold",
+    "loot.art": "treasures",
+    "loot.artifacts": "heirlooms",
+    "loot.books": "books",
+    "loot.food": "stores",
+    "loot.royals": "children",
+    "kill_person.oath_active": "{F} had your oath of {oath}, and you killed {person} anyway. Its priests now call you the Oathbreaker; {memory}.",
+    "kill_person.any": "{F} will not forget what you did to {person}, and every court in the valley heard of it.",
+    "take_hostage.nobody": "{F} hid its heirs from you this time.",
+    "release.nobody": "{F} waited at the foot of the mountain for someone you no longer hold.",
+    "kill.weak": "{F} buried its dead and bolted its doors.",
+    "harm.strong": "{F} is strong enough to answer fire with iron: its smiths start on bolt-throwers.",
+    "harm.strong.dwarf": "{F} is strong enough to answer fire with iron: its engineers start on a bolt-thrower.",
+    "harm.strong.elf": "{F} is old and strong; its wardens string the long bows and learn your name.",
+    "harm.strong.orc": "{F} howls for blood and sharpens spears long enough to reach you.",
+    "show_forgotten.any": "{F} had stopped believing in you, and the sight of you came down on it like fire.",
+    "show_in_rage.any": "{F} saw you overhead in a rage and took it for an attack.",
+    "defend.losing": "{F} was losing its war, and you turned it; its people sing of the mountain now.",
+    "defend.not_losing": "{F} was holding its own; it thanks you, warily.",
+    "show.any": "{F} saw you overhead, and mothers kept their children in for a season.",
+    "give.any": "{F} took your gift and wonders what you will ask for it.",
+    "give.any.dwarf": "{F} weighed your gift twice and wrote it down.",
+    "miracle.protector": "{F} saw the sky answer for it, and pilgrims start up the mountain road.",
+    "miracle.terror": "{F} saw what you can do when you choose to; some of it kneels, all of it fears.",
+    "accept_offering.any": "{F} saw its offering taken, and its priests grow bolder.",
+    "destroy_altar.any": "{F} saw its altar broken; its priests curse your name and its faithful scatter.",
+    "take_hostage.any": "{F} lost {person} to your lair; the court will pay, beg or plot.",
+    "release.any": "{person} is home in {F}, and the court watches for signs of what your lair has made of its blood.",
+    "witness_burn.enemy": "{F} watched you burn its enemy {T} and lit candles at your altar.",
+    "witness_burn.friend": "{F} watched you burn its kin in {T} and barred its gates.",
+    "witness_burn.neutral": "{F} saw the smoke over {T} and counted its own granaries.",
+    "offer.fulfilled": "{F} had asked this of you through {envoy}; its faith in you deepens.",
+    "offer.deceived": "{F} sent {envoy} to you with a lie, and you acted on it; the court has learned you can be used.",
+    "extra.offer_fulfilled": "That was what {envoy} had asked of you, and the court's faith deepens.",
+    "extra.deceived": "{envoy} had lied to you about why, and now the court knows you can be used.",
+    "extra.known.harm": "{known}, whom you met in {met}, will not forget it.",
+    "extra.known.help": "{known}, whom you met in {met}, counts you a friend now.",
+    "extra.known.seen": "{known} remembers you from {met}.",
+    "extra.known_new.harm": "{known} has now seen you up close, and will not forget it.",
+    "extra.known_new.help": "{known} has now met you, and will remember the help.",
+    "extra.known_new.seen": "{known} has now seen you up close.",
+    "tag.dragon_forgotten": "Nobody alive had seen you; they had taken you for a story until today.",
+    "tag.prophecy.harm": "Its priests had foretold your return, and the fire fulfils the prophecy.",
+    "tag.prophecy.help": "Its priests had foretold your return, and your mercy is read as the prophecy's grace.",
+    "tag.prophecy.seen": "Its priests had foretold your return, and here you are.",
+    "tag.grudge.harm": "Your name is already in its book of grudges; now there is a second line.",
+    "tag.grudge.help": "Your name is in its book of grudges, and the book does not close for kindness alone.",
+    "tag.sworn.harm": "It is sworn to take back what you carried off, and now it has another reason.",
+    "tag.sworn.help": "It is sworn to take back what you carried off; a gift is not what it swore for.",
+    "tag.dragon_blood.harm": "Its kings call you grandfather, and some of them will not forgive this.",
+    "tag.dragon_blood.help": "Its kings call you grandfather, and today they have proof.",
+    "tag.slayer_order.harm": "Its slayer order will take this as a summons.",
+    "tag.slayer_order.help": "Its slayer order does not know what to make of you now.",
+    "tag.sacked.help": "It has not forgotten its sack, and is grateful for any friend.",
+    "tag.robbed_the_dragon.harm": "It knows why you came: someone there still has your gold.",
+    "tag.false_dragon": "Its king claims to speak for you, and now has to explain you.",
+    "tag.old_enemies.help": "Its old enemies will hear of it."
+  }
+}

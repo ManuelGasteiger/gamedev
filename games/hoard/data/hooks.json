@@ -1,0 +1,799 @@
+{
+  "max_hooks": 3,
+  "second": 0.8,
+  "third": 0.3,
+  "repeat_mult": 0.5,
+  "templates": [
+    {
+      "id": "thief",
+      "kind": "thief",
+      "priority": 50,
+      "when": [
+        {
+          "adjacent": "lair"
+        },
+        {
+          "field": "fear",
+          "lt": 0.3
+        },
+        {
+          "field": "gold",
+          "on": "dragon",
+          "gte": 60
+        },
+        {
+          "field": "asleep_years",
+          "on": "dragon",
+          "gte": 50
+        },
+        {
+          "field": "effect:thief_guard",
+          "on": "dragon",
+          "eq": 0
+        }
+      ],
+      "where": "near_lair",
+      "acts": [
+        "take",
+        "kill"
+      ],
+      "reward": {
+        "gold_share": 0.2,
+        "fear": 0.1
+      },
+      "ignore": {
+        "gold_to_court": 0.1
+      },
+      "text": {
+        "title": "A thief in the hoard",
+        "text": "While you slept, someone from {faction} crept into the lair and carried gold down to {region}.",
+        "reward_text": "the gold back and more, and fear in {faction}",
+        "ignore_text": "the gold is gone and {faction} grows rich on it"
+      },
+      "force_if": [
+        {
+          "event": "treasure_hunters",
+          "self_as": "subject",
+          "event_tag": "robbed",
+          "this_sleep": true
+        }
+      ]
+    },
+    {
+      "id": "slayers_premonition",
+      "kind": "slayers",
+      "priority": 100,
+      "when": [
+        {
+          "tag": "slayers_coming:$self",
+          "on": "world"
+        }
+      ],
+      "force_if": [
+        {
+          "tag": "slayers_coming:$self",
+          "on": "world"
+        }
+      ],
+      "where": "lair",
+      "acts": [
+        "kill"
+      ],
+      "fight": {
+        "health_share": 0.4,
+        "defence": "slayer_band"
+      },
+      "reward": {
+        "artifacts": 2,
+        "growth_arcana": 1,
+        "fear": 0.1,
+        "fear_all": 0.05
+      },
+      "ignore": {},
+      "text": {
+        "title": "Slayers at the gate",
+        "text": "{Faction} has sent its slayers. They camp at the foot of your mountain and mean to come in while you sleep.",
+        "reward_text": "an artifact from the band, and fear in every court",
+        "ignore_text": "they try to slay you in your next sleep"
+      }
+    },
+    {
+      "id": "slayers_ready",
+      "kind": "slayers",
+      "priority": 100,
+      "when": [
+        {
+          "tag": "slayers_ready"
+        }
+      ],
+      "where": "lair",
+      "acts": [
+        "kill"
+      ],
+      "fight": {
+        "health_share": 0.4,
+        "defence": "slayer_band"
+      },
+      "reward": {
+        "artifacts": 2,
+        "growth_arcana": 1,
+        "fear": 0.1,
+        "fear_all": 0.05
+      },
+      "ignore": {},
+      "text": {
+        "title": "Slayers at the gate",
+        "text": "The slayers of {faction} are ready. They camp at the foot of your mountain and mean to come in while you sleep.",
+        "reward_text": "an artifact from the band, and fear in every court",
+        "ignore_text": "they try to slay you in your next sleep"
+      }
+    },
+    {
+      "id": "army_burned",
+      "kind": "army",
+      "priority": 60,
+      "cooldown_years": 150,
+      "when": [
+        {
+          "adjacent": "lair"
+        },
+        {
+          "field": "effect:lair_ward",
+          "on": "dragon",
+          "eq": 0
+        },
+        {
+          "tag": "burned_by_dragon"
+        },
+        {
+          "field": "wars",
+          "gte": 1
+        },
+        {
+          "field": "fear",
+          "lt": 0.7
+        }
+      ],
+      "where": "near_lair",
+      "acts": [
+        "kill"
+      ],
+      "reward": {
+        "food": 20,
+        "fear": 0.1,
+        "growth_might": 1
+      },
+      "ignore": {
+        "lair_burn_add": 0.3
+      },
+      "text": {
+        "title": "An army at the mountain",
+        "text": "The host of {faction} is marching through {region}, under your mountain.",
+        "reward_text": "the pick of their baggage: food, and fear in {faction}",
+        "ignore_text": "they burn the slopes of the lair and the hunting falls"
+      }
+    },
+    {
+      "id": "army_enemy_of_the_faithful",
+      "kind": "army",
+      "priority": 60,
+      "cooldown_years": 150,
+      "when": [
+        {
+          "adjacent": "lair"
+        },
+        {
+          "field": "effect:lair_ward",
+          "on": "dragon",
+          "eq": 0
+        },
+        {
+          "find": "faction",
+          "bind": "other"
+        },
+        {
+          "at_war": "other"
+        },
+        {
+          "field": "faith",
+          "on": "other",
+          "gte": 0.5
+        }
+      ],
+      "where": "near_lair",
+      "acts": [
+        "kill"
+      ],
+      "reward": {
+        "food": 20,
+        "fear": 0.1,
+        "growth_might": 1,
+        "other_faith": 0.2
+      },
+      "ignore": {
+        "lair_burn_add": 0.3
+      },
+      "text": {
+        "title": "An army at the mountain",
+        "text": "The host of {faction}, at war with the faithful of {other}, is marching through {region}, under your mountain.",
+        "reward_text": "the pick of their baggage: food, fear in {faction} and the thanks of {other}",
+        "ignore_text": "they burn the slopes of the lair and the hunting falls"
+      }
+    },
+    {
+      "id": "sack",
+      "kind": "sack",
+      "priority": 70,
+      "when": [
+        {
+          "event": "region_taken",
+          "self_as": "subject",
+          "region_from": "object",
+          "this_sleep": true
+        },
+        {
+          "field": "owner",
+          "on": "region",
+          "eq": "$self"
+        }
+      ],
+      "where": "$region",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "gold_share": 0.15,
+        "books": 3,
+        "growth_lore": 1
+      },
+      "ignore": {},
+      "text": {
+        "title": "A city burning",
+        "text": "{Faction} took {region} this age. The city still burns and its treasure lies in the streets.",
+        "reward_text": "gold and books out of the smoke",
+        "ignore_text": ""
+      }
+    },
+    {
+      "id": "pilgrims",
+      "kind": "pilgrims",
+      "priority": 40,
+      "when": [
+        {
+          "field": "faith",
+          "gte": 0.5
+        }
+      ],
+      "force_if": [
+        {
+          "field": "effect:cult",
+          "on": "dragon",
+          "gt": 0
+        }
+      ],
+      "pick": "self.faith",
+      "where": "lair",
+      "choices": [
+        "receive",
+        "eat"
+      ],
+      "choice_reward": {
+        "receive": {
+          "faith_pool": 1,
+          "growth_dominion": 2,
+          "faith": 0.1,
+          "growth_lore": 1
+        },
+        "eat": {
+          "food": 15,
+          "hunger_add": -0.2,
+          "fear": 0.1,
+          "faith": -0.3,
+          "growth_might": 1
+        }
+      },
+      "ignore": {
+        "faith_add": -0.15
+      },
+      "text": {
+        "title": "Pilgrims",
+        "text": "Pilgrims from {faction} have climbed to the lair with offerings. They wait at the mouth of the cave.",
+        "reward_text": "received: their offerings and scriptures, Dominion and Lore; eaten: a meal, and fear in {faction}",
+        "ignore_text": "their faith cools"
+      }
+    },
+    {
+      "id": "dead",
+      "kind": "dead",
+      "priority": 60,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "field": "race",
+          "eq": "undead"
+        }
+      ],
+      "where": "capital",
+      "acts": [
+        "burn",
+        "defend"
+      ],
+      "reward": {
+        "faith_neighbours": 0.2,
+        "growth_dominion": 2
+      },
+      "ignore": {
+        "wealth_mult": 1.5
+      },
+      "text": {
+        "title": "The dead walk",
+        "text": "The dead of {faction} walk at {region}. The living around them look to the mountain.",
+        "reward_text": "the faith of the living",
+        "ignore_text": "the dead spread"
+      }
+    },
+    {
+      "id": "hero",
+      "kind": "hero",
+      "priority": 50,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "person": "hero",
+          "bind": "person"
+        },
+        {
+          "tag": "hostage",
+          "on": "person",
+          "absent": true
+        },
+        {
+          "field": "bold",
+          "on": "person",
+          "gte": 0.6
+        }
+      ],
+      "pick": "person.bold",
+      "where": "capital",
+      "acts": [
+        "kill_person"
+      ],
+      "fight": {
+        "health_share": 0.15,
+        "defence": "hero"
+      },
+      "reward": {
+        "artifacts": 1,
+        "growth_arcana": 1,
+        "fear": 0.1,
+        "growth_lore": 1
+      },
+      "ignore": {
+        "cohesion_add": 0.1,
+        "anti_dragon_add": 0.1
+      },
+      "text": {
+        "title": "A hero's challenge",
+        "text": "{person} of {faction} stands on the walls of {region} and calls you out by name.",
+        "reward_text": "an artifact and his legend, and fear in {faction}",
+        "ignore_text": "{faction} takes heart and works on its weapons against you"
+      }
+    },
+    {
+      "id": "royal",
+      "kind": "royal",
+      "priority": 80,
+      "when": [
+        {
+          "event": "sack_of_the_capital",
+          "self_as": "subject",
+          "other_from": "object",
+          "region_from": "tag",
+          "this_sleep": true
+        }
+      ],
+      "where": "$region",
+      "acts": [
+        "take_hostage"
+      ],
+      "reward": {
+        "royals": 1,
+        "growth_lore": 2,
+        "other_fear": 0.07
+      },
+      "ignore": {
+        "cohesion_add": -0.1,
+        "other_cohesion_add": 0.1
+      },
+      "text": {
+        "title": "A royal in flight",
+        "text": "{Region} fell to {other} this age. The court of {faction} is on the road with what it could carry.",
+        "reward_text": "a royal for the lair, and Lore",
+        "ignore_text": "the line passes to {other}"
+      }
+    },
+    {
+      "id": "vein",
+      "kind": "vein",
+      "scope": "region",
+      "priority": 50,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "tag": "vein",
+          "on": "region"
+        },
+        {
+          "field": "race",
+          "on": "owner",
+          "eq": "dwarf"
+        }
+      ],
+      "where": "$region",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "artifacts": 3,
+        "growth_arcana": 2
+      },
+      "ignore": {},
+      "text": {
+        "title": "A vein struck",
+        "text": "The miners of {faction} struck a vein under {region}. The halls are full of new work.",
+        "reward_text": "artifacts, and Arcana",
+        "ignore_text": ""
+      }
+    },
+    {
+      "id": "rival_god",
+      "kind": "rival_god",
+      "priority": 50,
+      "when": [
+        {
+          "tag": "false_dragon:*",
+          "bind": "person"
+        }
+      ],
+      "where": "capital",
+      "acts": [
+        "burn"
+      ],
+      "reward": {
+        "faith": 0.3,
+        "faith_pool": 1,
+        "growth_dominion": 2
+      },
+      "ignore": {
+        "faith_add": -0.1
+      },
+      "text": {
+        "title": "A rival god",
+        "text": "{person} of {faction} is worshipped as a dragon at {region}, and the court's offerings go to the pretender.",
+        "reward_text": "the faith comes back to you",
+        "ignore_text": "the cult grows"
+      }
+    },
+    {
+      "id": "war",
+      "kind": "war",
+      "priority": 45,
+      "when": [
+        {
+          "event": "region_taken",
+          "self_as": "subject",
+          "other_from": "tag",
+          "region_from": "object",
+          "this_sleep": true
+        },
+        {
+          "at_war": "other"
+        },
+        {
+          "field": "vassal",
+          "on": "other",
+          "eq": 0
+        }
+      ],
+      "where": "$region",
+      "acts": [
+        "kill",
+        "defend"
+      ],
+      "reward": {
+        "other_faith": 0.3,
+        "fear": 0.07,
+        "growth_dominion": 1
+      },
+      "ignore": {
+        "other_cohesion_add": -0.1
+      },
+      "text": {
+        "title": "A war at its climax",
+        "text": "{Faction} took {region} from {other} this age; the war next door is at its climax.",
+        "reward_text": "the faith of {other}, and fear in {faction}",
+        "ignore_text": "{other} falls"
+      }
+    },
+    {
+      "id": "war_any",
+      "kind": "war",
+      "priority": 30,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "find": "faction",
+          "bind": "other"
+        },
+        {
+          "at_war": "other"
+        },
+        {
+          "field": "vassal",
+          "eq": 0
+        },
+        {
+          "field": "vassal",
+          "on": "other",
+          "eq": 0
+        },
+        {
+          "field": "power",
+          "gte": 1.0,
+          "of": "other.power"
+        }
+      ],
+      "where": "front",
+      "acts": [
+        "kill",
+        "defend"
+      ],
+      "reward": {
+        "other_faith": 0.3,
+        "fear": 0.07,
+        "growth_dominion": 1
+      },
+      "ignore": {
+        "other_cohesion_add": -0.1
+      },
+      "text": {
+        "title": "A war at its climax",
+        "text": "{Faction} and {other} are at war, and the stronger host of {faction} stands at {region}.",
+        "reward_text": "the faith of {other}, and fear in {faction}",
+        "ignore_text": "{other} loses the war"
+      }
+    },
+    {
+      "id": "fat_city_settled",
+      "kind": "fat_city",
+      "priority": 25,
+      "when": [
+        {
+          "event": "region_settled",
+          "self_as": "subject",
+          "region_from": "object",
+          "this_sleep": true
+        },
+        {
+          "field": "owner",
+          "on": "region",
+          "eq": "$self"
+        }
+      ],
+      "where": "$region",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "gold_share": 0.1,
+        "art": 3,
+        "growth_dominion": 1
+      },
+      "ignore": {},
+      "text": {
+        "title": "A city grown fat",
+        "text": "{Faction} has grown fat at {region}: new walls, full granaries, a market of foreign art.",
+        "reward_text": "gold and art",
+        "ignore_text": ""
+      },
+      "cooldown_years": 100
+    },
+    {
+      "id": "fat_city_golden",
+      "kind": "fat_city",
+      "priority": 25,
+      "when": [
+        {
+          "event": "golden_age",
+          "self_as": "subject",
+          "this_sleep": true
+        }
+      ],
+      "where": "capital",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "gold_share": 0.1,
+        "art": 3,
+        "growth_dominion": 1
+      },
+      "ignore": {},
+      "text": {
+        "title": "A city grown fat",
+        "text": "A golden age has made {faction} fat at {region}: new walls, full granaries, a market of foreign art.",
+        "reward_text": "gold and art",
+        "ignore_text": ""
+      },
+      "cooldown_years": 100
+    },
+    {
+      "id": "caravan",
+      "kind": "caravan",
+      "priority": 10,
+      "fallback": true,
+      "when": [
+        {
+          "field": "wealth",
+          "gte": 1
+        }
+      ],
+      "pick": "self.wealth",
+      "where": "capital",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "gold_share": 0.1,
+        "art": 1,
+        "books": 1
+      },
+      "ignore": {},
+      "text": {
+        "title": "A rich caravan",
+        "text": "{Faction} is the richest court of the valley, and its treasury at {region} is lightly guarded.",
+        "reward_text": "gold, a book and a piece of art",
+        "ignore_text": ""
+      }
+    },
+    {
+      "id": "herd",
+      "kind": "herd",
+      "priority": 55,
+      "when": [
+        {
+          "field": "hunger",
+          "on": "dragon",
+          "gte": 0.5
+        },
+        {
+          "adjacent": "lair"
+        },
+        {
+          "field": "wealth",
+          "gte": 3
+        }
+      ],
+      "where": "near_lair",
+      "acts": [
+        "kill"
+      ],
+      "reward": {
+        "food": 30,
+        "hunger_add": -0.3,
+        "fear": 0.07,
+        "growth_might": 1
+      },
+      "ignore": {},
+      "text": {
+        "title": "A fat herd",
+        "text": "The herds of {faction} graze at {region}, under your mountain, and the hunger is on you.",
+        "reward_text": "a full belly: food, and fear in {faction}",
+        "ignore_text": "the hunger stays"
+      },
+      "pick": "self.wealth"
+    },
+    {
+      "id": "tyrant",
+      "kind": "tyrant",
+      "priority": 45,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "person": "ruler",
+          "tag": "tyrant",
+          "bind": "person"
+        }
+      ],
+      "where": "capital",
+      "acts": [
+        "kill_person"
+      ],
+      "reward": {
+        "faith": 0.3,
+        "fear": 0.07,
+        "growth_dominion": 1,
+        "growth_lore": 1
+      },
+      "ignore": {
+        "cohesion_add": -0.05
+      },
+      "text": {
+        "title": "A tyrant's head",
+        "text": "{person} rules {faction} by terror from {region}. Its people would thank the one who ends the reign.",
+        "reward_text": "the thanks of {faction}: faith, and Dominion",
+        "ignore_text": "the tyrant grinds {faction} down"
+      }
+    },
+    {
+      "id": "library",
+      "kind": "library",
+      "priority": 40,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "person": "sage",
+          "bind": "person"
+        },
+        {
+          "field": "era",
+          "gte": 2
+        }
+      ],
+      "where": "capital",
+      "acts": [
+        "take"
+      ],
+      "reward": {
+        "books": 4,
+        "growth_lore": 2
+      },
+      "ignore": {
+        "anti_dragon_add": 0.05
+      },
+      "text": {
+        "title": "A library",
+        "text": "{person} keeps the library of {faction} at {region}; its shelves hold what the valley knows.",
+        "reward_text": "books, and Lore",
+        "ignore_text": "the scholars of {faction} turn their books on you"
+      }
+    },
+    {
+      "id": "horde",
+      "kind": "horde",
+      "priority": 35,
+      "cooldown_years": 100,
+      "when": [
+        {
+          "field": "race",
+          "eq": "orc"
+        },
+        {
+          "field": "wealth",
+          "gte": 5
+        }
+      ],
+      "pick": "self.wealth",
+      "where": "capital",
+      "acts": [
+        "kill",
+        "take"
+      ],
+      "reward": {
+        "food": 15,
+        "gold_share": 0.2,
+        "fear": 0.1,
+        "growth_might": 1
+      },
+      "ignore": {
+        "wealth_mult": 1.2
+      },
+      "text": {
+        "title": "A horde's camp",
+        "text": "The horde of {faction} has piled its plunder at {region} and sleeps around the fires.",
+        "reward_text": "their plunder and a meal, and fear in the horde",
+        "ignore_text": "the horde grows fat on its plunder"
+      }
+    }
+  ]
+}

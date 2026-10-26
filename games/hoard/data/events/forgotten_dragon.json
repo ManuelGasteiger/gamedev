@@ -1,0 +1,36 @@
+[
+  {
+    "id": "dragon_forgotten",
+    "needs_dragon": true,
+    "scope": "world",
+    "trigger": [
+      {"field": "max_fear", "on": "world", "lt": 0.1},
+      {"field": "max_faith", "on": "world", "lt": 0.1},
+      {"field": "quiet_years", "on": "world", "gte": 500},
+      {"tag": "dragon_forgotten", "on": "world", "absent": true},
+      {"find": "faction", "adjacent_to": "lair", "bind": "other"}
+    ],
+    "chance": 0.2,
+    "cooldown_decades": 150,
+    "effects": [
+      {"do": "tag", "on": "world", "tag": "dragon_forgotten", "decades": 150},
+      {"do": "field", "on": "all", "field": "anti_dragon", "set": 0}
+    ]
+  },
+  {
+    "id": "dragon_remembered",
+    "needs_dragon": true,
+    "scope": "world",
+    "trigger": [
+      {"tag": "dragon_forgotten", "on": "world"},
+      {"event": ["act_burn", "act_kill", "act_take", "act_show", "act_defend", "act_give", "act_take_hostage", "act_release", "act_miracle", "act_destroy_altar", "act_accept_offering"], "other_from": "subject", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "effects": [
+      {"do": "untag", "on": "world", "tag": "dragon_forgotten"},
+      {"do": "tag", "on": "world", "tag": "dragon_returned", "decades": 50},
+      {"do": "memory", "on": "all", "type": "seen", "fear": 0.1, "tags": ["seen"]}
+    ]
+  }
+]

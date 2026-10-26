@@ -1,0 +1,21 @@
+[
+  {
+    "id": "the_last_of_their_kind",
+    "kind": "race_extinct",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"let": "race", "field": "race", "on": "self"},
+      {"field": "race", "in": ["human", "dwarf", "elf", "saurian"]},
+      {"field": "courts:$race", "on": "world", "eq": 1},
+      {"field": "minority:$race", "on": "world", "lt": 0.15},
+      {"field": "regions", "eq": 1},
+      {"field": "cohesion", "lt": 0.5},
+      {"any": [{"field": "vassal", "eq": 1}, {"field": "wars", "gte": 1}]}
+    ],
+    "chance": 0.006,
+    "subject": "$race",
+    "object": "$self",
+    "effects": [{"do": "die_out", "on": "self"}]
+  }
+]

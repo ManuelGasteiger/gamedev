@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoard ages sandbox</title>
+<style>
+  :root { --bg: #15171c; --panel: #1e2128; --line: #343842; --fg: #d8dbe2; --dim: #8b90a0; --accent: #e0b24a; --bad: #d4594c; --good: #5fb37a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
+  header { display: flex; gap: 20px; align-items: center; padding: 8px 14px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; margin: 0; }
+  header .stat { color: var(--dim); }
+  header .stat b { color: var(--fg); }
+  #status { color: var(--accent); }
+  main { display: grid; grid-template-columns: 420px 1fr 400px; gap: 10px; padding: 10px; height: calc(100vh - 42px - 320px); min-height: 480px; }
+  .col { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+  .panel { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); margin: 0 0 6px; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { pointer-events: none; }
+  .region { cursor: pointer; stroke: var(--line); stroke-width: 1.5; }
+  .region.selected { stroke: var(--accent); stroke-width: 3; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 3px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--dim); font-weight: normal; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: #262a33; }
+  tbody tr.selected { background: #2f3340; outline: 1px solid var(--accent); }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  label { display: block; color: var(--dim); margin-top: 6px; }
+  select, input[type=text], input[type=number] { width: 100%; background: #12141a; color: var(--fg); border: 1px solid var(--line); border-radius: 3px; padding: 4px; font: inherit; }
+  input[type=range] { width: 100%; }
+  button { background: #2b2f3a; color: var(--fg); border: 1px solid var(--line); border-radius: 3px; padding: 4px 9px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #15171c; border-color: var(--accent); font-weight: 600; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  .row > * { flex: 1 1 auto; }
+  .queue li { display: flex; justify-content: space-between; gap: 6px; padding: 2px 0; border-bottom: 1px dotted var(--line); }
+  ul { list-style: none; padding: 0; margin: 4px 0; }
+  .offer { border: 1px solid var(--line); border-radius: 3px; padding: 6px; margin-top: 6px; }
+  .offer .clauses { color: var(--dim); }
+  .muted { color: var(--dim); }
+  .delta { font-family: ui-monospace, monospace; font-size: 11px; white-space: pre; color: var(--dim); max-height: 110px; overflow: auto; }
+  .up { color: var(--good); } .down { color: var(--bad); }
+  #chronicle-wrap { margin: 0 10px 10px; height: 300px; display: flex; flex-direction: column; }
+  #chronicle { overflow: auto; flex: 1; font-size: 12px; }
+  .sleep-block { margin-bottom: 8px; }
+  .sleep-block h3 { font-size: 12px; margin: 6px 0 2px; color: var(--accent); }
+  .ev { padding: 1px 0; }
+  .ev .y { color: var(--dim); display: inline-block; width: 52px; font-family: ui-monospace, monospace; }
+  .ev.act { color: var(--accent); }
+  .ev.bad { color: #e8a39b; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 0; }
+  #briefing-wrap { margin: 0 10px 10px; }
+  #briefing h3 { font-size: 15px; margin: 2px 0 6px; font-family: Georgia, 'DejaVu Serif', serif; font-weight: normal; }
+  #briefing .bgroup { display: grid; grid-template-columns: 80px 1fr; gap: 0 12px; margin-bottom: 6px; }
+  #briefing .bgroup .y { color: var(--accent); text-align: right; font-family: ui-monospace, monospace; font-size: 11px; padding-top: 2px; }
+  #briefing p { margin: 0; line-height: 1.5; max-width: 110ch; }
+  #briefing .bcols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 6px; }
+  #briefing .bcols h4 { margin: 0 0 3px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); font-weight: normal; }
+  #briefing .bcols ul { margin: 0; } #briefing .bcols li { padding: 1px 0; }
+  dt { color: var(--dim); } dd { margin: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hoard ages sandbox</h1>
+  <span class="stat">year <b id="h-year">0</b></span>
+  <span class="stat">sleeps <b id="h-sleeps">0</b></span>
+  <span class="stat">years slept <b id="h-slept">0</b></span>
+  <span class="stat">seed <b id="h-seed">1</b></span>
+  <span class="stat">hash <b id="h-hash">-</b></span>
+  <span id="status">loading wasm...</span>
+</header>
+<main>
+  <div class="col">
+    <div class="panel"><h2>Valley</h2><svg id="map" viewBox="0 0 400 360"></svg></div>
+    <div class="panel"><h2>Selected region</h2><div id="region-info" class="muted">click a region</div></div>
+  </div>
+  <div class="col">
+    <div class="panel"><h2>Factions</h2>
+      <table id="factions"><thead><tr>
+        <th></th><th>id</th><th>race</th><th>era</th><th>regions</th><th>wealth</th><th>coh</th><th>power</th><th>fear</th><th>faith</th><th>anti</th><th>war</th><th>vassal</th><th>traits</th><th>tags</th><th>ruler</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="panel"><h2>People</h2>
+      <table id="people"><thead><tr><th></th><th>name</th><th>faction</th><th>role</th><th>born</th><th>dies</th><th>traits</th><th>tags</th><th>known</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="panel"><h2>Dragon</h2><dl id="dragon"></dl></div>
+    <div class="panel"><h2>World</h2><dl id="world-info"></dl>
+      <div class="row"><select id="sponsor-race" style="flex:1"></select><select id="sponsor-region" style="flex:1"></select><button id="sponsor-go">Sponsor remnant</button></div>
+    </div>
+    <div class="panel"><h2>Active oaths</h2><div id="oaths" class="muted">none</div></div>
+  </div>
+  <div class="col">
+    <div class="panel"><h2>Act builder</h2>
+      <label>type <select id="act-type"></select></label>
+      <label>target <select id="act-target"></select></label>
+      <label>region <select id="act-region"></select></label>
+      <label>magnitude <span id="act-mag-v">0.30</span><input id="act-mag" type="range" min="0" max="1" step="0.05" value="0.3"></label>
+      <div id="act-take"><label>category <select id="act-category"></select></label><label>amount <input id="act-amount" type="number" step="0.1" value="1"></label></div>
+      <div id="act-defend"><label>against <select id="act-against"></select></label></div>
+      <div id="act-miracle"><label><input id="act-terror" type="checkbox"> terror (otherwise protector)</label></div>
+      <label>witnesses <input id="act-witnesses" type="text" placeholder="comma separated faction ids"></label>
+      <div class="row"><button id="act-add">Add act</button><button id="act-apply" class="primary">Apply acts</button></div>
+      <ul id="queue" class="queue"></ul>
+      <div id="act-result" class="delta"></div>
+    </div>
+    <div class="panel"><h2>Offers</h2><div id="offers" class="muted">none</div></div>
+    <div class="panel"><h2>Sleep</h2>
+      <div class="row">
+        <button class="sleep-btn" data-years="50">50</button><button class="sleep-btn" data-years="100">100</button>
+        <button class="sleep-btn" data-years="300">300</button><button class="sleep-btn" data-years="1000">1000</button>
+        <input id="sleep-years" type="number" value="100" step="1" min="1" style="flex:0 0 80px">
+        <button id="sleep-go" class="primary">Sleep</button>
+      </div>
+      <div id="forecast" class="muted" style="margin-top:6px"></div>
+      <div id="wake" class="muted" style="margin-top:6px"></div>
+      <div class="row"><input id="seed" type="number" value="1" style="flex:0 0 100px"><button id="reset">Reset</button><button id="export">Export world</button><button id="import-btn">Import world</button><input id="import" type="file" accept=".json" hidden></div>
+    </div>
+  </div>
+</main>
+<div id="briefing-wrap" class="panel"><h2>Briefing of the last sleep</h2><div id="briefing" class="muted">no sleep yet</div></div>
+<div id="chronicle-wrap" class="panel">
+  <div class="row" style="margin:0 0 6px"><h2 style="margin:0;flex:0">Chronicle</h2><input id="filter" type="text" placeholder="filter (kind, faction, region, text)"></div>
+  <div id="chronicle"></div>
+</div>
+
+<script>
+const WASM_BASE64 = '%%WASM_BASE64%%';
+const DATA = %%DATA_JSON%%;
+const REGION_LAYOUT = {
+  lair: [200, 180], east_vale: [300, 160], east_marches: [370, 110], west_vale: [100, 160], west_marches: [30, 110],
+  hill_hold: [200, 60], deep_hold: [110, 30], elder_wood: [240, 290], deep_wood: [150, 330], old_wood: [60, 330],
+  north_scar: [300, 40], south_fen: [60, 250],
+};
+const ACT_TYPES = ['burn', 'kill', 'take', 'defend', 'show', 'give', 'take_hostage', 'release', 'destroy_altar', 'accept_offering', 'miracle'];
+const CATEGORIES = ['gold', 'books', 'artifacts', 'art', 'royals', 'food'];
+const RACE_HUE = { human: 30, dwarf: 210, elf: 120, orc: 0 };
+
+let sim, world, queue = [], sleeps = [], pendingEvents = [], selectedFaction = '', selectedRegion = '';
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 2) => typeof v === 'number' ? v.toFixed(d) : String(v ?? '');
+
+function wasiShim(getMemory) {
+  const dec = new TextDecoder();
+  const u32 = (ptr) => new DataView(getMemory().buffer).getUint32(ptr, true);
+  const setU32 = (ptr, v) => new DataView(getMemory().buffer).setUint32(ptr, v, true);
+  const shim = {
+    fd_write(fd, iovs, iovsLen, nwritten) {
+      let out = '', total = 0;
+      for (let i = 0; i < iovsLen; i++) {
+        const ptr = u32(iovs + i * 8), len = u32(iovs + i * 8 + 4);
+        out += dec.decode(new Uint8Array(getMemory().buffer, ptr, len));
+        total += len;
+      }
+      setU32(nwritten, total);
+      if (out) console.log('[wasm fd' + fd + ']', out.trimEnd());
+      return 0;
+    },
+    fd_close: () => 0,
+    fd_seek: () => 70,
+    fd_fdstat_get: () => 8,
+    proc_exit(code) { throw new Error('wasm proc_exit ' + code); },
+    environ_sizes_get(c, s) { setU32(c, 0); setU32(s, 0); return 0; },
+    environ_get: () => 0,
+    args_sizes_get(c, s) { setU32(c, 0); setU32(s, 0); return 0; },
+    args_get: () => 0,
+    clock_time_get(id, prec, out) { new DataView(getMemory().buffer).setBigUint64(out, BigInt(Date.now()) * 1000000n, true); return 0; },
+    random_get(ptr, len) { crypto.getRandomValues(new Uint8Array(getMemory().buffer, ptr, len)); return 0; },
+  };
+  return new Proxy(shim, { get: (t, k) => t[k] ?? ((...a) => { console.warn('wasi ' + k + ' unimplemented', a); return 52; }) });
+}
+
+async function loadSim() {
+  const bin = Uint8Array.from(atob(WASM_BASE64), (c) => c.charCodeAt(0));
+  let instance;
+  ({ instance } = await WebAssembly.instantiate(bin, { wasi_snapshot_preview1: wasiShim(() => instance.exports.memory) }));
+  instance.exports._initialize();
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  return function cmd(obj) {
+    const text = enc.encode(JSON.stringify(obj) + '\0');
+    const ptr = instance.exports.ages_alloc(text.length);
+    new Uint8Array(instance.exports.memory.buffer).set(text, ptr);
+    const out = instance.exports.ages_cmd(ptr);
+    instance.exports.ages_free(ptr);
+    const mem = new Uint8Array(instance.exports.memory.buffer);
+    let end = out;
+    while (mem[end] !== 0) end++;
+    const res = JSON.parse(dec.decode(mem.subarray(out, end)));
+    if (res.ok === false) { setStatus('error: ' + res.error); console.error(obj, res); }
+    return res;
+  };
+}
+
+function setStatus(text) { $('status').textContent = text; }
+
+function hashString(s) { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+function factionColour(id) {
+  const f = world.factions.find((x) => x.id === id);
+  const hue = (RACE_HUE[f?.race] ?? 270) + (hashString(id) % 40) - 20;
+  return `hsl(${hue} 55% ${45 + (hashString(id + 'l') % 16)}%)`;
+}
+
+function regionById(id) { return world.regions.find((r) => r.id === id); }
+function factionById(id) { return world.factions.find((f) => f.id === id); }
+function neighbourOwners(factionId) {
+  const f = factionById(factionId);
+  if (!f) return [];
+  const ids = new Set();
+  for (const rid of f.regions) for (const n of regionById(rid)?.neighbours ?? []) {
+    const o = regionById(n)?.owner;
+    if (o && o !== factionId) ids.add(o);
+  }
+  return [...ids].sort();
+}
+
+function renderMap() {
+  const svg = $('map');
+  const parts = [];
+  for (const r of world.regions) {
+    const [x, y] = REGION_LAYOUT[r.id] ?? [200, 180];
+    for (const n of r.neighbours) {
+      if (n < r.id) continue;
+      const [nx, ny] = REGION_LAYOUT[n] ?? [200, 180];
+      parts.push(`<line x1="${x}" y1="${y}" x2="${nx}" y2="${ny}" stroke="#444a58" stroke-width="2"/>`);
+    }
+  }
+  for (const r of world.regions) {
+    const [x, y] = REGION_LAYOUT[r.id] ?? [200, 180];
+    const fill = r.owner ? factionColour(r.owner) : '#2a2d35';
+    const radius = r.lair ? 30 : 24;
+    const tags = [...r.tags].filter((t) => ['wasteland', 'warded', 'dug_in', 'walls', 'lava', 'lake'].includes(t)).join(' ');
+    parts.push(`<g class="region${r.id === selectedRegion ? ' selected' : ''}" data-id="${r.id}">`,
+      `<circle cx="${x}" cy="${y}" r="${radius}" fill="${fill}" class="region${r.id === selectedRegion ? ' selected' : ''}" data-id="${r.id}"/>`,
+      `<circle cx="${x}" cy="${y}" r="${radius}" fill="#000" fill-opacity="${(r.burn * 0.75).toFixed(2)}" pointer-events="none"/>`,
+      r.burn > 0.3 ? `<text x="${x + radius - 6}" y="${y - radius + 10}" font-size="14">🔥</text>` : '',
+      `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="10" fill="#fff">${r.id}</text>`,
+      `<text x="${x}" y="${y + radius + 11}" text-anchor="middle" font-size="9" fill="#aab">${r.owner || (r.lair ? 'dragon' : 'empty')}</text>`,
+      tags ? `<text x="${x}" y="${y + radius + 21}" text-anchor="middle" font-size="9" fill="#e0b24a">${tags}</text>` : '',
+      '</g>');
+  }
+  svg.innerHTML = parts.join('');
+  svg.querySelectorAll('circle.region').forEach((c) => c.addEventListener('click', () => selectRegion(c.dataset.id)));
+}
+
+function renderRegionInfo() {
+  const r = regionById(selectedRegion);
+  if (!r) { $('region-info').textContent = 'click a region'; return; }
+  $('region-info').innerHTML = `<b>${r.id}</b> ${r.terrain} · owner ${r.owner || '-'} · land ${fmt(r.land)} · burn ${fmt(r.burn)} · hot ${r.hot_decades} cold ${r.cold_decades}<br>` +
+    `tags: ${[...r.tags].join(', ') || '-'}<br>neighbours: ${r.neighbours.join(', ')}`;
+}
+
+function raceText(f) {
+  const dom = f.dominant_race, share = f.pop[dom] ?? 1;
+  const mix = share < 0.999 ? ` ${Math.round(share * 100)}%` : '';
+  return dom === f.race ? dom + mix : `${dom}${mix} (was ${f.race})`;
+}
+function traitsText(t) { return `A${Math.round(t.authority * 10)} O${Math.round(t.openness * 10)} M${Math.round(t.militarism * 10)} P${Math.round(t.piety * 10)}`; }
+
+function renderFactions() {
+  const tbody = $('factions').querySelector('tbody');
+  tbody.innerHTML = world.factions.map((f) => `<tr data-id="${f.id}" class="${f.id === selectedFaction ? 'selected' : ''}">
+    <td><span class="swatch" style="background:${factionColour(f.id)}"></span></td><td>${f.id}</td><td>${raceText(f)}</td><td>${f.era_name} (${f.era})</td>
+    <td>${f.regions.join(', ')}</td><td>${fmt(f.wealth, 1)}</td><td>${fmt(f.cohesion)}</td><td>${fmt(f.power, 1)}</td>
+    <td>${fmt(f.fear)}</td><td>${fmt(f.faith)}</td><td>${fmt(f.anti_dragon)}</td><td>${f.at_war_with.join(', ')}</td>
+    <td>${f.overlord ? 'of ' + f.overlord : f.vassals.length ? 'lord of ' + f.vassals.join(', ') : ''}</td><td>${traitsText(f.culture.traits)}</td>
+    <td>${[...f.tags].filter((t) => !t.startsWith('vassal_of:')).join(' ')}</td><td>${f.ruler.class} ${f.ruler.reigned}/${f.ruler.reign_length}</td></tr>`).join('');
+  tbody.querySelectorAll('tr').forEach((tr) => tr.addEventListener('click', () => selectFaction(tr.dataset.id)));
+}
+
+function renderPeople() {
+  const known = new Map((world.dragon.known_people || []).map((k) => [k.id, k]));
+  const t = (p) => `b${Math.round(p.traits.bold * 10)} p${Math.round(p.traits.pious * 10)} g${Math.round(p.traits.greedy * 10)} c${Math.round(p.traits.cunning * 10)}`;
+  const order = ['ruler', 'heir', 'hostage_ruler', 'hero', 'sage', 'priest'];
+  const people = (world.people || []).slice().sort((a, b) => a.faction.localeCompare(b.faction) || order.indexOf(a.role) - order.indexOf(b.role));
+  $('people').querySelector('tbody').innerHTML = people.map((p) => {
+    const k = known.get(p.id);
+    return `<tr data-id="${p.id}"><td><span class="swatch" style="background:${p.faction ? factionColour(p.faction) : '#555'}"></span></td><td>${p.name}</td><td>${p.faction || '-'}</td><td>${p.role}</td><td>${p.born}</td><td>${p.dies || '-'}</td>
+      <td>${t(p)}</td><td>${p.tags.join(' ')}</td><td>${k ? `<span class="${k.relationship > 0.1 ? 'up' : k.relationship < -0.1 ? 'down' : ''}">${fmt(k.relationship)}</span> ${k.how}` : ''}</td></tr>`;
+  }).join('') || '<tr><td colspan="9" class="muted">nobody</td></tr>';
+}
+
+// a template the wasm does not know arrives half filled ({...}); the panel drops the gap and counts it below the text
+function renderBriefing(b) {
+  if (!b) { $('briefing').innerHTML = 'no sleep yet'; return; }
+  let gaps = 0;
+  const race = (r) => (r === 'dwarf' ? 'dwarves' : r === 'elf' ? 'elves' : r === 'undead' ? 'undead' : r + 's');
+  const clean = (s, x = {}) => String(s ?? '').replace('{race_plural}', x.kind === 'remnant' ? race(x.id) : '{race_plural}').replace(/\{[^{}]*\}/g, () => { gaps += 1; return ''; }).replace(/\s+([.,;:])/g, '$1');
+  const list = (items) => items.length ? `<ul>${items.map((x) => `<li>${clean(x.text, x)}</li>`).join('')}</ul>` : '<span class="muted">none</span>';
+  const groups = (b.while_you_slept || []).map((g) => `<div class="bgroup"><span class="y">${g.from}–${g.to}</span><p>${g.lines.map((l) => clean(l.text)).join(' ')}</p></div>`).join('');
+  const cols = `<div class="bcols"><div><h4>People</h4>${list(b.people || [])}</div><div><h4>Threads</h4>${list(b.threads || [])}</div><div><h4>Opportunities</h4>${list(b.opportunities || [])}</div></div>`;
+  const head = clean(b.headline?.text), phase = clean(b.phase?.text);
+  $('briefing').innerHTML = `<h3>${head}</h3>${groups || '<div class="muted">nothing worth a line</div>'}
+    <div class="muted">${phase}${gaps ? ` · ${gaps} unfilled template placeholders dropped (en.json is newer than the wasm)` : ''}</div>
+    ${cols}`;
+  $('briefing').classList.remove('muted');
+}
+
+function renderDragon() {
+  const d = world.dragon;
+  const hungerClass = d.hunger >= 0.9 ? 'down' : d.hunger > 0.5 ? '' : 'up';
+  const rows = { size: fmt(d.size, 3), knowledge: fmt(d.knowledge, 3), magic: fmt(d.magic, 3), faith_pool: fmt(d.faith_pool, 3), threat: fmt(d.threat, 1),
+    hunger: `<span id="hunger" class="${hungerClass}">${fmt(d.hunger)}</span> (needs ${fmt(d.hunger_need)} / decade)`,
+    hoard: CATEGORIES.map((c) => `${c} ${fmt(d.hoard[c], 1)}`).join(' · '), tags: [...d.tags].join(' ') || '-', lineages: d.lineages.join(', ') || '-' };
+  $('dragon').innerHTML = Object.entries(rows).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+}
+
+function renderWorld() {
+  const remnants = (world.remnants || []).map((r) => `${r.race} ${fmt(r.strength)} (from ${r.origin}, era ${r.max_era})`).join(' · ') || 'none';
+  const races = {};
+  for (const r of world.regions) if (r.owner) { const f = factionById(r.owner); if (f) races[f.dominant_race] = (races[f.dominant_race] ?? 0) + 1; }
+  const rows = { 'regions by race': Object.entries(races).map(([k, v]) => `${k} ${v}`).join(' · ') || '-', remnants,
+    wars: world.wars.map((x) => `${x.coalition ? 'coalition ' : ''}${[x.a, ...x.allies_a].join('+')} vs ${[x.b, ...x.allies_b].join('+')}`).join(' · ') || 'none',
+    'world tags': [...world.tags].join(' ') || '-' };
+  $('world-info').innerHTML = Object.entries(rows).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  fillSelect($('sponsor-race'), (world.remnants || []).map((r) => r.race), true);
+  fillSelect($('sponsor-region'), world.regions.filter((r) => !r.owner && !r.lair).map((r) => r.id), true);
+  $('sponsor-go').disabled = !(world.remnants || []).length;
+}
+
+function renderForecast() {
+  const years = Number($('sleep-years').value) || 100;
+  const f = sim({ cmd: 'forecast', years });
+  if (!f.ok) { $('forecast').textContent = ''; return; }
+  $('forecast').innerHTML = `forecast ${years} y (blurred by knowledge): wakes <b>${f.wake_reason}</b> after ~${f.years} y · size ~${fmt(f.size, 3)} · knowledge ~${fmt(f.knowledge, 2)} · magic ~${fmt(f.magic, 2)} · hunger ~${fmt(f.hunger)} · strongest ${f.strongest || '-'} at era ~${f.strongest_era} · slay attempt ${f.slay_possible ? 'possible' : 'unlikely'}`;
+}
+
+function clauseText(c) {
+  const p = c.params || {};
+  const who = c.who || 'they';
+  switch (c.pred) {
+    case 'tribute': return `${who} pay tribute of ${fmt(p.amount, 1)} wealth per decade while faith holds`;
+    case 'no_harm': return `${who} will not burn, kill or take from them`;
+    case 'defend': return `${who} will defend them when invaded`;
+    case 'no_walls': return `${who} build no walls and stay below era 2`;
+    case 'no_settle': return `${who} do not settle new land`;
+    case 'hostage': return `${who} keep a hostage of their line`;
+    default: return `${who} ${c.pred} ${JSON.stringify(p)}`;
+  }
+}
+
+function renderOffers() {
+  const offers = world.offers || [];
+  if (!offers.length) { $('offers').textContent = 'none'; return; }
+  $('offers').innerHTML = offers.map((o, i) => `<div class="offer"><b>${o.oath.parties[1]}</b> · ${o.text_key.replace('offer.', '').replace(/_/g, ' ')}${o.envoy_name ? ` · envoy ${o.envoy_name}` : ''}${o.target_name ? ` · about ${o.target_name}` : ''}
+    <div class="clauses">they say: ${(o.stated_reason || '').replace(/_/g, ' ')}${o.eyes_say_otherwise ? ' · <i>the envoy\'s eyes say otherwise</i>' : ''}${o.marked ? ' · this court lied before' : ''}<br>${o.oath.clauses.map(clauseText).join('<br>') || 'asks: ' + (o.ask || 'nothing').replace(/_/g, ' ')}<br>stakes: dragon ${o.oath.stakes.breach_by_dragon}, them ${o.oath.stakes.breach_by_them} · until ${o.oath.expires}</div>
+    <div class="row"><button data-accept="${i}">Accept</button><button data-decline="${i}">Decline</button></div></div>`).join('');
+  $('offers').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+    const accept = b.dataset.accept !== undefined;
+    const r = sim({ cmd: accept ? 'accept_offer' : 'decline_offer', index: Number(accept ? b.dataset.accept : b.dataset.decline) });
+    if (r.ok) pendingEvents.push(...r.events);
+    refreshWorld();
+    renderChronicle();
+  }));
+}
+
+function renderOaths() {
+  const oaths = world.oaths || [];
+  if (!oaths.length) { $('oaths').textContent = 'none'; return; }
+  $('oaths').innerHTML = oaths.map((o) => `<div class="offer"><b>${o.parties.join(' ~ ')}</b> · ${o.status} · ${o.sworn} to ${o.expires}
+    <div class="clauses">${o.clauses.map(clauseText).join('<br>')}</div></div>`).join('');
+}
+
+function fillSelect(sel, values, keep) {
+  const prev = keep ? sel.value : '';
+  sel.innerHTML = values.map((v) => `<option value="${v}">${v}</option>`).join('');
+  if (values.includes(prev)) sel.value = prev;
+}
+
+function renderActBuilder() {
+  fillSelect($('act-target'), world.factions.map((f) => f.id), true);
+  if (selectedFaction) $('act-target').value = selectedFaction;
+  const target = factionById($('act-target').value);
+  fillSelect($('act-region'), ['', ...(target?.regions ?? [])], true);
+  if (selectedRegion && target?.regions.includes(selectedRegion)) $('act-region').value = selectedRegion;
+  fillSelect($('act-against'), world.factions.map((f) => f.id).filter((id) => id !== target?.id), true);
+  $('act-witnesses').value = target ? neighbourOwners(target.id).join(', ') : '';
+  const type = $('act-type').value;
+  $('act-take').hidden = type !== 'take';
+  $('act-defend').hidden = type !== 'defend';
+  $('act-miracle').hidden = type !== 'miracle';
+}
+
+function buildAct() {
+  const type = $('act-type').value;
+  const act = { type, target: $('act-target').value, region: $('act-region').value, magnitude: Number($('act-mag').value),
+    witnesses: $('act-witnesses').value.split(',').map((s) => s.trim()).filter(Boolean), payload: {} };
+  if (type === 'take') act.payload[$('act-category').value] = Number($('act-amount').value);
+  if (type === 'defend') act.against = $('act-against').value;
+  if (type === 'miracle' && $('act-terror').checked) act.payload.terror = 1;
+  return act;
+}
+
+function actLabel(a) {
+  const extra = a.type === 'take' ? ' ' + Object.entries(a.payload).map(([k, v]) => `${k}:${v}`).join(',') : a.type === 'defend' ? ' vs ' + a.against : a.payload?.terror ? ' terror' : '';
+  return `${a.type} ${a.target}${a.region ? '@' + a.region : ''} m=${a.magnitude}${extra}`;
+}
+
+function renderQueue() {
+  $('queue').innerHTML = queue.map((a, i) => `<li><span>${actLabel(a)}</span><button data-i="${i}">remove</button></li>`).join('');
+  $('queue').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { queue.splice(Number(b.dataset.i), 1); renderQueue(); }));
+}
+
+function applyQueue() {
+  if (!queue.length) queue.push(buildAct());
+  const res = sim({ cmd: 'apply_acts', acts: queue });
+  if (!res.ok) { $('act-result').textContent = 'apply failed: ' + (res.error || 'unknown error'); return; }
+  const delta = (b, a) => { const d = a - b; return `<span class="${d > 0 ? 'up' : d < 0 ? 'down' : ''}">${fmt(b)}→${fmt(a)}</span>`; };
+  $('act-result').innerHTML = res.changed.map((c) => `${c.id.padEnd(12)} fear ${delta(c.before.fear, c.after.fear)}  faith ${delta(c.before.faith, c.after.faith)}  wealth ${delta(c.before.wealth, c.after.wealth)}`).join('\n');
+  pendingEvents.push(...res.events);
+  queue = [];
+  renderQueue();
+  refreshWorld();
+  renderChronicle();
+}
+
+function eventText(e) {
+  const s = e.subject, o = e.object, m = e.magnitude, n = e.count > 1 ? ` (x${e.count})` : '';
+  const tags = [...(e.tags || [])];
+  const texts = {
+    sleep_begin: () => `the dragon sleeps, planning ${m} years`,
+    wake: () => `the dragon wakes after ${m} years: ${o}`,
+    war_started: () => `${s} declares war on ${o}`,
+    war_ended: () => `war between ${s} and ${o} ends (${tags.join(', ')})`,
+    region_taken: () => `${s} takes ${o} from ${tags[0] ?? '?'}`,
+    collapse: () => `${s} collapses into ${m} part${m === 1 ? '' : 's'}`,
+    successor_founded: () => `${s} founded at ${o}, successor of ${tags[0] ?? '?'}`,
+    faction_destroyed: () => `${s} is destroyed`,
+    era_advance: () => `${s} reaches era ${m}`,
+    slayers_founded: () => `${s} founds a dragon-slayer order`,
+    tribute_paid: () => `${s} pays tribute of ${fmt(m, 1)}`,
+    slay_attempt_failed: () => `${s} tries to slay the dragon and fails (chance ${fmt(m)})`,
+    dragon_slain: () => `${s} slays the dragon`,
+    oath_sworn: () => `oath ${s} sworn with ${o} (${tags.join(', ')})`,
+    oath_expired: () => `oath ${s} with ${o} expires${tags.length ? ' (' + tags.join(', ') + ')' : ''}`,
+    oath_breached_by_dragon: () => `the dragon breaks oath ${s} with ${o} (${tags.join(', ')})`,
+    oath_breached_by_them: () => `${o} break oath ${s} (${tags.join(', ')})`,
+    orcs_spawned: () => `orcs ${s} rise in ${o}`,
+    region_settled: () => `${s} settles ${o}`,
+    region_abandoned: () => `${s} abandons ${o} (burn ${fmt(m)})`,
+    elves_withdrew: () => `${s} withdraw from ${o}`,
+    dug_in: () => `${s} dig in at ${o}`,
+    warlord_died: () => `the warlord of ${s} dies`,
+    plague: () => `plague in ${s}`,
+    bad_century: () => `a bad century begins in ${s}`,
+    volcanic_winter: () => `volcanic winter over the valley`,
+    wasteland_formed: () => `${s} becomes wasteland`,
+    wasteland_healed: () => `${s} heals from wasteland`,
+    dragon_raised_lineage: () => `a dragon-raised dynasty rules ${s}`,
+    vassal_sworn: () => `${s} swears fealty to ${o}`,
+    vassal_freed: () => `${s} throws off ${o} (${tags.join(', ')})`,
+    vassal_absorbed: () => `${o} absorbs its vassal ${s}`,
+    vassal_revolt: () => `${s} revolts against ${o}`,
+    coalition_formed: () => `${s} raises a coalition against ${o}`,
+    coalition_ended: () => `the coalition of ${s} against ${o} ends (${tags.join(', ')})`,
+    joined_war: () => `${s} joins the war on the side of ${o} (${tags.join(', ')})`,
+    remnant_formed: () => tags[0] === 'off_map' ? `${s}s roam beyond the valley, near ${o}` : `the last ${s} faction is gone; a remnant lingers near ${o}`,
+    race_returned: () => `the ${tags[0] ?? ''}s return to ${o} as ${s} (${tags[1] ?? ''})`,
+    fading_begins: () => `the fading begins for ${s}`,
+    fading_ends: () => `the fading ends for ${s}`,
+    elves_departed: () => `${s} depart from ${o}`,
+    hegemony: () => `${s} rules ${m} regions: a hegemony`,
+    hegemony_ended: () => `the hegemony of ${s} ends (${tags.join(', ')})`,
+    person_died: () => `${s} of ${o} dies (${tags.join(', ')})`,
+    person_rose: () => `${s} rises in ${o} (${tags.join(', ')})`,
+    person_crowned: () => `${s} takes the throne of ${o} (${tags.join(', ')})`,
+    reign_named: () => `the reign of ${s} over ${o} is called ${tags[0] ?? ''}`,
+    hostage_taken: () => `${s} of ${o} comes to the lair as a hostage (${tags.join(', ')})`,
+    hostage_released: () => `${s} goes home to ${o}`,
+    raised_in_lair: () => `${s} grows up in the lair (${m} years)`,
+    offer_fulfilled: () => `${s} gets what ${o} asked for; faith deepens`,
+    deceived_dragon: () => `${o} of ${s} lied to the dragon and it acted on it`,
+    offer_declined: () => `the dragon sends ${o} of ${s} away`,
+    dragon_moulted: () => `the dragon moults into phase ${m}`,
+    golden_age: () => `a golden age begins in ${s} (${m} years)`,
+    tyrant_rises: () => `a tyrant takes ${s} (${m} years)`,
+    tyrant_died: () => `the tyrant of ${s} dies`,
+    succession_crisis: () => `succession crisis in ${s}`,
+    dragon_starving: () => `the dragon starves in its sleep`,
+    dragon_atrophied: () => `the dragon has shrunk by ${fmt(m, 3)}`,
+    act_spell: () => `dragon: ${s}${o ? ' for the ' + o + 's' : ''}`,
+    spell_failed: () => `the spell fails for ${o} (${tags.join(', ')})`,
+  };
+  if (e.kind.startsWith('act_') && e.kind !== 'act_spell') return `dragon: ${e.kind.slice(4)} on ${s}${o ? ' at ' + o : ''} (m ${fmt(m)})${n}`;
+  const f = texts[e.kind];
+  return (f ? f() : `${e.kind} ${s} ${o} ${fmt(m)}`.trim()) + n;
+}
+
+function eventClass(e) {
+  if (e.kind.startsWith('act_')) return 'act';
+  if (['dragon_slain', 'slay_attempt_failed', 'oath_breached_by_dragon', 'faction_destroyed', 'volcanic_winter', 'dragon_starving', 'remnant_formed'].includes(e.kind)) return 'bad';
+  return '';
+}
+
+function renderChronicle() {
+  const q = $('filter').value.trim().toLowerCase();
+  const matches = (e) => !q || (e.kind + ' ' + e.subject + ' ' + e.object + ' ' + [...(e.tags || [])].join(' ') + ' ' + eventText(e)).toLowerCase().includes(q);
+  const block = (title, events) => {
+    const evs = events.filter(matches);
+    if (!evs.length && q) return '';
+    return `<div class="sleep-block"><h3>${title}</h3>` + evs.map((e) => `<div class="ev ${eventClass(e)}"><span class="y">${e.year}</span>${eventText(e)}</div>`).join('') + '</div>';
+  };
+  const pending = pendingEvents.length ? block(`Year ${world.year}, awake (applies to the next sleep)`, pendingEvents) : '';
+  $('chronicle').innerHTML = pending + [...sleeps].reverse().map((s) => block(`Year ${s.from} to ${s.to}, woke: ${s.wake_reason}`, s.chronicle)).join('') || '<span class="muted">nothing yet</span>';
+}
+
+function renderHeader() {
+  $('h-year').textContent = world.year;
+  $('h-sleeps').textContent = sleeps.length;
+  $('h-slept').textContent = sleeps.reduce((a, s) => a + s.years_slept, 0);
+  $('h-seed').textContent = world.seed;
+  $('h-hash').textContent = sim({ cmd: 'hash' }).hash;
+}
+
+function refreshWorld() {
+  world = sim({ cmd: 'world' });
+  if (!factionById(selectedFaction)) selectedFaction = world.factions[0]?.id ?? '';
+  renderHeader(); renderMap(); renderRegionInfo(); renderFactions(); renderPeople(); renderDragon(); renderWorld(); renderOffers(); renderOaths(); renderActBuilder(); renderForecast();
+}
+
+function sponsorRemnant() {
+  const r = sim({ cmd: 'sponsor_remnant', race: $('sponsor-race').value, region: $('sponsor-region').value });
+  if (r.ok) pendingEvents.push(...r.events);
+  refreshWorld();
+  renderChronicle();
+}
+
+function selectFaction(id) { selectedFaction = id; selectedRegion = factionById(id)?.regions[0] ?? selectedRegion; refreshWorld(); }
+function selectRegion(id) { selectedRegion = id; const owner = regionById(id)?.owner; if (owner) selectedFaction = owner; refreshWorld(); }
+
+function doSleep(years) {
+  const from = world.year;
+  const r = sim({ cmd: 'sleep', years });
+  if (!r.ok && r.error) return;
+  sleeps.push({ from, to: r.year, wake_reason: r.wake_reason, years_slept: r.years_slept, chronicle: [...pendingEvents, ...r.chronicle] });
+  pendingEvents = [];
+  $('wake').textContent = `slept ${r.years_slept} of ${years} years, woke: ${r.wake_reason}, ${r.chronicle.length} events, ${r.offers.length} offers`;
+  renderBriefing(r.briefing);
+  refreshWorld();
+  renderChronicle();
+  document.body.dataset.sleeps = sleeps.length;
+}
+
+function resetWorld(seed) {
+  sim({ cmd: 'reset', seed });
+  sleeps = []; queue = []; pendingEvents = [];
+  $('wake').textContent = ''; $('act-result').textContent = '';
+  renderBriefing(null);
+  renderQueue(); refreshWorld(); renderChronicle();
+}
+
+function exportWorld() {
+  const blob = new Blob([JSON.stringify(world, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hoard-world-y${world.year}-s${world.seed}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importWorld(file) {
+  const text = await file.text();
+  let parsed;
+  try { parsed = JSON.parse(text); } catch (e) { setStatus('import: not json'); return; }
+  const r = sim({ cmd: 'load_world', world: parsed });
+  if (r.ok) { sleeps = []; pendingEvents = []; refreshWorld(); renderChronicle(); setStatus('world imported'); }
+}
+
+function wireControls() {
+  fillSelect($('act-type'), ACT_TYPES);
+  fillSelect($('act-category'), CATEGORIES);
+  $('act-type').addEventListener('change', renderActBuilder);
+  $('act-target').addEventListener('change', () => { selectedFaction = $('act-target').value; renderActBuilder(); renderFactions(); });
+  $('act-mag').addEventListener('input', () => { $('act-mag-v').textContent = fmt(Number($('act-mag').value)); });
+  $('act-add').addEventListener('click', () => { queue.push(buildAct()); renderQueue(); });
+  $('act-apply').addEventListener('click', applyQueue);
+  document.querySelectorAll('.sleep-btn').forEach((b) => b.addEventListener('click', () => { $('sleep-years').value = b.dataset.years; doSleep(Number(b.dataset.years)); }));
+  $('sleep-go').addEventListener('click', () => doSleep(Number($('sleep-years').value)));
+  $('sleep-years').addEventListener('change', renderForecast);
+  $('sponsor-go').addEventListener('click', sponsorRemnant);
+  $('reset').addEventListener('click', () => resetWorld(Number($('seed').value)));
+  $('export').addEventListener('click', exportWorld);
+  $('import-btn').addEventListener('click', () => $('import').click());
+  $('import').addEventListener('change', () => { if ($('import').files[0]) importWorld($('import').files[0]); $('import').value = ''; });
+  $('filter').addEventListener('input', renderChronicle);
+}
+
+async function main() {
+  sim = await loadSim();
+  const r = sim({ cmd: 'load', data: DATA, seed: Number($('seed').value) });
+  if (!r.ok) return;
+  wireControls();
+  refreshWorld();
+  renderQueue();
+  renderChronicle();
+  setStatus('ready');
+  document.body.dataset.ready = '1';
+}
+main().catch((e) => { setStatus('failed: ' + e.message); console.error(e); });
+</script>
+</body>
+</html>

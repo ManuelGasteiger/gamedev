@@ -1,0 +1,44 @@
+[
+  {
+    "id": "old_enemies",
+    "trigger": [
+      {"event": "war_started", "self_as": "either", "other_from": "counterpart", "within_years": 300, "min_count": 3},
+      {"tag": "old_enemies:$other", "absent": true},
+      {"field": "power", "gte": 0.5, "of": "other.power"},
+      {"field": "power", "lte": 2.0, "of": "other.power"}
+    ],
+    "chance": 1,
+    "cooldown_decades": 5,
+    "effects": [
+      {"do": "tag", "tag": "old_enemies:$other", "decades": 80, "inherit": true},
+      {"do": "tag", "on": "other", "tag": "old_enemies:$self", "decades": 80, "inherit": true},
+      {"do": "field", "field": "militarism", "add": 0.1},
+      {"do": "field", "on": "other", "field": "militarism", "add": 0.1},
+      {"do": "field", "field": "era_progress", "add": 5},
+      {"do": "field", "on": "other", "field": "era_progress", "add": 5}
+    ]
+  },
+  {
+    "id": "old_enemies_again",
+    "trigger": [
+      {"tag": "old_enemies:*", "bind": "other", "min_age_years": 30},
+      {"adjacent": "other"},
+      {"at_war": "other", "absent": true},
+      {"field": "vassal", "eq": 0},
+      {"field": "vassal", "on": "other", "eq": 0}
+    ],
+    "chance": 0.08,
+    "cooldown_decades": 8,
+    "chance_mult": [
+      {"if": [{"person": "hero", "tag": "sworn_to:old_enemies:$other"}], "mult": 2}
+    ],
+    "thread": "war:$self:$other:$year",
+    "effects": [
+      {"do": "tag", "tag": "rematch:$other", "decades": 80, "inherit": true},
+      {"do": "field", "field": "era_progress", "add": 5},
+      {"do": "field", "on": "other", "field": "era_progress", "add": 5},
+      {"do": "spawn_person", "role": "hero", "tags": ["warleader"], "bind": "leader"},
+      {"do": "war", "against": "other", "reason": "old_enemies"}
+    ]
+  }
+]

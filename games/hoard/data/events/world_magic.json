@@ -1,0 +1,60 @@
+[
+  {
+    "id": "age_of_magic",
+    "scope": "world",
+    "major": true,
+    "once": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "year", "on": "world", "gte": 150},
+      {"tag": "age_of_magic", "on": "world", "absent": true}
+    ],
+    "chance": 0.0003,
+    "object": "",
+    "effects": [
+      {"do": "tag", "on": "world", "tag": "age_of_magic"}
+    ]
+  },
+  {
+    "id": "colleges_of_magic",
+    "era": [2, 99],
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "magic", "on": "world", "gte": 0.4},
+      {"field": "openness", "gte": 0.55},
+      {"tag": "archmages", "absent": true},
+      {"find": "faction", "tag": "archmages", "absent": true}
+    ],
+    "chance": 0.01,
+    "once": true,
+    "object": "",
+    "effects": [
+      {"do": "tag", "tag": "archmages", "decades": 0, "inherit": true},
+      {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 1.5, "decades": 30},
+      {"do": "modifier", "var": "era_rate", "op": "mul", "value": 1.2, "decades": 20}
+    ]
+  },
+  {
+    "id": "wild_surge",
+    "scope": "region",
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "magic", "on": "world", "gte": 0.7},
+      {"tag": "fey", "on": "region", "absent": true},
+      {"tag": "blighted", "on": "region", "absent": true}
+    ],
+    "chance": 0.0008,
+    "cooldown_decades": 30,
+    "object": "$owner",
+    "branches": [
+      {"weight": 1, "text_key": "wild_surge_fey", "effects": [
+        {"do": "tag", "on": "region", "tag": "fey", "decades": 50},
+        {"do": "modifier", "on": "region", "var": "land", "op": "add", "value": 0.2, "decades": 50}
+      ]},
+      {"weight": 1, "text_key": "wild_surge_blight", "effects": [
+        {"do": "tag", "on": "region", "tag": "blighted", "decades": 30},
+        {"do": "modifier", "on": "region", "var": "land", "op": "mul", "value": 0.6, "decades": 30}
+      ]}
+    ]
+  }
+]

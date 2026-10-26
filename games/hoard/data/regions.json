@@ -1,0 +1,14 @@
+[
+  { "id": "lair",         "terrain": "lair",    "land": 0.30, "lair": true,  "neighbours": ["east_vale", "west_vale", "hill_hold", "elder_wood"] },
+  { "id": "east_vale",    "terrain": "vale",    "land": 0.80, "owner": "aldmere",  "neighbours": ["lair", "west_vale", "east_marches", "north_scar", "elder_wood"] },
+  { "id": "east_marches", "terrain": "marches", "land": 0.60, "owner": "aldmere",  "neighbours": ["east_vale", "north_scar"] },
+  { "id": "west_vale",    "terrain": "vale",    "land": 0.80, "owner": "vessary",  "neighbours": ["lair", "east_vale", "west_marches", "hill_hold", "south_fen"] },
+  { "id": "west_marches", "terrain": "marches", "land": 0.60, "owner": "vessary",  "neighbours": ["west_vale", "south_fen"] },
+  { "id": "hill_hold",    "terrain": "hills",   "land": 0.70, "owner": "dorun",    "neighbours": ["lair", "west_vale", "north_scar", "deep_hold"] },
+  { "id": "deep_hold",    "terrain": "hills",   "land": 0.60, "owner": "dorun",    "neighbours": ["hill_hold"] },
+  { "id": "elder_wood",   "terrain": "wood",    "land": 0.60, "owner": "ilvareth", "neighbours": ["lair", "east_vale", "deep_wood", "south_fen"] },
+  { "id": "deep_wood",    "terrain": "wood",    "land": 0.60, "owner": "ilvareth", "neighbours": ["elder_wood", "old_wood"] },
+  { "id": "old_wood",     "terrain": "wood",    "land": 0.60, "neighbours": ["deep_wood"] },
+  { "id": "north_scar",   "terrain": "scar",    "land": 0.40, "neighbours": ["east_vale", "east_marches", "hill_hold"] },
+  { "id": "south_fen",    "terrain": "fen",     "land": 0.40, "neighbours": ["west_vale", "west_marches", "elder_wood"] }
+]

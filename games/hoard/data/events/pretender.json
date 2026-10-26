@@ -1,0 +1,45 @@
+[
+  {
+    "id": "pretender_returns",
+    "trigger": [
+      {"tag": "successor_of:*", "bind": "old", "ref": "collapse@old", "min_age_years": 20},
+      {"any": [{"person": "hero", "tag": "claimant", "bind": "person"}, {"lineage": "old"}]},
+      {"find": "faction", "tag": "successor_of:$old", "adjacent_to": "self", "bind": "rival"},
+      {"at_war": "rival", "absent": true},
+      {"field": "vassal", "eq": 0},
+      {"field": "vassal", "on": "rival", "eq": 0},
+      {"field": "power", "gte": 0.6, "of": "rival.power"}
+    ],
+    "chance": 0.08,
+    "cooldown_decades": 30,
+    "object": "$rival",
+    "tags": ["$old"],
+    "thread": "war:$self:$rival:$year",
+    "effects": [
+      {"do": "spawn_person", "role": "hero", "tags": ["claimant", "pretender"], "bind": "person", "if": [{"var": "person", "eq": ""}]},
+      {"do": "tag", "tag": "pretender:$person", "decades": 50},
+      {"do": "war", "against": "rival", "reason": "pretender"}
+    ],
+    "branches": [
+      {"if": [{"lineage": "old"}], "text_key": "pretender_hoard"},
+      {"weight": 1}
+    ]
+  },
+  {
+    "id": "restored_line",
+    "trigger": [
+      {"tag": "pretender:*", "bind": "person"},
+      {"field": "alive", "on": "person", "eq": 1},
+      {"any": [{"event": "region_taken", "self_as": "subject", "within_years": 10}, {"event": "vassal_sworn", "self_as": "object", "within_years": 10}]}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "$person",
+    "effects": [
+      {"do": "crown", "person": "person", "how": "restored"},
+      {"do": "field", "field": "cohesion", "add": 0.2},
+      {"do": "untag", "tag": "pretender:*"},
+      {"do": "tag", "tag": "restored_line", "decades": 100, "inherit": true}
+    ]
+  }
+]

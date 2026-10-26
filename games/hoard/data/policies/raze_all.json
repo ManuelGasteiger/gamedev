@@ -1,0 +1,6 @@
+{
+  "acts": [
+    { "type": "burn", "target": "each", "region": "largest", "magnitude": 0.5 },
+    { "type": "take", "target": "each", "magnitude": 0.3, "payload_share": { "gold": 1.0 } }
+  ]
+}

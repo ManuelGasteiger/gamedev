@@ -1,0 +1,254 @@
+{
+  "human": {
+    "lifespan": 60,
+    "growth": 0.02,
+    "cohesion_decay": 0.012,
+    "era_rate": 1.0,
+    "memory_halflife": 150,
+    "ruler": "mortal",
+    "loot": [
+      "gold",
+      "royals"
+    ],
+    "alliance": "tribute_worship",
+    "temperament": {
+      "war_appetite": 1.0,
+      "expansion": 1.5,
+      "home_terrain": [
+        "vale",
+        "marches",
+        "fen"
+      ],
+      "off_home_land": 0.8,
+      "settles_off_home": true
+    },
+    "traits": {
+      "authority": 0.5,
+      "openness": 0.5,
+      "militarism": 0.5,
+      "piety": 0.5
+    },
+    "affinity": {
+      "human": 0.5,
+      "dwarf": 0.3,
+      "elf": 0.0,
+      "orc": -0.8
+    },
+    "person": {
+      "accession_age": 20,
+      "lifespan": 64,
+      "lifespan_jitter": 0.2,
+      "max_age": 95,
+      "generation": 32
+    }
+  },
+  "dwarf": {
+    "lifespan": 250,
+    "growth": 0.022,
+    "cohesion_decay": 0.004,
+    "era_rate": 1.1,
+    "memory_halflife": 500,
+    "ruler": "longlived",
+    "loot": [
+      "gold",
+      "artifacts",
+      "siege"
+    ],
+    "alliance": "dig_lair",
+    "temperament": {
+      "war_appetite": 0.6,
+      "expansion": 0.4,
+      "home_terrain": [
+        "hills"
+      ],
+      "off_home_land": 0.4,
+      "settles_off_home": false
+    },
+    "traits": {
+      "authority": 0.6,
+      "openness": 0.3,
+      "militarism": 0.4,
+      "piety": 0.4
+    },
+    "affinity": {
+      "dwarf": 0.5,
+      "elf": -0.3,
+      "orc": -0.9
+    },
+    "person": {
+      "accession_age": 60,
+      "lifespan": 260,
+      "lifespan_jitter": 0.2,
+      "max_age": 380,
+      "generation": 100
+    }
+  },
+  "elf": {
+    "lifespan": 800,
+    "growth": 0.008,
+    "cohesion_decay": 0.0012,
+    "era_rate": 0.4,
+    "memory_halflife": 0,
+    "ruler": "longlived",
+    "loot": [
+      "books",
+      "art"
+    ],
+    "alliance": "teach_magic",
+    "temperament": {
+      "war_appetite": 0.3,
+      "expansion": 0.3,
+      "home_terrain": [
+        "wood"
+      ],
+      "off_home_land": 0.3,
+      "settles_off_home": false
+    },
+    "traits": {
+      "authority": 0.3,
+      "openness": 0.4,
+      "militarism": 0.2,
+      "piety": 0.5
+    },
+    "affinity": {
+      "elf": 0.5,
+      "orc": -0.9
+    },
+    "person": {
+      "accession_age": 150,
+      "lifespan": 820,
+      "lifespan_jitter": 0.25,
+      "max_age": 1300,
+      "generation": 320
+    }
+  },
+  "orc": {
+    "lifespan": 40,
+    "growth": 0.0,
+    "cohesion_decay": 0.05,
+    "era_rate": 0.2,
+    "memory_halflife": 50,
+    "ruler": "warlord",
+    "loot": [
+      "captives",
+      "scrap"
+    ],
+    "alliance": "army",
+    "temperament": {
+      "war_appetite": 2.5,
+      "expansion": 1.0,
+      "home_terrain": [
+        "scar",
+        "wasteland"
+      ],
+      "off_home_land": 0.6,
+      "settles_off_home": true
+    },
+    "traits": {
+      "authority": 0.7,
+      "openness": 0.2,
+      "militarism": 0.9,
+      "piety": 0.3
+    },
+    "affinity": {
+      "orc": 0.5
+    },
+    "remnant": {
+      "start": 0.3,
+      "floor": 0.15
+    },
+    "person": {
+      "accession_age": 15,
+      "lifespan": 42,
+      "lifespan_jitter": 0.25,
+      "max_age": 70,
+      "generation": 20
+    }
+  },
+  "undead": {
+    "lifespan": 1000,
+    "growth": 0.0,
+    "cohesion_decay": 0.03,
+    "era_rate": 0.0,
+    "memory_halflife": 0,
+    "ruler": "immortal",
+    "loot": [
+      "scrap"
+    ],
+    "alliance": "none",
+    "temperament": {
+      "war_appetite": 2.0,
+      "expansion": 0.5,
+      "home_terrain": [
+        "wasteland",
+        "scar"
+      ],
+      "off_home_land": 0.3,
+      "settles_off_home": true
+    },
+    "traits": {
+      "authority": 0.9,
+      "openness": 0.0,
+      "militarism": 0.9,
+      "piety": 0.0
+    },
+    "affinity": {
+      "human": -0.9,
+      "dwarf": -0.9,
+      "elf": -0.9,
+      "orc": -0.5,
+      "undead": 0.5
+    },
+    "person": {
+      "accession_age": 0,
+      "lifespan": 0,
+      "lifespan_jitter": 0,
+      "max_age": 0,
+      "generation": 0
+    }
+  },
+  "saurian": {
+    "lifespan": 120,
+    "growth": 0.016,
+    "cohesion_decay": 0.006,
+    "era_rate": 0.6,
+    "memory_halflife": 300,
+    "ruler": "longlived",
+    "loot": [
+      "artifacts",
+      "gold"
+    ],
+    "alliance": "army",
+    "temperament": {
+      "war_appetite": 0.9,
+      "expansion": 0.7,
+      "home_terrain": [
+        "fen",
+        "lake"
+      ],
+      "off_home_land": 0.5,
+      "settles_off_home": false
+    },
+    "traits": {
+      "authority": 0.6,
+      "openness": 0.2,
+      "militarism": 0.5,
+      "piety": 0.7
+    },
+    "affinity": {
+      "human": -0.2,
+      "dwarf": -0.2,
+      "elf": 0.1,
+      "orc": -0.5,
+      "undead": -0.9,
+      "saurian": 0.5
+    },
+    "person": {
+      "accession_age": 25,
+      "lifespan": 120,
+      "lifespan_jitter": 0.2,
+      "max_age": 170,
+      "generation": 40
+    }
+  }
+}

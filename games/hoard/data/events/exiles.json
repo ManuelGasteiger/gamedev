@@ -1,0 +1,43 @@
+[
+  {
+    "id": "exodus",
+    "trigger": [
+      {"event": "region_taken", "self_as": "tag", "other_from": "subject", "region_from": "object", "within_years": 10},
+      {"let": "race", "field": "race", "on": "self"},
+      {"field": "race", "on": "other", "ne": "$race"},
+      {"field": "cohesion", "gte": 0.3},
+      {"tag": "exiles:*", "on": "region", "absent": true}
+    ],
+    "chance": 0.8,
+    "cooldown_decades": 3,
+    "object": "$region",
+    "tags": ["$other"],
+    "effects": [
+      {"do": "refugees", "share": 0.1, "bind": "host"},
+      {"do": "tag", "on": "region", "tag": "exiles:$race", "decades": 80},
+      {"do": "tag", "on": "host", "tag": "host_of:$race", "decades": 80, "inherit": true, "if": [{"var": "host", "ne": ""}]},
+      {"do": "field", "on": "host", "field": "openness", "add": 0.1, "if": [{"var": "host", "ne": ""}]}
+    ]
+  },
+  {
+    "id": "return_of_the_exiles",
+    "scope": "region",
+    "trigger": [
+      {"tag": "exiles:*", "on": "region", "bind": "exiled", "min_age_years": 80},
+      {"field": "regions:$exiled", "on": "world", "lte": 2},
+      {"field": "owned", "on": "region", "eq": 1},
+      {"field": "race", "on": "owner", "ne": "$exiled"},
+      {"field": "cohesion", "on": "owner", "lt": 0.5},
+      {"field": "regions", "on": "owner", "gte": 2}
+    ],
+    "chance": 0.08,
+    "cooldown_decades": 10,
+    "object": "$owner",
+    "tags": ["$exiled"],
+    "effects": [
+      {"do": "untag", "on": "region", "tag": "exiles:*"},
+      {"do": "spawn_faction", "race": "$exiled", "region": "region", "war_with": "holder", "tags": ["returned", "restoration_war"], "bind": "new"},
+      {"do": "tag", "on": "new", "tag": "returned_exiles", "decades": 100, "inherit": true}
+    ]
+  }
+]

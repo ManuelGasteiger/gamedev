@@ -1,0 +1,24 @@
+[
+  {
+    "id": "treasure_hunters",
+    "needs_dragon": true,
+    "trigger": [
+      {"adjacent": "lair"},
+      {"field": "fear", "lt": 0.3, "ref": "act_take@self"},
+      {"field": "gold", "on": "dragon", "gte": 60},
+      {"field": "asleep_years", "on": "dragon", "gte": 50}
+    ],
+    "chance": 0.04,
+    "cooldown_decades": 5,
+    "object": "dragon",
+    "chance_mult": [
+      {"if": [{"tag": "dragon_forgotten", "on": "world"}], "mult": 3},
+      {"if": [{"tag": "robbed_the_dragon"}], "mult": 1.5}
+    ],
+    "branches": [
+      {"if": [{"field": "effect:thief_guard", "on": "dragon", "gt": 0}], "text_key": "treasure_hunters_failed", "effects": [{"do": "memory", "type": "seen", "fear": 0.1, "tags": ["seen"]}, {"do": "tag", "tag": "hunters_lost", "decades": 30}]},
+      {"weight": 0.7, "text_key": "treasure_hunters_failed", "effects": [{"do": "memory", "type": "seen", "fear": 0.1, "tags": ["seen"]}, {"do": "tag", "tag": "hunters_lost", "decades": 30}]},
+      {"weight": 0.3, "tag": "robbed", "text_key": "treasure_hunters_robbed", "effects": [{"do": "wealth_transfer", "from": "dragon", "to": "self", "share": 0.02}, {"do": "field", "field": "faith", "add": -0.1}, {"do": "field", "field": "anti_dragon", "add": 0.05}, {"do": "tag", "tag": "robbed_the_dragon", "decades": 50, "inherit": true}]}
+    ]
+  }
+]

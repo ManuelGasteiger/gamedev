@@ -1,0 +1,125 @@
+[
+  {
+    "id": "great_plague",
+    "scope": "world",
+    "major": true,
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "factions", "on": "world", "gte": 3}],
+    "chance": 0.0005,
+    "cooldown_decades": 40,
+    "object": "",
+    "effects": [
+      {"do": "field", "on": "all", "field": "wealth", "mul": 0.7},
+      {"do": "field", "on": "all", "field": "cohesion", "add": -0.1}
+    ]
+  },
+  {
+    "id": "comet",
+    "scope": "world",
+    "major": true,
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "factions", "on": "world", "gte": 2}],
+    "chance": 0,
+    "cooldown_decades": 20,
+    "object": "",
+    "effects": [
+      {"do": "field", "on": "all", "field": "piety", "add": 0.1},
+      {"do": "modifier", "on": "all", "var": "war_chance", "op": "mul", "value": 1.5, "decades": 5}
+    ]
+  },
+  {
+    "id": "the_dance_of_claimants",
+    "kind": "civil_war_claimants",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "regions", "gte": 3},
+      {"field": "cohesion", "lt": 0.7},
+      {"field": "vassal", "eq": 0}
+    ],
+    "chance": 0,
+    "cooldown_decades": 30,
+    "object": "",
+    "effects": [{"do": "split", "war": 1}]
+  },
+  {
+    "id": "hero_unites",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "cohesion", "lt": 0.5},
+      {"field": "regions", "gte": 2}
+    ],
+    "chance": 0,
+    "cooldown_decades": 30,
+    "object": "$person",
+    "effects": [
+      {"do": "spawn_person", "role": "hero", "tags": ["uniter"], "bind": "person"},
+      {"do": "field", "field": "cohesion", "add": 0.25},
+      {"do": "tag", "tag": "united_by_hero", "decades": 20, "inherit": true}
+    ]
+  },
+  {
+    "id": "long_winter",
+    "scope": "world",
+    "major": true,
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "factions", "on": "world", "gte": 2}],
+    "chance": 0,
+    "cooldown_decades": 30,
+    "object": "",
+    "effects": [
+      {"do": "modifier", "on": "all", "var": "growth", "op": "mul", "value": 0.4, "decades": 5},
+      {"do": "field", "on": "all", "field": "cohesion", "add": -0.05}
+    ]
+  },
+  {
+    "id": "holy_war",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "piety", "gte": 0.6},
+      {"field": "vassal", "eq": 0},
+      {"let": "race", "field": "race", "on": "self"},
+      {"find": "faction", "adjacent_to": "self", "bind": "other"},
+      {"field": "race", "on": "other", "ne": "$race"},
+      {"field": "vassal", "on": "other", "eq": 0},
+      {"at_war": "other", "absent": true}
+    ],
+    "chance": 0,
+    "cooldown_decades": 30,
+    "effects": [
+      {"do": "field", "field": "cohesion", "add": 0.1},
+      {"do": "war", "against": "other", "reason": "holy_war"}
+    ]
+  },
+  {
+    "id": "festival",
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "vassal", "eq": 0}],
+    "chance": 0,
+    "cooldown_decades": 10,
+    "object": "",
+    "effects": [{"do": "field", "field": "cohesion", "add": 0.03}]
+  },
+  {
+    "id": "temple_raised",
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "piety", "gte": 0.4}],
+    "chance": 0,
+    "cooldown_decades": 15,
+    "object": "",
+    "effects": [{"do": "field", "field": "piety", "add": 0.05}]
+  },
+  {
+    "id": "town_founded",
+    "trigger": [{"tag": "generated", "on": "world"}, {"field": "regions", "gte": 1}, {"field": "wars", "eq": 0}],
+    "chance": 0,
+    "cooldown_decades": 15,
+    "object": "",
+    "effects": [{"do": "field", "field": "wealth", "mul": 1.05}]
+  },
+  {
+    "id": "royal_birth",
+    "trigger": [{"tag": "generated", "on": "world"}, {"person": "ruler", "bind": "person"}],
+    "chance": 0,
+    "cooldown_decades": 10,
+    "object": "$person",
+    "effects": [{"do": "field", "field": "cohesion", "add": 0.02}]
+  }
+]

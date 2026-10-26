@@ -1,0 +1,2328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hoard</title>
+<style>
+  :root {
+    --bg: #171a22; --panel: #1f232cf2; --panel-solid: #1f232c; --line: #353a46; --fg: #dde0e7; --dim: #8e94a4;
+    --accent: #e0b24a; --bad: #d4594c; --good: #5fb37a; --fear: #e8705f; --faith: #7fb0ff; --wealth: #e0b24a;
+    --overlay: #0b0d1266; --fire: #ff8a2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, sans-serif; }
+  canvas#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  button { background: #2b2f3a; color: var(--fg); border: 1px solid var(--line); border-radius: 3px; padding: 4px 9px; font: inherit; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); color: #15171c; border-color: var(--accent); font-weight: 600; }
+  button.danger { border-color: var(--bad); }
+  input[type=range] { width: 100%; }
+  select, input[type=text], input[type=number] { background: #12141a; color: var(--fg); border: 1px solid var(--line); border-radius: 3px; padding: 3px 5px; font: inherit; }
+  .muted { color: var(--dim); }
+  .up { color: var(--good); } .down { color: var(--bad); }
+  .hidden { display: none !important; }
+
+  /* HUD */
+  #hud { position: fixed; top: 0; left: 0; right: 0; display: flex; gap: 11px; align-items: center; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 5; overflow: hidden; }
+  #hud h1 { font-size: 15px; margin: 0 6px 0 0; letter-spacing: .04em; }
+  #hud .stat { color: var(--dim); white-space: nowrap; }
+  #hud .stat.warn b { color: var(--bad); }
+  #hud .stat b { color: var(--fg); font-weight: 600; }
+  #hud .spacer { flex: 1; }
+  #hud button { white-space: nowrap; }
+  #hud .bar { display: inline-block; width: 64px; height: 8px; background: #11131a; border: 1px solid var(--line); border-radius: 4px; vertical-align: middle; overflow: hidden; }
+  #hud .bar i { display: block; height: 100%; background: var(--accent); }
+  #hud .bar.hunger i { background: var(--bad); }
+  #status { color: var(--accent); }
+  #hud.rage { border-bottom-color: var(--bad); }
+  @media (max-width: 1500px) { #hud { gap: 8px; font-size: 12px; } #hud .bar { width: 44px; } #hud #status { display: none; } #hud button { padding: 3px 7px; } }
+  @media (max-width: 1180px) { #hud { gap: 5px; font-size: 11px; padding: 5px 6px; } #hud .bar { width: 26px; } #hud h1 { font-size: 12px; margin-right: 2px; } #hud button { padding: 3px 5px; font-size: 11px; } }
+
+  /* region labels (always on) and the legend */
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+  .label { position: absolute; transform: translate(-50%, 0); text-align: center; white-space: nowrap; font-size: 11px; line-height: 1.2; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+  .label .nm { font-weight: 600; font-size: 12px; }
+  .label .nm i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: 0; border: 1px solid #0008; }
+  .label .tr { color: #c9cfdb; }
+  .label .bd { font-size: 10px; color: #ffd98a; }
+  .label.sel .nm { color: #fff; text-decoration: underline; }
+  #legend { position: fixed; left: 10px; bottom: 10px; z-index: 5; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; font-size: 11px; color: var(--dim); width: 224px; line-height: 1.6; overflow: hidden; }
+  #legend b { color: var(--fg); font-weight: 600; }
+  #legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; border: 1px solid #0006; }
+  #legend .row { display: block; margin: 0; white-space: nowrap; }
+  #legend .row span.it { margin-right: 8px; }
+  #legend-toggle { position: fixed; left: 10px; bottom: 10px; z-index: 5; font-size: 11px; padding: 2px 7px; }
+  #ticker { color: var(--fg); font-size: 13px; margin-top: 2px; min-height: 18px; text-shadow: 0 1px 3px #000; }
+
+  /* region tooltip and action panel */
+  #tip { position: fixed; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 3px 7px; font-size: 12px; z-index: 6; transform: translate(12px, 12px); }
+  #actions { position: fixed; left: 244px; right: 10px; bottom: 10px; max-width: 900px; max-height: 40vh; font-size: 12px; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; z-index: 5; }
+  #actions.flying { max-height: 70px; }
+  #actions h2 { font-size: 13px; margin: 0 0 6px; }
+  #actions h2 .owner { color: var(--dim); font-weight: normal; }
+  #actions .facts { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 0 0 6px; color: var(--dim); }
+  #actions .facts b { color: var(--fg); font-weight: 600; }
+  #actions .facts .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; border: 1px solid #0006; }
+  #actions .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px 10px; }
+  .action .ctl { flex-wrap: wrap; justify-content: flex-end; }
+  @media (max-width: 1100px) { .action { grid-template-columns: 90px minmax(50px, 1fr) auto; } .action .ctl input[type=range] { width: 46px; } .action .ctl select { max-width: 72px; } }
+  .action .name { display: flex; flex-direction: column; line-height: 1.15; }
+  .action .ctl input[type=range] { width: 60px; }
+  .action { display: grid; grid-template-columns: 112px minmax(90px, 1fr) auto; gap: 6px; align-items: center; padding: 1px 4px; min-height: 22px; border-bottom: 1px dotted var(--line); }
+  .action .name { font-weight: 600; }
+  .action .name small { color: var(--dim); font-weight: normal; margin-left: 4px; }
+  .action .desc { color: var(--dim); font-size: 11px; }
+  .action.off .name { color: var(--dim); }
+  .action.off .desc { color: #6a6f7d; font-style: italic; }
+  .action .ctl { display: flex; gap: 4px; align-items: center; }
+  .action .ctl input[type=range] { width: 70px; }
+  .action .ctl select { max-width: 100px; }
+  .action .desc { line-height: 1.2; }
+  .action .cost { color: var(--accent); font-size: 10px; font-weight: normal; white-space: nowrap; }
+  #keys { color: var(--dim); font-size: 11px; margin-top: 6px; }
+
+  /* floating deltas and toasts */
+  #floats { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+  .float { position: absolute; transform: translate(-50%, -50%); font-weight: 600; font-size: 10.5px; text-shadow: 0 1px 3px #000; white-space: nowrap; }
+  .float.fear { color: var(--fear); } .float.faith { color: var(--faith); } .float.wealth { color: var(--wealth); } .float.info { color: var(--fg); }
+  #toasts { position: fixed; top: 48px; left: 12px; width: 360px; z-index: 7; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+  .toast { background: var(--panel); border-left: 3px solid var(--accent); padding: 5px 8px; border-radius: 3px; font-size: 12px; opacity: 0; animation: toast 5s forwards; }
+  .toast.bad { border-left-color: var(--bad); }
+  .toast .y { color: var(--dim); font-family: ui-monospace, monospace; margin-right: 6px; }
+  @keyframes toast { 0% { opacity: 0; transform: translateX(-10px); } 8% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+  #flash { position: fixed; inset: 0; background: #ff2a2a; opacity: 0; pointer-events: none; z-index: 8; transition: opacity .25s; }
+  #dim { position: fixed; inset: 0; background: #06070a; opacity: 0; pointer-events: none; z-index: 2; transition: opacity .6s; }
+
+  /* overlays */
+  .overlay { position: fixed; inset: 0; background: var(--overlay); z-index: 10; display: flex; align-items: center; justify-content: center; }
+  .sheet { background: var(--panel-solid); border: 1px solid var(--line); border-radius: 8px; width: 980px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+  .sheet header { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .sheet header h2 { margin: 0; font-size: 16px; }
+  .sheet .tabs { display: flex; gap: 2px; margin-left: 10px; }
+  .sheet .tabs button { border-radius: 3px 3px 0 0; }
+  .sheet .tabs button.on { background: var(--accent); color: #15171c; border-color: var(--accent); }
+  .sheet .body { padding: 12px 14px; overflow: auto; flex: 1; min-height: 300px; }
+  .sheet footer { padding: 8px 14px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: center; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .box { border: 1px solid var(--line); border-radius: 4px; padding: 8px; margin-bottom: 8px; }
+  .box h3 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 0; }
+  dt { color: var(--dim); } dd { margin: 0; }
+  .meter { height: 8px; background: #11131a; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin: 2px 0 4px; }
+  .meter i { display: block; height: 100%; background: var(--accent); }
+  .meter.hunger i { background: var(--bad); }
+  .offer { border: 1px solid var(--line); border-radius: 3px; padding: 6px; margin-top: 6px; }
+  .offer .clauses { color: var(--dim); margin: 3px 0; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  .ev { padding: 1px 0; font-size: 12px; }
+  .ev .y { color: var(--dim); display: inline-block; width: 52px; font-family: ui-monospace, monospace; }
+  .ev.act { color: var(--accent); } .ev.bad { color: #e8a39b; }
+  .sleep-block h4 { font-size: 12px; margin: 8px 0 2px; color: var(--accent); }
+  #lair-foot { flex-wrap: wrap; } #lair-foot .lair-narr { color: #efe7d4; font-family: Georgia, 'Palatino Linotype', 'DejaVu Serif', serif; font-size: 13px; }
+
+  /* montage */
+  #montage-hud { position: fixed; top: 44px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 9; pointer-events: none; }
+  #montage-hud .year { font-size: 34px; font-weight: 700; letter-spacing: .06em; text-shadow: 0 2px 6px #000; }
+  #montage-hud .hint { color: var(--dim); font-size: 12px; }
+  #montage-ctl { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 9; background: var(--panel); padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+
+  /* wake screen: a page of the chronicle */
+  #wake { background: #06070bd9; align-items: flex-start; overflow-y: auto; padding: 4vh 0; z-index: 11; }
+  #wake .page { width: min(820px, 94vw); margin: 0 auto; background: #1a1c21; border: 1px solid #3a3d45; border-radius: 4px; padding: 26px 40px 20px 28px; color: #e9e3d5; font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, 'DejaVu Serif', serif; box-shadow: 0 12px 48px #000c; }
+  #wake .kicker { display: flex; gap: 8px; align-items: center; font: 600 12px/1.4 system-ui, sans-serif; font-variant: all-small-caps; letter-spacing: .12em; color: #bba679; padding-left: 110px; }
+  #wake .kicker .sep { color: #5d5648; } #wake .kicker .spacer { flex: 1; }
+  #wake button.ghost { background: none; border-color: #4a4538; color: #bba679; font: 11px system-ui, sans-serif; letter-spacing: .04em; text-transform: none; padding: 2px 8px; }
+  #wake h2.headline { font-weight: normal; font-size: 27px; line-height: 1.3; margin: 10px 0 10px 110px; max-width: 30em; color: #f4eee0; }
+  #wake .dragonline { font: 12px/1.6 system-ui, sans-serif; color: var(--dim); margin-left: 110px; }
+  #wake .row2 { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 0 18px; margin: 0 0 14px; }
+  #wake .margin { text-align: right; color: #bba679; font-size: 13px; font-variant: small-caps; letter-spacing: .06em; padding-top: 3px; white-space: nowrap; }
+  #wake .margin .range { display: block; font-size: 10.5px; color: #7d745f; letter-spacing: .08em; }
+  #wake .row2.cont { margin-top: -6px; }
+  #wake p { margin: 0; font-size: 16.5px; line-height: 1.62; max-width: 36em; }
+  #wake p.quiet { color: #a39d8f; font-style: italic; font-size: 15px; }
+  #wake p .lead { color: #f4eee0; border-bottom: 1px solid #6d5f3d; }
+  #wake section { margin-top: 16px; border-top: 1px solid #2f3138; padding-top: 14px; }
+  #wake ul { list-style: none; margin: 0; padding: 0; font-size: 15px; line-height: 1.55; max-width: 38em; }
+  #wake li { margin: 0 0 6px; }
+  #wake .tk { font: 600 10px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #8d8676; margin-right: 4px; }
+  #wake button.go { font: 11px system-ui, sans-serif; margin-left: 6px; padding: 0 9px; border-color: var(--accent); color: var(--accent); background: #2a2516; }
+  #wake footer { display: flex; gap: 12px; align-items: center; margin-top: 18px; padding-left: 110px; font: 12px system-ui, sans-serif; }
+
+  /* narration strip, side column (oaths and tasks, court), people */
+  #narration { position: fixed; left: 244px; bottom: 120px; width: min(560px, calc(100vw - 260px)); z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 2px; }
+  #narration .nl { background: #12141add; border-left: 3px solid var(--accent); padding: 3px 9px; border-radius: 2px; text-shadow: 0 1px 2px #000; font-size: 12.5px; transition: opacity .4s; }
+  #narration .nl.main { color: #f0e6cf; font-family: Georgia, 'Palatino Linotype', 'DejaVu Serif', serif; font-size: 14px; }
+  #narration .nl.react { border-left-color: #555b68; margin-left: 16px; color: #cfd3dc; }
+  #narration .nl em { font-style: normal; font-weight: 600; margin: 0 2px; }
+  .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: 0; border: 1px solid #0006; }
+  #side { position: fixed; top: 46px; right: 10px; width: 300px; z-index: 5; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+  #side .card { pointer-events: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; font-size: 12px; overflow: auto; min-height: 0; flex: 0 1 auto; }
+  #side .card h3, .box h3.plain { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); }
+  #side #court h3 { color: var(--fg); }
+  ul.tasks { list-style: none; margin: 0; padding: 0; } ul.tasks li { padding: 1px 0; } ul.tasks li.owed { color: var(--dim); }
+  .person { padding: 4px 0 5px; border-bottom: 1px dotted var(--line); }
+  .person .role { color: var(--dim); font-size: 11px; text-transform: lowercase; }
+  .person .meta { color: var(--dim); font-size: 11px; line-height: 1.35; }
+  .person .verbs { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; align-items: center; }
+  .person .verbs button { font-size: 11px; padding: 1px 7px; }
+  .person .verbs small { color: var(--accent); }
+  .person .why, .cost-note { color: #6f7483; font-size: 10.5px; font-style: italic; }
+  .person.dead { opacity: .62; }
+  .rel.warm { color: var(--good); } .rel.cold { color: var(--bad); }
+  .relbar { display: inline-block; position: relative; width: 60px; height: 6px; background: #11131a; border: 1px solid var(--line); border-radius: 3px; vertical-align: 0; margin-left: 4px; }
+  .relbar::after { content: ''; position: absolute; left: 50%; top: -1px; bottom: -1px; width: 1px; background: #555; }
+  .relbar i { position: absolute; top: 0; bottom: 0; } .relbar i.pos { background: var(--good); } .relbar i.neg { background: var(--bad); }
+  ul.pev { list-style: none; margin: 3px 0 0; padding: 0; font-size: 11.5px; } ul.pev .y { color: var(--dim); display: inline-block; width: 44px; font-family: ui-monospace, monospace; }
+  .audience { border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 4px; padding: 8px 11px; margin-top: 8px; }
+  .audience .speech { font-family: Georgia, 'Palatino Linotype', 'DejaVu Serif', serif; font-size: 17px; color: #f0e8d6; margin: 5px 0 4px; }
+  .audience .ask .price { color: var(--accent); }
+  .audience .hint { color: #e8a39b; font-style: italic; margin-top: 2px; }
+  .audience .clauses { color: var(--dim); margin: 4px 0; font-size: 11.5px; }
+  .rhythm-line { font-family: Georgia, 'Palatino Linotype', 'DejaVu Serif', serif; font-size: 15px; color: #efe7d4; margin: 2px 0 8px; }
+  .sleep-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sleep-choice > div { border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+  .sleep-choice > div.ready { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .sleep-choice button.big { font-size: 14px; padding: 6px 14px; }
+  .sleep-choice .fc { margin-top: 6px; font-size: 11.5px; }
+  #hud .bar.phase i { background: #b48cff; }
+  #hud #h-phase-stat.ready b, #hud #h-phase-note { color: var(--accent); }
+
+  /* chronicle drawer */
+  #chron { position: fixed; top: 38px; right: 0; bottom: 0; width: 420px; background: var(--panel); border-left: 1px solid var(--line); z-index: 6; display: flex; flex-direction: column; }
+  #chron .head { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); align-items: center; }
+  #chron .head input { flex: 1; }
+  #chron .list { overflow: auto; flex: 1; padding: 6px 8px; }
+
+  #seed-row input { width: 90px; }
+  #import { display: none; }
+  #export-text { width: 100%; height: 120px; background: #12141a; color: var(--fg); border: 1px solid var(--line); font: 11px ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="dim"></div>
+<div id="floats"></div>
+<div id="toasts"></div>
+<div id="flash"></div>
+
+<div id="hud">
+  <h1>HOARD</h1>
+  <span class="stat">year <b id="h-year">0</b></span>
+  <span class="stat">age <b id="h-age">1</b></span>
+  <span class="stat">stamina <span class="bar"><i id="h-stamina-bar"></i></span> <b id="h-stamina">0</b></span>
+  <span class="stat hidden" id="h-health-stat">health <span class="bar health"><i id="h-health-bar"></i></span> <b id="h-health">0</b></span>
+  <span class="stat">size <b id="h-size">0</b></span>
+  <span class="stat">knowledge <b id="h-knowledge">0</b></span>
+  <span class="stat">magic <b id="h-magic">0</b></span>
+  <span class="stat">faith <b id="h-faith">0</b></span>
+  <span class="stat" id="h-hunger-stat">hunger <span class="bar hunger"><i id="h-hunger-bar"></i></span> <b id="h-hunger">0</b></span>
+  <span class="stat">threat <b id="h-threat">0</b></span>
+  <span class="chips hidden" id="h-growth"></span>
+  <button id="h-picks" class="picks hidden" title="choose a talent">talent ready</button>
+  <span class="stat" id="h-phase-stat"><b id="h-phase">hatchling</b> <span class="bar phase"><i id="h-phase-bar"></i></span> <span id="h-phase-note"></span></span>
+  <span class="stat" id="h-tags"></span>
+  <span class="spacer"></span>
+  <span id="status">loading</span>
+  <button id="btn-last" title="the last wake briefing">Last sleep</button>
+  <button id="btn-land" title="land at the lair (L)">Land</button>
+  <button id="btn-chron" title="the chronicle (C)">Chronicle</button>
+  <button id="btn-system">Game</button>
+</div>
+
+<div id="labels"></div>
+<div id="tip" class="hidden"></div>
+<div id="actions"><h2>loading</h2></div>
+<div id="narration" class="hidden"></div>
+<div id="side"><div id="hooks" class="card hidden"></div><div id="tasks" class="card hidden"></div><div id="court" class="card hidden"></div></div>
+<div id="legend">
+  <b>Legend</b> <span class="muted" style="float:right;cursor:pointer;pointer-events:auto" id="legend-hide">hide</span>
+  <div class="row"><span class="it"><span class="sw" style="background:hsl(30 55% 50%)"></span>human</span><span class="it"><span class="sw" style="background:hsl(210 55% 50%)"></span>dwarf</span><span class="it"><span class="sw" style="background:hsl(120 55% 45%)"></span>elf</span><span class="it"><span class="sw" style="background:hsl(0 55% 50%)"></span>orc</span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:hsl(280 55% 50%)"></span>undead</span><span class="it"><span class="sw" style="background:#e0b24a"></span>capital ring</span><span class="it"><span class="sw" style="background:#f0d9b5"></span>envoy</span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#151515"></span>burn (char)</span><span class="it"><span class="sw" style="background:#ff8a2a"></span>flames</span><span class="it"><span class="sw" style="background:#6b6b66"></span>wasteland</span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#ff4040"></span>war arrow</span><span class="it"><span class="sw" style="background:#fff"></span>army cubes</span><span class="it"><span class="sw" style="background:#3a5a2a"></span>plague</span></div>
+  <div class="row"><span class="it"><span class="sw" style="background:#5ea0ff"></span>ward</span><span class="it"><span class="sw" style="background:#fff0a0"></span>bless</span><span class="it"><span class="sw" style="background:#8a3ad0"></span>curse</span><span class="it"><span class="sw" style="background:#c9b58a"></span>remnant camp</span></div>
+  <div class="row hidden" id="legend-v04"><span class="it"><span class="sw" style="background:#ff4a32"></span>tower range</span><span class="it"><span class="sw" style="background:#5ea0ff"></span>ward dome</span><span class="it" id="legend-hook"><span class="sw" style="background:#ffc940"></span>hook</span></div>
+  <div class="row muted">tile ring = owner · flag = overlord</div>
+</div>
+<button id="legend-toggle" class="hidden">Legend</button>
+
+<div id="montage-hud" class="hidden"><div class="year" id="m-year">0</div><div class="hint" id="m-hint">Space pause · + / - speed · Esc skip</div><div id="ticker"></div></div>
+<div id="montage-ctl" class="hidden">
+  <button id="m-pause">Pause</button><button id="m-slower">-</button><span id="m-speed" class="muted" style="align-self:center">20 y/s</span><button id="m-faster">+</button><button id="m-skip" class="primary">Skip to wake (Esc)</button>
+</div>
+<div id="wake" class="overlay hidden"></div>
+
+<div id="chron" class="hidden">
+  <div class="head"><b>Chronicle</b><input id="chron-filter" type="text" placeholder="filter (kind, faction, region, text)"><button id="chron-close">×</button></div>
+  <div class="list" id="chron-list"></div>
+</div>
+
+<div id="lair" class="overlay hidden">
+  <div class="sheet">
+    <header><h2>The lair</h2><span class="muted" id="lair-year"></span>
+      <div class="tabs" id="lair-tabs">
+        <button data-tab="hoard" class="on">Hoard</button><button data-tab="growth" id="lair-tab-growth" class="hidden">Growth</button><button data-tab="envoys">Envoys</button><button data-tab="oaths">Oaths and tasks</button>
+        <button data-tab="known">Known people</button><button data-tab="spells">Spells</button><button data-tab="sleep">Sleep</button><button data-tab="chronicle">Chronicle</button>
+      </div>
+      <span class="spacer" style="flex:1"></span><button id="lair-takeoff">Take off</button>
+    </header>
+    <div class="body" id="lair-body"></div>
+    <footer class="muted" id="lair-foot"></footer>
+  </div>
+</div>
+
+<div id="system" class="overlay hidden">
+  <div class="sheet" style="width:620px">
+    <header><h2>Game</h2><span class="spacer" style="flex:1"></span><button id="system-close">Close</button></header>
+    <div class="body">
+      <div class="box"><h3>New world</h3>
+        <div class="row" id="seed-row"><label>seed <input id="seed" type="number" value="1"></label><button id="new-game" class="danger">New world</button><span class="muted">a new valley and its history; the autosave is replaced</span><button id="btn-legends" class="hidden">Legends</button></div>
+      </div>
+      <div class="box"><h3>Save</h3>
+        <div class="muted">The game autosaves to this browser after every age. Export writes the world as JSON; the artifact viewer blocks downloads, so the JSON is also shown below to copy.</div>
+        <div class="row"><button id="export">Export world</button><button id="import-btn">Import world</button><input id="import" type="file" accept=".json"><button id="export-copy">Copy JSON</button></div>
+        <textarea id="export-text" class="hidden" readonly></textarea>
+      </div>
+      <div class="box"><h3>Controls</h3>
+        <div class="muted">WASD / arrows fly · click a tile to fly there · wheel zoom · right-drag pan · hold B to burn (release to breathe) · L land at the lair · C chronicle · Space / + / - / Esc in the sleep montage</div>
+      </div>
+      <div class="box"><h3>Credits</h3>
+        <div class="muted">Dragon model by MattBas (dragon.best/3d), CC BY-SA 4.0. three.js, MIT.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>%%THREE_JS%%</script>
+<script src="vendor/gltf-loader.r158.js"></script>
+<script type="application/json" id="assets" data-manifest="assets.json"></script>
+<script>
+// ===================================================================================================
+// shim + sim bridge: the wasm module (embedded) behind sim(cmd) -> json; identical to the 2D sandbox
+// ===================================================================================================
+const WASM_BASE64 = '%%WASM_BASE64%%';
+const DATA = %%DATA_JSON%%;
+const CONSTANTS = JSON.parse(DATA.constants);
+const RACES = JSON.parse(DATA.races);
+
+const $ = (id) => document.getElementById(id);
+const fmt = (v, d = 2) => typeof v === 'number' ? v.toFixed(d) : String(v ?? '');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function addStyle(css) { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); }
+
+function wasiShim(getMemory) {
+  const dec = new TextDecoder();
+  const u32 = (ptr) => new DataView(getMemory().buffer).getUint32(ptr, true);
+  const setU32 = (ptr, v) => new DataView(getMemory().buffer).setUint32(ptr, v, true);
+  const shim = {
+    fd_write(fd, iovs, iovsLen, nwritten) {
+      let out = '', total = 0;
+      for (let i = 0; i < iovsLen; i++) {
+        const ptr = u32(iovs + i * 8), len = u32(iovs + i * 8 + 4);
+        out += dec.decode(new Uint8Array(getMemory().buffer, ptr, len));
+        total += len;
+      }
+      setU32(nwritten, total);
+      if (out) console.log('[wasm fd' + fd + ']', out.trimEnd());
+      return 0;
+    },
+    fd_close: () => 0,
+    fd_seek: () => 70,
+    fd_fdstat_get: () => 8,
+    proc_exit(code) { throw new Error('wasm proc_exit ' + code); },
+    environ_sizes_get(c, s) { setU32(c, 0); setU32(s, 0); return 0; },
+    environ_get: () => 0,
+    args_sizes_get(c, s) { setU32(c, 0); setU32(s, 0); return 0; },
+    args_get: () => 0,
+    clock_time_get(id, prec, out) { new DataView(getMemory().buffer).setBigUint64(out, BigInt(Date.now()) * 1000000n, true); return 0; },
+    random_get(ptr, len) { crypto.getRandomValues(new Uint8Array(getMemory().buffer, ptr, len)); return 0; },
+  };
+  return new Proxy(shim, { get: (t, k) => t[k] ?? ((...a) => { console.warn('wasi ' + k + ' unimplemented', a); return 52; }) });
+}
+
+async function loadSim() {
+  const bin = Uint8Array.from(atob(WASM_BASE64), (c) => c.charCodeAt(0));
+  let instance;
+  ({ instance } = await WebAssembly.instantiate(bin, { wasi_snapshot_preview1: wasiShim(() => instance.exports.memory) }));
+  instance.exports._initialize();
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  return function cmd(obj) {
+    const text = enc.encode(JSON.stringify(obj) + '\0');
+    const ptr = instance.exports.ages_alloc(text.length);
+    new Uint8Array(instance.exports.memory.buffer).set(text, ptr);
+    const out = instance.exports.ages_cmd(ptr);
+    instance.exports.ages_free(ptr);
+    const mem = new Uint8Array(instance.exports.memory.buffer);
+    let end = out;
+    while (mem[end] !== 0) end++;
+    const res = JSON.parse(dec.decode(mem.subarray(out, end)));
+    if (res.ok === false) { setStatus('sim error: ' + res.error); console.warn('sim', obj, res); }
+    return res;
+  };
+}
+
+function setStatus(text) { $('status').textContent = text; }
+
+// ===================================================================================================
+// world model: the raw API view plus a display model the scene draws from (mutable during the montage)
+// ===================================================================================================
+const REGION_LAYOUT = {
+  lair: [200, 180], east_vale: [300, 160], east_marches: [370, 110], west_vale: [100, 160], west_marches: [30, 110],
+  hill_hold: [200, 60], deep_hold: [110, 30], elder_wood: [240, 290], deep_wood: [150, 330], old_wood: [60, 330],
+  north_scar: [300, 40], south_fen: [60, 250],
+};
+const WORLD_SCALE = 0.1;
+const RACE_HUE = { human: 30, dwarf: 210, elf: 120, orc: 0, undead: 280 };
+const TERRAIN_COLOUR = { vale: 0x5f9a4f, marches: 0x8a9a4a, hills: 0x8a6e4e, wood: 0x3e6b3a, fen: 0x4e8a7e, scar: 0x6e6478, lair: 0x4a4a52, lake: 0x6f8f6a, wasteland: 0x6b6b66 };
+const PALETTE = {
+  bg: 0x171a22, char: 0x151515, fire: 0xff8a2a, ember: 0xffd25a, ward: 0x5ea0ff, lake: 0x3f7fbf, altar: 0xf2f2f2, gate: 0x777780,
+  tent: 0xc9b58a, crown: 0xe0b24a, dragon: 0x5c3a86, rage: 0xb0302a, throat: 0xff9a3a, wingTip: 0xc070ff, crest: 0xe0b24a,
+  cave: 0xff7a1a, trunk: 0x5a4330, leaf: 0x2f5a2c, rock: 0x7a7a86, hut: 0xb9a27a, longhouse: 0xa8906a, wall: 0x9a9a9a,
+  tower: 0x8e8e96, spire: 0xc8c8e0, spireTip: 0x9fd0ff, post: 0x5a4a3a, pool: 0x2f6f8f, shadow: 0x000000, army: 0xffffff,
+};
+const STAMINA = { base: 100, per_size: 20, rage: 30, stiff_mult: 0.5 };   // stiff: the first raid after a moult (17.4)
+const COST = { burn_per_quarter: 15, take: 10, kill: 10, defend: 12, roar: 3, hostage: 20, release: 5, give: 5, accept_offering: 5, destroy_altar: 8, miracle: 0, spell: 0, sponsor: 10, terraform: 30, demand: 8, kill_person: 10 };
+const ERA_NAMES = ['bronze', 'iron', 'castles', 'gunpowder', 'arcane'];
+const CATEGORIES = ['gold', 'books', 'artifacts', 'art', 'royals', 'food'];
+const DREAM_EVENTS = ['slay_attempt_failed', 'oath_breached_by_dragon', 'dragon_slain', 'dragon_starving', 'slayers_ready', 'slayers_coming'];
+
+let sim, world, model;
+const play = { seed: 1, age: 1, stamina: 0, ageEvents: [], ages: [], landed: false };
+
+function toWorld(sx, sy) { return [(sx - 200) * WORLD_SCALE, (sy - 180) * WORLD_SCALE]; }
+function regionCentre(id) { if (valley) return valley.site(id); const [sx, sy] = REGION_LAYOUT[id] ?? [200, 180]; return toWorld(sx, sy); }
+function groundAt(x, z) { return valley ? valley.heightAt(x, z) : 0.5; }
+function hashString(s) { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+function seededRandom(key) { let s = hashString(key) || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
+
+function raceOf(id) {
+  const f = model?.factions.get(id) ?? world?.factions.find((x) => x.id === id);
+  if (f) return f.race;
+  const g = (world?.graveyard ?? []).find((x) => x.id === id);
+  return g ? g.race : undefined;
+}
+function factionHsl(id) {
+  const hue = (RACE_HUE[raceOf(id)] ?? 270) + (hashString(id) % 40) - 20;
+  return { h: ((hue % 360) + 360) % 360, s: 55, l: 45 + (hashString(id + 'l') % 16) };
+}
+function factionCss(id) { const c = factionHsl(id); return `hsl(${c.h} ${c.s}% ${c.l}%)`; }
+function factionColor3(id) { const c = factionHsl(id); return new THREE.Color().setHSL(c.h / 360, c.s / 100, c.l / 100); }
+
+function regionById(id) { return world.regions.find((r) => r.id === id); }
+function factionById(id) { return world.factions.find((f) => f.id === id); }
+function witnessesFor(regionId, targetId) {
+  const ids = new Set();
+  for (const n of regionById(regionId)?.neighbours ?? []) { const o = regionById(n)?.owner; if (o && o !== targetId) ids.add(o); }
+  return [...ids].sort();
+}
+
+// the display model: everything the scene needs, keyed by id, cheap to copy and to mutate event by event
+function buildModel(view) {
+  const m = { year: view.year, regions: new Map(), factions: new Map(), armies: view.armies ?? [], remnants: view.remnants ?? [], dragon: view.dragon, offers: view.offers ?? [], wars: view.wars ?? [], modifiers: view.modifiers ?? [] };
+  for (const f of view.factions) {
+    m.factions.set(f.id, { id: f.id, race: f.dominant_race ?? f.race, era: f.era, capital: f.capital, overlord: f.overlord || '', altar: !!f.altar,
+      hostage_taken: !!f.hostage_taken, at_war_with: [...f.at_war_with], allies: f.allies ?? [], faith: f.faith, fear: f.fear, wealth: f.wealth, power: f.power ?? 0, tags: new Set(f.tags), regions: [...f.regions] });
+  }
+  for (const r of view.regions) {
+    m.regions.set(r.id, { id: r.id, owner: r.owner || '', terrain: r.terrain, burn: r.burn, tags: new Set(r.tags), wealth_share: r.wealth_share ?? 0,
+      capital: !!r.capital, lair: !!r.lair, neighbours: r.neighbours, land: r.land, name: r.name || '' });
+  }
+  // the dragon's spells are modifiers in the sim; the display model carries them as tags so tiles and labels can show them
+  for (const mod of m.modifiers) {
+    const spell = mod.source.startsWith('dragon.') ? mod.source.slice(7) : '';
+    if (!spell) continue;
+    const tag = { ward: 'warded', bless: 'blessed', curse: 'cursed', teach: 'taught', incite: 'incited' }[spell];
+    if (!tag) continue;
+    if (m.regions.has(mod.target)) m.regions.get(mod.target).tags.add(tag);
+    else if (m.factions.has(mod.target)) m.factions.get(mod.target).tags.add(tag);
+  }
+  return m;
+}
+
+function remnantCamps(m) {
+  const camps = [];
+  for (const rem of m.remnants) {
+    if (rem.strength <= (CONSTANTS.remnant_min_strength ?? 0.1)) continue;
+    const home = RACES[rem.race]?.temperament?.home_terrain ?? [];
+    const candidates = [...m.regions.values()].filter((r) => !r.owner && !r.lair && (home.includes(r.terrain) || (r.tags.has('wasteland') && home.includes('wasteland'))));
+    const pick = candidates.find((r) => r.id === rem.origin) ?? candidates[0];
+    if (pick) camps.push({ race: rem.race, region: pick.id, strength: rem.strength });
+  }
+  return camps;
+}
+
+function armyPosition(army, m) {
+  const def = m.regions.get(army.region);
+  const att = m.factions.get(army.attacker);
+  const [dx, dz] = regionCentre(army.region);
+  let from = null;
+  for (const n of def?.neighbours ?? []) if (att?.regions.includes(n) || m.regions.get(n)?.owner === army.attacker) { from = regionCentre(n); break; }
+  if (!from) return [dx + 2.2, dz];
+  const t = 0.68;
+  return [from[0] + (dx - from[0]) * t, from[1] + (dz - from[1]) * t];
+}
+
+function refreshWorld() {
+  const prev = model;
+  world = sim({ cmd: 'world' });
+  indexNames(world);
+  model = buildModel(world);
+  if (valley && valley.key !== valleyKey()) buildValleyScene();   // a cataclysm changed a region's terrain
+  syncScene(prev);
+  renderHud();
+  renderActions();
+}
+
+// ===================================================================================================
+// scene build: renderer, orthographic camera, lights, fog, tiles with terrain decoration, settlements, banners
+// ===================================================================================================
+let renderer, scene, camera, raycaster, valley = null, rimFlora = null, water = null;
+const cam = { yaw: Math.PI / 4, pitch: 0.87, dist: 70, zoom: 1, target: new THREE.Vector3(0, 0, 0.5), follow: true };
+const tiles = new Map();        // region id -> { mesh, group, decor, key, flames: [], decal, outline, polygon }
+const sceneLayers = { armies: null, envoys: null, camps: null, effects: null, arrows: null };
+let ambient, sun, flameTexture;
+
+function material(color, extra = {}) { return new THREE.MeshPhongMaterial({ color, flatShading: true, shininess: 0, specular: 0x000000, ...extra }); }
+function box(w, h, d, color, x = 0, y = 0, z = 0) { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material(color)); mesh.position.set(x, y, z); return mesh; }
+function cone(r, h, color, x = 0, y = 0, z = 0, segments = 6) { const mesh = new THREE.Mesh(new THREE.ConeGeometry(r, h, segments), material(color)); mesh.position.set(x, y, z); return mesh; }
+function cylinder(r, h, color, x = 0, y = 0, z = 0, segments = 8) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, segments), material(color)); mesh.position.set(x, y, z); return mesh; }
+function disc(r, color, opacity, y) {
+  const mesh = new THREE.Mesh(new THREE.CircleGeometry(r, 24), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
+  mesh.rotation.x = -Math.PI / 2; mesh.position.y = y; return mesh;
+}
+function flatTorus(r, tube, color, y) { const mesh = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 6, 24), material(color)); mesh.rotation.x = Math.PI / 2; mesh.position.y = y; return mesh; }
+
+
+function outlineMesh(t, color, opacity = 0.95, lift = 0) {
+  const mesh = new THREE.Mesh(t.outline, new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  mesh.position.y = lift;
+  return mesh;
+}
+
+// lift a group's direct children onto the ground under each of them (children keep the old tile-top convention y = 0.5)
+function drape(g) { for (const c of g.children) c.position.y += groundAt(g.position.x + c.position.x, g.position.z + c.position.z) - (g.position.y + 0.5); }
+
+function makeFlameTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 32;
+  const g = c.getContext('2d'), grad = g.createRadialGradient(16, 16, 2, 16, 16, 16);
+  grad.addColorStop(0, 'rgba(255,240,180,1)'); grad.addColorStop(0.4, 'rgba(255,150,40,0.9)'); grad.addColorStop(1, 'rgba(255,60,0,0)');
+  g.fillStyle = grad; g.fillRect(0, 0, 32, 32);
+  const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
+}
+
+function buildScene() {
+  const canvas = $('view');
+  // software GL (headless checks, machines without a GPU): no MSAA, a quarter of the flora, coarser ground, no shadows
+  const probe = document.createElement('canvas').getContext('webgl2'), info = probe?.getExtension('WEBGL_debug_renderer_info');
+  const softwareGL = /swiftshader|llvmpipe|software/i.test(info ? probe.getParameter(info.UNMASKED_RENDERER_WEBGL) : '');
+  probe?.getExtension('WEBGL_lose_context')?.loseContext();
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: !softwareGL });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(PALETTE.bg);
+  scene.fog = new THREE.Fog(PALETTE.bg, 62, 108);
+  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 300);
+  raycaster = new THREE.Raycaster();
+  ambient = new THREE.AmbientLight(0xaab4c8, 0.75);
+  sun = new THREE.DirectionalLight(0xfff1dc, 1.1);
+  sun.position.set(18, 30, 12);
+  scene.add(ambient, sun);
+  flameTexture = makeFlameTexture();
+  VALLEY.detail = softwareGL ? 0.25 : 1;
+  VALLEY.cell = softwareGL ? 0.9 : 0.6;
+  renderer.shadowMap.enabled = !softwareGL; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
+  sun.position.set(30, 48, 18); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 1, far: 140 });
+  sun.shadow.camera.updateProjectionMatrix(); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
+  water = buildWater();
+  scene.add(water);
+  for (const key of Object.keys(sceneLayers)) { sceneLayers[key] = new THREE.Group(); scene.add(sceneLayers[key]); }
+  buildValleyScene();
+  buildDragon();
+  resize();
+  window.addEventListener('resize', () => { resize(); layoutOverlays(); });
+}
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  const halfH = 23.5 / cam.zoom, halfW = halfH * (w / h);
+  camera.left = -halfW; camera.right = halfW; camera.top = halfH; camera.bottom = -halfH;
+  camera.updateProjectionMatrix();
+}
+
+function updateCamera() {
+  const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  camera.position.set(cam.target.x + cam.dist * cp * Math.sin(cam.yaw), cam.target.y + cam.dist * sp, cam.target.z + cam.dist * cp * Math.cos(cam.yaw));
+  camera.lookAt(cam.target);
+}
+
+// the valley for play.seed (web/game/terrain.js), then one entry per region: a group standing on its settlement plateau,
+// its outline ribbon and its flora. Called again by newGame when the seed changes.
+function buildValleyScene() {
+  for (const t of tiles.values()) { scene.remove(t.group, t.flora.group); t.outline.dispose(); }
+  tiles.clear();
+  if (valley) scene.remove(valley.mesh, rimFlora);
+  for (const layer of ['armies', 'camps', 'arrows']) sceneLayers[layer].clear();
+  armies.clear(); camps.clear(); warArrows.clear();
+  valley = buildValley(play.seed, [...model.regions.values()]);
+  valley.key = valleyKey();
+  rimFlora = buildRimFlora(valley);
+  scene.add(valley.mesh, rimFlora);
+  for (const r of model.regions.values()) buildTile(r);
+  renderer.shadowMap.needsUpdate = true;
+}
+
+// the valley is rebuilt when the seed or the terrain deal changes (a generated world deals terrain per seed)
+function valleyKey() { return play.seed + '|' + [...model.regions.values()].map((r) => r.terrain).join(','); }
+
+function buildTile(r) {
+  const [cx, cz] = regionCentre(r.id);
+  const group = new THREE.Group();
+  group.position.set(cx, groundAt(cx, cz) - 0.5, cz);
+  const terrain = new THREE.Group();
+  buildTerrainDecor(terrain, r);
+  group.add(terrain);
+  const decor = new THREE.Group();
+  group.add(decor);
+  scene.add(group);
+  const flora = buildFlora(valley, r);
+  scene.add(flora.group);
+  const base = new THREE.Color(TERRAIN_COLOUR[r.terrain] ?? 0x777777);
+  tiles.set(r.id, { group, decor, terrain, flora, outline: valley.outlineGeometry(r.id, group.position), key: '', flames: [], baseColor: base, color: base.clone(), tinted: false });
+  syncTile(r, true);
+}
+
+// the lair's cave on its ledge and the glow in the crater above it; the mountain itself is part of the valley mesh
+function buildTerrainDecor(group, r) {
+  if (r.terrain !== 'lair') return;
+  const [cx, cz] = regionCentre(r.id), base = groundAt(cx, cz) - 0.5;
+  const cave = new THREE.Mesh(new THREE.SphereGeometry(0.34, 8, 6), new THREE.MeshBasicMaterial({ color: PALETTE.cave }));
+  cave.position.set(-0.6, 0.85, -0.9);
+  const light = new THREE.PointLight(PALETTE.cave, 2.2, 9);
+  light.position.set(0.2, 1.5, 0.4);
+  const [px, pz] = valley.peak, top = groundAt(px, pz);
+  const glow = new THREE.Mesh(new THREE.CircleGeometry(0.75, 10), new THREE.MeshBasicMaterial({ color: PALETTE.cave }));
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.set(px - cx, top + 0.1 - base, pz - cz);
+  const craterLight = new THREE.PointLight(PALETTE.cave, 1.6, 7);
+  craterLight.position.set(px - cx, top + 1.2 - base, pz - cz);
+  group.add(cave, light, glow, craterLight);
+}
+
+function tileKey(r, m) {
+  const f = m.factions.get(r.owner);
+  return [r.owner, f?.era ?? -1, Math.round(r.wealth_share * 10), Math.round(r.burn * 20), [...r.tags].sort().join(','), r.capital, f?.altar, f?.overlord, f?.hostage_taken, r.terrain, f ? [...f.tags].filter((t) => t === 'cursed' || t === 'taught').join(',') : ''].join('|');
+}
+
+function syncTile(r, instant = false) {
+  const t = tiles.get(r.id);
+  if (!t) return;
+  const m = model;
+  const key = tileKey(r, m);
+  const waste = r.tags.has('wasteland');
+  const target = waste ? new THREE.Color(TERRAIN_COLOUR.wasteland) : t.baseColor.clone();
+  target.lerp(new THREE.Color(PALETTE.char), r.burn * 0.55);
+  if (!t.tinted || !t.color.equals(target)) { t.color.copy(target); t.tinted = true; valley.tintRegion(r.id, r.burn, waste); tintFlora(t.flora, r.burn, waste); }
+  if (key === t.key) return;
+  const ownerChanged = t.key && t.key.split('|')[0] !== r.owner;
+  t.key = key;
+  t.decor.clear();
+  buildDecor(t.decor, r, m, t);
+  if (renderer.shadowMap.enabled) renderer.shadowMap.needsUpdate = true;
+  if (ownerChanged && !instant) flashTile(r.id, r.owner ? factionColor3(r.owner) : new THREE.Color(0xffffff));
+}
+
+function buildDecor(group, r, m, tile) {
+  const owner = m.factions.get(r.owner);
+  if (r.owner) {
+    const ring = outlineMesh(tile, factionColor3(r.owner));
+    ring.userData.ring = true;
+    group.add(ring);
+    buildBanner(group, owner?.overlord || r.owner, owner ? owner.overlord : '');
+    const altar = r.capital && owner?.altar, dwarf = owner?.race === 'dwarf' && !r.lair;
+    const reserved = [[1.5, 0.5, 0.5], ...(altar ? [[-1.0, 1.0, 0.8]] : []), ...(r.tags.has('dug_in') ? [[-1.3, -1.1, 0.8]] : []), ...(dwarf ? [[1.0, -1.2, 0.7]] : [])];
+    if (!r.lair) buildSettlement(group, owner?.era ?? 0, 2 + Math.min(12, Math.round(r.wealth_share * 10)), r.burn, r.id, r.owner, reserved);
+    if (r.capital) group.add(flatTorus(0.38, 0.08, PALETTE.crown, 2.1).translateX(0));
+    if (altar) placeModel(group, 'temple', -1.0, 1.0, { burn: r.burn, accent: factionColor3(r.owner), rot: Math.PI / 4 });
+    if (dwarf) placeModel(group, 'mine', 1.0, -1.2, { burn: r.burn, rot: -Math.PI / 4 });
+  } else if (r.tags.has('elf_withdrawn')) {
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; group.add(box(0.35, 0.1, 0.12, 0x9fb79a, Math.cos(a) * 2.9, 0.56, Math.sin(a) * 2.9).rotateY(-a)); }
+  }
+  if (r.tags.has('warded')) group.add(flatTorus(1.7, 0.07, PALETTE.ward, 1.25));
+  if (r.tags.has('blessed')) group.add(flatTorus(1.7, 0.07, 0xfff0a0, 1.1));
+  if (owner?.tags.has('cursed')) group.add(cone(0.22, 0.6, 0x8a3ad0, -1.6, 1.0, -0.4, 4));
+  if (r.tags.has('dug_in')) placeModel(group, 'gate', -1.3, -1.1, { burn: r.burn, accent: r.owner ? factionColor3(r.owner) : null, rot: Math.atan2(1.3, 1.1) });
+  if (r.tags.has('lake')) { const lake = disc(1.5, PALETTE.lake, 0.95, 0.545); lake.position.set(0.9, 0.545, -0.9); group.add(lake); }
+  if (r.tags.has('lava')) { const lava = disc(1.2, PALETTE.fire, 0.95, 0.545); group.add(lava); }
+}
+
+function buildBanner(group, colourFaction, overlord) {
+  const post = box(0.09, 1.5, 0.09, PALETTE.post, 1.5, 1.25, 0.5);
+  const flag = box(0.6, 0.34, 0.05, 0x000000, 1.85, 1.78, 0.5);
+  flag.material.color.copy(factionColor3(colourFaction));
+  group.add(post, flag);
+  if (overlord) { const pennant = box(0.3, 0.2, 0.05, 0x000000, 1.7, 1.42, 0.5); pennant.material.color.copy(factionColor3(overlord)); group.add(pennant); }
+}
+
+function houseColour(base, burn) { return new THREE.Color(base).lerp(new THREE.Color(PALETTE.char), Math.min(1, burn * 1.1)); }
+
+// settlement models per era (Quaternius Ultimate Fantasy RTS): a town centre, count - 1 houses on a spiral around it
+// facing inwards, a watch tower in eras 1 and 2, a wall ring from era 2, corner towers from era 3, the arcane spire in era 4
+const SETTLEMENT = {
+  centre: ['centre.0', 'centre.1', 'centre.2', 'centre.2', 'centre.2'],
+  houses: [['house.0.a', 'house.0.b'], ['house.1.a', 'house.1.b'], ['house.2.a', 'house.2.b'], ['house.2.b', 'house.3.a'], ['house.3.a', 'house.2.b']],
+  wallRadius: 2.2, wallSegments: 14,
+};
+
+function buildSettlement(group, era, count, burn, regionId, owner, reserved) {
+  const rnd = seededRandom(regionId + ':houses'), e = clamp(era, 0, 4);
+  const look = { burn, accent: owner ? factionColor3(owner) : null };
+  placeModel(group, SETTLEMENT.centre[e], 0, 0, { ...look, rot: Math.round(rnd() * 4) * Math.PI / 2 });
+  const taken = [...reserved];
+  for (let i = 1, placed = 1; placed < count && i < count + 24; i++) {
+    const a = i * 2.39996 + rnd() * 0.4, d = 0.75 + Math.sqrt(i) * 0.36;
+    const x = Math.cos(a) * d, z = Math.sin(a) * d;
+    if (d > 2.0 || taken.some(([tx, tz, r]) => Math.hypot(x - tx, z - tz) < r)) continue;
+    const kinds = SETTLEMENT.houses[e];
+    placeModel(group, kinds[Math.floor(rnd() * kinds.length)], x, z, { ...look, rot: Math.atan2(-x, -z), scale: 0.85 + rnd() * 0.3 });
+    taken.push([x, z, 0.5]);
+    placed++;
+  }
+  if (e === 1 || e === 2) placeModel(group, 'tower.1', -1.55, 0.35, look);
+  if (e >= 2) for (let i = 0; i < SETTLEMENT.wallSegments; i++) {
+    const a = ((i + 0.5) / SETTLEMENT.wallSegments) * Math.PI * 2;
+    placeModel(group, 'wall', Math.cos(a) * SETTLEMENT.wallRadius, Math.sin(a) * SETTLEMENT.wallRadius, { ...look, rot: -a - Math.PI / 2 });
+  }
+  if (e >= 3) for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) placeModel(group, 'tower.3', sx * 1.56, sz * 1.56, look);
+  if (e >= 4) {
+    group.add(cone(0.26, 1.9, houseColour(PALETTE.spire, burn), 0, 2.1, 0, 6));
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), new THREE.MeshBasicMaterial({ color: PALETTE.spireTip }));
+    tip.position.y = 3.1;
+    group.add(tip);
+  }
+}
+
+function flashTile(regionId, color) {
+  const t = tiles.get(regionId);
+  if (!t) return;
+  const ring = outlineMesh(t, color, 1, 0.05);
+  t.group.add(ring);
+  effects.push({ life: 0.9, update(dt, e) { ring.material.opacity = Math.max(0, e.life); ring.position.y = 0.05 + (0.9 - e.life) * 0.5; }, end() { t.group.remove(ring); } });
+}
+
+function syncScene(prev) {
+  for (const r of model.regions.values()) syncTile(r, !prev);
+  syncArmies();
+  syncWarArrows();
+  syncCamps();
+  syncDefences();
+  syncHookPins();
+  syncEffects();
+  syncDragonLook();
+  syncEraTint();
+  labelsDirty = true;
+}
+
+function syncEraTint() {
+  let top = 0;
+  for (const f of model.factions.values()) top = Math.max(top, f.era);
+  const warm = new THREE.Color(0xfff1dc), cool = new THREE.Color(0xd7e2ff);
+  sun.color.copy(warm).lerp(cool, top / 4);
+}
+
+// ===================================================================================================
+// entities: dragon, armies, envoys, remnant camps, flames and other timed effects
+// ===================================================================================================
+const dragon = { group: null, parts: {}, pos: new THREE.Vector3(0, 0, 0.5), heading: 0, height: 6, ground: 0.5, speed: 14, target: null, flap: 0, shadow: null, beam: null, breathing: 0 };
+const armies = new Map();   // key attacker|defender|region -> group
+const envoys = [];          // { group, from, t, offerIndex, faction }
+const camps = new Map();    // race -> group
+const effects = [];         // { life, update(dt, e), end() }
+
+const DRAGON_MODEL = { scale: 0.48, fly: 'Flying-loop', idle: 'Idle-loop' };
+
+function buildDragon() {
+  const g = new THREE.Group();
+  const throat = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), new THREE.MeshBasicMaterial({ color: PALETTE.throat }));
+  throat.position.set(0, 0.6, 2.2);
+  const crest = cone(0.14, 0.5, PALETTE.crest, 0, 0, 0, 4), tipL = cone(0.16, 0.55, PALETTE.wingTip, 0, 0, 0, 4), tipR = tipL.clone();
+  crest.visible = tipL.visible = tipR.visible = false;
+  g.add(throat);
+  scene.add(g);
+  dragon.group = g;
+  dragon.parts = { throat, crest, tipL, tipR, head: null, materials: [] };
+  dragon.shadow = disc(1.2, PALETTE.shadow, 0.35, 0.56);
+  scene.add(dragon.shadow);
+  const beamGeo = new THREE.CylinderGeometry(0.08, 0.5, 1, 6, 1, true);
+  dragon.beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: PALETTE.fire, transparent: true, opacity: 0.8, depthWrite: false }));
+  dragon.beam.visible = false;
+  scene.add(dragon.beam);
+  loadDragonModel();
+}
+
+// the placeholder dragon (assets/gltf/creatures/dragon-placeholder, parsed by loadModels). Its clips play by state,
+// the breath bends the head on top of them, and the throat, crest and wing tips ride on its bones.
+function loadDragonModel() {
+  const gltf = dragonGltf;
+  if (!gltf) return;
+  {
+    const model = gltf.scene, p = dragon.parts;
+    model.scale.setScalar(DRAGON_MODEL.scale);
+    model.traverse((o) => { if (o.isMesh) { o.material = o.material.clone(); o.frustumCulled = false; p.materials.push(o.material); } });
+    dragon.group.add(model);
+    dragon.group.updateMatrixWorld(true);
+    const bone = (name) => model.getObjectByName(name);
+    const pin = (obj, name, at) => {
+      const b = bone(name);
+      if (!b) return;
+      const world = dragon.group.localToWorld(new THREE.Vector3(...at));
+      b.add(obj);
+      obj.position.copy(b.worldToLocal(world));
+      obj.scale.setScalar(dragon.group.scale.x / b.getWorldScale(new THREE.Vector3()).x);
+    };
+    p.head = bone('Head');
+    pin(p.throat, 'Jaw', DRAGON_PINS.throat);
+    pin(p.crest, 'Head', DRAGON_PINS.crest);
+    pin(p.tipL, 'LeftWingFingerOutBottom', DRAGON_PINS.tipL);
+    pin(p.tipR, 'RightWingFingerOutBottom', DRAGON_PINS.tipR);
+    buildLookParts(model);
+    dragon.mixer = new THREE.AnimationMixer(model);
+    dragon.actions = Object.fromEntries(gltf.animations.map((c) => [c.name, dragon.mixer.clipAction(c)]));
+    dragon.clip = '';
+    syncDragonLook();
+  }
+}
+
+// points in the dragon group's own frame (rest pose, scale 1), measured once from the model
+const DRAGON_PINS = { throat: [0, 0.88, 1.98], crest: [0, 1.22, 1.45], tipL: [2.75, 1.05, 0.45], tipR: [-2.75, 1.05, 0.45] };
+
+function animateDragon(dt, state) {
+  if (!dragon.mixer) return;
+  const name = state === 'idle' ? DRAGON_MODEL.idle : DRAGON_MODEL.fly;
+  const next = dragon.actions[name];
+  if (next && dragon.clip !== name) {
+    next.reset().play();
+    if (dragon.clip) dragon.actions[dragon.clip].crossFadeTo(next, 0.35, false);
+    dragon.clip = name;
+  }
+  if (next) next.timeScale = state === 'cruise' ? 1.25 : state === 'hover' ? 0.75 : 1;
+  dragon.mixer.update(dt);
+  applyLookPose();
+  if (dragon.breathing > 0 && dragon.parts.head) dragon.parts.head.rotation.x += 0.55;
+}
+
+// size grows slowly (gold digests at 0.001 per unit), so the model scale uses a square root to show early growth
+function dragonScale(d) { return clamp(1 + Math.sqrt(Math.max(0, d.size)) * 1.2, 1, 2.5) * (1 - clamp(d.hunger - 0.5, 0, 0.4) * 0.5); }
+
+function syncDragonLook() {
+  const d = model.dragon;
+  dragon.group.scale.setScalar(dragonScale(d) * lookScale());
+  const rage = d.tags.includes('rage');
+  dragon.parts.tipL.visible = dragon.parts.tipR.visible = d.magic >= 0.5;
+  dragon.parts.crest.visible = d.knowledge >= 0.5;
+  syncLook(rage);
+  $('hud').classList.toggle('rage', rage);
+}
+
+function placeDragonAtLair() {
+  const [x, z] = regionCentre('lair');
+  dragon.pos.set(x + 0.3, dragon.height, z + 0.5);
+  dragon.heading = Math.PI / 4;
+  dragon.ground = groundAt(dragon.pos.x, dragon.pos.z);
+  dragon.target = null;
+  cam.target.set(x, 0, z);
+}
+
+function dragonRegion() { return valley.regionAt(dragon.pos.x, dragon.pos.z); }
+
+function armyKey(a) { return a.attacker + '|' + a.defender + '|' + a.region; }
+
+function buildArmy(a, m) {
+  const g = new THREE.Group();
+  const rnd = seededRandom(armyKey(a));
+  const n = 4 + Math.floor(rnd() * 6);
+  const col = factionColor3(a.attacker);
+  for (let i = 0; i < n; i++) g.add(box(0.26, 0.34, 0.26, col.getHex(), (rnd() - 0.5) * 1.3, 0.72, (rnd() - 0.5) * 1.1));
+  const [x, z] = armyPosition(a, m);
+  g.position.set(x, groundAt(x, z) - 0.5, z);
+  drape(g);
+  g.userData.army = a;
+  return g;
+}
+
+function syncArmies() {
+  const seen = new Set();
+  for (const a of model.armies) {
+    const key = armyKey(a);
+    seen.add(key);
+    if (!armies.has(key)) { const g = buildArmy(a, model); armies.set(key, g); sceneLayers.armies.add(g); puff(g.position, factionColor3(a.attacker)); }
+  }
+  for (const [key, g] of armies) if (!seen.has(key)) { sceneLayers.armies.remove(g); armies.delete(key); }
+}
+
+// war arrows: one flat arrow per (attacker, defender) pair from the attacker's nearest region to the defender's border region
+const warArrows = new Map();   // key attacker|defender -> group
+
+function arrowKey(a, b) { return a + '|' + b; }
+
+function buildArrow(fromId, toId, color) {
+  const [fx, fz] = regionCentre(fromId), [tx, tz] = regionCentre(toId);
+  const dx = tx - fx, dz = tz - fz, len = Math.hypot(dx, dz);
+  if (len < 0.1) return null;
+  const g = new THREE.Group();
+  const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.08, len * 0.55), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, depthWrite: false }));
+  shaft.position.z = -len * 0.05;
+  const head = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.9, 4), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, depthWrite: false }));
+  head.rotation.x = Math.PI / 2; head.position.z = len * 0.26;
+  g.add(shaft, head);
+  let top = 0;
+  for (let i = 0; i <= 8; i++) top = Math.max(top, groundAt(fx + dx * i / 8, fz + dz * i / 8));
+  g.userData.baseY = top + 0.9;
+  g.position.set((fx + tx) / 2, g.userData.baseY, (fz + tz) / 2);
+  g.rotation.y = Math.atan2(dx, dz);
+  g.userData.pulse = Math.random() * 6;
+  return g;
+}
+
+function warPairs(m) {
+  const pairs = new Map();
+  for (const a of m.armies) {
+    const key = arrowKey(a.attacker, a.defender);
+    if (pairs.has(key)) continue;
+    const att = m.factions.get(a.attacker);
+    const def = m.regions.get(a.region);
+    let from = null;
+    for (const n of def?.neighbours ?? []) if (att?.regions.includes(n) || m.regions.get(n)?.owner === a.attacker) { from = n; break; }
+    if (!from) from = att?.capital || att?.regions?.[0];
+    if (from) pairs.set(key, { from, to: a.region, attacker: a.attacker, defender: a.defender });
+  }
+  return pairs;
+}
+
+function syncWarArrows() {
+  const wanted = warPairs(model);
+  for (const [key, g] of warArrows) if (!wanted.has(key)) { sceneLayers.arrows.remove(g); warArrows.delete(key); }
+  for (const [key, p] of wanted) {
+    if (warArrows.has(key)) continue;
+    const g = buildArrow(p.from, p.to, 0xff4040);
+    if (!g) continue;
+    warArrows.set(key, g);
+    sceneLayers.arrows.add(g);
+  }
+}
+
+function addWarArrow(attacker, defender) {
+  const att = model.factions.get(attacker), def = model.factions.get(defender);
+  if (!att || !def) return;
+  const key = arrowKey(attacker, defender);
+  if (warArrows.has(key)) return;
+  let from = null, to = null;
+  for (const rid of def.regions) { const r = model.regions.get(rid); const n = r?.neighbours.find((x) => att.regions.includes(x)); if (n) { from = n; to = rid; break; } }
+  if (!from) { from = att.capital || att.regions[0]; to = def.capital || def.regions[0]; }
+  if (!from || !to) return;
+  const g = buildArrow(from, to, 0xff4040);
+  if (!g) return;
+  warArrows.set(key, g);
+  sceneLayers.arrows.add(g);
+}
+
+function removeWarArrows(a, b) {
+  for (const [key, g] of warArrows) {
+    const [att, def] = key.split('|');
+    const hit = b === null ? (att === a || def === a) : ((att === a && def === b) || (att === b && def === a));
+    if (hit) { sceneLayers.arrows.remove(g); warArrows.delete(key); }
+  }
+}
+
+function updateArrows(dt) {
+  const t = performance.now() / 1000;
+  for (const g of warArrows.values()) { g.position.y = g.userData.baseY + Math.sin(t * 3 + g.userData.pulse) * 0.12; g.children[1].scale.setScalar(1 + Math.sin(t * 6 + g.userData.pulse) * 0.15); }
+}
+
+// timed region overlays: plague (sick green haze), collapse (shards flying apart), era advance (rising ring)
+function plagueEffect(regionId, seconds = 2.5) {
+  const t = tiles.get(regionId);
+  if (!t) return;
+  const haze = disc(2.8, 0x3a5a2a, 0.55, 0.62);
+  t.group.add(haze);
+  const motes = [];
+  for (let i = 0; i < 5; i++) { const m = box(0.14, 0.14, 0.14, 0x7fbf5a, (Math.random() - 0.5) * 3, 0.9, (Math.random() - 0.5) * 3); t.group.add(m); motes.push(m); }
+  effects.push({ life: seconds, update(dt, e) { haze.material.opacity = 0.55 * Math.min(1, e.life); motes.forEach((m, i) => { m.position.y += dt * 0.5; m.position.x += Math.sin(performance.now() / 300 + i) * dt * 0.4; }); }, end() { t.group.remove(haze); motes.forEach((m) => t.group.remove(m)); } });
+}
+
+function collapseEffect(factionId, seconds = 1.6) {
+  const f = model.factions.get(factionId);
+  if (!f) return;
+  const col = factionColor3(factionId);
+  for (const rid of f.regions) {
+    const t = tiles.get(rid);
+    if (!t) continue;
+    const shards = [];
+    for (let i = 0; i < 10; i++) { const s = box(0.3, 0.12, 0.3, col.getHex(), 0, 0.8, 0); s.userData.v = [(Math.random() - 0.5) * 6, 2 + Math.random() * 3, (Math.random() - 0.5) * 6]; t.group.add(s); shards.push(s); }
+    const ring = outlineMesh(t, 0xffffff, 1, 0.05);
+    t.group.add(ring);
+    effects.push({ life: seconds, update(dt, e) { for (const s of shards) { const v = s.userData.v; s.position.x += v[0] * dt; s.position.y += v[1] * dt; s.position.z += v[2] * dt; v[1] -= 9 * dt; s.rotation.x += dt * 5; } ring.material.opacity = Math.max(0, e.life / seconds); ring.position.y = 0.05 + (seconds - e.life) * 0.8; }, end() { shards.forEach((s) => t.group.remove(s)); t.group.remove(ring); } });
+  }
+}
+
+function eraEffect(regionId, era, seconds = 1.8) {
+  const t = tiles.get(regionId);
+  if (!t) return;
+  const ring = flatTorus(1.2, 0.08, 0xffe9a0, 0.7);
+  t.group.add(ring);
+  effects.push({ life: seconds, update(dt, e) { const k = 1 - e.life / seconds; ring.position.y = 0.7 + k * 3; ring.scale.setScalar(1 + k * 0.8); ring.material.opacity = 1 - k; ring.material.transparent = true; }, end() { t.group.remove(ring); } });
+  floatText(...regionCentre(regionId), `era ${era}: ${ERA_NAMES[era] ?? era}`, 'info');
+}
+
+function settleEffect(regionId, factionId) {
+  const [x, z] = regionCentre(regionId);
+  puff(new THREE.Vector3(x, 0, z), factionColor3(factionId));
+  flashTile(regionId, factionColor3(factionId));
+}
+
+// region labels: a DOM label per tile, projected every frame, showing owner swatch, name, terrain and burn / wasteland
+let labelsDirty = true;
+const labelEls = new Map();
+
+function ensureLabels() {
+  for (const r of model.regions.values()) {
+    if (labelEls.has(r.id)) continue;
+    const el = document.createElement('div');
+    el.className = 'label';
+    el.dataset.region = r.id;
+    $('labels').appendChild(el);
+    labelEls.set(r.id, el);
+  }
+}
+
+function labelHtml(r) {
+  const owner = r.owner ? model.factions.get(r.owner) : null;
+  const sw = r.owner ? `<i style="background:${factionCss(r.owner)}"></i>` : '<i style="background:#555a66"></i>';
+  const name = r.lair ? 'your lair' : (owner ? escapeHtml(factionTitle(owner.id)) : 'unclaimed');
+  const badges = [];
+  if (r.tags.has('wasteland')) badges.push('wasteland');
+  else if (r.burn > 0.3) badges.push('burning ' + Math.round(r.burn * 100) + '%');
+  else if (r.burn > 0.05) badges.push('char ' + Math.round(r.burn * 100) + '%');
+  if (r.tags.has('warded')) badges.push('warded');
+  if (r.tags.has('blessed')) badges.push('blessed');
+  if (owner?.tags.has('cursed')) badges.push('cursed');
+  if (owner?.tags.has('taught')) badges.push('taught');
+  if (r.tags.has('lake')) badges.push('lake');
+  if (r.capital) badges.push('capital');
+  if (owner?.overlord) badges.push('vassal');
+  const where = r.lair ? escapeHtml(regionName(r.id) || 'the mountain') : `${escapeHtml(regionTitle(r.id))} · ${r.terrain}`;
+  return `<div class="nm">${sw}${name}</div><div class="tr">${where}</div>${badges.length ? `<div class="bd">${badges.join(' · ')}</div>` : ''}${defenceLabelHtml(r.id)}${hookLabelHtml(r.id)}`;
+}
+
+function updateLabels() {
+  ensureLabels();
+  const hidden = deathOpen();
+  for (const [id, el] of labelEls) {
+    const r = model.regions.get(id);
+    if (!r || hidden) { el.style.display = 'none'; continue; }
+    if (labelsDirty) el.innerHTML = labelHtml(r);
+    el.classList.toggle('sel', id === selectedRegion);
+    const [x, z] = regionCentre(id);
+    const p = new THREE.Vector3(x, groundAt(x, z) + 0.6, z - 2.2).project(camera);
+    el.style.display = '';
+    el.style.left = ((p.x + 1) / 2 * innerWidth) + 'px';
+    el.style.top = ((1 - p.y) / 2 * innerHeight) + 'px';
+  }
+  labelsDirty = false;
+}
+
+function syncCamps() {
+  const wanted = new Map(remnantCamps(model).map((c) => [c.race, c]));
+  for (const [race, g] of camps) if (!wanted.has(race) || g.userData.region !== wanted.get(race).region) { sceneLayers.camps.remove(g); camps.delete(race); }
+  for (const [race, c] of wanted) {
+    if (camps.has(race)) continue;
+    const g = new THREE.Group();
+    const col = new THREE.Color(PALETTE.tent).lerp(factionColor3(race + '-remnant'), 0.3).getHex();
+    g.add(cone(0.42, 0.55, col, -1.5, 0.78, -1.6, 4), cone(0.36, 0.48, col, -0.9, 0.75, -2.0, 4));
+    const [x, z] = regionCentre(c.region);
+    g.position.set(x, groundAt(x, z) - 0.5, z);
+    drape(g);
+    g.userData = { region: c.region, race, camp: c };
+    camps.set(race, g);
+    sceneLayers.camps.add(g);
+  }
+}
+
+function spawnEnvoys() {
+  for (const e of envoys) sceneLayers.envoys.remove(e.group);
+  envoys.length = 0;
+  (model.offers ?? []).forEach((offer, i) => {
+    const faction = offer.oath.parties[1];
+    const f = model.factions.get(faction);
+    const from = regionCentre(f?.capital ?? f?.regions?.[0] ?? 'lair');
+    const g = new THREE.Group();
+    const col = factionColor3(faction).getHex();
+    g.add(cylinder(0.14, 0.5, col, 0, 0.8, 0, 6));
+    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 6), material(0xf0d9b5)); headMesh.position.y = 1.15; g.add(headMesh);
+    g.position.set(from[0], groundAt(from[0], from[1]) - 0.5, from[1]);
+    sceneLayers.envoys.add(g);
+    envoys.push({ group: g, from, t: 0, index: i, faction, duration: 9 + (i % 3) });
+  });
+}
+
+function updateEnvoys(dt) {
+  const [lx, lz] = regionCentre('lair');
+  envoys.forEach((e, i) => {
+    e.t = Math.min(1, e.t + dt / e.duration);
+    const a = (i / Math.max(1, envoys.length)) * Math.PI * 2;
+    const tx = lx + 1.6 + Math.cos(a) * 0.9, tz = lz + 2.3 + Math.sin(a) * 0.9;
+    const x = e.from[0] + (tx - e.from[0]) * e.t, z = e.from[1] + (tz - e.from[1]) * e.t;
+    e.group.position.set(x, groundAt(x, z) - 0.5 + Math.sin(e.t * 40) * 0.04 * (e.t < 1), z);
+  });
+}
+
+function spawnFlames(regionId, count, life = 6) {
+  const t = tiles.get(regionId);
+  if (!t) return;
+  const rnd = seededRandom(regionId + ':' + Math.random());
+  for (let i = 0; i < count; i++) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: fireTexture(), color: fireColour(), transparent: true, depthWrite: false }));
+    const a = rnd() * Math.PI * 2, d = rnd() * (2.2 + 3.5 * (model.regions.get(regionId)?.burn ?? 0));
+    const lx = Math.cos(a) * d, lz = Math.sin(a) * d;
+    s.position.set(lx, groundAt(t.group.position.x + lx, t.group.position.z + lz) - t.group.position.y + 0.4 + rnd() * 0.3, lz);
+    s.scale.setScalar(0.6 + rnd() * 0.5);
+    t.group.add(s);
+    const phase = rnd() * 6;
+    effects.push({ life, update(dt, e) { s.scale.setScalar((0.5 + 0.35 * Math.sin(performance.now() / 90 + phase)) * Math.min(1, e.life)); s.material.opacity = Math.min(1, e.life); }, end() { t.group.remove(s); } });
+  }
+}
+
+function keepBurning() {
+  for (const r of model.regions.values()) {
+    const t = tiles.get(r.id);
+    if (r.burn > 0.3 && t && !t.burning) { t.burning = true; spawnFlames(r.id, 8 + Math.round(r.burn * 20), 4); setTimeout(() => { if (t) t.burning = false; }, 3500); }
+  }
+}
+
+function puff(position, color) {
+  const g = new THREE.Group();
+  for (let i = 0; i < 6; i++) { const b = box(0.25, 0.25, 0.25, color.getHex(), (Math.random() - 0.5) * 0.8, 0.9, (Math.random() - 0.5) * 0.8); g.add(b); }
+  g.position.copy(position);
+  g.position.y = Math.max(position.y, groundAt(position.x, position.z) - 0.5);
+  sceneLayers.effects.add(g);
+  effects.push({ life: 0.8, update(dt, e) { g.children.forEach((b, i) => { b.position.y += dt * 2; b.position.x += dt * Math.cos(i) * 1.5; b.position.z += dt * Math.sin(i) * 1.5; b.scale.setScalar(Math.max(0.01, e.life)); }); }, end() { sceneLayers.effects.remove(g); } });
+}
+
+function beam(regionId, seconds = 0.9) {
+  const [x, z] = regionCentre(regionId);
+  const target = new THREE.Vector3(x, groundAt(x, z) + 0.1, z);
+  dragon.breathing = seconds;
+  effects.push({ life: seconds, update() {
+    const from = dragon.parts.throat.getWorldPosition(new THREE.Vector3());
+    const mid = from.clone().add(target).multiplyScalar(0.5);
+    const len = from.distanceTo(target);
+    dragon.beam.visible = true;
+    dragon.beam.position.copy(mid);
+    dragon.beam.scale.set(beamWidth(), len, beamWidth());
+    dragon.beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), from.clone().sub(target).normalize());
+  }, end() { dragon.beam.visible = false; } });
+}
+
+function updateEffects(dt) {
+  for (let i = effects.length - 1; i >= 0; i--) {
+    const e = effects[i];
+    e.life -= dt;
+    if (e.life <= 0) { e.end(); effects.splice(i, 1); } else e.update(dt, e);
+  }
+}
+
+// ===================================================================================================
+// input and dragon movement: WASD/arrows, click-to-fly, wheel zoom, right-drag pan, hover highlight, hold B to burn
+// ===================================================================================================
+const keys = new Set();
+let hoverRegion = null, selectedRegion = null, burnHold = null;
+const pointer = { x: 0, y: 0, down: false, button: 0, lastX: 0, lastY: 0, dragged: false, moved: false };
+let hoverRing = null;
+
+function wireInput() {
+  const canvas = $('view');
+  window.addEventListener('keydown', (e) => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') { if (e.key === 'Escape') e.target.blur(); else return; }
+    if (tag === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) { e.target.blur(); if (e.key === ' ') e.preventDefault(); }
+    if (montage.active) return montageKey(e);
+    if (deathOpen()) return;
+    if (wakeOpen()) { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); closeWake(); } return; }
+    if (growthUi.open) return growthKey(e);
+    if (!$('lair').classList.contains('hidden')) { if (e.key === 'Escape') takeOff(); return; }
+    if (e.key === 'Escape') { closePanels(); return; }
+    keys.add(e.key.toLowerCase());
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key.toLowerCase() === 'l') landAtLair();
+    if (e.key.toLowerCase() === 'c') toggleChronicle();
+    if (e.key.toLowerCase() === 'b' && !burnHold) startBurnHold();
+  });
+  window.addEventListener('blur', () => { keys.clear(); releaseBurnHold(); });
+  window.addEventListener('keyup', (e) => { keys.delete(e.key.toLowerCase()); if (e.key.toLowerCase() === 'b') releaseBurnHold(); });
+  canvas.addEventListener('pointermove', (e) => {
+    pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = -(e.clientY / innerHeight) * 2 + 1; pointer.moved = true;
+    if (pointer.down && pointer.button === 2) {
+      const dx = e.clientX - pointer.lastX, dy = e.clientY - pointer.lastY;
+      const k = 0.045 / cam.zoom;
+      const right = new THREE.Vector3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)), fwd = new THREE.Vector3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw));
+      cam.target.addScaledVector(right, -dx * k).addScaledVector(fwd, dy * k);
+      pointer.dragged = true; cam.follow = false;
+    }
+    pointer.lastX = e.clientX; pointer.lastY = e.clientY;
+    $('tip').style.left = e.clientX + 'px'; $('tip').style.top = e.clientY + 'px';
+  });
+  canvas.addEventListener('pointerdown', (e) => { pointer.down = true; pointer.button = e.button; pointer.dragged = false; pointer.lastX = e.clientX; pointer.lastY = e.clientY; });
+  canvas.addEventListener('pointerup', (e) => {
+    pointer.down = false;
+    if (e.button === 0 && !pointer.dragged && !montage.active) {
+      pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+      const hit = pickRegion();
+      if (hit) { flyTo(hit); if (hit === 'lair' && dragonRegion() === 'lair') landAtLair(); }
+    }
+  });
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  canvas.addEventListener('wheel', (e) => { cam.zoom = clamp(cam.zoom * (e.deltaY > 0 ? 0.9 : 1.1), 0.55, 3); resize(); }, { passive: true });
+  $('btn-land').addEventListener('click', landAtLair);
+  $('btn-last').addEventListener('click', () => openWake(play.lastWake));
+  $('btn-chron').addEventListener('click', toggleChronicle);
+  $('btn-system').addEventListener('click', () => { $('system').classList.toggle('hidden'); $('seed').value = play.seed; $('btn-legends').classList.toggle('hidden', !hasLegends()); });
+  $('system-close').addEventListener('click', () => $('system').classList.add('hidden'));
+  $('legend-hide').addEventListener('click', () => { $('legend').classList.add('hidden'); $('legend-toggle').classList.remove('hidden'); });
+  $('legend-toggle').addEventListener('click', () => { $('legend').classList.remove('hidden'); $('legend-toggle').classList.add('hidden'); });
+}
+
+// Esc closes whatever is open, in order: wake summary, game sheet, chronicle drawer, hover tip
+function closePanels() {
+  if (wakeOpen()) return closeWake();
+  if (!$('system').classList.contains('hidden')) return $('system').classList.add('hidden');
+  if (!$('chron').classList.contains('hidden')) return $('chron').classList.add('hidden');
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+}
+
+function pickRegion() {
+  raycaster.setFromCamera(new THREE.Vector2(pointer.x, pointer.y), camera);
+  const hit = valley.pick(raycaster.ray.origin, raycaster.ray.direction);
+  return hit ? valley.regionAt(hit.x, hit.z) : null;
+}
+
+function updateHover() {
+  const id = montage.active || !pointer.moved ? null : pickRegion();
+  if (id === hoverRegion) return;
+  hoverRegion = id;
+  if (hoverRing) { hoverRing.parent?.remove(hoverRing); hoverRing = null; }
+  if (id) {
+    const t = tiles.get(id);
+    hoverRing = outlineMesh(t, 0xffffff, 0.55, 0.03);
+    t.group.add(hoverRing);
+    const r = model.regions.get(id);
+    $('tip').textContent = `${regionTitle(id)} · ${r.terrain}${r.owner ? ' · ' + factionTitle(r.owner) : ' · unclaimed'}${r.burn > 0.05 ? ' · burn ' + fmt(r.burn) : ''}${actWound(id) > 0 ? ' · ' + numText(actWound(id)) + ' wounds per act' : ''}`;
+    $('tip').classList.remove('hidden');
+  } else $('tip').classList.add('hidden');
+}
+
+function flyTo(regionId) {
+  cam.follow = true;
+  const [x, z] = regionCentre(regionId);
+  dragon.target = new THREE.Vector3(x + 0.4, dragon.height, z + 0.6);
+}
+
+function updateDragon(dt) {
+  let vx = 0, vz = 0;
+  if (keys.has('w') || keys.has('arrowup')) vz -= 1;
+  if (keys.has('s') || keys.has('arrowdown')) vz += 1;
+  if (keys.has('a') || keys.has('arrowleft')) vx -= 1;
+  if (keys.has('d') || keys.has('arrowright')) vx += 1;
+  if (vx || vz) {
+    dragon.target = null; cam.follow = true;
+    const right = new THREE.Vector3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)), fwd = new THREE.Vector3(-Math.sin(cam.yaw), 0, -Math.cos(cam.yaw));
+    const move = right.multiplyScalar(vx).add(fwd.multiplyScalar(-vz)).normalize().multiplyScalar(dragon.speed * dt);
+    dragon.pos.add(move);
+    dragon.heading = Math.atan2(move.x, move.z);
+  } else if (dragon.target) {
+    const to = dragon.target.clone().sub(dragon.pos); to.y = 0;
+    const dist = to.length();
+    if (dist < 0.15) dragon.target = null;
+    else { const step = Math.min(dist, dragon.speed * dt); dragon.pos.addScaledVector(to.normalize(), step); dragon.heading = Math.atan2(to.x, to.z); }
+  }
+  dragon.pos.x = clamp(dragon.pos.x, -24, 24); dragon.pos.z = clamp(dragon.pos.z, -22, 22);
+  dragon.flap += dt * (vx || vz || dragon.target ? 9 : 4);
+  const bob = Math.sin(dragon.flap * 0.5) * 0.15;
+  const ahead = groundAt(dragon.pos.x + Math.sin(dragon.heading) * 1.5, dragon.pos.z + Math.cos(dragon.heading) * 1.5);
+  dragon.ground += (Math.max(groundAt(dragon.pos.x, dragon.pos.z), ahead) - dragon.ground) * Math.min(1, dt * 3);
+  dragon.group.position.set(dragon.pos.x, dragon.ground + dragon.height + bob, dragon.pos.z);
+  dragon.group.rotation.y = dragon.heading;
+  animateDragon(dt, vx || vz || dragon.target ? 'cruise' : 'hover');
+  dragon.breathing = Math.max(0, dragon.breathing - dt);
+  dragon.parts.throat.material.color.setHex(dragon.breathing > 0 || burnHold ? (lookOf().fire ? fireColour() : 0xffe070) : PALETTE.throat);
+  dragon.shadow.position.set(dragon.pos.x, groundAt(dragon.pos.x, dragon.pos.z) + 0.08, dragon.pos.z);
+  dragon.shadow.scale.setScalar(dragon.group.scale.x * 1.2);
+  // the camera follows the dragon softly unless the player panned
+  if (cam.follow && !pointer.down) cam.target.lerp(new THREE.Vector3(dragon.pos.x, 0, dragon.pos.z), Math.min(1, dt * 1.5));
+  const here = dragonRegion();
+  if (here !== selectedRegion) { selectedRegion = here; renderActions(); }
+  if (play.landOnArrival && here === 'lair' && !dragon.target) landAtLair();
+}
+
+function startBurnHold() {
+  const here = dragonRegion();
+  const r = here && model.regions.get(here);
+  if (!r || !r.owner) return;
+  burnHold = { region: here, start: performance.now(), ring: null };
+  const t = tiles.get(here);
+  burnHold.ring = flatTorus(0.4, 0.12, PALETTE.fire, 1.3);
+  t.group.add(burnHold.ring);
+}
+
+function burnHoldMagnitude() { return burnHold ? clamp(0.1 + (performance.now() - burnHold.start) / 2500 * 0.7, 0.1, 0.8) : 0; }
+
+function updateBurnHold() {
+  if (!burnHold) return;
+  const m = burnHoldMagnitude();
+  burnHold.ring.scale.setScalar(1 + m * 5);
+  const el = $('burn-mag'); if (el) el.textContent = `${fmt(m, 2)} · ${burnStamina(m)} stamina`;
+}
+
+function releaseBurnHold() {
+  if (!burnHold) return;
+  const m = burnHoldMagnitude();
+  const region = burnHold.region;
+  tiles.get(region)?.group.remove(burnHold.ring);
+  burnHold = null;
+  act('burn', { region, magnitude: m });
+}
+
+// ===================================================================================================
+// actions panel and act emission: availability per hovered region, costs in stamina, acts through apply_acts
+// ===================================================================================================
+function burnCost(m) { return Math.max(COST.burn_per_quarter, Math.round(m / 0.25 * COST.burn_per_quarter)); }
+
+function lootCategories(f) {
+  const loot = new Set(['gold', 'food']);
+  const race = f.race;
+  if (f.era >= 2 || race === 'elf') loot.add('books');
+  if (f.era >= 3 || race === 'dwarf') loot.add('artifacts');
+  if (f.era >= 2) loot.add('art');
+  return [...loot];
+}
+
+function heldLineageRace() { return (model.dragon.lineages ?? []).map((l) => model.factions.get(l)?.race ?? l); }
+
+// hostages are recorded per faction id in dragon.lineages; a successor of that house counts as the same line
+function heldLineageOf(f) {
+  if (!f) return '';
+  for (const l of model.dragon.lineages ?? []) if (l === f.id || f.tags.has('successor_of:' + l) || (model.factions.get(l)?.race === f.race && !model.factions.has(l))) return l;
+  return '';
+}
+
+function spellGateValue(s, d) { return s.gate === 'knowledge_or_magic' ? Math.max(d.knowledge, d.magic) : d[s.gate] ?? 0; }
+
+// why a spell cannot be cast here right now, or '' when it can; mirrors spells.cpp so the panel never lies
+function spellWhy(s, r, owner, d) {
+  if (!s.enabled) return 'not in this build';
+  const v = spellGateValue(s, d);
+  if (v < s.gate_min) return `${axisName(s.gate)} ${fmt(v)} < ${s.gate_min}`;
+  if (s.id === 'incite') {
+    if (!owner || owner.race !== 'orc') return 'no orc horde here';
+    const victims = inciteVictims(r, owner);
+    if (!victims.length) return 'no neighbour left to incite against';
+    return '';
+  }
+  if (s.id === 'raise_undead') {
+    if (r.owner) return 'the site must be ownerless';
+    if (r.lair) return 'not the lair';
+    if (!(r.burn >= 0.5 || r.tags.has('wasteland') || r.terrain === 'scar')) return 'site must be burned ≥ 0.5, wasteland or scar';
+    return '';
+  }
+  if (s.target === 'faction' && !owner) return 'no faction here';
+  if (s.id === 'ward' && r.tags.has('warded')) return 'already warded';
+  if (s.target === 'region' && r.lair) return 'not the lair';
+  return '';
+}
+
+function inciteVictims(r, orc) {
+  return [...new Set(r.neighbours.map((n) => model.regions.get(n)?.owner).filter((o) => o && o !== orc.id && !orc.at_war_with.includes(o)))];
+}
+
+// each entry: { id, name, desc, cost, costText, ok, why, controls }
+function actionsFor(regionId) {
+  const r = model.regions.get(regionId);
+  if (!r) return [];
+  const owner = r.owner ? model.factions.get(r.owner) : null;
+  const d = model.dragon;
+  const armiesHere = model.armies.filter((a) => a.region === regionId);
+  const cat = world.catalogue ?? {};
+  const list = [];
+  const need = (cost) => play.stamina >= cost ? '' : `needs ${cost} stamina (${play.stamina} left)`;
+  const add = (a) => {
+    if (!a.why && a.cost) a.why = need(a.cost);
+    a.ok = !a.why;
+    const verb = a.id === 'hostage' ? 'take_hostage' : a.id;
+    a.woundText = a.ok ? woundCostText(verb, regionId) : '';
+    a.lethal = a.ok && isLethal(woundCost(verb, regionId));
+    list.push(a);
+  };
+  const noOne = r.lair ? 'your own lair' : 'nobody lives here';
+  const ward = wardBurnMult(regionId) < 1 ? ` · warded: your burns ×${wardBurnMult(regionId)}` : '';
+
+  add({ id: 'burn', name: 'Burn', cost: burnStamina(0.25), desc: owner ? `hold B for 0.1 to 0.8${burnNote()}${ward} <span id="burn-mag"></span>` : '', why: owner ? '' : `nothing here to burn (${noOne})`,
+    controls: owner ? `<button data-run="burn" data-m="0.25">0.25</button><button data-run="burn" data-m="0.5">0.5</button>` : '' });
+  const cats = owner ? lootCategories(owner) : [];
+  if (owner && r.capital && !owner.hostage_taken) cats.push('royals');
+  add({ id: 'take', name: 'Take', cost: COST.take, desc: owner ? `loot a share of ${factionTitle(owner.id)}'s wealth` : '', why: owner ? '' : `no settlement here (${noOne})`,
+    controls: owner ? `<select id="take-cat">${cats.map((c) => `<option>${c}</option>`).join('')}</select><input id="take-m" type="range" min="0.05" max="0.6" step="0.05" value="0.2" title="share of wealth"><button data-run="take">Take</button>` : '' });
+  add({ id: 'kill', name: 'Kill army', cost: killStamina(), desc: armiesHere.length ? `cull the troops here (feeds you)${effect('kill_mult') !== 1 ? ` · ×${fmt(effect('kill_mult'), 1)} harder` : ''}` : '', why: armiesHere.length ? '' : (model.armies.length ? 'no army here (armies stand at war borders)' : 'no army here (nobody is at war)'),
+    controls: armiesHere.length ? `<select id="kill-who">${armiesHere.map((a) => `<option value="${a.attacker}">${escapeHtml(factionTitle(a.attacker))}</option>`).join('')}</select><button data-run="kill">Kill</button>` : '' });
+  const defendable = owner ? armiesHere.filter((a) => a.defender === owner.id && owner.at_war_with.includes(a.attacker)) : [];
+  add({ id: 'defend', name: 'Defend', cost: COST.defend, desc: defendable.length ? `drive off the attacker` : '', why: defendable.length ? '' : !owner ? noOne : owner.at_war_with.length ? `${factionTitle(owner.id)} is at war but no attacker stands here` : `${factionTitle(owner.id)} is not at war`,
+    controls: defendable.length ? `<select id="defend-who">${defendable.map((a) => `<option value="${a.attacker}">${escapeHtml(factionTitle(a.attacker))}</option>`).join('')}</select><button data-run="defend">Defend</button>` : '' });
+  const crush = crushAction(r, owner);
+  if (crush) add(crush);
+  add({ id: 'roar', name: 'Roar', cost: COST.roar, desc: owner ? `show yourself to ${factionTitle(owner.id)} (fear +)` : '', why: owner ? '' : noOne, controls: owner ? `<button data-run="roar">Roar</button>` : '' });
+  add({ id: 'hostage', name: 'Hostage', cost: COST.hostage, desc: owner ? `take an heir of ${factionTitle(owner.id)}` : '', why: !owner ? `no court here (${noOne})` : !r.capital ? `only at a capital (${owner.capital ? regionTitle(owner.capital) : '?'})` : owner.hostage_taken ? 'already holding their heir' : '',
+    controls: `<button data-run="hostage">Take hostage</button>` });
+  const lineage = owner && r.capital ? heldLineageOf(owner) : '';
+  add({ id: 'release', name: 'Release', cost: COST.release, desc: lineage ? `return the heir of ${factionTitle(lineage)}` : '', why: lineage ? '' : !owner ? noOne : !r.capital ? 'only at a capital' : (d.lineages?.length ? `no hostage of this house (holding ${d.lineages.map(factionTitle).join(', ')})` : 'no hostage held'), controls: `<button data-run="release">Release</button>` });
+  add({ id: 'give', name: 'Give', cost: COST.give, desc: owner ? `gold from the hoard (${fmt(d.hoard.gold, 1)}) for faith` : '', why: !owner ? `nobody to give to (${noOne})` : d.hoard.gold < 0.5 ? `the hoard has no gold (${fmt(d.hoard.gold, 2)})` : '',
+    controls: owner ? `<input id="give-amt" type="range" min="0.5" max="${Math.max(1, d.hoard.gold).toFixed(1)}" step="0.5" value="${Math.min(5, Math.max(0.5, d.hoard.gold)).toFixed(1)}"><button data-run="give">Give</button>` : '' });
+  const altar = owner && r.capital && owner.altar;
+  add({ id: 'altar', name: 'Altar', cost: COST.accept_offering, desc: altar ? `${factionTitle(owner.id)} keeps an altar to you` : '', why: altar ? '' : !owner ? noOne : !r.capital ? 'altars stand at the capital' : `no altar: faith ${fmt(owner.faith)} must exceed ${CONSTANTS.reaction_faith_high ?? 0.5}`,
+    controls: altar ? `<button data-run="accept_offering">Accept offering (${COST.accept_offering})</button><button data-run="destroy_altar">Destroy (${COST.destroy_altar})</button>` : '' });
+  const miracleCost = CONSTANTS.act_miracle_faith_cost ?? 1;
+  add({ id: 'miracle', name: 'Miracle', cost: 0, costText: `${miracleCost} faith`, desc: owner ? `protect (faith +0.3) or terror (fear +0.4)` : '', why: !owner ? noOne : d.faith_pool < miracleCost ? `faith pool ${fmt(d.faith_pool)} < ${miracleCost} (gain it from tribute, offerings, art)` : '',
+    controls: `<button data-run="miracle" data-terror="0">Protect</button><button data-run="miracle" data-terror="1">Terror</button>` });
+  const dm = cat.demand;
+  // a court already bound by an active oath with that clause refuses it as "already sworn" (oaths.cpp active_oath_with_pred)
+  const dmOpen = dm && owner ? dm.preds.filter((x) => !(world.oaths ?? []).some((o) => o.status === 'active' && o.parties.includes(owner.id) && o.clauses.some((c) => c.pred === x))) : [];
+  const dmWhy = !dm ? 'unavailable' : !owner ? noOne : !r.capital ? 'demands are made at the capital' : d.knowledge < dm.gate_knowledge ? `knowledge ${fmt(d.knowledge)} < ${dm.gate_knowledge}` : !dmOpen.length ? `already sworn to you: ${dm.preds.map((x) => x.replace('_', ' ')).join(', ')}` : (owner.fear < dm.fear && owner.power >= 0.5 * d.threat) ? `they refuse: fear ${fmt(owner.fear)} < ${dm.fear} and power ${fmt(owner.power, 0)} ≥ half your threat` : '';
+  add({ id: 'demand', name: 'Demand', cost: COST.demand, costText: `${COST.demand} st · knowledge ${dm?.gate_knowledge ?? '?'}`, desc: owner ? `impose an oath on ${factionTitle(owner.id)} (fear ${fmt(owner.fear)})${dmOpen.length < (dm?.preds.length ?? 0) ? ' · already sworn: ' + dm.preds.filter((x) => !dmOpen.includes(x)).map((x) => x.replace('_', ' ')).join(', ') : ''}` : '', why: dmWhy,
+    controls: dm ? `<select id="demand-pred">${dmOpen.map((x) => `<option value="${x}">${x.replace('_', ' ')}</option>`).join('')}</select><button data-run="demand">Demand</button>` : '' });
+  for (const s of (cat.spells ?? [])) {
+    const why = spellWhy(s, r, owner, d);
+    let controls = `<button data-run="cast" data-spell="${s.id}">${cap(s.id)}</button>`;
+    if (s.id === 'incite' && !why) controls = `<select id="incite-against">${inciteVictims(r, owner).map((v) => `<option value="${v}">${escapeHtml(factionTitle(v))}</option>`).join('')}</select>` + controls;
+    add({ id: 'spell-' + s.id, name: cap(s.id), cost: 0, desc: spellDesc(s), costText: s.cost ? `${s.cost} ${axisName(s.gate)}` : `needs ${s.gate_min} ${axisName(s.gate)}`, why, controls });
+  }
+  const camp = [...camps.values()].find((g) => g.userData.region === regionId);
+  const rem = (model.remnants ?? []).filter((x) => x.strength > (CONSTANTS.remnant_min_strength ?? 0.1));
+  add({ id: 'sponsor', name: 'Sponsor remnant', cost: COST.sponsor, desc: camp ? `the ${racePlural(camp.userData.race)} return here` : '', why: camp ? '' : rem.length ? `no remnant camp here (${rem.map((x) => racePlural(x.race) + ' near ' + regionTitle(x.origin)).join(', ')})` : 'no remnant exists (a race must have lost its last faction)',
+    controls: camp ? `<button data-run="sponsor">Sponsor</button>` : '' });
+  const tf = cat.terraform;
+  const tfKinds = (tf?.kinds ?? []).filter((k) => !r.tags.has(k.tag));
+  add({ id: 'terraform', name: 'Terraform', cost: COST.terraform, desc: tf ? `costs ${Math.round(tf.cost_size_fraction * 100)}% of size` : '', why: !tf ? 'unavailable' : r.lair ? 'not the lair' : d.size < tf.gate_size ? `size ${fmt(d.size)} < ${tf.gate_size} (size grows from gold while you sleep)` : tfKinds.length ? '' : 'nothing left to do here',
+    controls: tfKinds.length ? tfKinds.map((k) => `<button data-run="terraform" data-kind="${k.kind}">${cap(k.kind)}</button>`).join('') : '' });
+  return list;
+}
+
+function axisName(gate) { return gate.replace('_or_', ' / ').replace(/_/g, ' '); }
+function cap(s) { return s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase()); }
+function spellDesc(s) {
+  const m = s.modifier;
+  const texts = { ward: 'invasions ×0.2 for 10 decades', curse: 'cohesion decays ×2 for 10 decades', bless: 'land +0.3 for 5 decades', incite: 'the horde marches on a neighbour', raise_undead: 'an undead host rises here and attacks a neighbour', teach: 'era progress ×2 for 10 decades' };
+  return texts[s.id] ?? (m ? `${m.var} ${m.op} ${m.value} for ${m.decades} decades` : '');
+}
+
+function regionFacts(r, owner) {
+  const facts = [];
+  facts.push(`<span><span class="sw" style="background:${r.owner ? factionCss(r.owner) : '#555a66'}"></span><b>${owner ? escapeHtml(factionTitle(owner.id)) : r.lair ? 'your lair' : 'unclaimed'}</b></span>`);
+  facts.push(`terrain <b>${r.terrain}</b>`);
+  if (owner) {
+    facts.push(`race <b>${owner.race}</b>`, `era <b>${owner.era} ${ERA_NAMES[owner.era] ?? ''}</b>`, `wealth <b>${fmt(owner.wealth, 0)}</b> (share ${Math.round(r.wealth_share * 100)}%)`, `fear <b>${fmt(owner.fear)}</b>`, `faith <b>${fmt(owner.faith)}</b>`, `power <b>${fmt(owner.power ?? 0, 0)}</b>`);
+    if (r.capital) facts.push('<b>capital</b>');
+    if (owner.overlord) facts.push(`vassal of <b>${factionTitle(owner.overlord)}</b>`);
+    if (owner.at_war_with.length) facts.push(`at war with <b>${owner.at_war_with.map(factionTitle).join(', ')}</b>`);
+    if (owner.allies?.length) facts.push(`allies ${owner.allies.map(factionTitle).join(', ')}`);
+    if (owner.hostage_taken) facts.push('<b>heir held</b>');
+    if (owner.altar) facts.push('<b>altar</b>');
+  }
+  if (r.burn > 0.05) facts.push(`burn <b>${fmt(r.burn)}</b>`);
+  if (r.tags.size) facts.push(`tags ${[...r.tags].join(' ')}`);
+  const mods = (model.modifiers ?? []).filter((m) => m.target === r.id || (owner && m.target === owner.id));
+  if (mods.length) facts.push(`modifiers ${mods.map((m) => `${m.source.replace('dragon.', '')} ${m.var} ${m.op} ${m.value} until ${m.until}`).join('; ')}`);
+  return `<div class="facts">${facts.map((f) => `<span>${f}</span>`).join('')}</div>`;
+}
+
+function renderActions() {
+  const panel = $('actions');
+  renderCourt();
+  renderTasks();
+  if (montage.active || play.landed) { panel.classList.add('hidden'); renderNarration(); return; }
+  panel.classList.remove('hidden');
+  const id = selectedRegion;
+  labelsDirty = true;
+  panel.classList.toggle('flying', !id);
+  if (!id) { panel.innerHTML = `<h2>Flying</h2><div class="muted">fly over a region to act · ${play.stamina} stamina left · L to land at the lair</div><div id="keys">WASD / arrows / click to fly · hold B to burn · wheel zoom · right-drag pan · Esc closes panels</div>`; renderNarration(); return; }
+  const r = model.regions.get(id);
+  const owner = r.owner ? model.factions.get(r.owner) : null;
+  const list = actionsFor(id);
+  panel.innerHTML = `<h2>${escapeHtml(regionTitle(id))} <span class="owner">${r.lair ? '· press L to land' : ''}</span></h2>${regionFacts(r, owner)}${defenceFactsHtml(id)}${hookActionsHtml(id)}<div class="grid">` +
+    list.map((a) => `<div class="action ${a.ok ? '' : 'off'}${a.lethal ? ' lethal' : ''}" data-id="${a.id}"><span class="name">${a.name}<span class="cost" data-base="${escapeHtml(a.costText ?? (a.cost ? a.cost + ' st' : ''))}">${a.costText ?? (a.cost ? a.cost + ' st' : '')}${a.woundText}</span></span><span class="desc">${a.ok ? a.desc : a.why}</span><span class="ctl">${a.ok ? a.controls : ''}</span></div>`).join('') +
+    `</div><div id="keys">${play.stamina} stamina · hold B to burn · L land at the lair · C chronicle · Esc closes panels</div>`;
+  panel.querySelectorAll('button[data-run]').forEach((b) => b.addEventListener('click', () => runButton(b, id)));
+  bindHookActions(panel);
+  renderNarration();
+}
+
+function runButton(b, regionId) {
+  const run = b.dataset.run;
+  if (run === 'burn') return act('burn', { region: regionId, magnitude: Number(b.dataset.m) });
+  if (run === 'take') return act('take', { region: regionId, category: $('take-cat').value, magnitude: Number($('take-m').value) });
+  if (run === 'kill') return act('kill', { region: regionId, attacker: $('kill-who').value });
+  if (run === 'defend') return act('defend', { region: regionId, against: $('defend-who').value });
+  if (run === 'roar') return act('show', { region: regionId });
+  if (run === 'hostage') return act('take_hostage', { region: regionId });
+  if (run === 'release') return act('release', { region: regionId });
+  if (run === 'give') return act('give', { region: regionId, gold: Number($('give-amt').value) });
+  if (run === 'accept_offering' || run === 'destroy_altar') return act(run, { region: regionId });
+  if (run === 'miracle') return act('miracle', { region: regionId, terror: b.dataset.terror === '1' });
+  if (run === 'demand') return act('demand', { region: regionId, pred: $('demand-pred').value });
+  if (run === 'cast') return act('cast', { region: regionId, spell: b.dataset.spell, against: $('incite-against')?.value });
+  if (run === 'sponsor') return act('sponsor_remnant', { region: regionId });
+  if (run === 'terraform') return act('terraform', { region: regionId, kind: b.dataset.kind });
+  if (run === 'crush') return act('crush', { region: regionId });
+}
+
+function spend(cost) {
+  if (play.stamina < cost) { toast(`not enough stamina (${play.stamina} < ${cost})`, true); return false; }
+  play.stamina -= cost;
+  return true;
+}
+
+function pushEvents(res) { if (res?.events?.length) play.ageEvents.push(...res.events); }
+
+// one player verb -> one API call; the view is rebuilt afterwards and the diff drives the animation
+function act(name, params = {}) {
+  if (montage.active || play.dead) return null;
+  const region = params.region ?? selectedRegion ?? dragonRegion();
+  const r = model.regions.get(region);
+  if (!r) return null;
+  const target = params.target ?? r.owner;
+  if (!confirmLethal(name, region)) return null;
+  const shown = woundCost(name, region);
+  const witnesses = keptWitnesses(witnessesFor(region, target), region);
+  const before = snapshot();
+  const nb = narrationBefore();
+  const story = { kind: name, target, region, against: params.against, person: params.person, spell: params.spell, pred: params.pred, terror: !!params.terror, gold: params.gold };
+  let res = null;
+  const simple = { show: COST.roar, take_hostage: COST.hostage, release: COST.release, accept_offering: COST.accept_offering, destroy_altar: COST.destroy_altar };
+  if (name === 'burn') {
+    const m = clamp(params.magnitude ?? 0.25, 0.1, 0.8);
+    if (!target || !spend(burnStamina(m))) return null;
+    beam(region);
+    spawnFlames(region, 10 + Math.round(m * 36));
+    res = applyActs([{ type: 'burn', target, region, magnitude: burnMagnitude(m), witnesses }]);
+  } else if (name === 'take') {
+    if (!target || !spend(COST.take)) return null;
+    const category = params.category ?? 'gold';
+    const payload = {}; payload[category] = 1;
+    res = applyActs([{ type: 'take', target, region, magnitude: clamp(params.magnitude ?? 0.2, 0.05, 0.9), witnesses, payload }]);
+    if (res.ok) toast(`took ${category} from ${factionTitle(target)}`);
+  } else if (name === 'kill') {
+    const attacker = params.attacker ?? model.armies.find((a) => a.region === region)?.attacker;
+    if (!attacker || !spend(killStamina())) return null;
+    const g = armies.get(attacker + '|' + r.owner + '|' + region);
+    if (g) puff(g.position, factionColor3(attacker));
+    res = applyActs([{ type: 'kill', target: attacker, region, magnitude: killMagnitude(params.magnitude ?? 0.3), witnesses: keptWitnesses(witnessesFor(region, attacker), region), payload: { soldiers: 1 } }]);
+    story.target = attacker;
+  } else if (name === 'crush') {
+    if (!target || !spend(CRUSH.cost)) return null;
+    crushEffect(region);
+    res = applyActs(crushActs(region, target));
+  } else if (name === 'defend') {
+    if (!target || !params.against || !spend(COST.defend)) return null;
+    beam(region, 0.6);
+    res = applyActs([{ type: 'defend', target, region, magnitude: 0.5, against: params.against, witnesses }]);
+    if (res.events?.some((e) => e.kind === 'war_ended' || e.kind === 'coalition_ended')) toast(`${factionTitle(params.against)} withdraws: the war ends`);
+  } else if (name in simple) {
+    if (!target || !spend(simple[name])) return null;
+    res = applyActs([{ type: name, target, region, magnitude: name === 'show' ? 0.3 : 0.5, witnesses, ...(name === 'take_hostage' && params.item ? { item: params.item } : {}) }]);
+    const moved = res.events?.find((e) => e.kind === (name === 'take_hostage' ? 'hostage_taken' : 'hostage_released'));
+    if (name === 'take_hostage' && res.ok) toast(moved ? `${nameOf(moved.subject)} is carried to the lair` : `the court of ${target} has no one left to take`, !moved);
+    if (name === 'release' && res.ok) toast(moved ? `${nameOf(moved.subject)} goes home to ${factionTitle(target)}` : `no hostage of ${target} to release`, !moved);
+  } else if (name === 'give') {
+    if (!target || !spend(COST.give)) return null;
+    res = applyActs([{ type: 'give', target, region, magnitude: 0.2, witnesses, payload: { gold: params.gold ?? 1 } }]);
+  } else if (name === 'miracle') {
+    if (!target) return null;
+    const payload = params.terror ? { terror: 1 } : {};
+    res = applyActs([{ type: 'miracle', target, region, magnitude: 1, witnesses, payload }]);
+    flashTile(region, new THREE.Color(params.terror ? 0xff4040 : 0xfff0a0));
+  } else if (name === 'demand') {
+    if (!target || !spend(COST.demand)) return null;
+    res = sim({ cmd: 'demand', target, pred: params.pred ?? 'tribute' });
+    story.sworn = !!res.sworn;
+    if (res.ok && res.sworn) { toast(`${factionTitle(target)} swears ${params.pred.replace('_', ' ')} under your shadow`); flashTile(region, new THREE.Color(PALETTE.crown)); }
+    else if (res.ok) toast(`${factionTitle(target)} refuses: ${res.reason}`, true);
+  } else if (name === 'cast') {
+    const s = (world.catalogue?.spells ?? []).find((x) => x.id === params.spell);
+    res = sim({ cmd: 'cast', spell: params.spell, target: params.target ?? r.owner, region, against: params.against ?? '' });
+    if (res.ok && res.cast) { toast(`${cap(params.spell)} cast on ${res.spawned_faction ? factionTitle(res.spawned_faction) : res.target ? factionTitle(res.target) : regionTitle(res.region)}${res.war_with ? ', war on ' + factionTitle(res.war_with) : ''}`); flashTile(region, new THREE.Color(s?.gate === 'faith_pool' ? 0xfff0a0 : PALETTE.ward)); }
+    else if (res.ok) toast(`${cap(params.spell)} fails: ${res.reason}`, true);
+  } else if (name === 'sponsor_remnant') {
+    const race = params.race ?? [...camps.values()].find((g) => g.userData.region === region)?.userData.race;
+    if (!race || !spend(COST.sponsor)) return null;
+    res = sim({ cmd: 'sponsor_remnant', race, region });
+    const back = res.events?.find((e) => e.kind === 'race_returned');
+    if (back) { toast(`the ${racePlural(race)} return to ${regionTitle(region)} as ${factionTitle(back.subject)}`); flashTile(region, factionColor3(back.subject)); }
+    else toast(`sponsor fails: ${res.events?.find((e) => e.kind === 'spell_failed')?.tags?.join(', ') ?? 'unknown'}`, true);
+  } else if (name === 'terraform') {
+    if (!spend(COST.terraform)) return null;
+    res = sim({ cmd: 'terraform', region, kind: params.kind ?? 'wasteland' });
+    if (res.ok && !res.done) toast(`terraform fails: ${res.reason}`, true);
+    else if (res.ok) { toast(`${regionTitle(region)} becomes ${res.tag} (size −${fmt(res.cost, 3)})`); flashTile(region, new THREE.Color(PALETTE.lake)); }
+  } else { console.warn('unknown action', name); return null; }
+  pushEvents(res);
+  refreshWorld();
+  showDeltas(before, region);
+  renderChronicle();
+  narrateAct(story, res, nb);
+  actOutcome(res, region, { act: name, shown });
+  return res;
+}
+
+function applyActs(acts) { return sim({ cmd: 'apply_acts', acts }); }
+
+// what an act did beyond the map (v0.4): wounds, answered hooks, death
+function actOutcome(res, region, ctx = {}) {
+  if (!res?.ok) return;
+  woundsFrom(res, { region, ...ctx });
+  hooksFrom(res);
+  deathFrom(res);
+}
+
+function snapshot() {
+  const s = {};
+  for (const f of world.factions) s[f.id] = { fear: f.fear, faith: f.faith, wealth: f.wealth };
+  return s;
+}
+
+function showDeltas(before, region) {
+  const [x, z] = regionCentre(region);
+  let row = 0;
+  for (const f of world.factions) {
+    const b = before[f.id];
+    if (!b) continue;
+    const parts = [];
+    const dFear = f.fear - b.fear, dFaith = f.faith - b.faith, dWealth = f.wealth - b.wealth;
+    if (Math.abs(dFear) > 0.004) parts.push(['fear', dFear]);
+    if (Math.abs(dFaith) > 0.004) parts.push(['faith', dFaith]);
+    if (Math.abs(dWealth) > 0.4) parts.push(['wealth', dWealth]);
+    if (!parts.length) continue;
+    const reg = f.regions.includes(region) ? region : (f.capital ?? f.regions[0]);
+    const [fx, fz] = reg ? regionCentre(reg) : [x, z];
+    parts.forEach(([kind, d], i) => floatText(fx, fz, `${f.id === model.regions.get(region)?.owner ? '' : factionTitle(f.id) + ' '}${kind} ${d > 0 ? '+' : ''}${kind === 'wealth' ? d.toFixed(0) : d.toFixed(2)}`, kind, row++ * 18 + i * 0));
+  }
+}
+
+function floatText(x, z, text, kind, offsetY = 0) {
+  const el = document.createElement('div');
+  el.className = 'float ' + kind;
+  el.textContent = text;
+  $('floats').appendChild(el);
+  const start = performance.now();
+  effects.push({ life: 2.2, update() {
+    const p = new THREE.Vector3(x, groundAt(x, z) + 1.1, z).project(camera);
+    const t = (performance.now() - start) / 2200;
+    el.style.left = ((p.x + 1) / 2 * innerWidth) + 'px';
+    el.style.top = ((1 - p.y) / 2 * innerHeight - 40 - t * 50 - offsetY) + 'px';
+    el.style.opacity = String(1 - t * t);
+  }, end() { el.remove(); } });
+}
+
+function toast(text, bad = false, year = null) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (bad ? ' bad' : '');
+  el.innerHTML = (year !== null ? `<span class="y">${year}</span>` : '') + text;
+  const box = $('toasts');
+  box.appendChild(el);
+  while (box.children.length > 7) box.firstChild.remove();
+  setTimeout(() => el.remove(), 5000);
+}
+
+function renderHud() {
+  const d = model.dragon;
+  $('h-year').textContent = model.year;
+  $('h-age').textContent = play.age;
+  $('h-stamina').textContent = play.stamina;
+  $('h-stamina-bar').style.width = clamp(play.stamina / staminaBudget() * 100, 0, 100) + '%';
+  $('h-size').textContent = fmt(d.size, 2);
+  $('h-knowledge').textContent = fmt(d.knowledge, 2);
+  $('h-magic').textContent = fmt(d.magic, 2);
+  $('h-faith').textContent = fmt(d.faith_pool, 2);
+  $('h-hunger').textContent = fmt(d.hunger);
+  $('h-hunger-bar').style.width = (d.hunger * 100) + '%';
+  $('h-hunger-stat').classList.toggle('warn', d.hunger >= (CONSTANTS.hunger_atrophy_at ?? 0.5));
+  $('h-threat').textContent = fmt(d.threat, 0);
+  $('h-tags').textContent = d.tags.length ? d.tags.join(' ') : '';
+  renderPhaseHud();
+  renderGrowthHud();
+  renderHealthHud();
+  renderHooksHud();
+  $('legend-v04').classList.toggle('hidden', !hasDefences() && !hasHooks());
+  $('legend-hook').classList.toggle('hidden', !hasHooks());
+}
+
+function staminaBudget() {
+  const full = STAMINA.base + Math.round(STAMINA.per_size * model.dragon.size) + (model.dragon.tags.includes('rage') ? STAMINA.rage : 0) + Math.round(effect('stamina_add'));
+  return model.dragon.tags.includes('stiff') ? Math.round(full * STAMINA.stiff_mult) : full;
+}
+
+// ===================================================================================================
+// lair overlay: hoard, growth, hunger, envoys, oaths, pre-sleep spells, sleep with forecast, chronicle tab
+// ===================================================================================================
+let lairTab = 'hoard';
+
+function landAtLair() {
+  if (montage.active || play.landed) return;
+  if (growthUi.open) closeGrowth();
+  if (dragonRegion() !== 'lair') { flyTo('lair'); toast('flying to the lair'); return; }
+  play.landed = true;
+  play.landOnArrival = false;
+  play.lairNarrFrom = NARR.group + 1;
+  dragon.height = 2.2;
+  placeDragonAtLair();
+  lairTab = (model.offers?.length ? 'envoys' : 'hoard');
+  renderLair();
+  $('lair').classList.remove('hidden');
+  $('dim').style.opacity = '0.3';
+  renderActions();
+}
+
+function takeOff() {
+  play.landed = false;
+  dragon.height = 5;
+  $('lair').classList.add('hidden');
+  $('dim').style.opacity = '0';
+  renderActions();
+}
+
+function renderLair() {
+  $('lair-year').textContent = `year ${model.year} · age ${play.age}`;
+  $('lair-tabs').querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.tab === lairTab));
+  const body = $('lair-body');
+  const d = model.dragon;
+  const tabs = {
+    hoard() {
+      const hl = CONSTANTS.hoard_halflife ?? {};
+      const bar = (v, max, cls = '') => `<div class="meter ${cls}"><i style="width:${clamp(v / max * 100, 0, 100)}%"></i></div>`;
+      return `<div class="cols"><div>
+        <div class="box"><h3>Hoard</h3><dl>${CATEGORIES.map((c) => `<dt>${c}</dt><dd>${fmt(d.hoard[c], 1)} <span class="muted">half-life ${hl[c] ?? '-'} y</span></dd>`).join('')}</dl></div>
+        <div class="box"><h3>Growth</h3><dl>
+          <dt>size</dt><dd>${fmt(d.size, 3)} ${bar(d.size, 5)}</dd><dt>knowledge</dt><dd>${fmt(d.knowledge, 3)} ${bar(d.knowledge, 5)}</dd>
+          <dt>magic</dt><dd>${fmt(d.magic, 3)} ${bar(d.magic, 5)}</dd><dt>faith pool</dt><dd>${fmt(d.faith_pool, 3)} ${bar(d.faith_pool, 5)}</dd>
+          <dt>threat</dt><dd>${fmt(d.threat, 1)}</dd></dl></div>
+        <div class="box"><h3>Hunger</h3>${bar(d.hunger, 1, 'hunger')}<div>${fmt(d.hunger)} · need ${fmt(d.hunger_need)} per decade · wakes at ${CONSTANTS.hunger_wake_at}</div></div>
+        ${hasHealth() ? `<div class="box"><h3>Health</h3>${bar(health().left, health().max, 'hunger')}<div>${Math.round(health().left)} of ${Math.round(health().max)} · ${numText(health().wounds)} wounds, healed by sleep${d.hoard.embers !== undefined ? ` · embers ${fmt(d.hoard.embers, 1)} (what you burned; they feed Flame as you sleep)` : ''}</div></div>` : ''}
+      </div><div>
+        <div class="box"><h3>Tags and lineages</h3><div>${d.tags.join(' ') || '<span class="muted">none</span>'}</div><div class="muted">lineages: ${d.lineages.join(', ') || 'none'}</div></div>
+        <div class="box"><h3>Factions</h3>${world.factions.map((f) => `<div><span style="color:${factionCss(f.id)}">■</span> <b>${escapeHtml(factionTitle(f.id))}</b> ${f.dominant_race} ${f.era_name} · ${f.regions.length} regions · wealth ${fmt(f.wealth, 0)} · fear ${fmt(f.fear)} · faith ${fmt(f.faith)}${f.overlord ? ' · vassal of ' + factionTitle(f.overlord) : ''}${f.at_war_with.length ? ' · war: ' + f.at_war_with.map(factionTitle).join(', ') : ''}</div>`).join('')}</div>
+        <div class="box"><h3>Remnants</h3>${(world.remnants ?? []).map((r) => `${racePlural(r.race)} ${fmt(r.strength)} near ${regionTitle(r.origin)}`).join(' · ') || '<span class="muted">none</span>'}</div>
+      </div></div>`;
+    },
+    growth() { return growthTabHtml(); },
+    envoys() { return envoysTabHtml(); },
+    known() { return knownTabHtml(); },
+    oaths() {
+      const oaths = world.oaths ?? [];
+      const tasks = `<div class="box"><h3>Open tasks</h3>${tasksHtml()}</div>`;
+      if (!oaths.length) return tasks + '<div class="muted">No oaths sworn. Accept an envoy\'s offer or make a demand at a cowed court.</div>';
+      return tasks + oaths.slice().reverse().map((o) => `<div class="offer"><b style="color:${factionCss(o.parties[1])}">${escapeHtml(factionTitle(o.parties[1]))}</b> · ${o.id.startsWith('demand') ? 'imposed by you' : 'offered by them'} · <span class="${o.status === 'active' ? 'up' : 'down'}">${oathStatus(o.status)}</span> · sworn ${o.sworn}, until ${o.expires}<div class="clauses">${o.clauses.map(clauseText).join('<br>')}</div></div>`).join('');
+    },
+    spells() {
+      const regions = [...model.regions.values()].filter((r) => !r.lair);
+      const factions = [...model.factions.values()];
+      const rows = (world.catalogue?.spells ?? []).map((s) => {
+        const axisValue = s.gate === 'knowledge_or_magic' ? Math.max(d.knowledge, d.magic) : d[s.gate] ?? 0;
+        const ok = s.enabled && axisValue >= s.gate_min;
+        const targets = s.target === 'region' ? regions.map((r) => `<option value="${r.id}">${escapeHtml(regionTitle(r.id))}${r.owner ? ' (' + escapeHtml(factionTitle(r.owner)) + ')' : ''}</option>`) : factions.map((f) => `<option value="${f.id}">${escapeHtml(factionTitle(f.id))}</option>`);
+        return `<div class="action ${ok ? '' : 'off'}"><span class="name">${cap(s.id)}<span class="cost">${s.cost ? s.cost + ' ' + axisName(s.gate) : 'needs ' + s.gate_min + ' ' + axisName(s.gate)}</span></span><span class="desc">${!s.enabled ? 'not in this build' : ok ? spellDesc(s) : `${axisName(s.gate)} ${fmt(axisValue)} < ${s.gate_min}`}</span>
+          <span class="ctl">${ok ? `<select id="spell-t-${s.id}">${targets.join('')}</select>${s.id === 'incite' ? `<select id="spell-a-${s.id}">${factions.map((f) => `<option value="${f.id}">${escapeHtml(factionTitle(f.id))}</option>`).join('')}</select>` : ''}<button data-cast="${s.id}">Cast</button>` : ''}</span></div>`;
+      }).join('');
+      const mods = (world.modifiers ?? []).filter((m) => m.source.startsWith('dragon.'));
+      return `<div class="box"><h3>Cast before sleeping</h3><div class="muted">Spells become modifiers that tick while you sleep; the chronicle records the cast and the expiry.</div>${rows}</div>
+        <div class="box"><h3>Your active modifiers</h3>${mods.map((m) => `<div><b>${cap(m.source.replace('dragon.', ''))}</b> on <span style="color:${model.factions.has(m.target) ? factionCss(m.target) : 'inherit'}">${escapeHtml(model.factions.has(m.target) ? factionTitle(m.target) : regionTitle(m.target))}</span>: ${m.var.replace(/_/g, ' ')} ${m.op === 'mul' ? '×' : '+'} ${m.value}, year ${m.from} to ${m.until}</div>`).join('') || '<span class="muted">none</span>'}</div>`;
+    },
+    sleep() { return sleepTabHtml(); },
+    chronicle() { return `<div class="row"><input id="lair-filter" type="text" placeholder="filter" style="flex:1"></div><div id="lair-chron">${chronicleHtml('')}</div>`; },
+  };
+  body.innerHTML = tabs[lairTab]();
+  body.querySelectorAll('[data-accept],[data-decline]').forEach((b) => b.addEventListener('click', () => answerOffer(b)));
+  body.querySelectorAll('[data-cast]').forEach((b) => b.addEventListener('click', () => castFromLair(b.dataset.cast)));
+  if (lairTab === 'growth') bindGrowth(body);
+  if (lairTab === 'envoys') bindEnvoys(body);
+  if (lairTab === 'known') bindKnown(body);
+  if (lairTab === 'sleep') bindSleepTab(body);
+  $('sleep-go')?.addEventListener('click', () => sleep(Number($('sleep-years').value)));
+  $('sleep-years')?.addEventListener('change', renderForecast);
+  $('lair-filter')?.addEventListener('input', () => { $('lair-chron').innerHTML = chronicleHtml($('lair-filter').value); });
+  if (lairTab === 'sleep') renderForecast();
+  renderLairFoot();
+}
+
+// the lair footer: stamina, and what the last act in the lair did (the narration strip is hidden behind the sheet)
+function renderLairFoot() {
+  const last = NARR.lines.filter((l) => l.group === NARR.group && l.group >= (play.lairNarrFrom ?? 0));
+  $('lair-foot').innerHTML = `<span>${play.stamina} stamina left this age · Esc or Take off to fly again</span>${last.length ? `<span class="lair-narr">${last.map((l) => escapeHtml(l.text)).join(' ')}</span>` : ''}`;
+}
+
+function answerOffer(b) {
+  const accept = b.dataset.accept !== undefined;
+  const index = Number(accept ? b.dataset.accept : b.dataset.decline);
+  const offer = model.offers[index];
+  const nb = narrationBefore();
+  const res = sim({ cmd: accept ? 'accept_offer' : 'decline_offer', index });
+  if (res.ok) {
+    play.ageEvents.push(...(res.events ?? []));
+    const e = envoys[index];
+    if (e) { sceneLayers.envoys.remove(e.group); }
+    toast(`${accept ? 'oath sworn with' : 'declined'} ${factionTitle(offer.oath.parties[1])}`);
+  }
+  refreshWorld();
+  if (res.ok) narrateAct({ kind: accept ? 'accept_offer' : 'decline_offer', target: offer.from_faction || offer.oath.parties[1], person: personOf(offer.envoy) }, res, nb);
+  spawnEnvoysSettled();
+  renderLair();
+  renderChronicle();
+}
+
+// after an answer the remaining envoys keep standing at the entrance instead of walking again
+function spawnEnvoysSettled() { spawnEnvoys(); for (const e of envoys) e.t = 1; }
+
+function castFromLair(spellId) {
+  const target = $(`spell-t-${spellId}`)?.value;
+  const s = (world.catalogue?.spells ?? []).find((x) => x.id === spellId);
+  const params = { spell: spellId, against: $(`spell-a-${spellId}`)?.value ?? '' };
+  const res = sim({ cmd: 'cast', spell: spellId, target: s?.target === 'faction' ? target : (model.regions.get(target)?.owner ?? ''), region: s?.target === 'region' ? target : (model.factions.get(target)?.capital ?? ''), against: params.against });
+  if (res.ok) { play.ageEvents.push(...(res.events ?? [])); toast(res.cast ? `${cap(spellId)} cast on ${res.spawned_faction ? factionTitle(res.spawned_faction) : res.target ? factionTitle(res.target) : regionTitle(res.region)}` : `${cap(spellId)} fails: ${res.reason}`, !res.cast); }
+  refreshWorld();
+  renderLair();
+  renderChronicle();
+}
+
+function renderForecast() {
+  const years = Number($('sleep-years')?.value) || 100;
+  play.sleepYears = years;
+  const f = sim({ cmd: 'forecast', years });
+  const el = $('forecast');
+  if (!el || !f.ok) return;
+  const noise = (CONSTANTS.forecast_noise ?? 0.5) / (1 + model.dragon.knowledge);
+  el.innerHTML = `Forecast for ${years} years (noise ±${Math.round(noise * 100)}%, knowledge ${fmt(model.dragon.knowledge)} sharpens it): wake <b>${f.wake_reason.replace(/_/g, ' ')}</b> after ~${f.years} y · size ~${fmt(f.size, 3)} · knowledge ~${fmt(f.knowledge, 2)} · magic ~${fmt(f.magic, 2)} · hunger ~${fmt(f.hunger)} · strongest ${f.strongest ? escapeHtml(factionTitle(f.strongest)) : '-'} at era ~${f.strongest_era}${sleepBetHtml(years, f)}`;
+}
+
+function clauseText(c) {
+  const p = c.params || {};
+  const who = c.who === 'dragon' ? 'you' : (c.who || 'they');
+  switch (c.pred) {
+    case 'tribute': return p.target !== undefined ? `${who} pay ${fmt(p.amount, 1)} wealth per decade once you burn their rival (a tribute clause; the rival is implied)` : `${who} pay tribute of ${fmt(p.amount, 1)} wealth per decade while their faith stays above ${CONSTANTS.oath_tribute_min_faith ?? 0.2} and their wealth covers it`;
+    case 'no_harm': return `${who} will not burn, kill or take from them`;
+    case 'defend': return `${who} will defend them when they are invaded (a region taken while you sleep breaks it)`;
+    case 'no_walls': return `${who} build no walls and stay below era 2 while fear holds`;
+    case 'no_settle': return `${who} do not settle new land while fear holds`;
+    case 'hostage': return `${who} keep a hostage of their line`;
+    default: return `${who} ${c.pred} ${JSON.stringify(p)}`;
+  }
+}
+function offerTitle(key) { return { 'offer.protect': 'tribute for your protection', 'offer.tribute': 'an oath of worship', 'offer.burn_rival': 'gold to burn a rival', 'offer.rite': 'the rite (an exit)', 'offer.return_hostage': 'a ransom for their hostage', 'offer.hide_heir': 'an heir to hide in your lair', 'offer.teach': 'to be taught', 'offer.bless': 'a blessing', 'offer.judge': 'a judgement', 'offer.purge': 'a purge of the dead', 'offer.ward': 'a ward on their altar', 'offer.elope': 'an elopement' }[key] ?? key.replace('offer.', '').replace(/_/g, ' '); }
+function offerRite(key) { return key === 'offer.rite' ? 'a rite without clauses: they would open a way out of the valley for you (not in this build)' : 'a rite without clauses'; }
+function stakeText(s) { return { betrayal: 'betrayal (their faith drops to 0.02, fear +0.3, faith stops regrowing)', curse: 'a curse (their cohesion decays ×2 for 10 decades)', none: 'nothing' }[s] ?? s; }
+function oathStatus(s) { return { active: 'active', expired: 'expired', breached_by_dragon: 'broken by you (betrayal)', breached_by_them: 'broken by them' }[s] ?? s; }
+
+// ===================================================================================================
+// sleep montage: replay the returned chronicle on the map, event by event, with pause / speed / skip
+// ===================================================================================================
+const montage = { active: false, events: [], index: 0, year: 0, endYear: 0, speed: 20, paused: false, result: null, fromYear: 0, before: null, done: false };
+
+function sleep(years) {
+  if (montage.active) return null;
+  years = Math.max(1, Math.round(years) || 1);
+  const before = { year: model.year, dragon: { ...model.dragon }, factions: snapshot(), view: world };
+  const res = sim({ cmd: 'sleep', years });
+  if (!res.ok && res.error) return null;
+  for (const e of effects.splice(0)) e.end();   // a breath or flash still running when the dragon lies down ends with the age
+  play.ages.push({ age: play.age, from: before.year, to: res.year, wake_reason: res.wake_reason, years_slept: res.years_slept, acts: play.ageEvents, chronicle: res.chronicle });
+  play.ageEvents = [];
+  takeOff();
+  placeDragonAtLair();
+  dragon.height = 2.2;
+  $('dim').style.opacity = '0.35';
+  montage.active = true; montage.done = false;
+  montage.events = res.chronicle.filter((e) => e.kind !== 'sleep_begin');
+  montage.index = 0; montage.year = before.year; montage.fromYear = before.year; montage.endYear = res.year; montage.result = res; montage.before = before; montage.paused = false;
+  montage.final = sim({ cmd: 'world' });
+  indexNames(montage.final);
+  montage.you = youContext([world, montage.final]);
+  montage.speed = play.montageSpeed ?? 20;
+  clearNarration();
+  $('montage-hud').classList.remove('hidden'); $('montage-ctl').classList.remove('hidden'); $('actions').classList.add('hidden'); $('wake').classList.add('hidden');
+  $('m-speed').textContent = montage.speed + ' y/s';
+  $('m-pause').textContent = 'Pause';
+  $('ticker').textContent = `the dragon sleeps, planning ${years} years`;
+  renderChronicle();
+  if (play.skipLapse) finishMontage();
+  return res;
+}
+
+function montageKey(e) {
+  if (e.key === ' ') { e.preventDefault(); toggleMontagePause(); }
+  if (e.key === '+' || e.key === '=') montageSpeed(2);
+  if (e.key === '-') montageSpeed(0.5);
+  if (e.key === 'Escape') finishMontage();
+}
+function toggleMontagePause() { montage.paused = !montage.paused; $('m-pause').textContent = montage.paused ? 'Resume' : 'Pause'; }
+function montageSpeed(k) { montage.speed = clamp(montage.speed * k, 2.5, 640); $('m-speed').textContent = montage.speed + ' y/s'; }
+
+function updateMontage(dt) {
+  if (!montage.active || montage.paused || montage.done) return;
+  montage.year = Math.min(montage.endYear, montage.year + dt * montage.speed);
+  $('m-year').textContent = `Year ${Math.floor(montage.year)}`;
+  $('h-year').textContent = Math.floor(montage.year);
+  while (montage.index < montage.events.length && montage.events[montage.index].year <= montage.year) playEvent(montage.events[montage.index++]);
+  if (montage.year >= montage.endYear && montage.index >= montage.events.length) finishMontage();
+}
+
+// what can be derived per event is applied to the display model here; the rest arrives with the final world
+function playEvent(e) {
+  const m = model;
+  const s = e.subject, o = e.object;
+  const text = eventText(e);
+  const bad = eventClass(e) === 'bad';
+  const ensureFaction = (id, race) => { if (!m.factions.has(id)) m.factions.set(id, { id, race: race ?? raceOf(id) ?? 'human', era: 0, capital: '', overlord: '', altar: false, hostage_taken: false, at_war_with: [], allies: [], faith: 0, fear: 0, wealth: 0, tags: new Set(), regions: [] }); return m.factions.get(id); };
+  const setOwner = (regionId, owner) => {
+    const r = m.regions.get(regionId); if (!r) return;
+    const prev = m.factions.get(r.owner); if (prev) prev.regions = prev.regions.filter((x) => x !== regionId);
+    r.owner = owner; if (owner) ensureFaction(owner).regions.push(regionId);
+    syncTile(r);
+  };
+  const quiet = ['tribute_paid', 'wake', 'act_spell', 'spell_failed'].includes(e.kind) || e.kind.startsWith('act_');
+  switch (e.kind) {
+    case 'war_started': { const a = ensureFaction(s), b = ensureFaction(o); a.at_war_with.push(o); b.at_war_with.push(s); addDerivedArmies(s, o); addWarArrow(s, o); break; }
+    case 'joined_war': { ensureFaction(s); const side = m.factions.get(o); if (side) for (const enemy of side.at_war_with) { addDerivedArmies(s, enemy); addWarArrow(s, enemy); } break; }
+    case 'coalition_formed': { ensureFaction(s); ensureFaction(o); addDerivedArmies(s, o); addWarArrow(s, o); break; }
+    case 'war_ended': case 'coalition_ended': { for (const f of m.factions.values()) if (f.id === s || f.id === o) f.at_war_with = f.at_war_with.filter((x) => x !== s && x !== o); removeArmies(s, o); removeWarArrows(s, o); break; }
+    case 'region_taken': { setOwner(o, s); addDerivedArmies(s, [...e.tags][0]); addWarArrow(s, [...e.tags][0]); floatText(...regionCentre(o), `${factionTitle(s)} takes ${regionTitle(o)}`, 'info'); break; }
+    case 'region_settled': case 'race_returned': case 'orcs_spawned': case 'undead_raised': { ensureFaction(s, e.kind === 'race_returned' ? [...e.tags][0] : e.kind === 'orcs_spawned' ? 'orc' : e.kind === 'undead_raised' ? 'undead' : undefined); setOwner(o, s); settleEffect(o, s); floatText(...regionCentre(o), e.kind === 'orcs_spawned' ? 'orcs rise' : e.kind === 'region_settled' ? 'settled' : e.kind === 'undead_raised' ? 'the dead rise' : 'they return', 'info'); break; }
+    case 'region_abandoned': case 'elves_withdrew': case 'elves_departed': setOwner(o, ''); floatText(...regionCentre(o), 'abandoned', 'info'); break;
+    case 'successor_founded': { ensureFaction(s, raceOf([...e.tags][0])); setOwner(o, s); puff(new THREE.Vector3(...regionCentre(o).flatMap((v, i) => i ? [0, v] : [v])), factionColor3(s)); break; }
+    case 'collapse': { collapseEffect(s); const f = m.factions.get(s); if (f && f.capital) floatText(...regionCentre(f.capital), `${factionTitle(s)} collapses`, 'fear'); break; }
+    case 'faction_destroyed': { const f = m.factions.get(s); if (f) { collapseEffect(s); for (const rid of [...f.regions]) setOwner(rid, ''); } m.factions.delete(s); removeArmies(s, null); removeWarArrows(s, null); break; }
+    case 'era_advance': { const f = ensureFaction(s); f.era = e.magnitude; for (const rid of f.regions) { syncTile(m.regions.get(rid)); eraEffect(rid, e.magnitude); } break; }
+    case 'wasteland_formed': { const r = m.regions.get(s); if (r) { r.tags.add('wasteland'); r.burn = Math.max(r.burn, 0.8); syncTile(r); } break; }
+    case 'wasteland_healed': { const r = m.regions.get(s); if (r) { r.tags.delete('wasteland'); r.burn = 0; syncTile(r); } break; }
+    case 'dug_in': { const r = m.regions.get(o); if (r) { r.tags.add('dug_in'); syncTile(r); } break; }
+    case 'vassal_sworn': { const f = ensureFaction(s); f.overlord = o; f.at_war_with = []; removeArmies(s, null); removeWarArrows(s, null); for (const rid of f.regions) { syncTile(m.regions.get(rid)); flashTile(rid, factionColor3(o)); } break; }
+    case 'vassal_freed': case 'vassal_revolt': { const f = m.factions.get(s); if (f) { f.overlord = ''; for (const rid of f.regions) syncTile(m.regions.get(rid)); } break; }
+    case 'vassal_absorbed': { const f = m.factions.get(s); if (f) { for (const rid of [...f.regions]) setOwner(rid, o); m.factions.delete(s); } break; }
+    case 'plague': { const f = m.factions.get(s); if (f) for (const rid of f.regions) { plagueEffect(rid); } if (f?.capital) floatText(...regionCentre(f.capital), 'plague', 'fear'); break; }
+    case 'volcanic_winter': for (const r of m.regions.values()) flashTile(r.id, new THREE.Color(0x888888)); break;
+    case 'spell_expired': { const t = m.regions.has(o) ? o : m.factions.get(o)?.capital; if (t) floatText(...regionCentre(t), `${s} fades`, 'faith'); const tag = { ward: 'warded', bless: 'blessed', curse: 'cursed', teach: 'taught', incite: 'incited' }[s]; const r = m.regions.get(o), f = m.factions.get(o); if (r && tag) { r.tags.delete(tag); syncTile(r); } if (f && tag) { f.tags.delete(tag); for (const rid of f.regions) syncTile(m.regions.get(rid)); } labelsDirty = true; break; }
+    case 'spell_cast': { const t = m.regions.has(o) ? o : m.factions.get(o)?.capital; if (t) flashTile(t, new THREE.Color(PALETTE.ward)); break; }
+    case 'oath_breached_by_them': case 'oath_expired': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), e.kind === 'oath_expired' ? 'oath expires' : 'oath broken', 'fear'); break; }
+    case 'oath_breached_by_dragon': { const f = m.factions.get(o); if (f?.capital) floatText(...regionCentre(f.capital), 'betrayed', 'fear'); redFlash(); break; }
+    case 'slay_attempt_failed': case 'dragon_starving': case 'dragon_slain': case 'slayers_ready': case 'slayers_coming': redFlash(); break;
+  }
+  if (e.kind === 'act_burn') { spawnFlames(o || m.factions.get(s)?.capital, 8, 2); }
+  montage.lastWorthy = !quiet && tickerWorthy(e, montage.you);
+  if (montage.lastWorthy) { toast(text, bad, e.year); montage.lastText = `${e.year}: ${text}`; $('ticker').textContent = montage.lastText; }
+  if (e.kind === 'war_started' || e.kind === 'coalition_formed') { const r = m.factions.get(o); if (r) for (const rid of r.regions) flashTile(rid, new THREE.Color(0xff4040)); }
+}
+
+function addDerivedArmies(attacker, defender) {
+  if (!attacker || !defender) return;
+  const att = model.factions.get(attacker), def = model.factions.get(defender);
+  if (!att || !def) return;
+  for (const rid of def.regions) {
+    const r = model.regions.get(rid);
+    if (!r || !r.neighbours.some((n) => att.regions.includes(n))) continue;
+    const a = { attacker, defender, region: rid, coalition: false };
+    const key = armyKey(a);
+    if (!armies.has(key)) { const g = buildArmy(a, model); armies.set(key, g); sceneLayers.armies.add(g); puff(g.position, factionColor3(attacker)); }
+    break;
+  }
+}
+
+function removeArmies(a, b) {
+  for (const [key, g] of armies) {
+    const [att, def] = key.split('|');
+    const hit = b === null ? (att === a || def === a) : ((att === a && def === b) || (att === b && def === a));
+    if (hit) { sceneLayers.armies.remove(g); armies.delete(key); }
+  }
+}
+
+function redFlash() { $('flash').style.opacity = '0.45'; setTimeout(() => { $('flash').style.opacity = '0'; }, 260); }
+
+function finishMontage() {
+  if (!montage.active || montage.done) return;
+  montage.done = true;
+  while (montage.index < montage.events.length) { const e = montage.events[montage.index++]; if (DREAM_EVENTS.includes(e.kind)) redFlash(); }
+  montage.active = false;
+  $('montage-hud').classList.add('hidden'); $('montage-ctl').classList.add('hidden');
+  $('dim').style.opacity = '0';
+  const res = montage.result, before = montage.before;
+  const hooksLast = closeHookAge(res.chronicle);
+  play.age += 1;
+  play.fury = false;
+  resetDefenceWarnings();
+  refreshWorld();
+  for (const t of tiles.values()) t.key = '';
+  for (const r of model.regions.values()) syncTile(r, true);
+  play.stamina = restedStamina(play.stamina, res.years_slept);
+  play.focusFaction = ''; play.landOnArrival = false;
+  placeDragonAtLair();
+  dragon.height = 5;
+  spawnEnvoys();
+  renderHud();
+  renderActions();
+  renderChronicle();
+  const d = model.dragon;
+  const atrophied = res.chronicle.find((e) => e.kind === 'dragon_atrophied');
+  const growth = {};
+  for (const k of ['size', 'knowledge', 'magic', 'faith_pool', 'hunger']) growth[k] = [before.dragon[k], d[k]];
+  const slain = res.wake_reason === 'dragon_slain' || world.tags.includes('dragon_slain');
+  const briefing = cleanBriefing(res.briefing ?? sim({ cmd: 'briefing', since: before.year }), [...res.chronicle, ...(play.ages[play.ages.length - 1]?.acts ?? [])]);
+  const wake = { from: before.year, to: model.year, years_slept: res.years_slept, wake_reason: res.wake_reason, briefing, growth, atrophy: atrophied?.magnitude ?? 0, offers: (model.offers ?? []).length, stamina: play.stamina,
+    growth_gained: res.growth_gained, healed: res.healed, hooksLast, arms: armsChanges(before.view, world, res.chronicle),
+    armsWas: armsLevels(before.view), ranks: res.chronicle.filter((e) => e.kind === 'rank_gained') };
+  if (!slain) openWake(wake, true); else play.lastWake = wake;
+  sun.color.setHex(0xffe9c8);
+  setTimeout(syncEraTint, 1500);
+  autosave();
+  if (slain) deathFrom({ ...res, wake_reason: 'dragon_slain' });
+}
+
+// ===================================================================================================
+// chronicle panel: everything so far, per age, filterable (shared with the lair tab)
+// ===================================================================================================
+function toggleChronicle() { $('chron').classList.toggle('hidden'); renderChronicle(); }
+
+function eventText(e) {
+  const s = nameOf(e.subject) || e.subject, o = nameOf(e.object) || e.object, m = e.magnitude, n = e.count > 1 ? ` (x${e.count})` : '';
+  const tags = [...(e.tags || [])];
+  const texts = {
+    sleep_begin: () => `the dragon sleeps, planning ${m} years`,
+    wake: () => `the dragon wakes after ${m} years: ${o}`,
+    war_started: () => `${s} declares war on ${o}${tags.length ? ' (' + tags.join(', ') + ')' : ''}`,
+    war_ended: () => `war between ${s} and ${o} ends (${tags.join(', ')})`,
+    region_taken: () => `${s} takes ${o} from ${tags[0] ?? '?'}`,
+    collapse: () => `${s} collapses into ${m} part${m === 1 ? '' : 's'}`,
+    successor_founded: () => `${s} founded at ${o}, successor of ${tags[0] ?? '?'}`,
+    faction_destroyed: () => `${s} is destroyed`,
+    era_advance: () => `${s} reaches era ${m}`,
+    slayers_founded: () => `${s} founds a dragon-slayer order`,
+    tribute_paid: () => `${s} pays tribute of ${fmt(m, 1)}`,
+    slay_attempt_failed: () => `${s} tries to slay the dragon and fails (chance ${fmt(m)})`,
+    dragon_slain: () => `${s} slays the dragon`,
+    oath_sworn: () => `oath ${s} sworn with ${o} (${tags.join(', ')})`,
+    oath_expired: () => `oath ${s} with ${o} expires${tags.length ? ' (' + tags.join(', ') + ')' : ''}`,
+    oath_breached_by_dragon: () => `the dragon breaks oath ${s} with ${o} (${tags.join(', ')})`,
+    oath_breached_by_them: () => `${o} break oath ${s} (${tags.join(', ')})`,
+    orcs_spawned: () => `orcs ${s} rise in ${o}`,
+    region_settled: () => `${s} settles ${o}`,
+    region_abandoned: () => `${s} abandons ${o} (burn ${fmt(m)})`,
+    elves_withdrew: () => `${s} withdraw from ${o}`,
+    dug_in: () => `${s} dig in at ${o}`,
+    warlord_died: () => `the warlord of ${s} dies`,
+    plague: () => `plague in ${s}`,
+    bad_century: () => `a bad century begins in ${s}`,
+    volcanic_winter: () => `volcanic winter over the valley`,
+    wasteland_formed: () => `${s} becomes wasteland`,
+    wasteland_healed: () => `${s} heals from wasteland`,
+    dragon_raised_lineage: () => `a dragon-raised dynasty rules ${s}`,
+    vassal_sworn: () => `${s} swears fealty to ${o}`,
+    vassal_freed: () => `${s} throws off ${o} (${tags.join(', ')})`,
+    vassal_absorbed: () => `${o} absorbs its vassal ${s}`,
+    vassal_revolt: () => `${s} revolts against ${o}`,
+    coalition_formed: () => `${s} raises a coalition against ${o}`,
+    coalition_ended: () => `the coalition of ${s} against ${o} ends (${tags.join(', ')})`,
+    joined_war: () => `${s} joins the war on the side of ${o} (${tags.join(', ')})`,
+    remnant_formed: () => tags[0] === 'off_map' ? `${s}s roam beyond the valley, near ${o}` : `the last ${s} faction is gone; a remnant lingers near ${o}`,
+    race_returned: () => `the ${tags[0] ?? ''}s return to ${o} as ${s} (${tags[1] ?? ''})`,
+    fading_begins: () => `the fading begins for ${s}`,
+    fading_ends: () => `the fading ends for ${s}`,
+    elves_departed: () => `${s} depart from ${o}`,
+    hegemony: () => `${s} rules ${m} regions: a hegemony`,
+    hegemony_ended: () => `the hegemony of ${s} ends (${tags.join(', ')})`,
+    person_died: () => `${s} of ${o} dies (${tags.join(', ')})`,
+    person_rose: () => `${s} rises in ${o} (${tags.join(', ')})`,
+    person_crowned: () => `${s} takes the throne of ${o} (${tags.join(', ')})`,
+    reign_named: () => `the reign of ${s} over ${o} is called ${tags[0] ?? ''}`,
+    hostage_taken: () => `${s} of ${o} comes to the lair as a hostage (${tags.join(', ')})`,
+    hostage_released: () => `${s} goes home to ${o}`,
+    raised_in_lair: () => `${s} grows up in the lair (${m} years)`,
+    offer_fulfilled: () => `${s} gets what ${o} asked for; faith deepens`,
+    deceived_dragon: () => `${o} of ${s} lied to the dragon and it acted on it`,
+    offer_declined: () => `the dragon sends ${o} of ${s} away`,
+    dragon_moulted: () => `the dragon moults into phase ${m}`,
+    golden_age: () => `a golden age begins in ${s} (${m} years)`,
+    tyrant_rises: () => `a tyrant takes ${s} (${m} years)`,
+    tyrant_died: () => `the tyrant of ${s} dies`,
+    succession_crisis: () => `succession crisis in ${s}`,
+    dragon_starving: () => `the dragon starves in its sleep`,
+    dragon_atrophied: () => `the dragon has shrunk by ${fmt(m, 3)}`,
+    act_spell: () => `dragon: ${s}${o ? ' for the ' + o + 's' : ''}`,
+    spell_cast: () => `dragon: ${s} on ${o}`,
+    spell_failed: () => `the spell ${o} fails (${tags.join(', ')})`,
+    undead_raised: () => `the dead rise at ${o} as ${s}`,
+    terraformed: () => `the dragon reshapes ${s} into ${o}`,
+    spell_expired: () => `the dragon's ${s} on ${o} fades`,
+    demand_refused: () => `${s} refuses the dragon's demand of ${o} (fear ${fmt(m)})`,
+    talent_taken: () => `you take the talent ${talentById(e.object)?.name ?? cap(e.object)}`,
+    dragon_wounded: () => `the ${tags.map((t) => DEF_WORD[t] ?? t.replace(/_/g, ' ')).join(' and ')} of ${s} wound you at ${o} (${fmt(m, 1)})`,
+    hook_resolved: () => `you answer the call at ${o}`,
+    hook_ignored: () => `you let the call at ${o} go unanswered`,
+    slayers_coming: () => `the slayers of ${s} are coming: you wake to meet them`,
+    race_extinct: () => `the last of the ${racePlural(e.subject)} are gone from the world`,
+    people_arrived: () => `${s} arrive from beyond the rim and settle ${o}`,
+    cataclysm: () => `a cataclysm turns ${s} into ${o}`,
+    age_of_magic: () => 'an age of magic begins',
+    necromancer_rose: () => `a necromancer's tower rises at ${o}`,
+    dead_rose: () => `the dead of ${o} rise`,
+  };
+  if (e.kind === 'dragon_slain' && e.cause?.text_key === 'defences') return `the ${tags.map((t) => DEF_WORD[t] ?? t.replace(/_/g, ' ')).join(' and ') || 'defences'} of ${s} bring the dragon down over ${o}`;
+  if (e.kind === 'oath_sworn' && tags[0]?.startsWith('demand.')) return `${factionTitle(o)} swore ${tags[0].slice(7).replace('_', ' ')} at your demand` + n;
+  if (e.kind.startsWith('act_') && e.kind !== 'act_spell') return `dragon: ${e.kind.slice(4).replace(/_/g, ' ')} on ${factionTitle(e.subject)}${e.object ? ' at ' + regionTitle(e.object) : ''}${personOf(tags[0]) ? ' (' + nameOf(tags[0]) + ')' : ''} (m ${fmt(m)})${n}`;
+  const named = eventSentence(e);
+  if (named) return named;
+  const f = texts[e.kind];
+  return (f ? f() : `${e.kind} ${s} ${o} ${fmt(m)}`.trim()) + n;
+}
+
+function eventClass(e) {
+  if (e.kind.startsWith('act_') || ['spell_cast', 'terraformed', 'talent_taken', 'rank_gained', 'hook_resolved'].includes(e.kind)) return 'act';
+  if (['dragon_slain', 'slay_attempt_failed', 'oath_breached_by_dragon', 'faction_destroyed', 'volcanic_winter', 'dragon_starving', 'remnant_formed', 'spell_failed', 'demand_refused', 'oath_breached_by_them', 'dragon_wounded', 'hook_ignored', 'slayers_coming', 'slayers_forming', 'slayers_ready'].includes(e.kind)) return 'bad';
+  return '';
+}
+
+function chronicleHtml(filter) {
+  const q = filter.trim().toLowerCase();
+  const matches = (e) => !q || (e.kind + ' ' + e.subject + ' ' + e.object + ' ' + [...(e.tags || [])].join(' ') + ' ' + eventText(e)).toLowerCase().includes(q);
+  const block = (title, events) => { const evs = events.filter(matches).slice().reverse(); if (!evs.length && q) return ''; return `<div class="sleep-block"><h4>${title}</h4>` + evs.map((e) => `<div class="ev ${eventClass(e)}"><span class="y">${e.year}</span>${eventText(e)}</div>`).join('') + '</div>'; };
+  const pending = play.ageEvents.length ? block(`Age ${play.age}, year ${model?.year ?? 0}, awake (newest first)`, play.ageEvents) : `<div class="sleep-block"><h4>Age ${play.age}, year ${model?.year ?? 0}, awake</h4><div class="muted">no acts yet this age</div></div>`;
+  return pending + [...play.ages].reverse().map((a) => block(`Age ${a.age}: ${a.from} to ${a.to}, woke ${a.wake_reason.replace(/_/g, ' ')} (newest first)`, [...a.acts, ...a.chronicle])).join('');
+}
+
+function renderChronicle() {
+  if (!$('chron').classList.contains('hidden')) $('chron-list').innerHTML = chronicleHtml($('chron-filter').value);
+}
+
+// ===================================================================================================
+// endings, persistence (autosave, new game, export / import), boot and the frame loop
+// ===================================================================================================
+const SAVE_KEY = 'hoard-game-save-v04';   // v0.4 starts a generated valley; a v0.3 save stays behind under v1
+
+function autosave() {
+  if (play.dead) return;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ world, game: { seed: play.seed, age: play.age, stamina: play.stamina, ages: play.ages, ageEvents: play.ageEvents, sleepYears: play.sleepYears, montageSpeed: play.montageSpeed, lastWake: play.lastWake, skipLapse: play.skipLapse, hits: play.hits ?? [] } }));
+  } catch (e) { /* storage unavailable: silent */ }
+}
+
+function loadAutosave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const save = JSON.parse(raw);
+    if (!save?.world?.regions || save.world.tags?.includes('dragon_slain') || save.world.dragon?.slain) return false;
+    const r = sim({ cmd: 'load_world', world: save.world });
+    if (!r.ok) return false;
+    Object.assign(play, save.game, { landed: false });
+    return true;
+  } catch (e) { return false; }
+}
+
+// a new world; `genesis` deals a generated valley with its pre-history (v0.4), told on the legends page before the first flight
+function newGame(seed, opts = {}) {
+  play.seed = seed;
+  sim({ cmd: 'reset', seed, genesis: !!opts.genesis });
+  play.age = 1; play.ages = []; play.ageEvents = []; play.landed = false; play.lastWake = null; play.hits = [];
+  closeDeath(); closeGrowth();
+  $('system').classList.add('hidden'); $('lair').classList.add('hidden'); $('wake').classList.add('hidden');
+  $('dim').style.opacity = '0';
+  world = sim({ cmd: 'world' });
+  indexNames(world);
+  model = buildModel(world);
+  if (valley && valley.key !== valleyKey()) buildValleyScene();
+  startAge();
+  autosave();
+  if (opts.genesis) openLegends();
+}
+
+function startAge() {
+  play.focusFaction = ''; play.landOnArrival = false; play.fury = false;
+  resetDefenceWarnings();
+  closeHookAge([]);
+  clearNarration();
+  refreshWorld();
+  for (const t of tiles.values()) t.key = '';
+  for (const r of model.regions.values()) syncTile(r, true);
+  play.stamina = staminaBudget();
+  placeDragonAtLair();
+  dragon.height = 5;
+  spawnEnvoysSettled();
+  renderHud();
+  renderActions();
+  renderChronicle();
+}
+
+function exportWorld() {
+  const text = JSON.stringify(world, null, 1);
+  $('export-text').value = text;
+  $('export-text').classList.remove('hidden');
+  try {
+    const blob = new Blob([text], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `hoard-world-y${world.year}-s${world.seed}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (e) { toast('download blocked here; copy the JSON below', true); }
+}
+
+async function importWorld(file) {
+  let parsed;
+  try { parsed = JSON.parse(await file.text()); } catch (e) { toast('import: not json', true); return; }
+  const r = sim({ cmd: 'load_world', world: parsed });
+  if (!r.ok) { toast('import failed', true); return; }
+  play.ages = []; play.ageEvents = []; play.age = 1; play.lastWake = null;
+  $('system').classList.add('hidden');
+  startAge();
+  autosave();
+  toast('world imported');
+}
+
+function wireSystem() {
+  $('new-game').addEventListener('click', () => newGame(Number($('seed').value) || 1, { genesis: true }));
+  $('btn-legends').addEventListener('click', () => { $('system').classList.add('hidden'); openLegends(); });
+  $('export').addEventListener('click', exportWorld);
+  $('export-copy').addEventListener('click', () => { $('export-text').value = JSON.stringify(world, null, 1); $('export-text').classList.remove('hidden'); $('export-text').select(); try { navigator.clipboard?.writeText($('export-text').value); } catch (e) { /* ignore */ } });
+  $('import-btn').addEventListener('click', () => $('import').click());
+  $('import').addEventListener('change', () => { if ($('import').files[0]) importWorld($('import').files[0]); $('import').value = ''; });
+  $('lair-tabs').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { lairTab = b.dataset.tab; renderLair(); }));
+  $('lair-takeoff').addEventListener('click', takeOff);
+  $('chron-close').addEventListener('click', toggleChronicle);
+  $('chron-filter').addEventListener('input', renderChronicle);
+  $('m-pause').addEventListener('click', toggleMontagePause);
+  $('m-faster').addEventListener('click', () => montageSpeed(2));
+  $('m-slower').addEventListener('click', () => montageSpeed(0.5));
+  $('m-skip').addEventListener('click', finishMontage);
+}
+
+let lastFrame = performance.now(), frameCount = 0;
+function frame(now) {
+  const dt = Math.min(0.1, (now - lastFrame) / 1000);
+  lastFrame = now;
+  frameCount++;
+  if (!montage.active && !play.landed) updateDragon(dt);
+  else { dragon.group.position.set(dragon.pos.x, groundAt(dragon.pos.x, dragon.pos.z), dragon.pos.z); dragon.group.rotation.y = dragon.heading; dragon.ground = dragon.group.position.y; animateDragon(dt, 'idle'); }
+  updateHover();
+  updateBurnHold();
+  updateEnvoys(dt);
+  updateMontage(dt);
+  updateEffects(dt);
+  updateArrows(dt);
+  updateLook(dt);
+  updateDefences(dt);
+  updateHookPins();
+  if (!montage.active) keepBurning();
+  updateCamera();
+  renderer.render(scene, camera);
+  updateLabels();
+  requestAnimationFrame(frame);
+}
+
+async function main() {
+  sim = await loadSim();
+  const r = sim({ cmd: 'load', data: DATA, seed: 1 });
+  if (!r.ok) return;
+  const restored = loadAutosave();
+  if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true });   // a fresh start: a generated valley, its legends first
+  world = sim({ cmd: 'world' });
+  indexNames(world);
+  model = buildModel(world);
+  await loadModels();
+  buildScene();
+  wireInput();
+  wireSystem();
+  if (!restored) { play.seed = 1; play.stamina = staminaBudget(); }
+  startAge();
+  if (!restored) { autosave(); openLegends(); }
+  setStatus(restored ? 'restored' : 'ready');
+  document.body.dataset.ready = '1';
+  requestAnimationFrame(frame);
+}
+
+window.game = {
+  flyTo(regionId) { flyTo(regionId); const [x, z] = regionCentre(regionId); dragon.pos.set(x + 0.4, dragon.height, z + 0.6); dragon.target = null; selectedRegion = dragonRegion(); renderActions(); },
+  act, land() { if (dragonRegion() !== 'lair') window.game.flyTo('lair'); landAtLair(); }, takeOff,
+  sleep(years) { const res = sleep(years); return res; },
+  finishMontage, acceptOffer(i = 0) { if (!(model.offers ?? []).length) return false; const r = sim({ cmd: 'accept_offer', index: i }); if (r.ok) play.ageEvents.push(...(r.events ?? [])); refreshWorld(); spawnEnvoysSettled(); if (play.landed) renderLair(); return r.ok; },
+  state() { return { frame: frameCount, year: model.year, age: play.age, stamina: play.stamina, landed: play.landed, montage: montage.active, region: dragonRegion(), dragon: model.dragon, dragonScale: dragon.group.scale.x, factions: world.factions.map((f) => ({ id: f.id, race: f.race, wealth: f.wealth, fear: f.fear, faith: f.faith, regions: f.regions, era: f.era, capital: f.capital, at_war_with: f.at_war_with })), offers: (model.offers ?? []).length, ages: play.ages.map((a) => ({ age: a.age, from: a.from, to: a.to, wake_reason: a.wake_reason, events: a.chronicle.length, acts: a.acts.length })), armies: model.armies.length, armyGroups: armies.size, arrows: warArrows.size, camps: camps.size, envoys: envoys.length, tiles: tiles.size, pendingEvents: play.ageEvents.length, ageEvents: play.ageEvents.map((e) => e.kind), oaths: (world.oaths ?? []).map((o) => ({ id: o.id, status: o.status, party: o.parties[1] })), modifiers: (world.modifiers ?? []).map((m) => m.source + '>' + m.target), montageYear: montage.year, lairTab, pos: [dragon.pos.x, dragon.pos.z], dragonPos: [dragon.pos.x, dragon.pos.z] }; },
+  actions() { return selectedRegion ? actionsFor(selectedRegion).map((a) => ({ id: a.id, ok: a.ok, why: a.why, cost: a.costText ?? a.cost })) : []; },
+  setLairTab(t) { lairTab = t; if (play.landed) renderLair(); },
+  pauseMontage() { if (montage.active && !montage.paused) toggleMontagePause(); },
+  advanceMontage(years) { if (!montage.active) return; const until = montage.year + years; const was = montage.paused; montage.paused = false; while (montage.year < until && montage.index < montage.events.length && !montage.done) updateMontage(1 / montage.speed); montage.paused = was; },
+  montageInfo() { return { active: montage.active, paused: montage.paused, year: montage.year, index: montage.index, total: montage.events.length, kinds: montage.events.map((e) => e.kind), texts: montage.events.map(eventText), lastText: montage.lastText ?? '', lastWorthy: !!montage.lastWorthy }; },
+  stepMontage() { if (!montage.active || montage.done || montage.index >= montage.events.length) return null; const e = montage.events[montage.index++]; montage.year = Math.max(montage.year, e.year); $('m-year').textContent = `Year ${Math.floor(montage.year)}`; playEvent(e); return e.kind; },
+  screenPos(regionId) { const [x, z] = regionCentre(regionId); const p = new THREE.Vector3(x, groundAt(x, z) + 0.1, z).project(camera); return [(p.x + 1) / 2 * innerWidth, (1 - p.y) / 2 * innerHeight]; },
+  labels() { return [...labelEls.entries()].map(([id, el]) => ({ id, text: el.textContent, shown: el.style.display !== 'none' })); },
+  tileColour(id) { const t = tiles.get(id); return t ? '#' + t.color.getHexString() : null; },
+  tileOwnerRing(id) { const t = tiles.get(id); const ring = t?.decor.children.find((c) => c.userData.ring); return ring ? '#' + ring.material.color.getHexString() : null; },
+  settlementCount(id) { const t = tiles.get(id); return t ? t.decor.children.length : 0; },
+  setPos(x, z) { dragon.pos.set(x, dragon.height, z); dragon.target = null; },
+  loadWorld(w) { const r = sim({ cmd: 'load_world', world: w }); if (r.ok) { play.ages = []; play.ageEvents = []; play.age = 1; startAge(); } return r.ok; },
+  keys: (k, down) => { if (down) keys.add(k); else keys.delete(k); },
+  newGame, setSpeed(v) { montage.speed = v; play.montageSpeed = v; $('m-speed').textContent = v + ' y/s'; }, sim: (o) => sim(o), world: () => world,
+  // v0.2: wake screen, narration, courts, known people, phases, tasks
+  wake() { const el = $('wake'); return { open: wakeOpen(), headline: el.querySelector('.headline')?.textContent ?? '', paragraphs: [...el.querySelectorAll('section.slept p')].map((x) => x.textContent), opportunities: (play.lastWake?.briefing?.opportunities ?? []).map((o) => ({ kind: o.kind, faction: o.faction, text: o.text })) }; },
+  narration() { return NARR.lines.map((l) => ({ kind: l.kind, text: l.text, faction: l.faction ?? '', mood: l.mood ?? '', who: l.who ?? '', source: l.source ?? '' })); },
+  narrateWith(a, res) { const nb = narrationBefore(); narrateAct(a, res, nb); return NARR.lines.length; },
+  briefingCleaned(b, events) { return cleanBriefing(b, events); },
+  tickerWorthy(e) { return tickerWorthy(e, youContext([world])); },
+  court() { const el = $('court'); return { shown: !el.classList.contains('hidden'), faction: el.dataset.faction ?? '', text: el.innerText, people: [...el.querySelectorAll('.person')].map((x) => x.dataset.person) }; },
+  people: () => world.people, known: () => world.dragon.known_people, phase: () => phaseInfo(), tasks: () => openTasks(),
+  // v0.4: growth and talents, defences and wounds, the arms race, death, hooks, legends
+  v04() {
+    const d = model.dragon;
+    return { growth: d.growth ?? null, picks: pendingPicks(), talents: d.talents ?? [], look: d.look ?? {}, effects: d.effects ?? {}, health: hasHealth() ? health() : null,
+      hooks: currentHooks().map((h) => ({ id: h.id, kind: h.kind, region: hookRegion(h), title: h.title, acts: h.resolve?.acts ?? [] })), answered: HOOKS.answered.map((h) => h.id), pins: HOOKS.pins.size,
+      defences: (world.regions ?? []).filter((r) => r.defences?.length).map((r) => ({ id: r.id, owner: r.owner, list: r.defences.map((x) => x.id), wound: actWound(r.id), passive: passiveHere(r.id) })),
+      defenceGroups: DEF.groups.size, growthOpen: growthUi.open, dead: !!play.dead, deathOpen: deathOpen(), wakeKind: wakeOpen() ? $('wake').dataset.kind ?? '' : '', genesis: world.genesis?.template ? world.genesis : null,
+      names: [...model.regions.values()].map((r) => r.name).filter(Boolean), arms: (world.factions ?? []).map((f) => ({ id: f.id, next: armsOf(f.id), stage: f.slayers?.stage ?? '', odds: f.slayers?.odds ?? null })),
+      ready: slayersReady(), door: slayersAtDoor(), phase: world.phase, hits: play.hits ?? [],
+      speed: dragon.speed, scale: dragon.group.scale.x, beamColour: '#' + dragon.beam.material.color.getHexString() };
+  },
+  newWorld: (seed) => newGame(seed, { genesis: true }), openGrowth: (axis) => openGrowth(axis), closeGrowth: () => closeGrowth(),
+  view(zoom, x = null, z = null) { cam.zoom = zoom; if (x !== null) { cam.follow = false; cam.target.set(x, 0, z); } else cam.follow = true; resize(); },
+  site: (id) => regionCentre(id),
+  pick(id) { if (growthUi.open && !growthUi.busy) { const ok = pendingPicks().some((p) => p.options.includes(id)); chooseTalent(id, growthUi.el); return ok; } return !!pickTalent(id)?.ok; },
+  // hold the dragon over a region for `seconds` of game time (passive wounds from the towers), in steps of `step`
+  dwell(regionId, seconds, step = 0.25) {
+    window.game.flyTo(regionId);
+    for (let t = 0; t < seconds - 1e-9; t += step) updateDefences(step);
+    if (DEF.pending.size) flushPassiveWounds();
+    return hasHealth() ? health() : null;
+  },
+};
+</script>
+<script src="game/models.js"></script>
+<script src="game/terrain.js"></script>
+<script src="game/text.js"></script>
+<script src="game/narrate.js"></script>
+<script src="game/court.js"></script>
+<script src="game/envoys.js"></script>
+<script src="game/rhythm.js"></script>
+<script src="game/wake.js"></script>
+<script src="game/sound.js"></script>
+<script src="game/effects.js"></script>
+<script src="game/look.js"></script>
+<script src="game/growth.js"></script>
+<script src="game/defences.js"></script>
+<script src="game/wounds.js"></script>
+<script src="game/bet.js"></script>
+<script src="game/arms.js"></script>
+<script src="game/hooks.js"></script>
+<script src="game/legends.js"></script>
+<script src="game/death.js"></script>
+<script>main().catch((e) => { setStatus('failed: ' + e.message); console.error(e); });</script>
+</body>
+</html>

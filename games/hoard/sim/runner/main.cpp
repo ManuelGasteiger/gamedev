@@ -1,0 +1,266 @@
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+#include "ages/ages.h"
+#include "ages/genesis.h"
+#include "ages/json.h"
+#include "ages/world_util.h"
+#include "ages/wounds.h"
+
+using namespace ages;
+using nlohmann::json;
+
+namespace {
+
+struct Options {
+    std::string data = "data";
+    std::string out = "out";
+    std::string acts;
+    std::string policy;
+    uint64_t seed = 1;
+    int years = 3000;
+    int sleep = 100;
+    bool briefing = false;
+    bool narrate = false;
+    bool genesis = false;   // v0.4 world (S2)
+};
+
+bool parse(int argc, char** argv, Options& o) {
+    for (int i = 1; i < argc; ++i) {
+        std::string k = argv[i];
+        auto need = [&](std::string& dst) { if (i + 1 >= argc) return false; dst = argv[++i]; return true; };
+        std::string v;
+        if (k == "--data") { if (!need(o.data)) return false; }
+        else if (k == "--out") { if (!need(o.out)) return false; }
+        else if (k == "--acts") { if (!need(o.acts)) return false; }
+        else if (k == "--policy") { if (!need(o.policy)) return false; }
+        else if (k == "--seed") { if (!need(v)) return false; o.seed = std::strtoull(v.c_str(), nullptr, 10); }
+        else if (k == "--years") { if (!need(v)) return false; o.years = std::atoi(v.c_str()); }
+        else if (k == "--sleep") { if (!need(v)) return false; o.sleep = std::atoi(v.c_str()); }
+        else if (k == "--briefing") o.briefing = true;
+        else if (k == "--narrate") o.narrate = true;
+        else if (k == "--genesis") o.genesis = true;
+        else { std::fprintf(stderr, "unknown argument %s\n", k.c_str()); return false; }
+    }
+    return o.years > 0 && o.sleep > 0;
+}
+
+bool write_file(const std::string& path, const std::string& text) {
+    std::ofstream out(path);
+    if (!out) return false;
+    out << text;
+    return true;
+}
+
+json record_json(const FactionRecord& r, bool alive) {
+    json j;
+    j["id"] = r.id;
+    j["race"] = r.race;
+    j["born"] = r.born;
+    if (alive) j["died"] = nullptr; else j["died"] = r.died;
+    j["lifetime"] = r.died - r.born;
+    j["max_regions"] = r.max_regions;
+    j["max_realm"] = r.max_realm;
+    j["eras"] = r.era_years;
+    return j;
+}
+
+// v0.4 (S1): how the dragon died (wounds from the defences while raiding, or a slaying while asleep) and whether the
+// briefing before the fatal sleep named the slayers
+json death_json(const World& w) {
+    size_t begin = 0, previous = 0;
+    for (size_t i = 0; i < w.chronicle.size(); ++i) {
+        const Event& e = w.chronicle[i];
+        if (e.kind == "sleep_begin") { previous = begin; begin = i; }
+        if (e.kind != "dragon_slain") continue;
+        bool wounds = e.cause.text_key == "defences";
+        bool warned = wounds;
+        for (size_t k = previous; k < begin && !warned; ++k) {
+            const Event& x = w.chronicle[k];
+            warned = x.subject == e.subject && (x.kind == "slayers_ready" || x.kind == "slayers_coming" || x.kind == "slayers_forming");
+        }
+        return {{"cause", wounds ? "wounds" : "slaying"}, {"year", e.year}, {"court", e.subject}, {"warned", warned}};
+    }
+    return nullptr;
+}
+
+// v0.4 hooks (S3): hooks per waking (resolved and ignored events share the waking's year; the last waking's still open),
+// answered share, fights, growth points the rewards paid per axis
+json hooks_json(const World& w, const Params& p) {
+    std::map<int, int> per_wake, answered_per_wake;
+    std::map<std::string, int> by_kind, answered_by_kind;
+    std::map<std::string, double> reward_growth;
+    int wakings = 0, fights = 0;
+    double fight_wounds = 0;
+    for (auto& e : w.chronicle) {
+        if (e.kind == "wake" && e.object != "dragon_slain") { wakings += 1; per_wake[e.year] += 0; }
+        if (e.kind != "hook_resolved" && e.kind != "hook_ignored") continue;
+        std::string kind = e.tags.empty() ? "" : *e.tags.begin();
+        per_wake[e.year] += 1;
+        by_kind[kind] += 1;
+        if (e.kind != "hook_resolved") continue;
+        answered_per_wake[e.year] += 1;
+        answered_by_kind[kind] += 1;
+        for (auto& kv : e.cause.params) {
+            if (kv.first == "fight") { if (kv.second > 0) { fights += 1; fight_wounds += kv.second; } }
+            else reward_growth[kv.first] += kv.second;
+        }
+    }
+    for (auto& h : w.hooks) { per_wake[h.offered] += 1; by_kind[h.kind] += 1; }
+    int with_hook = 0, offered = 0, answered = 0;
+    for (auto& kv : per_wake) { if (kv.second > 0) with_hook += 1; offered += kv.second; }
+    for (auto& kv : answered_per_wake) answered += kv.second;
+    return {{"wakings", wakings}, {"with_hook", with_hook}, {"offered", offered}, {"answered", answered}, {"by_kind", by_kind},
+            {"answered_by_kind", answered_by_kind}, {"fights", fights}, {"fight_wounds", fight_wounds}, {"reward_growth", reward_growth},
+            {"health_max", health_max(w, p)}};
+}
+
+json stats_json(const World& w, const Params& p) {
+    json factions = json::array();
+    std::vector<FactionRecord> all = w.graveyard;
+    for (auto& g : w.graveyard) factions.push_back(record_json(g, false));
+    for (auto& f : w.factions) {
+        FactionRecord r = record_of(f, w.year);
+        all.push_back(r);
+        factions.push_back(record_json(r, true));
+    }
+
+    std::map<std::string, std::vector<int>> era_timeline;
+    for (auto& r : all) {
+        auto& best = era_timeline[r.race];
+        for (size_t e = 1; e < r.era_years.size(); ++e) {
+            if (best.size() < e) best.resize(e, -1);
+            if (best[e - 1] < 0 || r.era_years[e] < best[e - 1]) best[e - 1] = r.era_years[e];
+        }
+    }
+    json timeline;
+    for (auto& kv : era_timeline) timeline[kv.first] = kv.second;
+
+    int orc_regions = 0, owned = 0;
+    double wealth = 0;
+    std::map<std::string, int> race_regions;
+    for (auto& r : w.regions) {
+        if (r.owner.empty()) continue;
+        owned += 1;
+        const Faction* f = find_faction(w, r.owner);
+        if (!f) continue;
+        race_regions[dominant_race(*f)] += 1;
+        if (f->race == "orc") orc_regions += 1;
+    }
+    for (auto& f : w.factions) wealth += f.wealth;
+    json alive = json::object(), remnants = json::object();
+    for (auto& kv : p.races) alive[kv.first] = false;
+    for (auto& f : w.factions) alive[dominant_race(f)] = true;
+    for (auto& r : w.remnants) remnants[r.race] = r.strength;
+    int hegemonies = 0, hunger_wakes = 0;
+    for (auto& e : w.chronicle) {
+        if (e.kind == "hegemony_ended") hegemonies += 1;
+        if (e.kind == "wake" && e.object == "hunger") hunger_wakes += 1;
+    }
+
+    json j;
+    j["seed"] = w.seed;
+    j["year"] = w.year;
+    j["factions"] = factions;
+    j["era_timeline"] = timeline;
+    j["orc_region_share"] = w.regions.empty() ? 0.0 : static_cast<double>(orc_regions) / static_cast<double>(w.regions.size());
+    j["empty_valley"] = owned == 0;
+    j["total_wealth"] = wealth;
+    j["regions_owned"] = owned;
+    j["dragon"] = {{"size", w.dragon.size}, {"knowledge", w.dragon.knowledge}, {"magic", w.dragon.magic},
+                   {"threat", threat(w.dragon, p.c)}};
+    j["dragon_slain"] = has_tag(w.tags, "dragon_slain");
+    j["race_regions"] = race_regions;
+    j["alive"] = alive;
+    j["remnants"] = remnants;
+    j["hegemonies_fallen"] = hegemonies;
+    j["hunger_wakes"] = hunger_wakes;
+    j["dragon"]["hunger"] = w.dragon.hunger;
+    j["dragon_death"] = death_json(w);   // v0.4 (S1)
+    j["dragon_growth"] = {{"phase", w.dragon.phase}, {"points", w.dragon.growth}, {"talents", w.dragon.talents}, {"wounds", w.dragon.wounds}};
+    j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
+    j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)
+    return j;
+}
+
+}
+
+int main(int argc, char** argv) {
+    Options o;
+    if (!parse(argc, argv, o)) {
+        std::fprintf(stderr, "usage: ages --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] --out out/\n");
+        return 2;
+    }
+    LoadResult loaded = load_data(o.data, o.seed);
+    if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
+    World& w = loaded.world;
+    const Params& p = loaded.params;
+    std::string gerr, legends;
+    if (o.genesis && !make_genesis(w, p, gerr)) { std::fprintf(stderr, "genesis failed: %s\n", gerr.c_str()); return 1; }   // v0.4 world (S2)
+    if (o.genesis) legends = legends_json(w, p);
+
+    std::vector<Act> log;
+    if (!o.acts.empty()) {
+        std::ifstream in(o.acts);
+        if (!in) { std::fprintf(stderr, "cannot open %s\n", o.acts.c_str()); return 1; }
+        std::stringstream ss;
+        ss << in.rdbuf();
+        std::string err;
+        if (!acts_from_json(ss.str(), log, err)) { std::fprintf(stderr, "%s\n", err.c_str()); return 1; }
+    }
+    Policy policy;
+    bool has_policy = false;
+    if (!o.policy.empty()) {
+        std::string err;
+        if (!load_policy(o.data, o.policy, policy, err)) { std::fprintf(stderr, "%s\n", err.c_str()); return 1; }
+        has_policy = true;
+    }
+
+    Scenario s;
+    s.first_acts = log;
+    s.policy = has_policy ? &policy : nullptr;
+    s.data_dir = o.data;
+    s.years = o.years;
+    s.sleep = o.sleep;
+    run_scenario(w, p, s);
+
+    std::string base = o.out;
+    if (!base.empty() && base.back() != '/') base += '/';
+    std::string mkdir = "mkdir -p \"" + o.out + "\"";
+#ifdef _WIN32
+    mkdir = "mkdir \"" + o.out + "\" 2>nul";
+#endif
+    if (std::system(mkdir.c_str()) != 0) std::fprintf(stderr, "warning: mkdir failed for %s\n", o.out.c_str());
+    bool ok = write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
+              write_file(base + "world_final.json", world_to_json(w)) &&
+              write_file(base + "stats.json", stats_json(w, p).dump(1));
+    if (!ok) { std::fprintf(stderr, "cannot write to %s\n", o.out.c_str()); return 1; }
+    if (o.narrate) {   // narrated.json: the narrator's sentence for every chronicle event, in chronicle order
+        json lines = json::array();
+        for (auto& e : w.chronicle) lines.push_back(event_sentence(w, p, e));
+        if (!write_file(base + "narrated.json", lines.dump(1))) { std::fprintf(stderr, "cannot write narrated.json\n"); return 1; }
+    }
+    if (!legends.empty() && !write_file(base + "legends.json", legends)) { std::fprintf(stderr, "cannot write legends\n"); return 1; }   // v0.4 world (S2)
+    std::string briefing = briefing_json(w, p, w.sleep_started);
+    if (!write_file(base + "briefing.json", briefing)) { std::fprintf(stderr, "cannot write briefing\n"); return 1; }
+    if (o.briefing) {
+        json b = json::parse(briefing, nullptr, false);
+        std::printf("== %s\n", b["headline"]["text"].get<std::string>().c_str());
+        for (auto& g : b["while_you_slept"]) {
+            std::printf("-- %d to %d\n", g["from"].get<int>(), g["to"].get<int>());
+            for (auto& l : g["lines"]) std::printf("  %d  %s\n", l["year"].get<int>(), l["text"].get<std::string>().c_str());
+        }
+        for (const char* k : {"people", "threads", "opportunities"}) {
+            std::printf("-- %s\n", k);
+            for (auto& l : b[k]) std::printf("  %s\n", l["text"].get<std::string>().c_str());
+        }
+        std::printf("-- %s\n", b["phase"]["text"].get<std::string>().c_str());
+    }
+    std::printf("seed %llu year %d factions %zu hash %016llx\n", static_cast<unsigned long long>(w.seed), w.year,
+                w.factions.size(), static_cast<unsigned long long>(chronicle_hash(w)));
+    return 0;
+}

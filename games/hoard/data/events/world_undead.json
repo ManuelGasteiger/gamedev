@@ -1,0 +1,79 @@
+[
+  {
+    "id": "necromancers_tower",
+    "kind": "necromancer_rose",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "magic", "on": "world", "gte": 0.4},
+      {"field": "owned", "on": "region", "eq": 0},
+      {"any": [{"field": "burn", "on": "region", "gte": 0.5}, {"tag": "wasteland", "on": "region"}, {"tag": "razed", "on": "region"}, {"tag": "ruins", "on": "region"}]},
+      {"find": "faction", "adjacent_to": "region", "bind": "scholar"},
+      {"field": "openness", "on": "scholar", "gte": 0.5},
+      {"field": "era", "on": "scholar", "gte": 2}
+    ],
+    "chance": 0.03,
+    "cooldown_decades": 30,
+    "subject": "$new",
+    "object": "$scholar",
+    "effects": [
+      {"do": "spawn_undead", "region": "region", "wealth": 40, "wealth_per_magic": 60, "cohesion": 0.85, "era": 2, "tags": ["tower"]}
+    ]
+  },
+  {
+    "id": "restless_dead",
+    "kind": "dead_rose",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "owned", "on": "region", "eq": 0},
+      {"field": "empty_years", "on": "region", "gte": 100},
+      {"any": [{"tag": "razed", "on": "region"}, {"tag": "ruins", "on": "region"}]}
+    ],
+    "chance": 0.02,
+    "chance_mult": [{"if": [{"tag": "age_of_magic", "on": "world"}], "mult": 2}],
+    "cooldown_decades": 30,
+    "subject": "$new",
+    "object": "$region",
+    "effects": [
+      {"do": "spawn_undead", "region": "region", "wealth": 35, "wealth_per_magic": 50, "cohesion": 0.8, "era": 1, "tags": ["restless_dead"]}
+    ]
+  },
+  {
+    "id": "the_dead_walk",
+    "kind": "dead_rose",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "owned", "on": "region", "eq": 0},
+      {"any": [{"tag": "razed", "on": "region"}, {"tag": "ruins", "on": "region"}, {"tag": "wasteland", "on": "region"}, {"tag": "cataclysm", "on": "region"}, {"field": "burn", "on": "region", "gte": 0.3}]}
+    ],
+    "chance": 0,
+    "subject": "$new",
+    "object": "$region",
+    "effects": [
+      {"do": "spawn_undead", "region": "region", "wealth": 35, "wealth_per_magic": 50, "cohesion": 0.8, "era": 1, "tags": ["restless_dead"]}
+    ]
+  },
+  {
+    "id": "the_plague_dead",
+    "kind": "dead_rose",
+    "scope": "region",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "owned", "on": "region", "eq": 1},
+      {"field": "regions", "on": "owner", "gte": 2},
+      {"any": [{"event": "plague", "on": "owner", "self_as": "subject", "within_years": 40}, {"event": "great_plague", "within_years": 40}]}
+    ],
+    "chance": 0,
+    "subject": "$new",
+    "object": "$owner",
+    "effects": [
+      {"do": "spawn_undead", "region": "region", "wealth": 40, "wealth_per_magic": 50, "cohesion": 0.8, "era": 1, "tags": ["restless_dead"]}
+    ]
+  }
+]

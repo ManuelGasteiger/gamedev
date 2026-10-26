@@ -1,0 +1,6 @@
+[
+  { "id": "aldmere",  "race": "human", "wealth": 20, "cohesion": 0.9, "era": 0 },
+  { "id": "vessary",  "race": "human", "wealth": 20, "cohesion": 0.9, "era": 0 },
+  { "id": "dorun",    "race": "dwarf", "wealth": 20, "cohesion": 0.9, "era": 0 },
+  { "id": "ilvareth", "race": "elf",   "wealth": 20, "cohesion": 0.9, "era": 0 }
+]

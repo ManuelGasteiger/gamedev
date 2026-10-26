@@ -1,0 +1,27 @@
+{
+  "factions": {
+    "human":  { "a": ["Ald", "Ves", "Mar", "Cor", "Hal", "Ber", "Tor", "Wen", "Gal", "Rhon"], "b": ["mere", "sary", "wick", "dale", "ford", "ley", "march", "holm", "stead", "fell"] },
+    "dwarf":  { "a": ["Dor", "Khaz", "Brum", "Thar", "Gund", "Mor", "Bel", "Drak"], "b": ["un", "ak", "dum", "ok", "grim", "heim", "dal", "tor"] },
+    "elf":    { "a": ["Ilv", "Sael", "Thal", "Aer", "Lor", "Vael", "Nim", "Ys"], "b": ["areth", "orien", "ande", "ieth", "wen", "ael", "uin", "ith"] },
+    "orc":    { "a": ["Gor", "Uzg", "Mog", "Krul", "Zag", "Bru", "Dur", "Ghaz"], "b": ["ak", "ul", "oth", "gash", "mok", "uk", "rat", "zag"] },
+    "undead": { "a": ["Mor", "Nek", "Vhal", "Sor", "Thul", "Ash", "Dun", "Grav"], "b": ["ghul", "rath", "mor", "wraith", "bane", "crypt", "shade", "dusk"] },
+    "saurian": { "a": ["Ssa", "Kir", "Tzo", "Xal", "Ssy", "Qua", "Vesh", "Ith"], "b": ["thrak", "lissa", "kesh", "zul", "rith", "qan", "sshi", "tlan"] }
+  },
+  "people": {
+    "human":  { "a": ["Ald", "Mae", "Cor", "Hal", "Bre", "Tam", "Ed", "Wyn", "Ros", "Gar", "Ser", "Ive"], "b": ["ric", "lis", "wen", "mund", "ric", "ara", "gar", "ifer", "lind", "eth", "bert", "ola"] },
+    "dwarf":  { "a": ["Thor", "Bal", "Dur", "Grim", "Hel", "Nor", "Brun", "Kaz"], "b": ["in", "dur", "gar", "a", "ga", "ri", "ild", "ek"] },
+    "elf":    { "a": ["Cael", "Ith", "Lor", "Nim", "Sael", "Thal", "Vael", "Yl"], "b": ["ion", "wen", "iel", "ande", "ira", "ith", "ael", "ona"] },
+    "orc":    { "a": ["Gor", "Uzg", "Mog", "Krul", "Zag", "Bru", "Dur", "Ghaz"], "b": ["bak", "ul", "oth", "gash", "mok", "uk", "rat", "zug"] },
+    "undead": { "a": ["Mor", "Nek", "Vhal", "Sor", "Thul", "Ash"], "b": ["ghul", "rath", "mor", "ith", "bane", "dusk"] },
+    "saurian": { "a": ["Ssi", "Kas", "Tzi", "Xo", "Ish", "Qua", "Vess", "Tla"], "b": ["sk", "lith", "ka", "zir", "ssa", "qet", "rak", "ix"] }
+  },
+  "epithets": {
+    "bold": "the Bold",
+    "pious": "the Pious",
+    "greedy": "the Grasping",
+    "cunning": "the Sly",
+    "golden": "the Great",
+    "tyrant": "the Cruel",
+    "dragon_raised": "Dragonward"
+  }
+}

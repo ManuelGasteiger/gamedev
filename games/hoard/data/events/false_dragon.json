@@ -1,0 +1,55 @@
+[
+  {
+    "id": "false_dragon",
+    "needs_dragon": true,
+    "trigger": [
+      {"field": "faith", "gt": 0.3},
+      {"any": [{"field": "quiet_years", "gte": 200}, {"field": "asleep_years", "on": "dragon", "gte": 200}]},
+      {"person": "ruler", "tag": "tyrant", "bind": "person"},
+      {"tag": "false_dragon:*", "absent": true}
+    ],
+    "chance": 0.3,
+    "cooldown_decades": 50,
+    "object": "$person",
+    "effects": [
+      {"do": "field", "field": "faith", "set": 0.2},
+      {"do": "field", "field": "piety", "add": 0.3},
+      {"do": "field", "field": "authority", "add": 0.3},
+      {"do": "tag", "tag": "false_dragon:$person", "decades": 50}
+    ]
+  },
+  {
+    "id": "false_dragon_judged",
+    "needs_dragon": true,
+    "trigger": [
+      {"tag": "false_dragon:*", "bind": "person"},
+      {"event": "act_kill", "self_as": "subject", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "$person",
+    "effects": [
+      {"do": "field", "field": "faith", "add": 0.4, "tags": ["judgement"]},
+      {"do": "untag", "tag": "false_dragon:*"},
+      {"do": "tag", "tag": "judged_by_fire", "decades": 50, "inherit": true}
+    ]
+  },
+  {
+    "id": "false_dragon_dies",
+    "needs_dragon": true,
+    "trigger": [
+      {"tag": "false_dragon:*", "bind": "person"},
+      {"field": "alive", "on": "person", "eq": 0}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "$person",
+    "effects": [
+      {"do": "untag", "tag": "false_dragon:*"}
+    ],
+    "branches": [
+      {"if": [{"event": ["act_show", "act_miracle", "act_give"], "self_as": "subject", "within_years": 300}], "text_key": "false_dragon_faith_returns", "effects": [{"do": "field", "field": "faith", "add": 0.2, "tags": ["gift"]}, {"do": "tag", "tag": "true_dragon_seen", "decades": 40}]},
+      {"weight": 1, "text_key": "false_dragon_disillusioned", "effects": [{"do": "modifier", "var": "faith_gain", "op": "mul", "value": 0.5, "decades": 20}, {"do": "tag", "tag": "disillusioned", "decades": 20, "inherit": true}]}
+    ]
+  }
+]

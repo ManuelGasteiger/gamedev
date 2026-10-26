@@ -1,0 +1,6 @@
+{
+  "acts": [
+    { "type": "defend", "target": "aldmere", "against": "any_attacker", "magnitude": 1.0 },
+    { "type": "give",   "target": "aldmere", "magnitude": 0.1 }
+  ]
+}

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "people_from_beyond_men",
+    "kind": "people_arrived",
+    "scope": "world",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "rim_open:0.45", "on": "world", "gte": 1}
+    ],
+    "chance": 0.0002,
+    "cooldown_decades": 60,
+    "subject": "$new",
+    "object": "$region",
+    "tags": ["$race"],
+    "effects": [
+      {"do": "arrive", "races": {"human": 1}, "wealth": 45, "cohesion": 0.85, "era_lag": 1, "weak_cohesion": 0.45, "tags": ["from_beyond"]}
+    ]
+  },
+  {
+    "id": "people_from_beyond_horde",
+    "kind": "people_arrived",
+    "scope": "world",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "rim_open:0.45", "on": "world", "gte": 1}
+    ],
+    "chance": 0.00014,
+    "cooldown_decades": 60,
+    "subject": "$new",
+    "object": "$region",
+    "tags": ["$race"],
+    "effects": [
+      {"do": "arrive", "races": {"orc": 1}, "wealth": 50, "cohesion": 0.85, "era_lag": 2, "weak_cohesion": 0.45, "tags": ["from_beyond"]}
+    ]
+  },
+  {
+    "id": "people_from_beyond_fen",
+    "kind": "people_arrived",
+    "scope": "world",
+    "major": true,
+    "trigger": [
+      {"tag": "generated", "on": "world"},
+      {"field": "rim_open:0.45", "on": "world", "gte": 1}
+    ],
+    "chance": 0.0001,
+    "cooldown_decades": 60,
+    "subject": "$new",
+    "object": "$region",
+    "tags": ["$race"],
+    "effects": [
+      {"do": "arrive", "races": {"saurian": 1}, "wealth": 40, "cohesion": 0.9, "era_lag": 1, "weak_cohesion": 0.45, "tags": ["from_beyond"]}
+    ]
+  }
+]

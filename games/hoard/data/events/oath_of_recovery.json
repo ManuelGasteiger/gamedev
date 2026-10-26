@@ -1,0 +1,72 @@
+[
+  {
+    "id": "oath_of_recovery",
+    "trigger": [
+      {"field": "race", "eq": "elf"},
+      {"field": "ruler_class", "in": ["longlived", "immortal"]},
+      {"any": [{"event": "act_take", "self_as": "subject", "other_from": "dragon", "event_tag": "loot:art", "within_years": 10}, {"event": "act_take", "self_as": "subject", "other_from": "dragon", "event_tag": "loot:artifacts", "within_years": 10}, {"event": "sack_of_the_capital", "self_as": "subject", "other_from": "object", "within_years": 10}]},
+      {"tag": "sworn:$other", "absent": true}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "effects": [
+      {"do": "tag", "tag": "sworn:$other", "decades": 100, "inherit": true},
+      {"do": "field", "field": "cohesion", "add": 0.2},
+      {"do": "field", "field": "anti_dragon", "add": 0.3, "if": [{"var": "other", "eq": "dragon"}]}
+    ],
+    "branches": [
+      {"if": [{"var": "other", "eq": "dragon"}], "text_key": "oath_of_recovery_dragon"},
+      {"weight": 1}
+    ]
+  },
+  {
+    "id": "oath_of_recovery_war",
+    "trigger": [
+      {"tag": "sworn:*", "bind": "other", "min_age_years": 20},
+      {"var": "other", "ne": "dragon"},
+      {"adjacent": "other"},
+      {"at_war": "other", "absent": true},
+      {"field": "vassal", "eq": 0},
+      {"field": "vassal", "on": "other", "eq": 0}
+    ],
+    "chance": 0.08,
+    "cooldown_decades": 10,
+    "chance_mult": [
+      {"if": [{"person": "hero", "tag": "sworn_to:sworn:$other"}], "mult": 2}
+    ],
+    "thread": "war:$self:$other:$year",
+    "effects": [
+      {"do": "tag", "tag": "oath_war:$other", "decades": 30},
+      {"do": "spawn_person", "role": "hero", "tags": ["oathbound"], "bind": "leader"},
+      {"do": "war", "against": "other", "reason": "oath_of_recovery"}
+    ]
+  },
+  {
+    "id": "oath_hunts_the_dragon",
+    "trigger": [
+      {"tag": "sworn:dragon", "min_age_years": 50},
+      {"field": "anti_dragon", "lt": 1.0}
+    ],
+    "chance": 0.1,
+    "cooldown_decades": 15,
+    "object": "dragon",
+    "effects": [
+      {"do": "field", "field": "anti_dragon", "add": 0.25},
+      {"do": "tag", "tag": "oath_hunters", "decades": 30}
+    ]
+  },
+  {
+    "id": "oath_released",
+    "trigger": [
+      {"tag": "sworn:*", "bind": "other"},
+      {"any": [{"event": "act_give", "self_as": "subject", "within_years": 10}, {"event": "region_taken", "self_as": "subject", "event_tag": "$other", "within_years": 10}]}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "effects": [
+      {"do": "untag", "tag": "sworn:$other"},
+      {"do": "tag", "tag": "oath_fulfilled:$other", "decades": 50},
+      {"do": "field", "field": "cohesion", "add": -0.3}
+    ]
+  }
+]

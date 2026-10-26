@@ -1,0 +1,57 @@
+[
+  {
+    "id": "slayer_order",
+    "trigger": [
+      {"event": "slayers_founded", "self_as": "subject", "within_years": 10},
+      {"tag": "slayer_order", "absent": true}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "dragon",
+    "effects": [
+      {"do": "tag", "tag": "slayer_order", "decades": 100, "inherit": true}
+    ]
+  },
+  {
+    "id": "slayer_order_survives",
+    "trigger": [
+      {"tag": "slayer_order"},
+      {"event": "successor_founded", "self_as": "subject", "other_from": "tag", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "effects": [
+      {"do": "field", "field": "cohesion", "add": 0.05},
+      {"do": "tag", "tag": "order_hall", "decades": 50, "inherit": true}
+    ]
+  },
+  {
+    "id": "slayer_order_spreads",
+    "trigger": [
+      {"tag": "slayer_order", "absent": true},
+      {"find": "ally", "tag": "slayer_order", "adjacent_to": "self", "bind": "other"},
+      {"field": "era", "gte": 1}
+    ],
+    "chance": 0.03,
+    "cooldown_decades": 20,
+    "effects": [
+      {"do": "tag", "tag": "slayer_order", "decades": 60, "inherit": true},
+      {"do": "field", "field": "anti_dragon", "add": 0.02},
+      {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 1.2, "decades": 20}
+    ]
+  },
+  {
+    "id": "slayer_martyrs",
+    "trigger": [
+      {"tag": "slayer_order"},
+      {"event": "slay_attempt_failed", "self_as": "subject", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "dragon",
+    "effects": [
+      {"do": "field", "field": "cohesion", "add": 0.1},
+      {"do": "tag", "tag": "martyrs", "decades": 30, "inherit": true}
+    ]
+  }
+]

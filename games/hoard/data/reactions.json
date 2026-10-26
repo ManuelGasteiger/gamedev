@@ -1,0 +1,17 @@
+[
+  { "acts": ["burn", "kill", "take"], "relationship": "oath_active",        "fear_per_m": 0.3, "faith_set": 0.02,                       "tags": ["betrayal", "harm"] },
+  { "acts": ["burn", "kill", "take"], "relationship": "faithful",           "fear_per_m": 0.3, "faith_per_m": -0.6,                     "tags": ["harm"] },
+  { "acts": ["burn", "kill", "take"], "relationship": "weak",               "fear_per_m": 0.5, "faith_per_m": -0.2,                     "tags": ["harm"] },
+  { "acts": ["burn", "kill", "take"], "relationship": "strong",             "fear_per_m": 0.2, "faith_per_m": -0.2, "anti_dragon_per_m": 0.1, "tags": ["harm", "resolve"] },
+  { "acts": ["defend"],               "relationship": "losing",             "fear_flat": -0.1, "faith_per_m": 0.5,                      "tags": ["saved"] },
+  { "acts": ["defend"],               "relationship": "not_losing",         "faith_per_m": 0.15,                                        "tags": ["helped"] },
+  { "acts": ["show"],                 "relationship": "any",                "fear_flat": 0.15,                                          "tags": ["seen"] },
+  { "acts": ["give"],                 "relationship": "any",                "faith_per_m": 0.2,                                         "tags": ["gift"] },
+  { "acts": ["miracle"],              "relationship": "protector",          "faith_flat": 0.3,                                          "tags": ["miracle"] },
+  { "acts": ["miracle"],              "relationship": "terror",             "fear_flat": 0.4, "faith_flat": 0.1,                        "tags": ["terror"] },
+  { "acts": ["accept_offering"],      "relationship": "any",                "faith_flat": 0.1,                                          "tags": ["offering"] },
+  { "acts": ["destroy_altar"],        "relationship": "any",                "faith_flat": -0.3,                                         "tags": ["sacrilege"] },
+  { "acts": ["witness_burn"],         "relationship": "enemy",              "fear_per_m": 0.1, "faith_per_m": 0.1,                      "tags": ["spillover"] },
+  { "acts": ["witness_burn"],         "relationship": "friend",             "fear_per_m": 0.2, "faith_per_m": -0.1,                     "tags": ["spillover"] },
+  { "acts": ["witness_burn"],         "relationship": "neutral",            "fear_per_m": 0.1,                                          "tags": ["spillover"] }
+]

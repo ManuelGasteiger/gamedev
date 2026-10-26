@@ -1,0 +1,41 @@
+[
+  {
+    "id": "vein",
+    "scope": "region",
+    "era": [1, 99],
+    "trigger": [
+      {"field": "terrain", "on": "region", "eq": "hills"},
+      {"field": "race", "on": "owner", "eq": "dwarf"},
+      {"tag": "vein", "on": "region", "absent": true}
+    ],
+    "chance": 0.008,
+    "cooldown_decades": 40,
+    "object": "$owner",
+    "effects": [
+      {"do": "modifier", "on": "region", "var": "land", "op": "add", "value": 0.3, "decades": 20},
+      {"do": "modifier", "on": "owner", "var": "growth", "op": "mul", "value": 1.3, "decades": 20},
+      {"do": "field", "on": "owner", "field": "authority", "add": 0.1},
+      {"do": "tag", "on": "region", "tag": "vein", "decades": 30},
+      {"do": "tag", "on": "owner", "tag": "vein_struck", "decades": 50}
+    ]
+  },
+  {
+    "id": "claim_on_the_hills",
+    "trigger": [
+      {"field": "race", "eq": "human"},
+      {"find": "faction", "tag": "vein_struck", "adjacent_to": "self", "bind": "other"},
+      {"at_war": "other", "absent": true},
+      {"field": "vassal", "eq": 0},
+      {"field": "vassal", "on": "other", "eq": 0},
+      {"field": "power", "gte": 1.0, "of": "other.power"}
+    ],
+    "chance": 0.08,
+    "cooldown_decades": 10,
+    "thread": "war:$self:$other:$year",
+    "effects": [
+      {"do": "tag", "tag": "claim_on:$other", "decades": 80, "inherit": true},
+      {"do": "spawn_person", "role": "hero", "tags": ["claimant_general"], "bind": "leader"},
+      {"do": "war", "against": "other", "reason": "old_claim"}
+    ]
+  }
+]

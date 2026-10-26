@@ -1,0 +1,44 @@
+[
+  {
+    "id": "sack_of_the_capital",
+    "trigger": [
+      {"event": "region_taken", "self_as": "tag", "other_from": "subject", "region_from": "object", "within_years": 10},
+      {"field": "land", "on": "region", "gte": 1.0, "of": "self.capital_land"}
+    ],
+    "chance": 1,
+    "cooldown_decades": 2,
+    "tags": ["$region"],
+    "effects": [
+      {"do": "wealth_transfer", "from": "self", "to": "other", "share": 0.25, "keep": 0.5},
+      {"do": "field", "on": "other", "field": "era_progress", "add": 20, "if": [{"field": "era", "gte": 3}]},
+      {"do": "field", "on": "region", "field": "burn", "add": 0.3},
+      {"do": "field", "field": "authority", "add": 0.1},
+      {"do": "field", "field": "piety", "add": 0.1},
+      {"do": "tag", "tag": "sacked:$other", "decades": 80, "inherit": true},
+      {"do": "tag", "on": "other", "tag": "plunder_of:$self", "decades": 60, "inherit": true}
+    ]
+  },
+  {
+    "id": "revenge_for_the_sack",
+    "trigger": [
+      {"tag": "sacked:*", "bind": "other", "min_age_years": 40},
+      {"adjacent": "other"},
+      {"at_war": "other", "absent": true},
+      {"field": "vassal", "eq": 0},
+      {"field": "vassal", "on": "other", "eq": 0},
+      {"field": "power", "gte": 1.0, "of": "other.power"}
+    ],
+    "chance": 0.1,
+    "cooldown_decades": 20,
+    "chance_mult": [
+      {"if": [{"person": "hero", "tag": "sworn_to:sacked:$other"}], "mult": 2}
+    ],
+    "thread": "war:$self:$other:$year",
+    "effects": [
+      {"do": "untag", "tag": "sacked:$other"},
+      {"do": "tag", "tag": "avenged:$other", "decades": 80, "inherit": true},
+      {"do": "spawn_person", "role": "hero", "tags": ["avenger"], "bind": "leader"},
+      {"do": "war", "against": "other", "reason": "revenge"}
+    ]
+  }
+]
