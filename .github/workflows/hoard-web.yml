@@ -24,7 +24,13 @@ jobs:
       - name: sandbox check
         run: NODE_PATH=$GITHUB_WORKSPACE/node_modules node web/check.cjs
       - name: game check
-        run: NODE_PATH=$GITHUB_WORKSPACE/node_modules node web/game-check.cjs
+        run: |
+          set +e
+          NODE_PATH=$GITHUB_WORKSPACE/node_modules node web/game-check.cjs > game-check.log 2>&1
+          status=$?
+          cat game-check.log
+          [ $status -eq 0 ] || grep -E "^FAIL|Error|checks passed" game-check.log | head -20 | cut -c1-400 | sed 's/^/::error::/'
+          exit $status
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: shots, path: "games/hoard/web/shots", retention-days: 7 }
