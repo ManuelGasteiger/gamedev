@@ -105,6 +105,7 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
     s.at_waking = [pending, &p, o](World& w, std::vector<Act>& acts, int index) {
         if (o.perturb == "burn" && index == 0)
             for (auto& a : acts) if (a.type == "burn") { a.magnitude = std::min(1.0, a.magnitude + 0.1); break; }
+        if (o.snapshots && index == 0) *o.snapshots << snapshot(w, p).dump() << "\n";
         if (!o.wakings) return;
         json hooks = json::array();
         for (auto& h : w.hooks) hooks.push_back({{"kind", h.kind}, {"refs", h.refs}});

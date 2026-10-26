@@ -8,7 +8,7 @@
 namespace ages {
 
 struct AnalyseOptions {
-    std::ostream* snapshots = nullptr;   // one JSON line per sleep: the core stocks
+    std::ostream* snapshots = nullptr;   // one JSON line at the first waking and after every sleep: the core stocks
     std::ostream* wakings = nullptr;     // one JSON line per waking: listed wounds, hooks and their refs, buckets
     bool buckets = false;                // sleep copies of the world for every bucket at every waking
     int bucket_samples = 2;
