@@ -30,3 +30,6 @@ DerivedDataCache/
 
 # raw simulation output; commit only the picked exports
 _raw/
+
+# agent worktrees
+/.claude/worktrees/

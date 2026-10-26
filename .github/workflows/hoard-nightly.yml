@@ -34,7 +34,12 @@ jobs:
         run: |
           bin=$(find build -name 'hoard-sim' -o -name 'hoard-sim.exe' | head -1)
           seq 1 300 | xargs -P 4 -I{} "$bin" --data data --golden {} | tr -d '\r' | sort -n > hashes.txt
-          diff -u tests/golden/state_hashes.txt hashes.txt
+          wc -l hashes.txt
+          if ! diff tests/golden/state_hashes.txt hashes.txt > golden.diff; then
+            echo "::error::$(grep -c '^>' golden.diff) seeds differ from the golden"
+            grep '^[<>]' golden.diff | head -20 | while read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
       - name: stored replays
         shell: bash
         run: |
