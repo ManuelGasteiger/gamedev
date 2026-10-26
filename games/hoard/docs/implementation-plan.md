@@ -68,7 +68,7 @@ Order and dependencies are `prompts/README.md`'s. Roughly three to four months o
 
 ### Iteration 1: foundation (item 17)
 
-Status 2026-10-26: built on branch `item/17-repo-determinism-ci`, pull request 2, CI green on four platforms; waiting for review. Report in `games/hoard/reports/17-repo-determinism-ci.md`. It also fixed a save/load bug (a loaded world diverged from the original).
+Status 2026-10-26: merged (pull request 2, text goldens in 3, nightly annotations in 5). Report in `games/hoard/reports/17-repo-determinism-ci.md`. It also fixed a save/load bug (a loaded world diverged from the original).
 
 Opus, one to two agent-weeks. Layout, `docs/`, the determinism policy in CMake, `check_banned.sh`, `detmath` and the six `pow` replacements, the state hash with per-decade trace, the save header, `.hrp` record and replay covering all ten state-changing verbs (audit §5), CI on GCC, Clang, MSVC, wasm, nightly jobs, the negative controls. Also the `dragons[]` change (preamble rule 8) as its own commit, since 17 touches `World` first.
 
@@ -77,6 +77,8 @@ Manu: nothing beyond review; MSVC runs in hosted CI.
 Gate: `ci.yml` green on four platforms with `compare` passing; negative controls fail as expected; one `golden:` commit for `pow`; record and replay pass for `played`, `idle`, `raze_all`; the measured sim time written into the preamble.
 
 ### Iteration 2: measure, and freeze the text grammar (01 and 19 in parallel)
+
+Status 2026-10-26: 01 merged (pull request 4, `reports/01-baseline-v04.md`): survival favours short sleeps (1 year wins 28.9 % of decisive states, 3000 years 8.8 %), growth favours long ones (3000 years wins 42 %), so the bet is real; no death before year 80 except `raze_all`. 19 in pull request 6 (`reports/19-text-renderer-l10n.md`): renderer, `data/text/{en,de}/`, person sex stored (rules version 2), refusal reasons as codes, 30 seeds fixed with German for all 246 strings, page chrome in en, pseudo and de. Narrator and page narration stay English until a later conversion (Manu's call). Open for Manu: D4, the German read in `reports/19-de-review.md` (all 30 seeds in both sexes).
 
 - 01 (Sonnet): sweep with six policies, agency metrics, bucket analysis, perturbation, lethality ratio, `newcomer` policy and first-hour slice, `data/bands.json`, `reports/01-baseline-v04.md`.
 - 19 (Opus, Sonnet for `translate.py`): renderer in `sim/text/`, per-language files, schema change, the 30 seeds fixed, German for the seeds, pseudo-locale check, the English literals and refusal reasons out of `sim/`.
