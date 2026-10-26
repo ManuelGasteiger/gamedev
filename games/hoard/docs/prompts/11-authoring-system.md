@@ -19,7 +19,7 @@ A JSON object that validates against the schema below. Its parts: roles (typed b
 5. Never state a fact the simulation cannot know: no weather unless a token gives it, no counts of soldiers, no distances, no coin amounts outside an option's payload.
 6. The four mortal races are fantasy peoples with cultures that drift. Do not borrow real-world ethnic, national or religious markers for any of them: no accents, no real cuisines, no real scripts, no real-world group as a template. Dwarves dig and remember; elves live long and leave; orcs raid and forget; humans spread. That is all you may assume.
 7. Options must differ in what they do, not in tone. Two options that resolve to the same act with different wording are one option. Every scenario has an `ignore` option; at least one other option has no `gate`.
-8. Every name, tag, path, gate, act type, payload key and chooser comes from the enumerations below, pasted exactly. If the thing you need is not in them, leave it out; do not invent a near-synonym.
+8. Every name, tag, path, gate, act type, payload key, chooser and noun comes from the enumerations below, pasted exactly. If the thing you need is not in them, leave it out; do not invent a near-synonym.
 9. Do not write numbers for `weight`, `cooldown` or `salience.w`; the pipeline fills them. Do write `stakes` and `once`.
 10. Output a JSON array only, no prose around it. Each object carries `provenance.gen = "llm"` and the cell id you were given.
 
@@ -50,7 +50,129 @@ No `or`. A `must` scenario needs a floor and a ceiling on the same path in `requ
 
 ## Tokens
 
-`{role.field}` only, for roles you defined and fields listed for that role's type. Common ones: `{court.name}`, `{envoy.name}`, `{envoy.pronoun}`, `{a.place}`, `{a.years_ago}`, `{a.verb}`, `{home.name}`. A token that is not bound fails validation.
+The text is English (`"text": {"lang": "en", ...}`); the German and later languages are written from it by a separate pass, so every person, item and number the sentence talks about must be a token. Form: `{role.field}` or `{role.field:mod.mod}`.
+
+- Every role: `name`. Acts: `place`, `years_ago`, `wakings_ago`, `size`, `verb`, `target_name`.
+- Person roles declare `"noun"` (a key from the `nouns` list in the vocabulary) and `"sex": "any"` beside the binder. Never write the person's noun as a plain word while the role is bound: `{envoy.noun:def}` gives "the envoy", `{envoy.noun:indef}` "an envoy", `{envoy.noun:poss2}` "your envoy", `{envoy.noun:def.gen}` "the envoy's". Another noun from the list may name the same person: `{hostage.noun:scribe.def}`.
+- Pronouns: `{x.subj}` (he, she), `{x.obj}` (him, her), `{x.poss}` (his, her), `{x.refl}`. Items take `{cup.subj}` (it) and `{cup.name:def}` (the Ashen Cup). No `pronoun` field.
+- Numbers with a unit: `{a.years_ago:year}` gives "1 year" and "40 years"; never write "{a.years_ago} years".
+- Selects for one-off agreement: `{x.gender?m=...|f=...}`. Plurals: `{a.years_ago:plural(one=...,other=# ...)}`.
+- A variant carries an `id` (snake_case, what makes it fire: `scribe`, `dread`, `keen_eyes`).
+
+Two seeds as examples:
+
+```json
+{
+ "id": "scribe_among_hostages",
+ "roles": {
+  "hostage": {
+   "person": {
+    "court": "lair",
+    "role": "hostage",
+    "choose": "most_recent"
+   },
+   "noun": "hostage",
+   "sex": "any"
+  },
+  "scribe": {
+   "person": {
+    "court": "lair",
+    "role": "hostage",
+    "trait": "curious",
+    "choose": "by_score:renown"
+   },
+   "noun": "scribe",
+   "sex": "any",
+   "optional": true
+  }
+ },
+ "text": {
+  "lang": "en",
+  "headline": "{hostage.noun:scribe.indef} among the hostages",
+  "body": "{hostage.name} of {court.name} has spent the days since the taking writing on the cave wall with a burnt stick: the names of the dead at {a.place}, the year, the weather. Asked why, {hostage.subj} says someone should keep the record, and that nobody else here can read.",
+  "because": "You took {hostage.name} at {a.place} {a.years_ago:year} ago; {court.name} keeps a library, so its people are lettered.",
+  "variants": [
+   {
+    "id": "scribe",
+    "if": "bound(scribe)",
+    "body": "{scribe.name} of {court.name} has covered the cave wall in charcoal: the names of the dead at {a.place}, the year, the weather. {scribe.subj} offers, without being asked, to keep your chronicle. Nobody else here can read."
+   }
+  ]
+ },
+ "options": [
+  {
+   "id": "keep",
+   "label": "Keep {hostage.noun:scribe.def} as {hostage.noun:historian.poss2}"
+  },
+  {
+   "id": "release",
+   "label": "Send {hostage.noun:scribe.def} home"
+  },
+  {
+   "id": "kill",
+   "label": "Silence the record"
+  },
+  {
+   "id": "ignore",
+   "label": "Let the writing stay on the wall"
+  }
+ ]
+}
+```
+
+```json
+{
+ "id": "envoy_who_lies",
+ "roles": {
+  "envoy": {
+   "person": {
+    "court": "$court",
+    "role": "envoy",
+    "is_lie": true,
+    "choose": "by_score:cunning"
+   },
+   "noun": "envoy",
+   "sex": "any"
+  }
+ },
+ "text": {
+  "lang": "en",
+  "headline": "{envoy.name} brings news of a plot",
+  "body": "{envoy.name} of {court.name} has climbed the pass to warn you: {rival.name} is forging engines to slay you and has sworn it at its altar. {court.name} asks only that you strike first, and offers forty gold a year in gratitude. {envoy.subj} does not meet your eye when naming the altar.",
+  "because": "A court at war with a stronger neighbour has a reason to want you angry at it.",
+  "variants": [
+   {
+    "id": "keen_eyes",
+    "if": "dragon.talents == keen_eyes",
+    "body": "{envoy.name} of {court.name} warns you that {rival.name} is forging engines to slay you. {envoy.noun:def.gen} eyes say otherwise: {rival.name} has no slayers and no engines. {court.name} is losing a war and would like you to win it."
+   },
+   {
+    "id": "dread",
+    "if": "court.dread >= 0.5",
+    "body": "{envoy.name} of {court.name} has climbed the pass and stands as far from the cave as the ledge allows. {rival.name} is forging engines to slay you, {envoy.noun:def} says, too quickly, and {court.name} would pay forty gold a year to see them burned first. The hands shake. The story does not."
+   }
+  ]
+ },
+ "options": [
+  {
+   "id": "swear",
+   "label": "Swear to burn the rival for forty a year"
+  },
+  {
+   "id": "reveal",
+   "label": "Name the lie to {envoy.noun:def.gen} face"
+  },
+  {
+   "id": "eat",
+   "label": "Eat {envoy.noun:liar.def}"
+  },
+  {
+   "id": "ignore",
+   "label": "Send {envoy.noun:def} home with no answer"
+  }
+ ]
+}
+```
 
 ## What good looks like
 

@@ -253,7 +253,7 @@ struct Constants {
     double briefing_rich_fear = 0.2;
     double briefing_slayers_forming = 0.5;
     int briefing_rich_count = 3;
-    double importance_default = 0.2;   // kinds en.json does not list
+    double importance_default = 0.2;   // kinds data/importance.json does not list
     double importance_min = 0.25;      // "while you slept" keeps an event at or above this, or one on a thread that has one
     double importance_known = 0.3;     // the subject or object is a person the dragon knows
     double importance_oath = 0.2;      // ... a court under an active oath with the dragon

@@ -66,7 +66,7 @@ std::string spells_catalogue_json(const Params& p);   // gates and costs for the
 LoadResult load_data(const std::string& dir, uint64_t seed);                 // data_io.cpp
 LoadResult load_data_from_json(const DataJson& d, uint64_t seed);
 
-// what an act meant to one court, in one or two plain sentences (data/text/en.json "reactions")
+// what an act meant to one court, in one or two plain sentences (data/text/en/narrator.json "reactions")
 struct ReactionLine {
     std::string faction;
     std::string text;

@@ -5,10 +5,10 @@
 
 namespace ages {
 
-// the en.json template an event is told with: the kind, or a variant (collapse_one, person_died_old_age, ...)
+// the narrator.json template an event is told with: the kind, or a variant (collapse_one, person_died_old_age, ...)
 std::string template_key(const Event& e);
 
-// data/text/en.json importance of the event's kind (0..1), plus the boosts of constants.json "briefing" when the
+// data/importance.json importance of the event's kind (0..1), plus the boosts of constants.json "briefing" when the
 // event touches someone the dragon knows, a court under oath with it, or a hostage
 double event_importance(const World& w, const Params& p, const Event& e);
 

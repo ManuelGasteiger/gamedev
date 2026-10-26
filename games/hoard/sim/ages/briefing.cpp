@@ -6,7 +6,7 @@
 #include "offers.h"
 #include "world_util.h"
 
-// 17.5: the narrator. Every sentence is a template from data/text/en.json filled with names and numbers; a cause clause
+// 17.5: the narrator. Every sentence is a template from data/text/en/narrator.json filled with names and numbers; a cause clause
 // is appended when the event's refs point at an earlier event (a "<cause>@<kind>" text, keyed by the kind of the cited
 // event, wins over the plain cause text). Threads collapse to one paragraph. "While you slept" keeps the events at or
 // above importance_min and every event of a thread that holds one.

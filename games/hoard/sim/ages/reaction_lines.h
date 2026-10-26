@@ -17,7 +17,7 @@ struct ReactionNote {
     std::string loot;     // what a take carried off (the largest payload share)
 };
 
-// the lines of apply_acts: per court the weightiest note, told by en.json "reactions" plus at most one sentence on an
+// the lines of apply_acts: per court the weightiest note, told by narrator.json "reactions" plus at most one sentence on an
 // offer fulfilled or a lie acted on, a person the dragon knows, or a mark a card left (events from first_event on)
 std::vector<ReactionLine> reaction_lines(const World& w, const Params& p, const std::vector<ReactionNote>& notes, size_t first_event);
 

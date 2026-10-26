@@ -65,7 +65,7 @@ def run_binary(binary, data, seed, years, policy, sleep, out, narrate=False, gen
         stats = json.load(f)
     with open(os.path.join(out, "wakings.jsonl")) as f:
         stats["wakings_log"] = [json.loads(line) for line in f if line.strip()]
-    if narrate:   # the sim's own narrator (data/text/en.json), cause clauses included, one sentence per chronicle event
+    if narrate:   # the sim's own narrator (data/text/en/narrator.json), cause clauses included, one sentence per chronicle event
         with open(os.path.join(out, "narrated.json")) as f:
             for e, text in zip(chron, json.load(f)):
                 e["text"] = text

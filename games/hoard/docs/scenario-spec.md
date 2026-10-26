@@ -75,7 +75,7 @@ Everything the scenario does to the world happens through the act the player pic
 | `require`, `forbid` | predicates (section 4) and negated act patterns; at least two distinct state elements read (Failbetter's two-quality minimum) |
 | `salience` | `{if, w}` pairs; `w` ∈ 1, 3, 9 |
 | `tags` | closed vocabulary: `theme:*` (about 30 themes, listed in `data/scenarios/vocab.json`), `faction:$role`, `race:*`, `ending:*` (pushes an ending), `tone:*` |
-| `text` | headline ≤ 8 words, body ≤ 100 words, because ≤ 30 words, labels ≤ 12 words, result lines ≤ 40 words; tokens `{role.field}` only |
+| `text` | `lang: "en"`; headline ≤ 8 words, body ≤ 100 words, because ≤ 30 words, labels ≤ 12 words, result lines ≤ 40 words; character caps per language in `vocab.json`; tokens per section 12 |
 | `options` | 2 to 4 plus `ignore`; each binds one act template (section 5); at least one non-ignore option without a `gate` |
 | `outcomes` | per option id: `suppress`, `history`, `seek`, `reveal_to_player` (a fact for the chronicle); never a state delta |
 | `followup` | `seek` tags for next waking's selection, so no scenario needs another's id |
@@ -178,3 +178,12 @@ The seed bank is deliberately broad to serve as exemplars across kinds; its cons
 ## 11. Example: a consequence that reads as memory
 
 Precondition: `take_hostage` on a dwarf heir two wakings ago, the heir still in the lair, the dwarf court at written memory tier. Roles: `a` (the act), `court` (owner, remembers `a`), `heir` (person, court = lair, tag hostage, from `$court`), `envoy` (person, court, role envoy, by_score:cunning). Options: `release($heir)` with terms, `demand($court, tribute)`, `keep($heir, ward)`, `kill($envoy)`, `ignore`. Because-line: "Kell Hold has written the taking of {heir.name} into the Book; the dwarves do not forget what is written." Tags: theme:hostage, theme:grudge, faction:$court, race:dwarf. Follow-up: `seek: ["theme:grudge"]`.
+
+## 12. Languages (item 19, 2026-10-26)
+
+Scenario files hold the logic and the English authoring text. Every language, English included, lives in `data/text/<lang>/scenarios.json` under `scn.<id>.<field>` keys (`headline`, `body`, `because`, `variant.<vid>.body`, `option.<oid>`, `result.<oid>`, `reveal.<oid>`), with provenance per key in `scenarios.meta.json`; `tools/text/scenario_strings.py` writes the English table. The core renders every string (`sim/text/`), so the shells show finished text.
+
+- Tokens: `{role.field}` or `{role.field:mod.mod}`; person fields `name`, `noun`, `subj`, `obj`, `poss`, `refl`; modifiers determiner (`def`, `indef`, `poss2`), case (`nom`, `acc`, `dat`, `gen`), a noun key, a unit (`year`), a possessed gender for `poss`; selects `{role.gender?m=…|f=…}`; plurals `{n:plural(one=…,other=#…)}`.
+- Person roles declare `noun` (closed list, `vocab.json` nouns) and `sex` (`any`, `m`, `f`). A bound person is never named by a bare noun.
+- Variants carry an `id`.
+- `tools/scenario_check.py --text data --bin build/hoard-sim` lints every language (same roles as the English, no English left, caps) and renders each key under 12 forced states; the `text_lint_seeds` test runs it on the seeds.

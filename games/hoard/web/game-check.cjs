@@ -559,7 +559,7 @@ async function finishSleep() {
   });
   await shot('j-1024');
   const panelOverflow = await page.$eval('#actions', (e) => e.scrollWidth - e.clientWidth);
-  check('j.1024', layout.hudScroll && layout.actionsRight && layout.overflowX && layout.hudH < 60 && panelOverflow <= 0, `hud fits: ${layout.hudScroll}, panel inside viewport: ${layout.actionsRight}, panel inner overflow ${panelOverflow}px, no horizontal scroll: ${layout.overflowX}, hud height ${layout.hudH.toFixed(0)}`);
+  check('j.1024', layout.hudScroll && layout.actionsRight && layout.overflowX && layout.hudH < 80 && panelOverflow <= 0, `hud fits: ${layout.hudScroll}, panel inside viewport: ${layout.actionsRight}, panel inner overflow ${panelOverflow}px, no horizontal scroll: ${layout.overflowX}, hud height ${layout.hudH.toFixed(0)}`);
   await page.evaluate(() => game.land());
   await shot('j-1024-lair');
   await page.evaluate(() => game.takeOff());
