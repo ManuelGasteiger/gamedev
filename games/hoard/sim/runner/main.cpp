@@ -9,6 +9,7 @@
 #include "ages/genesis.h"
 #include "ages/state_hash.h"
 #include "ages/record.h"
+#include "ages/save.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -32,6 +33,8 @@ struct Options {
     std::string trace;      // one state-hash line per sleep
     std::string record;     // write every input and a checkpoint per sleep as a .hrp
     std::string replay;     // replay a .hrp and verify its checkpoints (exit 3 on the first mismatch)
+    std::string save;       // write the final world as a save (temp file, rename, one .bak)
+    std::string load_save;  // start from a save instead of a fresh world
     bool state_hash = false;
     uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
 };
@@ -55,6 +58,8 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--state-hash") o.state_hash = true;
         else if (k == "--record") { if (!need(o.record)) return false; }
         else if (k == "--replay") { if (!need(o.replay)) return false; }
+        else if (k == "--save") { if (!need(o.save)) return false; }
+        else if (k == "--load-save") { if (!need(o.load_save)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -71,6 +76,20 @@ bool write_file(const std::string& path, const std::string& text) {
     if (!out) return false;
     out << text;
     return true;
+}
+
+bool write_save(const std::string& path, const std::string& text) {
+    std::string tmp = path + ".tmp";
+    {
+        std::ofstream out(tmp, std::ios::binary);
+        if (!out) return false;
+        out << text;
+        out.flush();
+        if (!out) return false;
+    }
+    std::remove((path + ".bak").c_str());
+    std::rename(path.c_str(), (path + ".bak").c_str());
+    return std::rename(tmp.c_str(), path.c_str()) == 0;
 }
 
 json record_json(const FactionRecord& r, bool alive) {
@@ -267,6 +286,13 @@ int main(int argc, char** argv) {
     std::string gerr, legends;
     if (o.genesis && !make_genesis(w, p, gerr)) { std::fprintf(stderr, "genesis failed: %s\n", gerr.c_str()); return 1; }   // v0.4 world (S2)
     if (o.genesis) legends = legends_json(w, p);
+    if (!o.load_save.empty()) {
+        std::ifstream in(o.load_save, std::ios::binary);
+        std::stringstream ss;
+        ss << in.rdbuf();
+        std::string err;
+        if (!in || load_save(ss.str(), w, err) != LoadSave::ok) { std::fprintf(stderr, "cannot load %s: %s\n", o.load_save.c_str(), err.c_str()); return 1; }
+    }
 
     std::vector<Act> log;
     if (!o.acts.empty()) {
@@ -314,6 +340,7 @@ int main(int argc, char** argv) {
         for (auto& l : recorder.lines) rec << l << "\n";
         rec << json({{"end", 1}, {"year", w.year}, {"h", hash_hex(state_hash(w).root)}}).dump() << "\n";
     }
+    if (!o.save.empty() && !write_save(o.save, save_json(w, p))) { std::fprintf(stderr, "cannot write %s\n", o.save.c_str()); return 1; }
     if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 
     std::string base = o.out;
