@@ -69,13 +69,12 @@ Tests added (the list you confirmed): `banned_ops`, `detmath_bounds`, `rng_seque
 ## 6. Found on the way
 
 - **Save/load bug (fixed)**: a world loaded from `world_to_json` continued differently from the original in 18 of 20 played seeds. `faction.eff` (read by `apply_acts` for faith gain) and `region.eff_land` (read by the defences) were reset on load. The page's autosave hit this on every reload. Now 0 of 120 diverge (played, raze_all, protect_one; 40 seeds each), and `save_roundtrip` checks it.
-- `region.eff_land` is set from `land` at genesis and never updated afterwards, so a terraform or cataclysm that changes `land` leaves the defences reading the old value. Saved as is; a rule question for you.
+- Correction (2026-10-26): `region.eff_land` is recomputed every decade step from `land`, home terrain and `land` modifiers (`rules/modifiers.cpp`), so terraforms and cataclysms do reach the defences. The earlier note here was wrong; nothing to fix.
 
 ## 7. Open questions
 
-1. Chronicle text goldens (section 4): want them?
-2. `eff_land` (section 6): should it follow `land`?
-3. The page records from load; a restored autosave appears as a `load_world` input with the full world (about 200 KB). Fine for bug reports, or cap it?
+1. Chronicle text goldens: added on 2026-10-26 (`tests/golden/chronicle/seed-{1,2,3}.txt`, checked by the `golden` test, `tools/chronicle_diff.py`).
+2. The page records from load; a restored autosave appears as a `load_world` input with the full world (about 200 KB). Fine for bug reports, or cap it?
 
 ## 8. How to verify in five minutes
 

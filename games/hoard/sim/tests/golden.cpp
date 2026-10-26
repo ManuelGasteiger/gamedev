@@ -1,5 +1,7 @@
+#include <iterator>
 #include <fstream>
 #include "fixtures.h"
+#include "ages/genesis.h"
 
 using namespace ages;
 
@@ -29,6 +31,24 @@ static bool check(const char* file, const std::string& hash) {
     return true;
 }
 
+static bool check_text(const std::string& file, const std::string& text) {
+    std::string path = std::string(AGES_GOLDEN_DIR) + "/" + file;
+    std::ifstream in(path, std::ios::binary);
+    if (in) {
+        std::string stored((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        if (stored == text) { std::printf("golden ok: %s\n", file.c_str()); return true; }
+        std::string got = path + ".new";
+        std::ofstream(got, std::ios::binary) << text;
+        std::fprintf(stderr, "golden text changed: %s (new version in %s; tools/chronicle_diff.py %s %s)\n", path.c_str(), got.c_str(), path.c_str(), got.c_str());
+        return false;
+    }
+    std::ofstream out(path, std::ios::binary);
+    CHECK(static_cast<bool>(out), "cannot write golden text file");
+    out << text;
+    std::printf("golden written: %s\n", file.c_str());
+    return true;
+}
+
 int main() {
     // v0: seed 42, the sample act log once, idle, 2000 years in sleeps of 100
     LoadResult idle = load_or_die(42);
@@ -51,5 +71,18 @@ int main() {
     r.sleep = 100;
     run_scenario(raze.world, raze.params, r);
     ok = check("ages_v0_1_raze.hash", hex(chronicle_hash(raze.world))) && ok;
+
+    // text goldens: seeds 1 to 3, generated worlds, played, 3000 years; tools/chronicle_diff.py reads a mismatch
+    Policy played;
+    CHECK(load_policy(AGES_DATA_DIR, "played", played, err), err.c_str());
+    for (int seed = 1; seed <= 3; ++seed) {
+        LoadResult g = load_or_die(static_cast<uint64_t>(seed));
+        CHECK(make_genesis(g.world, g.params, err), err.c_str());
+        Scenario sc;
+        sc.policy = &played;
+        sc.data_dir = AGES_DATA_DIR;
+        run_scenario(g.world, g.params, sc);
+        ok = check_text("chronicle/seed-" + std::to_string(seed) + ".txt", chronicle_text(g.world.chronicle)) && ok;
+    }
     return ok ? 0 : 1;
 }

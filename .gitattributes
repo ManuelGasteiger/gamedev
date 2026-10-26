@@ -48,3 +48,4 @@
 games/hoard/data/** text eol=lf
 *.json text eol=lf
 *.md text eol=lf
+games/hoard/tests/golden/** text eol=lf
