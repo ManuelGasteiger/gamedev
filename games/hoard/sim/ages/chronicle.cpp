@@ -54,6 +54,20 @@ uint64_t hash_events(const std::vector<Event>& events) {
     return h;
 }
 
+// the text golden: one event per line, year kind subject object magnitude cause, readable in a diff
+std::string chronicle_text(const std::vector<Event>& events) {
+    std::string out;
+    char mag[32];
+    for (auto& e : events) {
+        std::snprintf(mag, sizeof mag, "%.6g", e.magnitude);
+        out += std::to_string(e.year) + " " + e.kind + " " + (e.subject.empty() ? "-" : e.subject) + " " +
+               (e.object.empty() ? "-" : e.object) + " " + mag + " " + (e.cause.text_key.empty() ? "-" : e.cause.text_key);
+        if (e.count > 1) out += " x" + std::to_string(e.count);
+        out += "\n";
+    }
+    return out;
+}
+
 std::string events_to_json(const std::vector<Event>& events) {
     nlohmann::json arr = nlohmann::json::array();
     for (auto& e : events) {

@@ -76,6 +76,7 @@ Forecast forecast(const World& w, const Params& p, int years);   // dry run on a
 std::string forecast_to_json(const Forecast& f);
 uint64_t chronicle_hash(const World& w);
 std::string chronicle_hash_hex(const World& w);
+std::string chronicle_text(const std::vector<Event>& events);   // the text golden, one event per line
 
 // offers (section 9, 17.3): w.offers is generated at wake; accept swears the draft, decline is a `show` 0.1 act
 bool accept_offer(World& w, const Params& p, size_t index);
