@@ -22,13 +22,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: false }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: python for text_lint_seeds
+        shell: bash
+        run: python -m pip install --quiet jsonschema
       - name: build
         shell: bash
         env: { CXX: "${{ matrix.cxx }}" }
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release -j 4
-      - name: python for text_lint_seeds
-        shell: bash
-        run: python3 -m pip install --quiet jsonschema || python -m pip install --quiet jsonschema
       - name: all tests
         shell: bash
         run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
@@ -82,12 +84,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { lfs: false }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m pip install --quiet jsonschema
       - name: build with ASan and UBSan
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DCMAKE_CXX_FLAGS="-O1 -fsanitize=address,undefined,float-cast-overflow,float-divide-by-zero -fno-sanitize-recover=all -fno-omit-frame-pointer"
           cmake --build build -j 4
-      - run: python3 -m pip install --quiet jsonschema
       - run: ctest --test-dir build -L fast --output-on-failure
       - name: golden under sanitizers, seeds 1-100
         run: seq 1 100 | xargs -P 4 -I{} ./build/hoard-sim --data data --golden {} | sort -n > hashes.txt && diff -u <(head -100 tests/golden/state_hashes.txt) hashes.txt
