@@ -8,6 +8,10 @@
 
 namespace ages {
 
+// a refusal reason is a code with arguments, "needs_knowledge|n=3"; the text layer words it (data/text/<lang>/ui.json
+// "reason.<code>"), events carry the code alone
+inline std::string reason_code(const std::string& reason) { return reason.substr(0, reason.find('|')); }
+
 struct LoadResult {
     bool ok = false;
     std::string error;

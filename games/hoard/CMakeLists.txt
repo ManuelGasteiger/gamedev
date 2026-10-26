@@ -114,6 +114,7 @@ add_library(ages STATIC
   sim/text/bundle.cpp
   sim/text/bundle_io.cpp
   sim/text/batch.cpp
+  sim/text/reason.cpp
 )
 target_include_directories(ages PUBLIC sim)
 hoard_sim_flags(ages)

@@ -64,11 +64,11 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     r.target = target;
     r.pred = pred;
     Faction* f = find_faction(w, target);
-    if (!f) { r.reason = "no such faction"; return r; }
-    if (pred != "tribute" && pred != "no_walls" && pred != "no_settle") { r.reason = "unknown demand " + pred; return r; }
+    if (!f) { r.reason = "no_faction"; return r; }
+    if (pred != "tribute" && pred != "no_walls" && pred != "no_settle") { r.reason = "unknown_demand|pred=" + pred; return r; }
     double knowledge = c.demand_knowledge * effect(w, p, "demand_mult");   // v0.4: Old Tongues
-    if (w.dragons[kPlayer].knowledge < knowledge) { r.reason = "needs knowledge " + num(knowledge); return r; }
-    if (active_oath_with_pred(w, f->id, pred)) { r.reason = "already sworn"; return r; }
+    if (w.dragons[kPlayer].knowledge < knowledge) { r.reason = "needs_knowledge|n=" + num(knowledge); return r; }
+    if (active_oath_with_pred(w, f->id, pred)) { r.reason = "already_sworn"; return r; }
     Act a;
     a.year = w.year;
     a.type = "demand";
@@ -80,7 +80,7 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     if (!cowed) {
         f->anti_dragon += c.demand_refused_resolve;
         emit(w, "demand_refused", f->id, pred, f->fear, {}, because("not_cowed", {}, {{"fear", f->fear}}));
-        r.reason = "fear " + num(f->fear) + " < " + num(c.demand_fear) + " and they are not weak";
+        r.reason = "not_cowed|fear=" + num(f->fear) + "|need=" + num(c.demand_fear);
         return r;
     }
     Oath o;

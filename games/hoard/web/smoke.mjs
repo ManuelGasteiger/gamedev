@@ -145,6 +145,12 @@ if (ri > 0) {
   for (const x of bad) console.log('text mismatch:', x.text, x.problems.join('; '));
   console.log(`render batch: ${r.renders.length} strings, hash ${r.hash}, ${bad.length} wrong`);
   ok = ok && bad.length === 0;
+  for (const lang of ['de', 'en']) {   // a refusal worded in the session's language
+    cmd({ cmd: 'lang', lang });
+    const d = cmd({ cmd: 'demand', target: 'nobody', pred: 'tribute' });
+    console.log(`demand refused (${lang}): ${d.reason} -> ${d.reason_text}`);
+    ok = ok && !!d.reason_text && d.reason_text !== d.reason;
+  }
 }
 
 // node web/smoke.mjs --golden 1-60 --out hashes.txt: the state-hash golden, the same lines as `hoard-sim --golden`

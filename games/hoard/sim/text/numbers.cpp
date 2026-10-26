@@ -20,6 +20,19 @@ std::string format_int(long long n, const json& locale) {
     return n < 0 ? "-" + out : out;
 }
 
+bool format_decimal(const std::string& s, const json& locale, std::string& out) {
+    if (s.empty()) return false;
+    size_t i = s[0] == '-' ? 1 : 0, dot = s.find('.');
+    if (i >= s.size()) return false;
+    for (size_t k = i; k < s.size(); ++k) if (k != dot && (s[k] < '0' || s[k] > '9')) return false;
+    if (dot == i || dot + 1 == s.size()) return false;
+    std::string whole = s.substr(i, dot == std::string::npos ? std::string::npos : dot - i);
+    if (whole.size() > 18) return false;
+    out = (i ? "-" : "") + format_int(std::stoll(whole), locale);
+    if (dot != std::string::npos) out += locale.value("decimal", std::string(".")) + s.substr(dot + 1);
+    return true;
+}
+
 namespace {
 
 std::vector<std::string> split(const std::string& s, const std::string& sep) {

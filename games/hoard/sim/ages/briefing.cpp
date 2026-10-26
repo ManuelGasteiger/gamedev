@@ -412,7 +412,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     json opps = json::array();
     for (auto& of : w.offers) {
         std::string s = n.misc("opportunity_offer");
-        Narrator::replace_all(s, "{envoy}", of.envoy.empty() ? "An envoy" : n.name(of.envoy));
+        Narrator::replace_all(s, "{envoy}", of.envoy.empty() ? n.misc("an_envoy") : n.name(of.envoy));
         Narrator::replace_all(s, "{faction}", Narrator::cap(of.from_faction));
         auto ask = p.texts.asks.find(of.kind);
         std::string a = ask == p.texts.asks.end() ? of.kind : ask->second;

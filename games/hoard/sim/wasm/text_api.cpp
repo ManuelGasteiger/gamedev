@@ -1,11 +1,13 @@
 #include "text_api.h"
 #include "text/batch.h"
+#include "text/reason.h"
 
 using nlohmann::json;
 
 namespace {
 
 text::Bundles g_text;
+std::string g_lang = "en";
 
 json ui_strings(const std::string& lang) {
     json out = json::object();
@@ -22,7 +24,23 @@ bool text_load(const std::map<std::string, std::string>& bundles, std::string& e
     return text::bundles_from_json(bundles, g_text, err);
 }
 
+void text_set_lang(const std::string& lang) { g_lang = lang.empty() ? "en" : lang; }
+
+std::string text_reason(const std::string& encoded) { return text::reason_text(g_text, g_lang, encoded); }
+
+void text_word_reason(json& out) {
+    auto it = out.find("reason");
+    if (out.is_object() && it != out.end() && it->is_string() && !it->get_ref<const std::string&>().empty())
+        out["reason_text"] = text_reason(it->get<std::string>());
+}
+
 bool text_dispatch(const std::string& cmd, const json& in, json& out) {
+    if (cmd == "lang") {
+        if (!g_text.get(in.value("lang", std::string()))) { out = {{"ok", false}, {"error", "no such language"}}; return true; }
+        text_set_lang(in.value("lang", std::string()));
+        out = {{"ok", true}, {"lang", g_lang}};
+        return true;
+    }
     if (cmd == "ui") {
         out = {{"ok", true}, {"lang", in.value("lang", std::string("en"))}, {"strings", ui_strings(in.value("lang", std::string("en")))}};
         return true;
