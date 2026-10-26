@@ -91,6 +91,7 @@ Hook make_hook(const World& w, const HookDef& t, const CardCtx& ctx) {
     h.choices = t.choices;
     h.fight = t.fight_damage > 0 || t.fight_strength_mult > 0 || t.fight_health_share > 0;
     h.offered = w.year;
+    h.refs = ctx.refs;
     h.expires_year = w.year;   // the next sleep starts in the waking's year: no time passes while the dragon is awake
     h.id = h.kind + ":" + h.region + ":" + std::to_string(w.year);
     h.title = text_of(t, "title");

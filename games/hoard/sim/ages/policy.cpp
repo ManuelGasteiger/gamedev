@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include "ages.h"
+#include "defences.h"
+#include <algorithm>
 #include "hooks.h"
 #include "talents.h"
 #include "world_util.h"
@@ -14,6 +16,15 @@ static std::string largest_region(const World& w, const Faction& f) {
         if (r && r->land > best_land) { best_land = r->land; best = rid; }
     }
     return best;
+}
+
+// a defence beyond levies would strike this act (a range ring the newcomer policy keeps out of)
+static bool inside_ring(const World& w, const Params& p, const Act& a) {
+    const Region* r = act_region(w, a);
+    if (!r) return false;
+    for (auto& v : region_defences(w, p, *r))
+        if (v.def && v.def->id != "levies" && (v.per_act > 0 || v.passive > 0)) return true;
+    return false;
 }
 
 static int last_sleep_begin(const World& w) {
@@ -112,6 +123,8 @@ std::vector<Act> resolve_policy(const World& w, const Params& p, const Policy& p
         return resolve_policy(w, p, sub, sleep_index, data_dir);
     }
     for (auto& t : policy.acts) expand(w, p, t, acts);
+    if (policy.avoid_rings)
+        acts.erase(std::remove_if(acts.begin(), acts.end(), [&](const Act& a) { return inside_ring(w, p, a); }), acts.end());
     return acts;
 }
 
@@ -136,8 +149,11 @@ static void pick_talents(World& w, const Params& p, const Policy& policy) {
 
 // v0.4 (S1): sleep_cycle entries are "short" | "long" (the phase's windows) or years, cycled; min_sleep is the floor
 static int policy_sleep(const World& w, const Params& p, const Policy& policy, int index, int fallback) {
-    if (policy.sleep_cycle.empty()) return fallback;
-    const std::string& s = policy.sleep_cycle[static_cast<size_t>(index) % policy.sleep_cycle.size()];
+    if (policy.sleep_cycle.empty() && policy.sleep_open.empty()) return fallback;
+    size_t open = policy.sleep_open.size();
+    const std::string& s = static_cast<size_t>(index) < open ? policy.sleep_open[static_cast<size_t>(index)]
+                         : policy.sleep_cycle.empty() ? policy.sleep_open.back()
+                         : policy.sleep_cycle[(static_cast<size_t>(index) - open) % policy.sleep_cycle.size()];
     int years = s == "short" ? short_sleep(w.dragons[kPlayer], p.c) : s == "long" ? long_sleep(w.dragons[kPlayer], p.c) : std::atoi(s.c_str());
     return std::max(1, std::max(years, policy.min_sleep));
 }
@@ -149,10 +165,15 @@ void run_scenario(World& w, const Params& p, const Scenario& s) {
         if (sleep_index == 0 && !s.first_acts.empty()) apply_acts(w, p, s.first_acts);
         if (s.policy) {
             pick_talents(w, p, *s.policy);
-            apply_acts(w, p, resolve_policy(w, p, *s.policy, sleep_index, s.data_dir));
+            std::vector<Act> acts = resolve_policy(w, p, *s.policy, sleep_index, s.data_dir);
+            if (s.at_waking) s.at_waking(w, acts, sleep_index);
+            apply_acts(w, p, acts);
             answer_hooks(w, p, *s.policy);   // v0.4 hooks (S3)
         }
-        int span = std::min(remaining, s.policy ? policy_sleep(w, p, *s.policy, sleep_index, s.sleep) : s.sleep);
+        int years = s.policy ? policy_sleep(w, p, *s.policy, sleep_index, s.sleep) : s.sleep;
+        if (s.adjust_sleep) years = s.adjust_sleep(years, sleep_index);
+        if (s.before_sleep) s.before_sleep(w, sleep_index);
+        int span = std::min(remaining, years);
         SleepResult r = sleep(w, p, span);
         if (s.after_sleep) s.after_sleep(w);
         remaining -= std::max(r.years_slept, std::min(span, p.c.step_years));

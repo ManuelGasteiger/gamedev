@@ -30,6 +30,8 @@ bool policy_from_json(const std::string& text, Policy& out, std::string& err) {
     get(j, "talents", out.talents);       // v0.4 (S1)
     get(j, "sleep_cycle", out.sleep_cycle);
     get(j, "min_sleep", out.min_sleep);
+    get(j, "sleep_open", out.sleep_open);
+    get(j, "avoid_rings", out.avoid_rings);
     if (j.contains("answer_hooks")) {   // v0.4 hooks (S3)
         const json& h = j["answer_hooks"];
         get(h, "acts", out.hook_acts);

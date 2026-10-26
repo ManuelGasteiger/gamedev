@@ -115,6 +115,9 @@ struct Scenario {
     int years = 3000;
     int sleep = 100;
     std::function<void(const World&)> after_sleep;   // trace and replay checkpoints
+    std::function<void(World&, std::vector<Act>&, int)> at_waking;   // the policy's acts before they apply (analysis, perturbation)
+    std::function<void(const World&, int)> before_sleep;             // the waking's end, before the sleep starts
+    std::function<int(int, int)> adjust_sleep;                       // (years, sleep index) -> years
 };
 
 void run_scenario(World& w, const Params& p, const Scenario& s);
