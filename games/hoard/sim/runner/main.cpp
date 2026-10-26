@@ -188,17 +188,17 @@ json stats_json(const World& w, const Params& p) {
     j["empty_valley"] = owned == 0;
     j["total_wealth"] = wealth;
     j["regions_owned"] = owned;
-    j["dragon"] = {{"size", w.dragon.size}, {"knowledge", w.dragon.knowledge}, {"magic", w.dragon.magic},
-                   {"threat", threat(w.dragon, p.c)}};
+    j["dragon"] = {{"size", w.dragons[kPlayer].size}, {"knowledge", w.dragons[kPlayer].knowledge}, {"magic", w.dragons[kPlayer].magic},
+                   {"threat", threat(w.dragons[kPlayer], p.c)}};
     j["dragon_slain"] = has_tag(w.tags, "dragon_slain");
     j["race_regions"] = race_regions;
     j["alive"] = alive;
     j["remnants"] = remnants;
     j["hegemonies_fallen"] = hegemonies;
     j["hunger_wakes"] = hunger_wakes;
-    j["dragon"]["hunger"] = w.dragon.hunger;
+    j["dragon"]["hunger"] = w.dragons[kPlayer].hunger;
     j["dragon_death"] = death_json(w);   // v0.4 (S1)
-    j["dragon_growth"] = {{"phase", w.dragon.phase}, {"points", w.dragon.growth}, {"talents", w.dragon.talents}, {"wounds", w.dragon.wounds}};
+    j["dragon_growth"] = {{"phase", w.dragons[kPlayer].phase}, {"points", w.dragons[kPlayer].growth}, {"talents", w.dragons[kPlayer].talents}, {"wounds", w.dragons[kPlayer].wounds}};
     j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
     j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)
     return j;

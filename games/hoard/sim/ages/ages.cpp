@@ -67,7 +67,7 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     if (!f) { r.reason = "no such faction"; return r; }
     if (pred != "tribute" && pred != "no_walls" && pred != "no_settle") { r.reason = "unknown demand " + pred; return r; }
     double knowledge = c.demand_knowledge * effect(w, p, "demand_mult");   // v0.4: Old Tongues
-    if (w.dragon.knowledge < knowledge) { r.reason = "needs knowledge " + num(knowledge); return r; }
+    if (w.dragons[kPlayer].knowledge < knowledge) { r.reason = "needs knowledge " + num(knowledge); return r; }
     if (active_oath_with_pred(w, f->id, pred)) { r.reason = "already sworn"; return r; }
     Act a;
     a.year = w.year;
@@ -75,7 +75,7 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     a.target = f->id;
     a.item = pred;
     w.acts.push_back(a);
-    bool cowed = f->fear >= c.demand_fear || power(*f, c) < c.reaction_weak_ratio * threat(w.dragon, c);
+    bool cowed = f->fear >= c.demand_fear || power(*f, c) < c.reaction_weak_ratio * threat(w.dragons[kPlayer], c);
     if (const Person* ruler = find_person_role(w, f->id, "ruler")) meet(w, ruler->id, "demand", cowed ? 0 : c.known_show);
     if (!cowed) {
         f->anti_dragon += c.demand_refused_resolve;

@@ -23,11 +23,11 @@ Forecast forecast(const World& world, const Params& p, int years) {
     Forecast f;
     f.years = r.years_slept;
     f.wake_reason = r.wake_reason;
-    double amplitude = p.c.forecast_noise / (1.0 + world.dragon.knowledge) * effect(world, p, "forecast_mult");
-    f.size = blur(w.dragon.size, amplitude, noise);
-    f.knowledge = blur(w.dragon.knowledge, amplitude, noise);
-    f.magic = blur(w.dragon.magic, amplitude, noise);
-    f.hunger = clamp01(blur(w.dragon.hunger, amplitude, noise));
+    double amplitude = p.c.forecast_noise / (1.0 + world.dragons[kPlayer].knowledge) * effect(world, p, "forecast_mult");
+    f.size = blur(w.dragons[kPlayer].size, amplitude, noise);
+    f.knowledge = blur(w.dragons[kPlayer].knowledge, amplitude, noise);
+    f.magic = blur(w.dragons[kPlayer].magic, amplitude, noise);
+    f.hunger = clamp01(blur(w.dragons[kPlayer].hunger, amplitude, noise));
 
     const Faction* strongest = nullptr;
     for (auto& x : w.factions)

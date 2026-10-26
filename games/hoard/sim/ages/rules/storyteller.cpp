@@ -72,7 +72,7 @@ void storyteller_wake(World& w, const Params& p, int slept, bool guarantee) {
     bool had_major = any_since(w, p, from, s.major_importance);
     if (!had_major && !w.story_breather) {
         double quiet = static_cast<double>(w.year - w.last_major);
-        double chance = std::min(s.chance_max, s.chance_base + s.chance_per_window * quiet / std::max(1, long_sleep(w.dragon, p.c)));
+        double chance = std::min(s.chance_max, s.chance_base + s.chance_per_window * quiet / std::max(1, long_sleep(w.dragons[kPlayer], p.c)));
         bool forced = w.story_quiet_wakings >= s.forced_after || (s.forced_years > 0 && quiet >= s.forced_years);
         if ((forced || w.rng.chance(chance)) && draw(w, p, s.deck, forced)) {
             had_major = true;
@@ -80,7 +80,7 @@ void storyteller_wake(World& w, const Params& p, int slept, bool guarantee) {
         }
     }
     double near = std::max(slept * s.near_end_share, static_cast<double>(std::min(slept, p.c.step_years)));
-    if (guarantee && slept >= short_sleep(w.dragon, p.c) && !any_since(w, p, w.year - static_cast<int>(near + 0.5), p.c.importance_min))
+    if (guarantee && slept >= short_sleep(w.dragons[kPlayer], p.c) && !any_since(w, p, w.year - static_cast<int>(near + 0.5), p.c.importance_min))
         draw(w, p, s.wake_deck, true);
     if (had_major) { w.story_breather = true; w.story_quiet_wakings = 0; }
     else { w.story_breather = false; w.story_quiet_wakings += 1; }

@@ -34,7 +34,7 @@ void add_refs(CardCtx& ctx, const std::vector<int>& refs) {
 
 const Tags* tags_of(const World& w, const std::string& id) {
     if (id == "world") return &w.tags;
-    if (id == "dragon") return &w.dragon.tags;
+    if (id == "dragon") return &w.dragons[kPlayer].tags;
     if (const Faction* f = find_faction(w, id)) return &f->tags;
     if (const Region* r = find_region(w, id)) return &r->tags;
     if (const Person* x = find_person(w, id)) return &x->tags;
@@ -108,7 +108,7 @@ bool faction_num(const World& w, const Params& p, const CardCtx& ctx, const Fact
     else if (k == "faith") v = f.faith;
     else if (k == "anti_dragon") v = f.anti_dragon;
     else if (k == "power") v = power(f, c);
-    else if (k == "threat_ratio") v = power(f, c) / std::max(1e-9, threat(w.dragon, c));
+    else if (k == "threat_ratio") v = power(f, c) / std::max(1e-9, threat(w.dragons[kPlayer], c));
     else if (k == "regions") v = static_cast<double>(f.regions.size());
     else if (k == "realm") v = static_cast<double>(realm_regions(w, f));
     else if (k == "authority") v = t.authority;
@@ -135,7 +135,7 @@ bool num_field(const World& w, const Params& p, const CardCtx& ctx, const std::s
     if (id.empty()) return false;
     if (const Faction* f = find_faction(w, id)) return faction_num(w, p, ctx, *f, k, v);
     if (id == "dragon") {
-        const Dragon& d = w.dragon;
+        const Dragon& d = w.dragons[kPlayer];
         if (k == "size") v = d.size;
         else if (k == "knowledge") v = d.knowledge;
         else if (k == "magic") v = d.magic;
@@ -420,8 +420,8 @@ Ctxs candidates(const World& w, const Params& p, const CardPred& q, const CardCt
     }
     if (q.type == "lineage") {
         std::string id = var_of(ctx, q.name);
-        bool held = contains(w.dragon.lineages, id);
-        for (auto& h : w.dragon.hostages) if (const Person* x = find_person(w, h)) if (x->faction == id) held = true;
+        bool held = contains(w.dragons[kPlayer].lineages, id);
+        for (auto& h : w.dragons[kPlayer].hostages) if (const Person* x = find_person(w, h)) if (x->faction == id) held = true;
         return pass(ctx, held != q.absent);
     }
     if (q.type == "var") {

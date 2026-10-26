@@ -6,7 +6,7 @@ namespace ages {
 const char* const kGrowthAxes[5] = {"might", "flame", "arcana", "lore", "dominion"};
 
 void hatch(World& w, const Params& p) {
-    Hoard& h = w.dragon.hoard;
+    Hoard& h = w.dragons[kPlayer].hoard;
     for (auto& kv : p.c.start_hoard) {
         if (kv.first == "gold") h.gold += kv.second;
         else if (kv.first == "books") h.books += kv.second;
@@ -18,8 +18,8 @@ void hatch(World& w, const Params& p) {
 
 void add_growth(World& w, const Params& p, const std::string& axis, double points) {
     if (points <= 0) return;
-    w.dragon.growth[axis] += points;
-    if (axis == "might") w.dragon.size += points * p.c.size_per_might * effect(w, p, "size_mult");
+    w.dragons[kPlayer].growth[axis] += points;
+    if (axis == "might") w.dragons[kPlayer].size += points * p.c.size_per_might * effect(w, p, "size_mult");
 }
 
 double total_growth(const Dragon& d) {

@@ -8,12 +8,12 @@ namespace ages {
 // (only feeding acts at wake lower it). Waking is the rising edge through hunger_wake_at. Returns the size lost to atrophy.
 // 17.7: the need scales with the phase (hunger_phase_mult), 17.4: per-decade numbers scale with the step length
 double hunger_need(const World& w, const Constants& c) {
-    return (c.hunger_need + c.hunger_need_per_size * w.dragon.size) * c.hunger_phase_mult[static_cast<size_t>(phase_index(w.dragon))];
+    return (c.hunger_need + c.hunger_need_per_size * w.dragons[kPlayer].size) * c.hunger_phase_mult[static_cast<size_t>(phase_index(w.dragons[kPlayer]))];
 }
 
 double hunger_step(World& w, const Params& p, double nourishment) {
     const Constants& c = p.c;
-    Dragon& d = w.dragon;
+    Dragon& d = w.dragons[kPlayer];
     double before = d.hunger;
     double k = dts(w, c);
     double shortfall = hunger_need(w, c) * k - nourishment;
@@ -32,8 +32,8 @@ double hunger_step(World& w, const Params& p, double nourishment) {
 
 void feed(World& w, const Params& p, const Act& a, double m) {
     const Constants& c = p.c;
-    if (a.type == "kill") w.dragon.hunger = clamp01(w.dragon.hunger - c.hunger_kill_feed * m);
-    else if (a.type == "take" && a.payload.count("food")) w.dragon.hunger = clamp01(w.dragon.hunger - c.hunger_food_feed * m);
+    if (a.type == "kill") w.dragons[kPlayer].hunger = clamp01(w.dragons[kPlayer].hunger - c.hunger_kill_feed * m);
+    else if (a.type == "take" && a.payload.count("food")) w.dragons[kPlayer].hunger = clamp01(w.dragons[kPlayer].hunger - c.hunger_food_feed * m);
 }
 
 }

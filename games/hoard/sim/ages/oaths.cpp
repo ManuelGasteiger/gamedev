@@ -67,7 +67,7 @@ bool clause_holds(const World& w, const Params& p, const Oath& o, const Clause& 
     }
     if (cl.pred == "hostage") {
         by_dragon = true;
-        for (auto& l : w.dragon.lineages) if (l == f->race || l == f->id) return true;
+        for (auto& l : w.dragons[kPlayer].lineages) if (l == f->race || l == f->id) return true;
         return false;
     }
     return true;

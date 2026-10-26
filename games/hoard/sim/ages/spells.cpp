@@ -77,7 +77,7 @@ static CastResult cast_modifier(World& w, const SpellDef& s, CastResult r) {
     std::string target = s.target == "region" ? r.region : r.target;
     if (s.target == "region" && !find_region(w, target)) return fail(r, w, "no such region");
     if (s.target == "faction" && !find_faction(w, target)) return fail(r, w, "no such faction");
-    pay(w.dragon, s);
+    pay(w.dragons[kPlayer], s);
     r.modifier = make_modifier(w, "dragon." + s.id, target, s.modifier);
     r.has_modifier = true;
     r.cast = true;
@@ -95,7 +95,7 @@ static CastResult cast_incite(World& w, const Params& p, const SpellDef& s, Cast
     if (!v || v->id == orc->id) return fail(r, w, "no victim");
     if (!adjacent(w, *orc, *v)) return fail(r, w, "victim does not border the horde");
     if (at_war(*orc, v->id)) return fail(r, w, "already at war");
-    pay(w.dragon, s);
+    pay(w.dragons[kPlayer], s);
     start_war_between(w, *orc, *v, "incited");
     if (s.modifier.present) { r.modifier = make_modifier(w, "dragon.incite", orc->id, s.modifier); r.has_modifier = true; }
     r.war_with = v->id;
@@ -118,8 +118,8 @@ static CastResult cast_raise_undead(World& w, const Params& p, const SpellDef& s
                 if (const Faction* o = find_faction(w, nr->owner))
                     if (power(*o, p.c) > best) { best = power(*o, p.c); victim = o->id; }
     }
-    double wealth = s.spawn_wealth_per_magic * w.dragon.magic;
-    pay(w.dragon, s);
+    double wealth = s.spawn_wealth_per_magic * w.dragons[kPlayer].magic;
+    pay(w.dragons[kPlayer], s);
     Faction host = found_faction(w, p, s.spawn_race, site->id, wealth, s.spawn_cohesion, s.spawn_era);
     host.tags.insert("undead");
     host.tags.insert("raised_by_dragon");
@@ -158,7 +158,7 @@ CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& s
     SpellDef s = with_talents(w, p, it->second);
     if (!s.enabled) return fail(r, w, "disabled");
     std::string why;
-    if (!gate_open(w.dragon, s, why)) return fail(r, w, why);
+    if (!gate_open(w.dragons[kPlayer], s, why)) return fail(r, w, why);
     if (spell == "incite") return cast_incite(w, p, s, r);
     if (spell == "raise_undead") return cast_raise_undead(w, p, s, r);
     if (!s.modifier.present) return fail(r, w, "spell has no effect defined");
@@ -177,10 +177,10 @@ TerraformResult terraform_unrecorded(World& w, const Params& p, const std::strin
     Region* reg = find_region(w, region);
     if (!reg) return done("no such region");
     if (reg->lair) return done("not the lair");
-    if (w.dragon.size < t.gate_size) return done("needs size " + num(t.gate_size));
+    if (w.dragons[kPlayer].size < t.gate_size) return done("needs size " + num(t.gate_size));
     if (has_tag(reg->tags, k->second.tag)) return done("already " + k->second.tag);
-    r.cost = w.dragon.size * t.cost_size_fraction;
-    w.dragon.size -= r.cost;
+    r.cost = w.dragons[kPlayer].size * t.cost_size_fraction;
+    w.dragons[kPlayer].size -= r.cost;
     reg->tags.insert(k->second.tag);
     if (k->second.tag == "wasteland") { reg->hot_decades = 0; reg->cold_decades = 0; }
     r.tag = k->second.tag;

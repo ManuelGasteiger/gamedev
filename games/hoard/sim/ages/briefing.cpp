@@ -365,7 +365,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         Narrator::replace_all(s, "_", " ");
         threads.push_back({{"text", s}, {"kind", "oath"}, {"id", o.id}, {"status", o.status}});
     }
-    for (auto& id : w.dragon.hostages) {
+    for (auto& id : w.dragons[kPlayer].hostages) {
         const Person* x = find_person(w, id);
         if (!x) continue;
         std::string s = n.misc("hostage_line");
@@ -427,7 +427,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         else stated = of.stated_reason;
         Narrator::replace_all(s, "{stated}", stated);
         std::string eyes;
-        if (w.dragon.knowledge >= c.offer_truth_knowledge && of.is_lie) eyes += n.misc("eyes_say_otherwise");
+        if (w.dragons[kPlayer].knowledge >= c.offer_truth_knowledge && of.is_lie) eyes += n.misc("eyes_say_otherwise");
         if (of.marked) eyes += n.misc("marked_envoy");
         Narrator::replace_all(s, "{eyes}", eyes);
         opps.push_back({{"text", s}, {"kind", "offer"}, {"id", of.id}, {"offer_kind", of.kind}, {"faction", of.from_faction}});
@@ -461,13 +461,13 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     out["opportunities"] = opps;
 
     std::string ph = n.misc("phase_line");
-    size_t pi = static_cast<size_t>(phase_index(w.dragon));
-    Narrator::replace_all(ph, "{phase}", std::to_string(w.dragon.phase));
+    size_t pi = static_cast<size_t>(phase_index(w.dragons[kPlayer]));
+    Narrator::replace_all(ph, "{phase}", std::to_string(w.dragons[kPlayer].phase));
     Narrator::replace_all(ph, "{phase_word}", pi < p.texts.phase_names.size() ? p.texts.phase_names[pi] : "");
-    Narrator::replace_all(ph, "{short}", std::to_string(short_sleep(w.dragon, c)));
-    Narrator::replace_all(ph, "{long}", std::to_string(long_sleep(w.dragon, c)));
-    Narrator::replace_all(ph, "{ready}", std::string(ready_to_moult(w.dragon, c) ? n.misc("ready_to_moult") : "") + (has_tag(w.dragon.tags, "stiff") ? n.misc("stiff") : ""));
-    out["phase"] = {{"text", ph}, {"phase", w.dragon.phase}, {"ready_to_moult", ready_to_moult(w.dragon, c)}};
+    Narrator::replace_all(ph, "{short}", std::to_string(short_sleep(w.dragons[kPlayer], c)));
+    Narrator::replace_all(ph, "{long}", std::to_string(long_sleep(w.dragons[kPlayer], c)));
+    Narrator::replace_all(ph, "{ready}", std::string(ready_to_moult(w.dragons[kPlayer], c) ? n.misc("ready_to_moult") : "") + (has_tag(w.dragons[kPlayer].tags, "stiff") ? n.misc("stiff") : ""));
+    out["phase"] = {{"text", ph}, {"phase", w.dragons[kPlayer].phase}, {"ready_to_moult", ready_to_moult(w.dragons[kPlayer], c)}};
     return out.dump();
 }
 

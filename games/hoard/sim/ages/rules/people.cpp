@@ -57,7 +57,7 @@ static void bury(World& w, const Person& person) {
     d.died = w.year;
     w.dead_people.push_back(d);
     if (Known* k = find_known(w, person.id)) k->tags.insert("dead");
-    erase_value(w.dragon.hostages, person.id);
+    erase_value(w.dragons[kPlayer].hostages, person.id);
     std::string id = person.id;
     w.people.erase(std::remove_if(w.people.begin(), w.people.end(), [&](const Person& x) { return x.id == id; }), w.people.end());
 }
@@ -99,7 +99,7 @@ void crown(World& w, const Params& p, Faction& f, Person& person, const std::str
     int crowned = emit(w, "person_crowned", person.id, f.id, 0, {how}, cause);
     if (has_tag(person.tags, "dragon_raised") && !has_tag(f.tags, "dragon_raised")) {
         f.tags.insert("dragon_raised");
-        if (!contains(w.dragon.lineages, f.id)) w.dragon.lineages.push_back(f.id);
+        if (!contains(w.dragons[kPlayer].lineages, f.id)) w.dragons[kPlayer].lineages.push_back(f.id);
         emit(w, "dragon_raised_lineage", f.id, person.id, 0, {}, because("raised_in_lair", {crowned, last_event_id(w, "raised_in_lair", person.id)}));
     }
     make_heir(w, p, f, because("new_reign", {crowned}));

@@ -10,7 +10,7 @@ namespace lives {
 
 // a hostage held hostage_raise_years grows up in the lair: tag dragon_raised, and the faction's lineage follows
 void raise_hostages(World& w, const Params& p) {
-    std::vector<std::string> ids = w.dragon.hostages;
+    std::vector<std::string> ids = w.dragons[kPlayer].hostages;
     for (auto& id : ids) {
         Person* x = find_person(w, id);
         if (!x || has_tag(x->tags, "dragon_raised")) continue;
@@ -39,9 +39,9 @@ Person* pick_hostage(World& w, const std::string& faction) {
 void take_hostage_person(World& w, const Params& p, Person& person, bool consent, const Cause& cause) {
     person.tags.insert("hostage");
     person.hostage_since = w.year;
-    if (!contains(w.dragon.hostages, person.id)) {
-        w.dragon.hostages.push_back(person.id);
-        std::sort(w.dragon.hostages.begin(), w.dragon.hostages.end());
+    if (!contains(w.dragons[kPlayer].hostages, person.id)) {
+        w.dragons[kPlayer].hostages.push_back(person.id);
+        std::sort(w.dragons[kPlayer].hostages.begin(), w.dragons[kPlayer].hostages.end());
     }
     meet(w, person.id, "hostage", consent ? p.c.known_help : p.c.known_harm);
     emit(w, "hostage_taken", person.id, person.faction, 0, {consent ? "consent" : "seized", person.role}, cause);
@@ -58,12 +58,12 @@ void take_hostage_person(World& w, const Params& p, Person& person, bool consent
 }
 
 void release_hostage_person(World& w, const Params& p, const std::string& faction, const Cause& cause) {
-    std::vector<std::string> ids = w.dragon.hostages;
+    std::vector<std::string> ids = w.dragons[kPlayer].hostages;
     for (auto& id : ids) {
         Person* x = find_person(w, id);
         if (!x || x->faction != faction) continue;
         x->tags.erase("hostage");
-        erase_value(w.dragon.hostages, id);
+        erase_value(w.dragons[kPlayer].hostages, id);
         if (x->role == "hostage_ruler") x->role = "hero";
         if (x->role == "heir" && heir_of(w, faction) && heir_of(w, faction)->id != id) { x->role = "hero"; x->tags.insert("claimant"); }
         meet(w, id, "released", p.c.known_release);

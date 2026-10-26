@@ -222,10 +222,10 @@ const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_rem
                               "accept_offer", "decline_offer", "pick_talent"};
 
 json cmd_apply_acts_wounded(const json& in) {
-    double before = g.world.dragon.wounds;
+    double before = g.world.dragons[kPlayer].wounds;
     json out = cmd_apply_acts(in);
     if (!out.value("ok", false)) return out;
-    out["wounds"] = {{"taken", g.world.dragon.wounds - before}, {"total", g.world.dragon.wounds}, {"max", health_max(g.world, g.params)}};
+    out["wounds"] = {{"taken", g.world.dragons[kPlayer].wounds - before}, {"total", g.world.dragons[kPlayer].wounds}, {"max", health_max(g.world, g.params)}};
     out["slain"] = dragon_dead(g.world);
     return out;
 }
@@ -272,10 +272,10 @@ json cmd_answer_hook(const json& in) {
     std::string id = in.value("id", ""), choice = in.value("choice", ""), reason;
     std::vector<Hook> before = g.world.hooks;
     size_t first_event = g.world.chronicle.size();
-    double wounds = g.world.dragon.wounds;
+    double wounds = g.world.dragons[kPlayer].wounds;
     if (!answer_hook(g.world, g.params, id, choice, reason)) return fail(reason);
     return {{"ok", true}, {"events", events_since(first_event)}, {"hooks_resolved", hooks_resolved_json(before)},
-            {"wounds", {{"taken", g.world.dragon.wounds - wounds}, {"total", g.world.dragon.wounds}, {"max", health_max(g.world, g.params)}}},
+            {"wounds", {{"taken", g.world.dragons[kPlayer].wounds - wounds}, {"total", g.world.dragons[kPlayer].wounds}, {"max", health_max(g.world, g.params)}}},
             {"slain", dragon_dead(g.world)}};
 }
 

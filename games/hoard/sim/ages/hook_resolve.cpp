@@ -27,7 +27,7 @@ void mark(World& w, const Params& p, Faction& f, const char* type, double fear, 
 }
 
 std::map<std::string, double> reward(World& w, const Params& p, const Hook& h, const std::map<std::string, double>& r) {
-    Hoard& hoard = w.dragon.hoard;
+    Hoard& hoard = w.dragons[kPlayer].hoard;
     Faction* f = find_faction(w, h.faction);
     Faction* o = find_faction(w, h.other);
     double gold = of(r, "gold");
@@ -38,8 +38,8 @@ std::map<std::string, double> reward(World& w, const Params& p, const Hook& h, c
     hoard.art += of(r, "art");
     hoard.royals += of(r, "royals");
     hoard.food += of(r, "food");
-    w.dragon.faith_pool += of(r, "faith_pool");
-    w.dragon.hunger = clamp01(w.dragon.hunger + of(r, "hunger_add"));
+    w.dragons[kPlayer].faith_pool += of(r, "faith_pool");
+    w.dragons[kPlayer].hunger = clamp01(w.dragons[kPlayer].hunger + of(r, "hunger_add"));
     std::map<std::string, double> grown;
     for (const char* axis : kGrowthAxes) {
         double pts = of(r, (std::string("growth_") + axis).c_str());
@@ -149,10 +149,10 @@ void apply_hook_ignore(World& w, const Params& p, const Hook& h) {
     }
     if (Faction* o = find_faction(w, h.other)) o->cohesion = clamp01(o->cohesion + of(g, "other_cohesion_add"));
     if (of(g, "lair_burn_add") > 0) if (Region* r = find_region(w, lair_region(w))) r->burn = clamp01(r->burn + of(g, "lair_burn_add"));
-    if (of(g, "hoard_gold_mult") > 0) w.dragon.hoard.gold *= of(g, "hoard_gold_mult");
+    if (of(g, "hoard_gold_mult") > 0) w.dragons[kPlayer].hoard.gold *= of(g, "hoard_gold_mult");
     if (of(g, "gold_to_court") > 0) {
-        double amt = w.dragon.hoard.gold * of(g, "gold_to_court");
-        w.dragon.hoard.gold -= amt;
+        double amt = w.dragons[kPlayer].hoard.gold * of(g, "gold_to_court");
+        w.dragons[kPlayer].hoard.gold -= amt;
         if (Faction* f = find_faction(w, h.faction)) f->wealth += amt;
     }
 }

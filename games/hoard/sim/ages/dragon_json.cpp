@@ -56,7 +56,7 @@ void dragon_state_from_json(const json& dragon, Dragon& d) {
 }
 
 void dragon_view_to_json(const World& w, const Params& p, json& view) {
-    const Dragon& d = w.dragon;
+    const Dragon& d = w.dragons[kPlayer];
     json& dj = view["dragon"];
     json growth = json::object(), next = json::object(), ranks = json::object(), steps = json::object();
     for (const char* axis : kGrowthAxes) {

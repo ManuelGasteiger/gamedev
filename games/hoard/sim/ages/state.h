@@ -344,6 +344,8 @@ struct Genesis {
 
 struct Recorder;
 
+constexpr size_t kPlayer = 0;
+
 struct World {
     int year = 0;
     uint64_t seed = 0;
@@ -351,7 +353,7 @@ struct World {
     double magic = 0;
     std::vector<Region> regions;
     std::vector<Faction> factions;
-    Dragon dragon;
+    std::vector<Dragon> dragons = std::vector<Dragon>(1);   // index kPlayer is the player; more dragons later (decision review §7)
     std::vector<Oath> oaths;
     std::vector<Modifier> modifiers;
     std::vector<Act> acts;

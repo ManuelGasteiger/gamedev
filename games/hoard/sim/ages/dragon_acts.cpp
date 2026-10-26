@@ -46,7 +46,7 @@ double warded_burn(const World& w, const Params& p, const Act& a, double m) {
 }
 
 void after_burn(World& w, const Params& p, const Faction& f, const Act& a, double m) {
-    w.dragon.hoard.embers += m * effect(w, p, "ember_mult");
+    w.dragons[kPlayer].hoard.embers += m * effect(w, p, "ember_mult");
     double spread = effect(w, p, "burn_spread");
     std::vector<std::string> burned;
     if (Region* r = find_region(w, a.region)) {

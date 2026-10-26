@@ -109,7 +109,7 @@ std::vector<Pick> pending_picks(const World& w, const Params& p) {
     for (auto& a : b.axes) {
         for (size_t n = 0; n < b.nodes.size(); ++n) {
             int node = static_cast<int>(n);
-            if (growth_of(w.dragon, a.id) < b.nodes[n] || taken_at(w.dragon, b, a.id, node)) continue;
+            if (growth_of(w.dragons[kPlayer], a.id) < b.nodes[n] || taken_at(w.dragons[kPlayer], b, a.id, node)) continue;
             Pick pk;
             for (auto& t : b.talents) if (t.axis == a.id && t.node == node) pk.options.push_back(t.id);
             if (pk.options.empty()) continue;
@@ -117,7 +117,7 @@ std::vector<Pick> pending_picks(const World& w, const Params& p) {
             pk.node = node;
             pk.points = b.nodes[n];
             pk.needs_phase = b.node_phase[n];
-            pk.open = w.dragon.phase >= pk.needs_phase;
+            pk.open = w.dragons[kPlayer].phase >= pk.needs_phase;
             out.push_back(pk);
         }
     }
@@ -130,18 +130,18 @@ bool pick_talent_unrecorded(World& w, const Params& p, const std::string& id, st
     for (auto& pk : pending_picks(w, p)) {
         if (pk.axis != t->axis || pk.node != t->node) continue;
         if (!pk.open) { reason = "needs phase " + std::to_string(pk.needs_phase); return false; }
-        w.dragon.talents.push_back(id);
-        emit(w, "talent_taken", "dragon", id, pk.points, {t->axis}, because("growth", {}, {{"points", growth_of(w.dragon, t->axis)}}));
+        w.dragons[kPlayer].talents.push_back(id);
+        emit(w, "talent_taken", "dragon", id, pk.points, {t->axis}, because("growth", {}, {{"points", growth_of(w.dragons[kPlayer], t->axis)}}));
         return true;
     }
-    reason = taken_at(w.dragon, p.talents, t->axis, t->node) ? "node already chosen" : "node not reached";
+    reason = taken_at(w.dragons[kPlayer], p.talents, t->axis, t->node) ? "node already chosen" : "node not reached";
     return false;
 }
 
 double effect(const World& w, const Params& p, const std::string& key) {
     Merge m = merge_of(key);
     double v = m == Merge::mult ? 1 : 0;
-    for (auto& id : w.dragon.talents)
+    for (auto& id : w.dragons[kPlayer].talents)
         if (const TalentDef* t = def_of(p.talents, id)) {
             auto it = t->effects.find(key);
             if (it != t->effects.end()) combine(v, it->second, m);
@@ -150,7 +150,7 @@ double effect(const World& w, const Params& p, const std::string& key) {
         auto rank = a.rank_effects.find(key);
         auto mile = a.milestone_effects.find(key);
         if (rank == a.rank_effects.end() && mile == a.milestone_effects.end()) continue;
-        int r = rank_state(w.dragon, p.talents, a).ranks;
+        int r = rank_state(w.dragons[kPlayer], p.talents, a).ranks;
         if (r > 0 && rank != a.rank_effects.end()) combine(v, rank->second, m, r);
         if (milestones(a, r) > 0 && mile != a.milestone_effects.end()) combine(v, mile->second, m, milestones(a, r));
     }
@@ -159,10 +159,10 @@ double effect(const World& w, const Params& p, const std::string& key) {
 
 std::map<std::string, double> merged_effects(const World& w, const Params& p) {
     std::map<std::string, double> out;
-    for (auto& id : w.dragon.talents)
+    for (auto& id : w.dragons[kPlayer].talents)
         if (const TalentDef* t = def_of(p.talents, id)) for (auto& kv : t->effects) out[kv.first] = 0;
     for (auto& a : p.talents.axes) {
-        int r = rank_state(w.dragon, p.talents, a).ranks;
+        int r = rank_state(w.dragons[kPlayer], p.talents, a).ranks;
         if (r > 0) for (auto& kv : a.rank_effects) out[kv.first] = 0;
         if (milestones(a, r) > 0) for (auto& kv : a.milestone_effects) out[kv.first] = 0;
     }
@@ -175,14 +175,14 @@ std::map<std::string, double> merged_effects(const World& w, const Params& p) {
 TalentLook merged_look(const World& w, const Params& p) {
     TalentLook out;
     std::vector<const TalentDef*> taken;
-    for (auto& id : w.dragon.talents) if (const TalentDef* t = def_of(p.talents, id)) taken.push_back(t);
+    for (auto& id : w.dragons[kPlayer].talents) if (const TalentDef* t = def_of(p.talents, id)) taken.push_back(t);
     std::stable_sort(taken.begin(), taken.end(), [](const TalentDef* a, const TalentDef* b) { return a->node < b->node; });
     for (const TalentDef* t : taken) {
         for (auto& kv : t->look.str) out.str[kv.first] = kv.second;
         for (auto& kv : t->look.num) out.num[kv.first] = std::max(out.num[kv.first], kv.second);
     }
     for (auto& a : p.talents.axes) {
-        int r = rank_state(w.dragon, p.talents, a).ranks;
+        int r = rank_state(w.dragons[kPlayer], p.talents, a).ranks;
         if (r > 0) for (auto& kv : a.rank_look.num) out.num[kv.first] += kv.second * r;
         int steps = milestones(a, r);
         if (steps > 0) for (auto& kv : a.milestone_look.num) out.num[kv.first] += kv.second * steps;
