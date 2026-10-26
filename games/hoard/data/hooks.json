@@ -13,7 +13,7 @@
           "adjacent": "lair"
         },
         {
-          "field": "fear",
+          "field": "dread",
           "lt": 0.3
         },
         {
@@ -39,7 +39,7 @@
       ],
       "reward": {
         "gold_share": 0.2,
-        "fear": 0.1
+        "dread": 0.1
       },
       "ignore": {
         "gold_to_court": 0.1
@@ -86,8 +86,8 @@
       "reward": {
         "artifacts": 2,
         "growth_arcana": 1,
-        "fear": 0.1,
-        "fear_all": 0.05
+        "dread": 0.1,
+        "dread_all": 0.05
       },
       "ignore": {},
       "text": {
@@ -117,8 +117,8 @@
       "reward": {
         "artifacts": 2,
         "growth_arcana": 1,
-        "fear": 0.1,
-        "fear_all": 0.05
+        "dread": 0.1,
+        "dread_all": 0.05
       },
       "ignore": {},
       "text": {
@@ -150,7 +150,7 @@
           "gte": 1
         },
         {
-          "field": "fear",
+          "field": "dread",
           "lt": 0.7
         }
       ],
@@ -160,7 +160,7 @@
       ],
       "reward": {
         "food": 20,
-        "fear": 0.1,
+        "dread": 0.1,
         "growth_might": 1
       },
       "ignore": {
@@ -206,7 +206,7 @@
       ],
       "reward": {
         "food": 20,
-        "fear": 0.1,
+        "dread": 0.1,
         "growth_might": 1,
         "other_faith": 0.2
       },
@@ -262,6 +262,10 @@
         {
           "field": "faith",
           "gte": 0.5
+        },
+        {
+          "field": "awe",
+          "gte": 0.15
         }
       ],
       "force_if": [
@@ -282,12 +286,14 @@
           "faith_pool": 1,
           "growth_dominion": 2,
           "faith": 0.1,
+          "awe": 0.1,
           "growth_lore": 1
         },
         "eat": {
           "food": 15,
           "hunger_add": -0.2,
-          "fear": 0.1,
+          "dread": 0.25,
+          "awe": -0.1,
           "faith": -0.3,
           "growth_might": 1
         }
@@ -365,7 +371,7 @@
       "reward": {
         "artifacts": 1,
         "growth_arcana": 1,
-        "fear": 0.1,
+        "dread": 0.1,
         "growth_lore": 1
       },
       "ignore": {
@@ -399,7 +405,7 @@
       "reward": {
         "royals": 1,
         "growth_lore": 2,
-        "other_fear": 0.07
+        "other_dread": 0.07
       },
       "ignore": {
         "cohesion_add": -0.1,
@@ -502,7 +508,7 @@
       ],
       "reward": {
         "other_faith": 0.3,
-        "fear": 0.07,
+        "dread": 0.07,
         "growth_dominion": 1
       },
       "ignore": {
@@ -550,7 +556,7 @@
       ],
       "reward": {
         "other_faith": 0.3,
-        "fear": 0.07,
+        "dread": 0.07,
         "growth_dominion": 1
       },
       "ignore": {
@@ -681,7 +687,7 @@
       "reward": {
         "food": 30,
         "hunger_add": -0.3,
-        "fear": 0.07,
+        "dread": 0.07,
         "growth_might": 1
       },
       "ignore": {},
@@ -711,7 +717,7 @@
       ],
       "reward": {
         "faith": 0.3,
-        "fear": 0.07,
+        "dread": 0.07,
         "growth_dominion": 1,
         "growth_lore": 1
       },
@@ -782,7 +788,7 @@
       "reward": {
         "food": 15,
         "gold_share": 0.2,
-        "fear": 0.1,
+        "dread": 0.1,
         "growth_might": 1
       },
       "ignore": {

@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include "ages/memory_tiers.h"
 #include <string>
 #include "ages/ages.h"
 #include "ages/dragon_json.h"
@@ -47,9 +48,9 @@ void start_recording(bool genesis) {
     g.header = replay_header(g.world, g.params, genesis);
 }
 
-json fear_faith_snapshot(const World& w) {
+json court_snapshot(const World& w) {
     json j = json::object();
-    for (auto& f : w.factions) j[f.id] = {{"fear", f.fear}, {"faith", f.faith}, {"wealth", f.wealth}};
+    for (auto& f : w.factions) j[f.id] = {{"dread", dread_eff(f)}, {"awe", awe_eff(f)}, {"faith", f.faith}, {"wealth", f.wealth}};
     return j;
 }
 
@@ -113,20 +114,19 @@ json cmd_apply_acts(const json& in) {
     std::vector<Act> acts;
     std::string err;
     if (!acts_from_json(in.value("acts", json::array()).dump(), acts, err)) return fail(err);
-    json before = fear_faith_snapshot(g.world);
+    json before = court_snapshot(g.world);
     size_t first_event = g.world.chronicle.size();
     json lines = json::parse(reaction_lines_to_json(apply_acts(g.world, g.params, acts)), nullptr, false);
-    json after = fear_faith_snapshot(g.world);
-    json changed = json::array();
-    for (auto& a : acts) {
-        std::vector<std::string> touched = a.witnesses;
-        touched.push_back(a.target);
-        for (auto& id : touched) {
-            if (!before.contains(id)) continue;
-            bool seen = false;
-            for (auto& c : changed) if (c["id"] == id) seen = true;
-            if (!seen) changed.push_back({{"id", id}, {"before", before[id]}, {"after", after[id]}});
-        }
+    json after = court_snapshot(g.world);
+    json changed = json::array();   // every court the acts moved: the targets first, then the witnesses the sim chose
+    std::vector<std::string> order;
+    for (auto& a : acts) order.push_back(a.target);
+    for (auto& f : g.world.factions) order.push_back(f.id);
+    for (auto& id : order) {
+        if (!before.contains(id) || !after.contains(id) || before[id] == after[id]) continue;
+        bool seen = false;
+        for (auto& c : changed) if (c["id"] == id) seen = true;
+        if (!seen) changed.push_back({{"id", id}, {"before", before[id]}, {"after", after[id]}});
     }
     return {{"ok", true}, {"changed", changed}, {"events", events_since(first_event)}, {"lines", lines}};
 }

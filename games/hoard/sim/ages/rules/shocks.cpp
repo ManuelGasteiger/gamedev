@@ -88,7 +88,8 @@ static void succession_crises(World& w, const Params& p) {
         Faction s = found_faction(w, p, parent.race, largest, share, c.successor_cohesion, parent.era);
         s.culture = parent.culture;
         s.pop = parent.pop;
-        s.fear = parent.fear;
+        s.dread = parent.dread;
+    s.awe = parent.awe;
         s.faith = parent.faith;
         s.memory = parent.memory;
         s.tags.insert("successor_of:" + parent.id);

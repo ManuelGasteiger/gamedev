@@ -1,4 +1,5 @@
 #include "analyse.h"
+#include "ages/memory_tiers.h"
 #include <algorithm>
 #include <memory>
 #include "ages/defences.h"
@@ -33,7 +34,7 @@ json snapshot(const World& w, const Params& p) {
     json courts = json::array();
     for (auto& f : w.factions)
         courts.push_back({{"id", f.id}, {"race", f.race}, {"wealth", f.wealth}, {"era", f.era}, {"anti_dragon", f.anti_dragon},
-                          {"fear", f.fear}, {"faith", f.faith}, {"cohesion", f.cohesion}, {"regions", f.regions.size()}});
+                          {"dread", dread_eff(f)}, {"awe", awe_eff(f)}, {"faith", f.faith}, {"cohesion", f.cohesion}, {"regions", f.regions.size()}});
     j["courts"] = courts;
     return j;
 }

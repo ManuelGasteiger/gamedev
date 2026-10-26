@@ -5,7 +5,8 @@
 #include "state.h"
 
 // v0.4 (S1): a settled region's defences, derived from its court whenever they are read (data/defences.json).
-// Damage is after fear (x (1 - fear_damp x fear)) and the hero at the capital, before the dragon's armor.
+// Damage is after dread (x (1 - dread) once dread passes flee_dread: the garrisons flee) and the hero at the capital,
+// before the dragon's armor.
 
 namespace ages {
 

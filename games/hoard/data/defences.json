@@ -1,5 +1,4 @@
 {
-  "fear_damp": 0.5,
   "hero_bonus": 5,
   "defences": [
     { "id": "levies",        "label": "Levies",        "per_act": 2,  "era_scale": 1.0 },

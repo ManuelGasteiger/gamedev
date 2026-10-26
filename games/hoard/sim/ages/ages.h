@@ -28,6 +28,13 @@ struct SleepResult {
     std::vector<Hook> hooks;                       // v0.4 hooks (S3): the situations waiting at this waking
 };
 
+// a court as the sleeper will find it: dread and awe, the slayer pressure D (1 - 0.7 A), and the odds of a slaying
+// from it (0 while it has no order or dreads the dragon less than slayer_dread)
+struct CourtForecast {
+    std::string id;
+    double dread = 0, awe = 0, pressure = 0, slay_odds = 0;
+};
+
 struct Forecast {
     int years = 0;
     std::string wake_reason;
@@ -36,6 +43,7 @@ struct Forecast {
     int strongest_era = 0;
     bool slay_possible = false;
     std::string hook_kind, hook_title, hook_region;   // v0.4 hooks (S3): the likely hook of the next waking (star-reading)
+    std::vector<CourtForecast> courts;                 // item 02
 };
 
 struct CastResult {

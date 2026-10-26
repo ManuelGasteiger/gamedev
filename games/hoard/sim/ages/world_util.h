@@ -299,38 +299,38 @@ inline int short_sleep(const Dragon& d, const Constants& c) { return c.phase_sho
 inline int long_sleep(const Dragon& d, const Constants& c) { return c.phase_long_sleep[static_cast<size_t>(phase_index(d))]; }
 inline bool ready_to_moult(const Dragon& d, const Constants& c) { return eligible_phase(d, c) > d.phase; }
 
-inline void recompute_fear_faith(Faction& f, const Constants& c) {
-    double fear = 0, faith = 0;
+inline void recompute_faith(Faction& f, const Constants& c) {
+    double faith = 0;
     bool blocked = false;
     for (auto& m : f.memory) {
-        fear += m.weight * m.fear;
+        if (m.axis != "faith") continue;
         faith += m.weight * m.faith;
         if (has_tag(m.tags, "betrayal") && m.weight > c.betrayal_block_weight) blocked = true;
     }
-    f.fear = clamp01(fear);
     double nf = clamp01(faith);
     f.faith = blocked ? std::min(nf, f.faith) : nf;
 }
 
+// a faith memory; dread and awe go through deposit (memory_tiers.h)
 inline void remember(Faction& f, const Constants& c, int year, const std::string& type, double magnitude,
-                     double fear_delta, double faith_delta, const Tags& tags) {
+                     double faith_delta, const Tags& tags) {
     MemoryEntry m;
     m.year = year;
     m.type = type;
     m.magnitude = magnitude;
     m.weight = 1;
-    m.fear = fear_delta;
+    m.axis = "faith";
     m.faith = faith_delta;
     m.tags = tags;
     f.memory.push_back(m);
-    recompute_fear_faith(f, c);
+    recompute_faith(f, c);
 }
 
 inline void set_faith(Faction& f, const Constants& c, int year, const std::string& type, double magnitude,
-                      double target, double fear_delta, const Tags& tags) {
+                      double target, const Tags& tags) {
     double current = 0;
-    for (auto& m : f.memory) current += m.weight * m.faith;
-    remember(f, c, year, type, magnitude, fear_delta, target - current, tags);
+    for (auto& m : f.memory) if (m.axis == "faith") current += m.weight * m.faith;
+    remember(f, c, year, type, magnitude, target - current, tags);
     f.faith = target;
 }
 

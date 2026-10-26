@@ -1,4 +1,5 @@
 #include "slayers.h"
+#include "../memory_tiers.h"
 #include <cmath>
 #include <limits>
 #include "rules.h"
@@ -60,8 +61,8 @@ Cause slay_cause(const World& w, const Faction& f, const Person* lead) {
     int heaviest = 0;
     double top = -1;
     for (auto& m : f.memory)
-        if (m.type == "burn" && m.weight * m.magnitude > top) { top = m.weight * m.magnitude; heaviest = last_event_id(w, "act_burn", f.id, "", "", m.year); }
-    Cause c = because("slayers", {heaviest, last_event_id(w, "slayers_founded", f.id)}, {{"fear", f.fear}});
+        if (m.type == "burn" && m.axis == "dread" && m.weight * m.magnitude > top) { top = m.weight * m.magnitude; heaviest = last_event_id(w, "act_burn", f.id, "", "", m.year); }
+    Cause c = because("slayers", {heaviest, last_event_id(w, "slayers_founded", f.id)}, {{"dread", dread_eff(f)}});
     if (lead) { c.params["bold"] = lead->traits.bold; c.text_key = "slayers_led"; }
     return c;
 }
@@ -116,7 +117,12 @@ void attempt(World& w, const Params& p, Faction& f) {
         return;
     }
     f.wealth *= (1.0 - c.slay_fail_wealth_loss);
-    remember(f, c, w.year, "slay_failed", 1.0, c.slay_fail_fear, 0, {"slay_failed"});
+    Deposit d;
+    d.type = "slay_failed";
+    d.magnitude = 1.0;
+    d.dread = c.slay_fail_dread;
+    d.tags = {"slay_failed"};
+    deposit(w, p, f, d);
     w.dragons[kPlayer].tags.insert("rage");
     if (w.wake_reason.empty()) w.wake_reason = "slay_attempt_failed";
     emit(w, "slay_attempt_failed", f.id, hero, odds, {}, cause);
@@ -147,20 +153,22 @@ std::string slayer_stage(const World& w, const std::string& faction) {
     return t ? t->tag : "";
 }
 
-// forming needs the order and fear above slay_fear; the band readies by a per-decade roll at least one waking after it
-// formed and attacks in the first step of the sleep after it was ready; it disperses when the order or the fear goes
+// forming needs the order and dread at slayer_dread (act-api 6.4); the band readies by a per-decade roll scaled by the
+// slayer pressure D (1 - 0.7 A) over slayer_dread, at least one waking after it formed, and attacks in the first step of
+// the sleep after it was ready; it disperses when the order goes or dread falls under slay_lapse_dread
 void slayer_clock(World& w, const Params& p) {
     const Constants& c = p.c;
     double k = dts(w, c);
     for (auto& f : w.factions) {
         bool order = has_tag(f.tags, "slayers");
-        bool eligible = order && f.fear > c.slay_fear;
+        double dread = dread_eff(f);
+        bool eligible = order && dread >= c.mem.slayer_dread;
         const TimedTag* t = stage_tag(w, f.id);
         if (!t) { if (eligible) form(w, p, f); continue; }
-        if (!order || f.fear < c.slay_lapse_fear) { clear_stage(w, f); continue; }
+        if (!order || dread < c.slay_lapse_dread) { clear_stage(w, f); continue; }
         if (t->from > w.sleep_started) continue;   // reported this sleep: the next stage waits for a waking
         if (t->tag == kForming) {
-            if (eligible && w.rng.chance(c.slay_ready_rate * k)) ready(w, p, f);
+            if (eligible && w.rng.chance(c.slay_ready_rate * k * slayer_pressure(f, c.mem) / c.mem.slayer_dread)) ready(w, p, f);
             continue;
         }
         attempt(w, p, f);

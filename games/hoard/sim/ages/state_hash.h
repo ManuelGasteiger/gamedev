@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "json.h"
 #include "state.h"
 
 namespace ages {
@@ -15,6 +16,7 @@ struct StateHash {
 };
 
 StateHash state_hash(const World& w);
+StateHash state_hash_of_json(const nlohmann::json& world);   // the same over a saved world object
 std::string hash_hex(uint64_t h);
 std::string state_hash_json(const World& w);   // {"year", "root", "parts": {...}}, one trace line
 

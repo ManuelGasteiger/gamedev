@@ -36,6 +36,8 @@ add_library(ages STATIC
   sim/ages/forecast.cpp
   sim/ages/hoard.cpp
   sim/ages/importance.cpp
+  sim/ages/memory_tiers.cpp
+  sim/ages/memory_data.cpp
   sim/ages/reaction_lines.cpp
   sim/ages/hunger.cpp
   sim/ages/names.cpp

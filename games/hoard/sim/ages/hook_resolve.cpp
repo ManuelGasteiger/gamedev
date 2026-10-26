@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include "memory_tiers.h"
 #include "unrecorded.h"
 #include "defences.h"
 #include "growth.h"
@@ -9,8 +10,8 @@
 
 // v0.4 hooks (S3): an act of the raid (or a choice) answers a hook: the fight's wound first, then the reward
 // (data/hooks.json reward keys: gold, gold_share of the court's wealth, books, artifacts, art, royals, food, faith_pool,
-// hunger_add, growth_<axis>, fear, fear_all, faith, faith_neighbours, other_fear, other_faith) and hook_resolved;
-// an expired hook applies its ignore keys (wealth_mult, cohesion_add, anti_dragon_add, faith_add, fear_add,
+// hunger_add, growth_<axis>, dread, dread_all, awe, faith, faith_neighbours, other_dread, other_awe, other_faith) and hook_resolved;
+// an expired hook applies its ignore keys (wealth_mult, cohesion_add, anti_dragon_add, faith_add, dread_add, awe_add,
 // other_cohesion_add, lair_burn_add, hoard_gold_mult, gold_to_court)
 
 namespace ages {
@@ -19,11 +20,19 @@ namespace {
 
 double of(const std::map<std::string, double>& m, const char* k) { auto it = m.find(k); return it == m.end() ? 0 : it->second; }
 
-void mark(World& w, const Params& p, Faction& f, const char* type, double fear, double faith) {
-    if (fear == 0 && faith == 0) return;
-    if (fear > 0) fear *= effect(w, p, "fear_mult");
+void mark(World& w, const Params& p, Faction& f, const char* type, double dread, double faith, double awe = 0) {
+    if (dread == 0 && faith == 0 && awe == 0) return;
+    if (dread > 0) dread *= effect(w, p, "dread_mult");
+    if (awe > 0) awe *= effect(w, p, "awe_gain_mult");
     if (faith > 0) faith *= f.eff.faith_gain * effect(w, p, "faith_mult") * effect(w, p, "faith_gain_mult");
-    remember(f, p.c, w.year, type, 1.0, fear, faith, {"hook"});
+    Deposit d;
+    d.type = type;
+    d.magnitude = 1.0;
+    d.dread = dread;
+    d.awe = awe;
+    d.tags = {"hook"};
+    deposit(w, p, f, d);
+    if (faith != 0) remember(f, p.c, w.year, type, 1.0, faith, {"hook"});
 }
 
 std::map<std::string, double> reward(World& w, const Params& p, const Hook& h, const std::map<std::string, double>& r) {
@@ -47,9 +56,9 @@ std::map<std::string, double> reward(World& w, const Params& p, const Hook& h, c
         add_growth(w, p, axis, pts);
         grown[axis] = pts;
     }
-    if (f) mark(w, p, *f, "hook", of(r, "fear"), of(r, "faith"));
-    if (o) mark(w, p, *o, "hook", of(r, "other_fear"), of(r, "other_faith"));
-    if (of(r, "fear_all") > 0) for (auto& g : w.factions) if (!f || g.id != f->id) mark(w, p, g, "hook", of(r, "fear_all"), 0);
+    if (f) mark(w, p, *f, "hook", of(r, "dread"), of(r, "faith"), of(r, "awe"));
+    if (o) mark(w, p, *o, "hook", of(r, "other_dread"), of(r, "other_faith"), of(r, "other_awe"));
+    if (of(r, "dread_all") > 0) for (auto& g : w.factions) if (!f || g.id != f->id) mark(w, p, g, "hook", of(r, "dread_all"), 0);
     if (f && of(r, "faith_neighbours") != 0)
         for (auto& g : w.factions) if (g.id != f->id && adjacent(w, *f, g)) mark(w, p, g, "hook", 0, of(r, "faith_neighbours"));
     return grown;
@@ -145,7 +154,7 @@ void apply_hook_ignore(World& w, const Params& p, const Hook& h) {
         if (of(g, "wealth_mult") > 0) f->wealth *= of(g, "wealth_mult");
         f->cohesion = clamp01(f->cohesion + of(g, "cohesion_add"));
         f->anti_dragon = std::max(0.0, f->anti_dragon + of(g, "anti_dragon_add"));
-        mark(w, p, *f, "hook_ignored", of(g, "fear_add"), of(g, "faith_add"));
+        mark(w, p, *f, "hook_ignored", of(g, "dread_add"), of(g, "faith_add"), of(g, "awe_add"));
     }
     if (Faction* o = find_faction(w, h.other)) o->cohesion = clamp01(o->cohesion + of(g, "other_cohesion_add"));
     if (of(g, "lair_burn_add") > 0) if (Region* r = find_region(w, lair_region(w))) r->burn = clamp01(r->burn + of(g, "lair_burn_add"));

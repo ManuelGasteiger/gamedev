@@ -1,4 +1,5 @@
 #include "defences.h"
+#include "memory_tiers.h"
 #include "talents.h"
 #include "world_util.h"
 
@@ -45,7 +46,8 @@ std::vector<DefenceView> region_defences(const World& w, const Params& p, const 
     const Faction* f = r.owner.empty() ? nullptr : find_faction(w, r.owner);
     if (!f) return out;
     const DefenceBook& b = p.defences;
-    double damp = std::max(0.0, 1.0 - b.fear_damp * f->fear);
+    double dread = dread_eff(*f);
+    double damp = dread >= p.c.mem.flee_dread ? 1.0 - dread : 1.0;   // the garrisons flee (act-api 6.4)
     bool hero = hero_at_court(w, f->id) && capital_region(w, *f) == r.id;
     bool wrecked = has_tag(r.tags, "defences_wrecked");
     for (auto& d : b.defences) {

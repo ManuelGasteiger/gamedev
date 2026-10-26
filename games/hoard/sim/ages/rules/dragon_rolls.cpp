@@ -1,4 +1,5 @@
 #include "rules.h"
+#include "../memory_tiers.h"
 #include "slayers.h"
 #include "../growth.h"
 #include "../oaths.h"
@@ -17,15 +18,19 @@ static bool has_tribute_oath(const World& w, const std::string& id) {
 }
 
 // 17.7: tribute also feeds the sleeper (tribute_food per gold unit goes into the food stock). v0.4: a court under a
-// tribute oath pays out of faith or out of fear; tribute feeds Dominion
+// tribute oath pays out of faith or out of dread; tribute feeds Dominion
 static void tribute(World& w, const Params& p) {
     const Constants& c = p.c;
     double k = dts(w, c);
     auto points = c.growth_points.find("tribute");
     for (auto& f : w.factions) {
-        bool sworn = has_tribute_oath(w, f.id) && (f.faith > c.tribute_faith || f.fear >= c.demand_fear);
+        double dread = dread_eff(f);
+        bool devout = f.faith > c.tribute_faith;
+        bool sworn = has_tribute_oath(w, f.id) && (devout || dread >= c.mem.demand_dread);
         if (!sworn && f.faith <= c.tribute_faith_no_oath) continue;
-        double amount = f.wealth * c.tribute_rate * k * effect(w, p, "tribute_mult");
+        // paid out of faith at the full rate, out of dread in proportion to it (act-api 6.4)
+        double share = devout || !sworn ? 1.0 : dread / c.mem.demand_dread;
+        double amount = f.wealth * c.tribute_rate * k * effect(w, p, "tribute_mult") * share;
         f.wealth -= amount;
         w.dragons[kPlayer].hoard.gold += amount;
         w.dragons[kPlayer].hoard.food += amount * c.tribute_food;

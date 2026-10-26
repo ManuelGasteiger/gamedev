@@ -1,5 +1,7 @@
 #include "rules.h"
+#include "../memory_tiers.h"
 #include "../oaths.h"
+#include "../talents.h"
 #include "../world_util.h"
 
 namespace ages {
@@ -20,7 +22,20 @@ static Cause breach_cause(const World& w, const Faction& f, const Clause& cl, bo
         return because("faded_memory", {}, {{"faith", f.faith}});
     }
     if (f.era >= 2) return because("era_outgrew", {last_event_id(w, "era_advance", f.id)}, {{"era", static_cast<double>(f.era)}});
-    return because("faded_memory", {}, {{"fear", f.fear}});
+    return because("faded_memory", {}, {{"dread", dread_eff(f)}});
+}
+
+// an oath sworn in dread and not in awe chafes (act-api 6.4): it breaks by chance, oath_breach_rate per decade times
+// 1 - stability, where stability = 1 - 0.8 D (1 - A) and an awed court (A >= cult_awe) holds it half again as well;
+// a keyed draw, so the world stream does not move. Dragon-king (oath_steadfast) is never resented
+static bool breaks_unkept(const World& w, const Params& p, const Oath& o, const Faction& f) {
+    if (effect(w, p, "oath_steadfast") > 0) return false;
+    double unstable = 1.0 - oath_stability(f, p.c.mem);
+    if (awe_eff(f) >= p.c.mem.cult_awe) unstable /= 1.5;
+    double chance = p.c.oath_breach_rate * unstable * dts(w, p.c);
+    if (chance <= 0) return false;
+    Rng r = rng_for(w.seed, "oath_breach", o.id + ":" + std::to_string(w.year));
+    return r.chance(chance);
 }
 
 void rule_oaths(World& w, const Params& p) {
@@ -39,8 +54,12 @@ void rule_oaths(World& w, const Params& p) {
         if (o.expires > 0 && w.year >= o.expires) { o.status = "expired"; emit(w, "oath_expired", o.id, mortal, 0, {}, because("term_ended", {sworn}), thread); continue; }
         for (auto& cl : o.clauses) {
             bool by_dragon = false;
-            if (clause_holds(w, p, o, cl, window_from, by_dragon)) continue;
-            Cause cause = breach_cause(w, *f, cl, by_dragon, window_from);
+            bool resented = false;
+            if (clause_holds(w, p, o, cl, window_from, by_dragon)) {
+                resented = (cl.pred == "no_walls" || cl.pred == "no_settle") && breaks_unkept(w, p, o, *f);
+                if (!resented) continue;
+            }
+            Cause cause = resented ? because("resentment", {}, {{"dread", dread_eff(*f)}, {"awe", awe_eff(*f)}}) : breach_cause(w, *f, cl, by_dragon, window_from);
             add_ref(cause, sworn);
             if (by_dragon) {
                 o.status = "breached_by_dragon";

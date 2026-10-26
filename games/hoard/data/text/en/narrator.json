@@ -676,6 +676,18 @@
       "text": "{O} was crowned in {S}, and the line of the old kings was restored.",
       "brief": "the restoration in {s} in {year}"
     },
+    "dragon_temple_raised": {
+      "text": "{S} raised a temple to you, and carved on its walls what you did for them.",
+      "brief": "the dragon temple of {s} raised in {year}"
+    },
+    "slayer_memorial": {
+      "text": "{S} set up a memorial to those you killed, so that no child of theirs would forget.",
+      "brief": "the memorial of {s} raised in {year}"
+    },
+    "fire_memorial": {
+      "text": "{S} built a memorial from the stones of what you burned.",
+      "brief": "the memorial of {s} raised in {year}"
+    },
     "slayer_order": {
       "text": "In {S} the slayers took vows and a name: an order, and orders outlive kingdoms.",
       "brief": "the founding of the slayer order in {s} in {year}"
@@ -933,6 +945,7 @@
     "dragon_harm": "with {ref}",
     "treasury_empty": "because {ref} had emptied its treasury",
     "faded_memory": "because the memory of you had faded",
+    "resentment": "because an oath sworn in dread is kept in resentment",
     "era_outgrew": "because {ref} made the old terms unbearable",
     "party_gone": "with {ref}",
     "term_ended": "as its term ran out",
@@ -994,6 +1007,9 @@
     "dragon_remembered": "{p:years0} years after {ref_oldest}",
     "pretender_returns": "{p:years0} years after {ref_oldest}",
     "restored_line": "",
+    "dragon_temple_raised": "",
+    "slayer_memorial": "after {ref}",
+    "fire_memorial": "after {ref}",
     "slayer_order": "",
     "slayer_order_survives": "{p:years0} years after {ref_oldest}",
     "slayer_order_spreads": "{p:years0} years after {ref}",
@@ -1247,7 +1263,7 @@
     "eyes_say_otherwise": " The envoy's eyes say otherwise.",
     "marked_envoy": " This court has lied to you before.",
     "opportunity_war": "{faction} is losing a war against {enemy}; you could defend it.",
-    "opportunity_rich": "{faction} is rich and does not fear you.",
+    "opportunity_rich": "{faction} is rich and does not dread you.",
     "opportunity_slayers": "{faction} is arming against you; a slayer order could form there.",
     "phase_line": "Phase {phase} ({phase_word}): a short sleep is {short} years, a moult {long} years.{ready}",
     "ready_to_moult": " You are ready to moult.",
@@ -1322,6 +1338,9 @@
     "defend.losing": "{F} was losing its war, and you turned it; its people sing of the mountain now.",
     "defend.not_losing": "{F} was holding its own; it thanks you, warily.",
     "show.any": "{F} saw you overhead, and mothers kept their children in for a season.",
+    "show.awe": "{F} saw you overhead and stopped work to watch; nobody ran.",
+    "defend.saved": "{F} owes you its life, and its people carve your shape over their doors.",
+    "give.gift": "{F} took your gift with both hands; its priests say you choose whom to keep.",
     "give.any": "{F} took your gift and wonders what you will ask for it.",
     "give.any.dwarf": "{F} weighed your gift twice and wrote it down.",
     "miracle.protector": "{F} saw the sky answer for it, and pilgrims start up the mountain road.",

@@ -12,7 +12,7 @@
     "effects": [
       {"do": "tag", "tag": "dragon_blood", "decades": 100, "inherit": true},
       {"do": "field", "field": "faith", "min": 0.3},
-      {"do": "field", "field": "fear", "min": 0.2},
+      {"do": "field", "field": "dread", "min": 0.2},
       {"do": "modifier", "var": "cohesion_decay", "op": "mul", "value": 0.8, "decades": 30}
     ]
   },

@@ -3,7 +3,7 @@
 #include "../data.h"
 #include "../state.h"
 
-// v0.4 (S1): the slayer clock. A court with the slayers tag and fear above slay_fear forms a band (slayers_forming),
+// v0.4 (S1): the slayer clock. A court with the slayers tag and dread at slayer_dread forms a band (slayers_forming),
 // readies it at least one waking later (slayers_ready, slay_ready_rate per decade) and tries the slaying at the
 // first step of the sleep after that; Premonition turns the attempt into a wake once. The band's strength follows the
 // dragon, as RimWorld's raid points do: (base + hoard + growth points) x the court's era multiplier x the adaptation

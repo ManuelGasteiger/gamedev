@@ -1,4 +1,5 @@
 #include <cstdio>
+#include "memory_tiers.h"
 #include "record.h"
 #include "unrecorded.h"
 #include "ages.h"
@@ -47,8 +48,17 @@ bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
         if (Person* x = find_person(w, of.target)) {
             Faction* f = find_faction(w, x->faction);
             take_hostage_person(w, p, *x, true, because("offer_accepted", {sworn}));
-            if (f && of.kind == "hide_heir") remember(*f, p.c, w.year, "hide_heir", 1.0, 0, p.c.offer_consent_faith * f->eff.faith_gain, {"gift"});
-            if (f && of.kind == "elope") remember(*f, p.c, w.year, "elope", 1.0, 0.1, -0.1, {"harm"});
+            if (f) {   // a hidden heir is a consent hostage (awe), an elopement a theft (dread)
+                auto g = p.gains.find(of.kind == "hide_heir" ? "take_hostage.consent" : "take_hostage");
+                Deposit d;
+                d.type = of.kind;
+                d.magnitude = 1.0;
+                d.tags = {of.kind == "hide_heir" ? "gift" : "harm"};
+                if (g != p.gains.end()) { d.dread = g->second.dread * effect(w, p, "dread_mult"); d.awe = g->second.awe; }
+                deposit(w, p, *f, d);
+                if (of.kind == "hide_heir") remember(*f, p.c, w.year, "hide_heir", 1.0, p.c.offer_consent_faith * f->eff.faith_gain, {"gift"});
+                else remember(*f, p.c, w.year, "elope", 1.0, -0.1, {"harm"});
+            }
             for (auto& oa : w.oaths) if (oa.id == o.id) oa.fulfilled = true;
         }
     }
@@ -75,12 +85,23 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     a.target = f->id;
     a.item = pred;
     w.acts.push_back(a);
-    bool cowed = f->fear >= c.demand_fear || power(*f, c) < c.reaction_weak_ratio * threat(w.dragons[kPlayer], c);
+    double dread = dread_eff(*f);
+    bool cowed = dread >= c.mem.demand_dread || power(*f, c) < c.reaction_weak_ratio * threat(w.dragons[kPlayer], c);
     if (const Person* ruler = find_person_role(w, f->id, "ruler")) meet(w, ruler->id, "demand", cowed ? 0 : c.known_show);
+    auto it = p.gains.find(cowed ? "demand.sworn" : "demand.refused");
+    if (it != p.gains.end()) {
+        Deposit d;
+        d.type = "demand";
+        d.magnitude = 1;
+        d.dread = it->second.dread * effect(w, p, "dread_mult");
+        d.awe = it->second.awe;
+        d.act = static_cast<int>(w.acts.size()) - 1;
+        deposit(w, p, *f, d);
+    }
     if (!cowed) {
         f->anti_dragon += c.demand_refused_resolve;
-        emit(w, "demand_refused", f->id, pred, f->fear, {}, because("not_cowed", {}, {{"fear", f->fear}}));
-        r.reason = "not_cowed|fear=" + num(f->fear) + "|need=" + num(c.demand_fear);
+        emit(w, "demand_refused", f->id, pred, dread, {}, because("not_cowed", {}, {{"dread", dread}}));
+        r.reason = "not_cowed|dread=" + num(dread) + "|need=" + num(c.mem.demand_dread);
         return r;
     }
     Oath o;
@@ -99,7 +120,7 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     o.status = "active";
     o.kind = "demand";
     w.oaths.push_back(o);
-    emit(w, "oath_sworn", o.id, f->id, 0, {"demand." + pred}, because("cowed", {}, {{"fear", f->fear}}), "oath:" + o.id);
+    emit(w, "oath_sworn", o.id, f->id, 0, {"demand." + pred}, because("cowed", {}, {{"dread", dread}}), "oath:" + o.id);
     r.sworn = true;
     r.oath = o;
     return r;
