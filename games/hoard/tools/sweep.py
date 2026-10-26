@@ -300,7 +300,7 @@ def markdown(summary):
         d = s["deaths"]
         phase = [", ".join(f"p{k}:{v}" for k, v in s["marks"][m]["phase"].items()) + f" ({pct(s['marks'][m]['alive'])})" for m in marks]
         hoard = [fmt(s["marks"][m]["hoard"], 0) for m in marks]
-        out.append(f"| {p} | {pct(d['share'])} | {d['slaying']}/{d['wounds']} | " + ", ".join(f"{k} {v}" for k, v in d["killers"].items()) +
+        out.append(f"| {p} ({s['seeds']}) | {pct(d['share'])} | {d['slaying']}/{d['wounds']} | " + ", ".join(f"{k} {v}" for k, v in d["killers"].items()) +
                    f" | {fmt(d['median_year'], 0)} | {s['outcome']['entropy_bits']:.2f} | " + " | ".join(phase) + " | " + " | ".join(hoard) + " |")
     out += ["", "Growth points per century, by axis (seeds alive at the span's end):", ""]
     spans = list(next(iter(pols.values()))["growth_per_century"])
@@ -358,9 +358,12 @@ def sweep(args):
     t0 = time.time()
     os.makedirs(os.path.join(args.out, "replays"), exist_ok=True)
     policies = [p for p in args.policies.split(",") if p]
+    cap = {k: int(v) for k, v in (x.split("=") for x in args.policy_seeds.split(",") if x)}
     jobs = []
     for seed in range(1, args.seeds + 1):
         for p in policies:
+            if seed > cap.get(p, args.seeds):
+                continue
             mode = "buckets" if p == "played" and seed <= args.bucket_seeds else "plain"
             jobs.append((args.bin, args.data, seed, args.years, p, mode, args.out, args.bucket_samples))
         if "played" in policies and seed <= args.perturb_seeds:
@@ -378,7 +381,7 @@ def sweep(args):
                 sys.stderr.write(f"\r{done}/{len(jobs)} runs, {time.time() - t0:.0f} s")
     sys.stderr.write("\n")
     summary = {"seeds": args.seeds, "years": args.years, "jobs": args.jobs, "bucket_seeds": min(args.bucket_seeds, args.seeds),
-               "bucket_samples": args.bucket_samples, "perturb_seeds": min(args.perturb_seeds, args.seeds), "policies": {}}
+               "bucket_samples": args.bucket_samples, "perturb_seeds": min(args.perturb_seeds, args.seeds), "policy_seeds": cap, "policies": {}}
     for p in policies:
         write_csvs(args.out, p, by[(p, "run")])
         summary["policies"][p] = policy_summary(p, by[(p, "run")], args.years)
@@ -455,6 +458,7 @@ def main():
     ap.add_argument("--policies", default=",".join(POLICIES))
     ap.add_argument("--bucket-seeds", type=int, default=300, help="played seeds with the per-waking bucket analysis (the slow part)")
     ap.add_argument("--bucket-samples", type=int, default=2)
+    ap.add_argument("--policy-seeds", default="", help="per-policy seed cap, e.g. rest_only=30 (rest_only wakes every 1 to 5 years and is slow)")
     ap.add_argument("--perturb-seeds", type=int, default=100)
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--out", default="out/sweep")
