@@ -95,11 +95,11 @@ endif()
 
 add_executable(ages_runner sim/runner/main.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
-set_target_properties(ages_runner PROPERTIES OUTPUT_NAME ages)
+set_target_properties(ages_runner PROPERTIES OUTPUT_NAME hoard-sim)
 
 enable_testing()
 set(AGES_DATA_DIR ${CMAKE_SOURCE_DIR}/data)
-set(AGES_GOLDEN_DIR ${CMAKE_SOURCE_DIR}/sim/tests/golden)
+set(AGES_GOLDEN_DIR ${CMAKE_SOURCE_DIR}/tests/golden)
 
 function(ages_test name label)
   add_executable(test_${name} sim/tests/${name}.cpp)

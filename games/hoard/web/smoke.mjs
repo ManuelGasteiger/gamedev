@@ -13,8 +13,8 @@ data.text = readFileSync(join(root, 'data/text/en.json'), 'utf8');
 data.events = '[' + readdirSync(join(root, 'data/events')).filter((f) => f.endsWith('.json')).sort()
   .map((f) => readFileSync(join(root, 'data/events', f), 'utf8')).join(',\n') + ']';
 data.genesis = readFileSync(join(root, 'data/genesis.json'), 'utf8');   // v0.4 world (S2)
-const golden = readFileSync(join(root, 'sim/tests/golden/ages_v0.hash'), 'utf8').trim();
-const goldenRaze = readFileSync(join(root, 'sim/tests/golden/ages_v0_1_raze.hash'), 'utf8').trim();
+const golden = readFileSync(join(root, 'tests/golden/ages_v0.hash'), 'utf8').trim();
+const goldenRaze = readFileSync(join(root, 'tests/golden/ages_v0_1_raze.hash'), 'utf8').trim();
 
 function wasiShim(getMemory) {
   const dec = new TextDecoder();

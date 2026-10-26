@@ -7,15 +7,15 @@ Headless, deterministic C++17 simulation of the mortal factions of the valley wh
 ```
 cmake -S . -B build
 cmake --build build -j
-./build/ages --data data --seed 1 --years 3000 --out out/s1
-./build/ages --data data --seed 1 --years 2000 --policy raze_all --sleep 100 --out out/r1
-./build/ages --data data --seed 1 --years 1000 --acts my_log.json --out out/a1
+./build/hoard-sim --data data --seed 1 --years 3000 --out out/s1
+./build/hoard-sim --data data --seed 1 --years 2000 --policy raze_all --sleep 100 --out out/r1
+./build/hoard-sim --data data --seed 1 --years 1000 --acts my_log.json --out out/a1
 cd build && ctest                # all six tests
 cd build && ctest -L fast        # determinism, reactions, oath_breach_sleep, golden
-python3 tools/ages_stats.py --bin build/ages --seeds 1-200 --years 3000 [--policy raze_all]
+python3 tools/ages_stats.py --bin build/hoard-sim --seeds 1-200 --years 3000 [--policy raze_all]
 python3 tools/ages_stats.py --read out/stats
-python3 tools/interest.py --bin build/ages --data data --seeds 1-300 --years 3000 --policies idle,raze_all,played --out out/interest --jobs 4 --read-set 2
-./build/ages --data data --seed 3 --years 600 --sleep 300 --briefing --out out/b3   # prints the last sleep's briefing
+python3 tools/interest.py --bin build/hoard-sim --data data --seeds 1-300 --years 3000 --policies idle,raze_all,played --out out/interest --jobs 4 --read-set 2
+./build/hoard-sim --data data --seed 3 --years 600 --sleep 300 --briefing --out out/b3   # prints the last sleep's briefing
 ```
 
 The runner writes `chronicle.json`, `world_final.json`, `stats.json` and `briefing.json` into `--out` (`--narrate` adds `narrated.json`, the narrator's sentence for every event; `tools/interest.py` uses it for its narrated chronicles). `--acts` applies an act log once before the first sleep; `--policy` applies the policy's act template at the start of every sleep, targets resolved against the current world. A 3000-year run takes about 0.3 s (people and cards dominate).
@@ -36,7 +36,7 @@ On Linux/macOS: `WASI_SDK=/path/to/wasi-sdk web/build.sh` (needs python3 for the
 
 `sim/wasm/api.cpp` exports a three-function C ABI (`ages_cmd(json) -> json`, `ages_alloc`, `ages_free`); commands are `load` (data includes `events`, the cards of `data/events/` joined into one array), `reset`, `world`, `apply_acts`, `accept_offer`, `decline_offer`, `sleep`, `briefing`, `people`, `kill_person`, `forecast` ({years}: a blurred dry run on a copy of the world), `sponsor_remnant` ({race, region}), `cast`, `terraform`, `demand`, `catalogue`, `hash`, `load_world`. `apply_acts` and `kill_person` return `lines`: `[{faction, text}]`, what the act meant to each court that reacted. The page's WASI shim covers fd_write/fd_close/fd_seek and a few more; only those three are imported. Emscripten would also work later with the same `api.cpp`.
 
-Checks: `node web/smoke.mjs` loads the wasm in Node, runs a short scenario and verifies that the wasm chronicle hashes for both golden scenarios equal `sim/tests/golden/ages_v0.hash` and `ages_v0_1_raze.hash`. `PLAYWRIGHT_BROWSERS_PATH=... node web/check.cjs` drives the page headless (burn, apply, read the forecast line, sleep 100; then reset and sleep 1000 on an empty hoard and assert hunger rose) and writes `web/sandbox-check.png`. `node web/game-check.cjs` drives `web/hoard-game.html` through the playtest checklist in `web/GAME.md` and writes `web/shots/*.png`; `web/build.sh --html` re-embeds the existing wasm without recompiling.
+Checks: `node web/smoke.mjs` loads the wasm in Node, runs a short scenario and verifies that the wasm chronicle hashes for both golden scenarios equal `tests/golden/ages_v0.hash` and `ages_v0_1_raze.hash`. `PLAYWRIGHT_BROWSERS_PATH=... node web/check.cjs` drives the page headless (burn, apply, read the forecast line, sleep 100; then reset and sleep 1000 on an empty hoard and assert hunger rose) and writes `web/sandbox-check.png`. `node web/game-check.cjs` drives `web/hoard-game.html` through the playtest checklist in `web/GAME.md` and writes `web/shots/*.png`; `web/build.sh --html` re-embeds the existing wasm without recompiling.
 
 ## Layout
 
@@ -113,7 +113,7 @@ sim/tests/check.h               CHECK macro
 sim/tests/fixtures.h            shared fixtures (sample act log, oath builder)
 sim/tests/stats.h               per-seed stat collection for the slow tests
 sim/tests/<name>.cpp            determinism, baseline, reactions, oath_breach_sleep, policies, golden
-sim/tests/golden/*.hash         golden chronicle hashes (ages_v0: seed 42 sample log idle; ages_v0_1_raze: seed 42 raze_all); updating them is a deliberate commit
+tests/golden/*.hash         golden chronicle hashes (ages_v0: seed 42 sample log idle; ages_v0_1_raze: seed 42 raze_all); updating them is a deliberate commit
 tools/ages_stats.py             runs the binary over a seed range or reads existing out dirs, prints the v0.1 band table
 tools/interest.py               17.6 interest metrics per policy (causal depth, outcome entropy, ...) and narrated chronicles
 ```

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Interest metrics for the ages sim (doc section 17.6).
 
-  interest.py --bin build/ages --data data --seeds 1-1000 --years 3000 [--policies idle,raze_all,...] [--out out/interest]
+  interest.py --bin build/hoard-sim --data data --seeds 1-1000 --years 3000 [--policies idle,raze_all,...] [--out out/interest]
   interest.py --chronicle 42 [--policy played]          # narrated chronicle for blind judging
   interest.py --read-set 3                              # with a run: write top/bottom narrated chronicles to out/interest/read/
   interest.py --genesis ...                             # generated worlds (data/genesis.json): adds the world table below
@@ -891,7 +891,7 @@ def write_read_set(args, summaries, count):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--bin", default="build/ages")
+    ap.add_argument("--bin", default="build/hoard-sim")
     ap.add_argument("--data", default="data")
     ap.add_argument("--seeds", default="1-100")
     ap.add_argument("--years", type=int, default=3000)
