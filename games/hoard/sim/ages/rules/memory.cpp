@@ -1,4 +1,5 @@
 #include "rules.h"
+#include "core/detmath.h"
 #include <cmath>
 #include "../talents.h"
 #include "../world_util.h"
@@ -24,8 +25,8 @@ void rule_memory(World& w, const Params& p) {
         if (hl > 0) {
             if (f.eff.memory_halflife > 0) hl = f.eff.memory_halflife;
             hl *= longer;
-            double decay = std::pow(0.5, w.dt / hl);
-            double betrayal_decay = std::pow(0.5, w.dt * c.betrayal_decay_mult / hl);
+            double decay = det::half_life(w.dt, hl);
+            double betrayal_decay = det::half_life(w.dt * c.betrayal_decay_mult, hl);
             for (auto& m : f.memory) m.weight *= has_tag(m.tags, "betrayal") ? betrayal_decay : decay;
             f.memory.erase(std::remove_if(f.memory.begin(), f.memory.end(),
                                           [&](const MemoryEntry& m) { return m.weight < c.memory_drop; }),

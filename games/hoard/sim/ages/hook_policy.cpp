@@ -60,7 +60,7 @@ Act answer_act(const World& w, const Policy& policy, const Hook& h, const std::s
 bool affordable(const World& w, const Params& p, const Policy& policy, const Hook& h, const Act& a) {
     if (policy.hook_reach > 0 && hops_from_lair(w, h.region) > policy.hook_reach) return false;
     double damage = strike_damage(w, p, a) + hook_fight_damage(w, p, h);
-    return damage <= 0 || w.dragon.wounds + damage <= policy.hook_wound_cap * health_max(w, p);
+    return damage <= 0 || w.dragons[kPlayer].wounds + damage <= policy.hook_wound_cap * health_max(w, p);
 }
 
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Aggregate stats.json over a seed range.
 
-  ages_stats.py --bin build/ages --data data --seeds 1-200 --years 3000 [--policy idle] [--out out/stats]
+  ages_stats.py --bin build/hoard-sim --data data --seeds 1-200 --years 3000 [--policy idle] [--out out/stats]
   ages_stats.py --read out/stats          # aggregate existing <dir>/s<seed>/stats.json
 """
 import argparse
@@ -117,7 +117,7 @@ def print_table(agg):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--bin", default="build/ages")
+    ap.add_argument("--bin", default="build/hoard-sim")
     ap.add_argument("--data", default="data")
     ap.add_argument("--seeds", default="1-200")
     ap.add_argument("--years", type=int, default=3000)

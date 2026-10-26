@@ -138,7 +138,7 @@ static void pick_talents(World& w, const Params& p, const Policy& policy) {
 static int policy_sleep(const World& w, const Params& p, const Policy& policy, int index, int fallback) {
     if (policy.sleep_cycle.empty()) return fallback;
     const std::string& s = policy.sleep_cycle[static_cast<size_t>(index) % policy.sleep_cycle.size()];
-    int years = s == "short" ? short_sleep(w.dragon, p.c) : s == "long" ? long_sleep(w.dragon, p.c) : std::atoi(s.c_str());
+    int years = s == "short" ? short_sleep(w.dragons[kPlayer], p.c) : s == "long" ? long_sleep(w.dragons[kPlayer], p.c) : std::atoi(s.c_str());
     return std::max(1, std::max(years, policy.min_sleep));
 }
 
@@ -154,6 +154,7 @@ void run_scenario(World& w, const Params& p, const Scenario& s) {
         }
         int span = std::min(remaining, s.policy ? policy_sleep(w, p, *s.policy, sleep_index, s.sleep) : s.sleep);
         SleepResult r = sleep(w, p, span);
+        if (s.after_sleep) s.after_sleep(w);
         remaining -= std::max(r.years_slept, std::min(span, p.c.step_years));
         sleep_index += 1;
     }

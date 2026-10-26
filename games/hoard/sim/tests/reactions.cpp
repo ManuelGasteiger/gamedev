@@ -53,7 +53,7 @@ static void strong_vs_weak() {
     s->cohesion = 1.0;
     k->wealth = 1;
     k->cohesion = 0.3;
-    double th = threat(strong.world.dragon, strong.params.c);
+    double th = threat(strong.world.dragons[kPlayer], strong.params.c);
     CHECK(power(*s, strong.params.c) >= 0.5 * th, "fixture: strong faction must have power >= 0.5 threat");
     CHECK(power(*k, weak.params.c) < 0.5 * th, "fixture: weak faction must have power < 0.5 threat");
     apply_acts(strong.world, strong.params, {make_act("burn", "aldmere", 0.5, "east_vale")});

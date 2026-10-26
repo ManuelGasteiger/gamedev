@@ -342,6 +342,10 @@ struct Genesis {
     std::map<std::string, std::string> deal;
 };
 
+struct Recorder;
+
+constexpr size_t kPlayer = 0;
+
 struct World {
     int year = 0;
     uint64_t seed = 0;
@@ -349,7 +353,7 @@ struct World {
     double magic = 0;
     std::vector<Region> regions;
     std::vector<Faction> factions;
-    Dragon dragon;
+    std::vector<Dragon> dragons = std::vector<Dragon>(1);   // index kPlayer is the player; more dragons later (decision review §7)
     std::vector<Oath> oaths;
     std::vector<Modifier> modifiers;
     std::vector<Act> acts;
@@ -384,6 +388,7 @@ struct World {
     int last_major = 0;                    // storyteller: year of the last major event
     int story_quiet_wakings = 0;           // wakings in a row without a major event
     bool story_breather = false;           // the coming waking is a breather (the last one had a major event)
+    Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
 };
 
 }

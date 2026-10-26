@@ -1,4 +1,5 @@
 #include "offers.h"
+#include "unrecorded.h"
 #include "ages.h"
 #include "oaths.h"
 #include "rules/rules.h"
@@ -136,7 +137,7 @@ static void offers_of(World& w, Rng& rng, const Params& p, const Faction& f) {
         propose("burn_rival", g.id, revenge ? "revenge" : "fear_of_conquest", "", has_tag(g.tags, "slayers"));
         break;
     }
-    for (auto& id : w.dragon.hostages)
+    for (auto& id : w.dragons[kPlayer].hostages)
         if (const Person* x = find_person(w, id)) if (x->faction == f.id) { propose("return_hostage", id, "succession"); break; }
 
     bool threatened = has_tag(f.tags, "civil_war");
@@ -210,7 +211,7 @@ static void fulfil(World& w, const Params& p, Oath& o, const Act& a) {
     }
     double target = std::min(1.0, f->faith * c.offer_honest_faith_mult);
     if (target > f->faith) set_faith(*f, c, w.year, "offer_fulfilled", 1.0, target, 0, {"gratitude"});
-    if (o.price > 0 && !contains_pred(o, "tribute")) w.dragon.hoard.gold += o.price;
+    if (o.price > 0 && !contains_pred(o, "tribute")) w.dragons[kPlayer].hoard.gold += o.price;
     if (Known* k = find_known(w, o.envoy)) k->relationship = std::min(1.0, k->relationship + c.known_help);
     emit(w, "offer_fulfilled", f->id, o.envoy, f->faith, {o.kind, o.motive}, because("honest_offer", {sworn, act}, {{"faith", f->faith}, {"gold", o.price}}), "oath:" + o.id);
 }
@@ -236,7 +237,7 @@ void note_act(World& w, const Params& p, const Act& a, double m) {
     ledger(w, p, a, m);
 }
 
-bool kill_person(World& w, const Params& p, const std::string& id, std::string& reason, std::vector<ReactionLine>* lines) {
+bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, std::string& reason, std::vector<ReactionLine>* lines) {
     const Constants& c = p.c;
     Person* x = find_person(w, id);
     if (!x) { reason = "no such person"; return false; }

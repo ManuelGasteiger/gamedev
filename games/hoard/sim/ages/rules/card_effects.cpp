@@ -77,7 +77,7 @@ void field(World& w, const Params& p, const CardEffect& e, const std::string& id
     std::string k = str(e, "field");
     double* v = nullptr;
     if (Region* r = find_region(w, id)) { if (k == "burn") v = &r->burn; }
-    else if (id == "dragon") { if (k == "gold") v = &w.dragon.hoard.gold; else if (k == "hunger") v = &w.dragon.hunger; }
+    else if (id == "dragon") { if (k == "gold") v = &w.dragons[kPlayer].hoard.gold; else if (k == "hunger") v = &w.dragons[kPlayer].hunger; }
     else if (id == "world" && k == "magic") v = &w.magic;   // v0.4 world (S2)
     if (!v) return;
     if (has(e, "set")) *v = num(e, "set");
@@ -201,8 +201,8 @@ void refugees_to(World& w, const Params& p, const CardEffect& e, CardCtx& ctx, c
 
 void wealth_transfer(World& w, const CardEffect& e, CardCtx& ctx) {
     std::string from = var_of(ctx, str(e, "from", "self")), to = var_of(ctx, str(e, "to", "other"));
-    double* src = from == "dragon" ? &w.dragon.hoard.gold : nullptr;
-    double* dst = to == "dragon" ? &w.dragon.hoard.gold : nullptr;
+    double* src = from == "dragon" ? &w.dragons[kPlayer].hoard.gold : nullptr;
+    double* dst = to == "dragon" ? &w.dragons[kPlayer].hoard.gold : nullptr;
     if (Faction* f = find_faction(w, from)) src = &f->wealth;
     if (Faction* f = find_faction(w, to)) dst = &f->wealth;
     if (!src) return;

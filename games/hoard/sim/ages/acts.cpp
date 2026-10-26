@@ -1,4 +1,5 @@
 #include "ages.h"
+#include "unrecorded.h"
 #include "dragon_acts.h"
 #include "hooks.h"
 #include "importance.h"
@@ -38,7 +39,7 @@ static std::string harm_relationship(const World& w, const Params& p, const Fact
     const Constants& c = p.c;
     if (active_oath_with_pred(w, f.id, "no_harm") || active_oath_with_pred(w, f.id, "defend")) return "oath_active";
     if (f.faith > c.reaction_faith_high) return "faithful";
-    return power(f, c) < c.reaction_weak_ratio * threat(w.dragon, c) ? "weak" : "strong";
+    return power(f, c) < c.reaction_weak_ratio * threat(w.dragons[kPlayer], c) ? "weak" : "strong";
 }
 
 static void immediate(World& w, const Params& p, Faction& f, const Act& a, double m) {
@@ -60,22 +61,22 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
         for (auto& kv : a.payload) shares += kv.second;
         for (auto& kv : a.payload) {
             double amt = shares > 0 ? taken * kv.second / shares : 0;
-            if (kv.first == "gold") w.dragon.hoard.gold += amt * molten;
-            else if (kv.first == "books") w.dragon.hoard.books += amt;
-            else if (kv.first == "artifacts") w.dragon.hoard.artifacts += amt;
-            else if (kv.first == "art") w.dragon.hoard.art += amt;
-            else if (kv.first == "royals") w.dragon.hoard.royals += kv.second;
-            else if (kv.first == "food") w.dragon.hoard.food += amt;
+            if (kv.first == "gold") w.dragons[kPlayer].hoard.gold += amt * molten;
+            else if (kv.first == "books") w.dragons[kPlayer].hoard.books += amt;
+            else if (kv.first == "artifacts") w.dragons[kPlayer].hoard.artifacts += amt;
+            else if (kv.first == "art") w.dragons[kPlayer].hoard.art += amt;
+            else if (kv.first == "royals") w.dragons[kPlayer].hoard.royals += kv.second;
+            else if (kv.first == "food") w.dragons[kPlayer].hoard.food += amt;
         }
-        if (a.payload.empty()) w.dragon.hoard.gold += taken * molten;
+        if (a.payload.empty()) w.dragons[kPlayer].hoard.gold += taken * molten;
     } else if (a.type == "take_hostage") {   // 17.2: the heir (else the ruler) becomes a person in the lair
         f.tags.insert("hostage_taken");
-        w.dragon.lineages.push_back(f.id);
+        w.dragons[kPlayer].lineages.push_back(f.id);
         Person* x = a.item.empty() ? pick_hostage(w, f.id) : find_person(w, a.item);
         if (x && x->faction == f.id && !has_tag(x->tags, "hostage")) take_hostage_person(w, p, *x, false, because("seized", {}, {{"fear", f.fear}}));
     } else if (a.type == "release") {   // the heir goes home and the lair no longer holds that line
         f.tags.erase("hostage_taken");
-        erase_value(w.dragon.lineages, f.id);
+        erase_value(w.dragons[kPlayer].lineages, f.id);
         release_hostage_person(w, p, f.id, because("released", {last_event_id(w, "hostage_taken", "", f.id)}));
     } else if (a.type == "defend") {
         if (Faction* att = find_faction(w, a.against)) {
@@ -102,14 +103,14 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
         auto gold = a.payload.find("gold");
         if (era != a.payload.end()) f.era_progress += m * c.era_threshold[static_cast<size_t>(std::min<int>(f.era, 3))] * c.act_give_era_share;
         else if (gold != a.payload.end()) {   // gold from the hoard, as much of the asked amount as the hoard holds
-            double amt = std::min(std::max(0.0, gold->second), w.dragon.hoard.gold);
-            w.dragon.hoard.gold -= amt;
+            double amt = std::min(std::max(0.0, gold->second), w.dragons[kPlayer].hoard.gold);
+            w.dragons[kPlayer].hoard.gold -= amt;
             f.wealth += amt;
         } else f.wealth += m * std::max(f.wealth, c.act_give_wealth_floor);
     } else if (a.type == "accept_offering") {
-        w.dragon.faith_pool += c.act_accept_offering_faith_pool;
+        w.dragons[kPlayer].faith_pool += c.act_accept_offering_faith_pool;
     } else if (a.type == "miracle") {
-        w.dragon.faith_pool = std::max(0.0, w.dragon.faith_pool - c.act_miracle_faith_cost);
+        w.dragons[kPlayer].faith_pool = std::max(0.0, w.dragons[kPlayer].faith_pool - c.act_miracle_faith_cost);
     }
 }
 
@@ -156,7 +157,7 @@ static void witnesses(World& w, const Params& p, const Act& a, const Faction& ta
 static void sponsor_remnant(World& w, const Params& p, const Act& a) {
     std::string race = a.race;
     if (race.empty()) for (auto& kv : a.payload) if (p.races.count(kv.first)) race = kv.first;
-    if (w.dragon.knowledge < p.c.remnant_sponsor_knowledge) { emit(w, "spell_failed", "dragon", race, 0, {"knowledge"}); return; }
+    if (w.dragons[kPlayer].knowledge < p.c.remnant_sponsor_knowledge) { emit(w, "spell_failed", "dragon", race, 0, {"knowledge"}); return; }
     for (auto& rem : w.remnants) {
         if (rem.race != race) continue;
         auto rt = p.races.find(race);
@@ -185,10 +186,10 @@ static Tags act_tags(const Act& a) {
     return t;
 }
 
-std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts) {
+std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const std::vector<Act>& acts) {
     if (dragon_dead(w)) return {};
     double burn_total = 0;
-    bool rage = has_tag(w.dragon.tags, "rage");
+    bool rage = has_tag(w.dragons[kPlayer].tags, "rage");
     // a dragon nobody believes in any more (the forgotten-dragon card) is read like an enraged one: a show is a burn
     bool forgotten = has_tag(w.tags, "dragon_forgotten");
     size_t first_event = w.chronicle.size();
@@ -229,7 +230,7 @@ std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vecto
         resolve_hooks(w, p, act);   // v0.4 hooks (S3)
     }
     if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");
-    w.dragon.tags.erase("rage");
+    w.dragons[kPlayer].tags.erase("rage");
     score_events(w, p);
     return reaction_lines(w, p, notes, first_event);
 }

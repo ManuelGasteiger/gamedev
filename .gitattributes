@@ -43,3 +43,8 @@
 # archives
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.7z filter=lfs diff=lfs merge=lfs -text
+
+# hoard data and docs: LF everywhere so data hashes match on Windows checkouts
+games/hoard/data/** text eol=lf
+*.json text eol=lf
+*.md text eol=lf

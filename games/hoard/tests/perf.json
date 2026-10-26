@@ -1,0 +1,1 @@
+{ "seed": 1, "years": 3000, "policy": "played", "genesis": true, "instructions": null, "note": "set instructions from the first nightly perf artifact; the job fails above +5 %" }

@@ -1,4 +1,5 @@
 #include "ages.h"
+#include "unrecorded.h"
 #include "chronicle.h"
 #include "hooks.h"
 #include "importance.h"
@@ -28,7 +29,7 @@ static std::map<std::string, double> growth_since(const std::map<std::string, do
 }
 
 static void note_ranks(World& w, const Params& p, const std::map<std::string, int>& before) {
-    for (auto& kv : all_ranks(w.dragon, p.talents)) {
+    for (auto& kv : all_ranks(w.dragons[kPlayer], p.talents)) {
         auto it = before.find(kv.first);
         if (kv.second > (it == before.end() ? 0 : it->second)) emit(w, "rank_gained", "dragon", kv.first, kv.second, {}, because("growth"));
     }
@@ -38,20 +39,20 @@ static void note_ranks(World& w, const Params& p, const std::map<std::string, in
 // single short step). When the growth thresholds for the next phase are met, a sleep at least as long as the phase's
 // long window is a moult: digestion doubles and the dragon wakes one phase up, stiff for its first raid.
 // v0.4: wounds heal step by step; a slain dragon does not sleep.
-SleepResult sleep(World& w, const Params& p, int years) {
+SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     const Constants& c = p.c;
     SleepResult res;
     if (dragon_dead(w)) { res.wake_reason = "dragon_slain"; return res; }
     if (years < 1) years = 1;
     size_t start = w.chronicle.size();
-    std::map<std::string, double> growth_before = w.dragon.growth;
-    std::map<std::string, int> ranks_before = all_ranks(w.dragon, p.talents);
-    double wounds_before = w.dragon.wounds;
+    std::map<std::string, double> growth_before = w.dragons[kPlayer].growth;
+    std::map<std::string, int> ranks_before = all_ranks(w.dragons[kPlayer], p.talents);
+    double wounds_before = w.dragons[kPlayer].wounds;
     double wounded_share = wounds_before / std::max(1.0, health_max(w, p));
     w.wake_reason.clear();
     w.sleep_started = w.year;
-    w.moulting = years >= long_sleep(w.dragon, c) && ready_to_moult(w.dragon, c);
-    w.dragon.tags.erase("stiff");
+    w.moulting = years >= long_sleep(w.dragons[kPlayer], c) && ready_to_moult(w.dragons[kPlayer], c);
+    w.dragons[kPlayer].tags.erase("stiff");
     rebuild_defences(w);
     expire_hooks(w, p);   // v0.4 hooks (S3): what the raid left unanswered
     int slept = 0, remaining = years;
@@ -70,15 +71,15 @@ SleepResult sleep(World& w, const Params& p, int years) {
     storyteller_wake(w, p, slept, true);   // v0.4 world (S2)
     res.wake_reason = w.wake_reason.empty() ? "planned" : w.wake_reason;
     res.years_slept = slept;
-    if (atrophy > 0) emit(w, "dragon_atrophied", "dragon", "", atrophy, {}, because("hunger", {}, {{"hunger", w.dragon.hunger}}));
-    if (w.moulting && slept >= long_sleep(w.dragon, c)) {
-        w.dragon.phase += 1;
-        w.dragon.tags.insert("stiff");
-        emit(w, "dragon_moulted", "dragon", "", w.dragon.phase, {},
-             because("moult", {}, {{"size", w.dragon.size}, {"knowledge", w.dragon.knowledge}, {"magic", w.dragon.magic}}));
+    if (atrophy > 0) emit(w, "dragon_atrophied", "dragon", "", atrophy, {}, because("hunger", {}, {{"hunger", w.dragons[kPlayer].hunger}}));
+    if (w.moulting && slept >= long_sleep(w.dragons[kPlayer], c)) {
+        w.dragons[kPlayer].phase += 1;
+        w.dragons[kPlayer].tags.insert("stiff");
+        emit(w, "dragon_moulted", "dragon", "", w.dragons[kPlayer].phase, {},
+             because("moult", {}, {{"size", w.dragons[kPlayer].size}, {"knowledge", w.dragons[kPlayer].knowledge}, {"magic", w.dragons[kPlayer].magic}}));
     }
     w.moulting = false;
-    w.dragon.magic += effect(w, p, "magic_per_sleep_add");
+    w.dragons[kPlayer].magic += effect(w, p, "magic_per_sleep_add");
     note_ranks(w, p, ranks_before);
     adapt_after_sleep(w, p, wounded_share, start);
     emit(w, "wake", "dragon", res.wake_reason, slept, {}, {}, "", false);
@@ -86,8 +87,8 @@ SleepResult sleep(World& w, const Params& p, int years) {
     if (!has_tag(w.tags, "dragon_slain")) generate_offers(w, p);
     if (!has_tag(w.tags, "dragon_slain")) res.hooks = generate_hooks(w, p);   // v0.4 hooks (S3): after everything the sleep brought
     res.chronicle.assign(w.chronicle.begin() + static_cast<std::ptrdiff_t>(start), w.chronicle.end());
-    res.growth_gained = growth_since(growth_before, w.dragon);
-    res.healed = std::max(0.0, wounds_before - w.dragon.wounds);
+    res.growth_gained = growth_since(growth_before, w.dragons[kPlayer]);
+    res.healed = std::max(0.0, wounds_before - w.dragons[kPlayer].wounds);
     return res;
 }
 

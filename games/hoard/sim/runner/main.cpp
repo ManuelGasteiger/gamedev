@@ -7,6 +7,9 @@
 #include <vector>
 #include "ages/ages.h"
 #include "ages/genesis.h"
+#include "ages/state_hash.h"
+#include "ages/record.h"
+#include "ages/save.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -27,6 +30,13 @@ struct Options {
     bool briefing = false;
     bool narrate = false;
     bool genesis = false;   // v0.4 world (S2)
+    std::string trace;      // one state-hash line per sleep
+    std::string record;     // write every input and a checkpoint per sleep as a .hrp
+    std::string replay;     // replay a .hrp and verify its checkpoints (exit 3 on the first mismatch)
+    std::string save;       // write the final world as a save (temp file, rename, one .bak)
+    std::string load_save;  // start from a save instead of a fresh world
+    bool state_hash = false;
+    uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -44,6 +54,18 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--briefing") o.briefing = true;
         else if (k == "--narrate") o.narrate = true;
         else if (k == "--genesis") o.genesis = true;
+        else if (k == "--trace") { if (!need(o.trace)) return false; }
+        else if (k == "--state-hash") o.state_hash = true;
+        else if (k == "--record") { if (!need(o.record)) return false; }
+        else if (k == "--replay") { if (!need(o.replay)) return false; }
+        else if (k == "--save") { if (!need(o.save)) return false; }
+        else if (k == "--load-save") { if (!need(o.load_save)) return false; }
+        else if (k == "--golden") {
+            if (!need(v)) return false;
+            size_t dash = v.find('-');
+            o.golden_from = std::strtoull(v.c_str(), nullptr, 10);
+            o.golden_to = dash == std::string::npos ? o.golden_from : std::strtoull(v.c_str() + dash + 1, nullptr, 10);
+        }
         else { std::fprintf(stderr, "unknown argument %s\n", k.c_str()); return false; }
     }
     return o.years > 0 && o.sleep > 0;
@@ -54,6 +76,20 @@ bool write_file(const std::string& path, const std::string& text) {
     if (!out) return false;
     out << text;
     return true;
+}
+
+bool write_save(const std::string& path, const std::string& text) {
+    std::string tmp = path + ".tmp";
+    {
+        std::ofstream out(tmp, std::ios::binary);
+        if (!out) return false;
+        out << text;
+        out.flush();
+        if (!out) return false;
+    }
+    std::remove((path + ".bak").c_str());
+    std::rename(path.c_str(), (path + ".bak").c_str());
+    return std::rename(tmp.c_str(), path.c_str()) == 0;
 }
 
 json record_json(const FactionRecord& r, bool alive) {
@@ -171,17 +207,17 @@ json stats_json(const World& w, const Params& p) {
     j["empty_valley"] = owned == 0;
     j["total_wealth"] = wealth;
     j["regions_owned"] = owned;
-    j["dragon"] = {{"size", w.dragon.size}, {"knowledge", w.dragon.knowledge}, {"magic", w.dragon.magic},
-                   {"threat", threat(w.dragon, p.c)}};
+    j["dragon"] = {{"size", w.dragons[kPlayer].size}, {"knowledge", w.dragons[kPlayer].knowledge}, {"magic", w.dragons[kPlayer].magic},
+                   {"threat", threat(w.dragons[kPlayer], p.c)}};
     j["dragon_slain"] = has_tag(w.tags, "dragon_slain");
     j["race_regions"] = race_regions;
     j["alive"] = alive;
     j["remnants"] = remnants;
     j["hegemonies_fallen"] = hegemonies;
     j["hunger_wakes"] = hunger_wakes;
-    j["dragon"]["hunger"] = w.dragon.hunger;
+    j["dragon"]["hunger"] = w.dragons[kPlayer].hunger;
     j["dragon_death"] = death_json(w);   // v0.4 (S1)
-    j["dragon_growth"] = {{"phase", w.dragon.phase}, {"points", w.dragon.growth}, {"talents", w.dragon.talents}, {"wounds", w.dragon.wounds}};
+    j["dragon_growth"] = {{"phase", w.dragons[kPlayer].phase}, {"points", w.dragons[kPlayer].growth}, {"talents", w.dragons[kPlayer].talents}, {"wounds", w.dragons[kPlayer].wounds}};
     j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
     j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)
     return j;
@@ -189,12 +225,60 @@ json stats_json(const World& w, const Params& p) {
 
 }
 
+// the state-hash golden: every seed on a generated world, the played policy, 3000 years in its own sleep lengths
+int golden(const Options& o) {
+    for (uint64_t seed = o.golden_from; seed <= o.golden_to; ++seed) {
+        LoadResult loaded = load_data(o.data, seed);
+        if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
+        std::string err;
+        if (!make_genesis(loaded.world, loaded.params, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
+        Policy policy;
+        if (!load_policy(o.data, "played", policy, err)) { std::fprintf(stderr, "%s\n", err.c_str()); return 1; }
+        Scenario s;
+        s.policy = &policy;
+        s.data_dir = o.data;
+        s.years = 3000;
+        s.sleep = 100;
+        run_scenario(loaded.world, loaded.params, s);
+        std::printf("%llu %s\n", static_cast<unsigned long long>(seed), hash_hex(state_hash(loaded.world).root).c_str());
+        std::fflush(stdout);
+    }
+    return 0;
+}
+
+int replay(const Options& o) {
+    std::ifstream in(o.replay);
+    if (!in) { std::fprintf(stderr, "cannot open %s\n", o.replay.c_str()); return 1; }
+    std::vector<std::string> lines;
+    for (std::string l; std::getline(in, l);) if (!l.empty()) lines.push_back(l);
+    if (lines.empty()) { std::fprintf(stderr, "empty replay\n"); return 1; }
+    json h = json::parse(lines.front(), nullptr, false);
+    if (h.is_discarded() || h.value("hoard_replay", 0) != kReplayFormat) { std::fprintf(stderr, "not a hoard replay (format %d)\n", kReplayFormat); return 1; }
+    if (h.value("rules", 0) != kRulesVersion) std::fprintf(stderr, "warning: recorded under rules %d, this build has %d\n", h.value("rules", 0), kRulesVersion);
+    LoadResult loaded = load_data(o.data, h.value("seed", uint64_t{1}));
+    if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
+    if (hash_hex(loaded.params.data_hash) != h.value("data", "")) std::fprintf(stderr, "warning: data differs from the recording (%s, recorded %s)\n", hash_hex(loaded.params.data_hash).c_str(), h.value("data", "").c_str());
+    std::string err;
+    if (h.value("genesis", false) && !make_genesis(loaded.world, loaded.params, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
+    if (hash_hex(state_hash(loaded.world).root) != h.value("start", "")) { std::printf("start state differs from the recording\n"); return 3; }
+    std::vector<std::string> body(lines.begin() + 1, lines.end());
+    ReplayResult r = replay_lines(loaded.world, loaded.params, body);
+    if (!r.ok) { std::printf("replay failed: %s\n", r.error.c_str()); return r.first_bad_year >= 0 ? 3 : 1; }
+    json end = json::parse(lines.back(), nullptr, false);
+    if (end.contains("end") && end.value("h", "") != hash_hex(state_hash(loaded.world).root)) { std::printf("final state differs from the recording\n"); return 3; }
+    std::printf("replay ok: %d checkpoints, year %d\n", r.checkpoints, loaded.world.year);
+    return 0;
+}
+
 int main(int argc, char** argv) {
     Options o;
+    if (argc >= 3 && std::string(argv[1]) == "--golden") o.years = 3000;
     if (!parse(argc, argv, o)) {
-        std::fprintf(stderr, "usage: ages --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] --out out/\n");
+        std::fprintf(stderr, "usage: hoard-sim --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] [--trace t.jsonl] [--state-hash] --out out/\n       hoard-sim --data data/ --golden 1-300\n");
         return 2;
     }
+    if (o.golden_to) return golden(o);
+    if (!o.replay.empty()) return replay(o);
     LoadResult loaded = load_data(o.data, o.seed);
     if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
     World& w = loaded.world;
@@ -202,6 +286,13 @@ int main(int argc, char** argv) {
     std::string gerr, legends;
     if (o.genesis && !make_genesis(w, p, gerr)) { std::fprintf(stderr, "genesis failed: %s\n", gerr.c_str()); return 1; }   // v0.4 world (S2)
     if (o.genesis) legends = legends_json(w, p);
+    if (!o.load_save.empty()) {
+        std::ifstream in(o.load_save, std::ios::binary);
+        std::stringstream ss;
+        ss << in.rdbuf();
+        std::string err;
+        if (!in || load_save(ss.str(), w, err) != LoadSave::ok) { std::fprintf(stderr, "cannot load %s: %s\n", o.load_save.c_str(), err.c_str()); return 1; }
+    }
 
     std::vector<Act> log;
     if (!o.acts.empty()) {
@@ -226,7 +317,31 @@ int main(int argc, char** argv) {
     s.data_dir = o.data;
     s.years = o.years;
     s.sleep = o.sleep;
+    std::ofstream trace;
+    if (!o.trace.empty()) {
+        trace.open(o.trace);
+        if (!trace) { std::fprintf(stderr, "cannot write %s\n", o.trace.c_str()); return 1; }
+        trace << state_hash_json(w) << "\n";
+        s.after_sleep = [&](const World& x) { trace << state_hash_json(x) << "\n"; };
+    }
+    Recorder recorder;
+    std::string header;
+    if (!o.record.empty()) {
+        header = replay_header(w, p, o.genesis);
+        recorder.world = &w;
+        w.recorder = &recorder;
+    }
     run_scenario(w, p, s);
+    if (!o.record.empty()) {
+        w.recorder = nullptr;
+        std::ofstream rec(o.record);
+        if (!rec) { std::fprintf(stderr, "cannot write %s\n", o.record.c_str()); return 1; }
+        rec << header << "\n";
+        for (auto& l : recorder.lines) rec << l << "\n";
+        rec << json({{"end", 1}, {"year", w.year}, {"h", hash_hex(state_hash(w).root)}}).dump() << "\n";
+    }
+    if (!o.save.empty() && !write_save(o.save, save_json(w, p))) { std::fprintf(stderr, "cannot write %s\n", o.save.c_str()); return 1; }
+    if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 
     std::string base = o.out;
     if (!base.empty() && base.back() != '/') base += '/';

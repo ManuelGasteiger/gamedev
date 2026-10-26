@@ -1,4 +1,5 @@
 #include "rules.h"
+#include "core/detmath.h"
 #include <cmath>
 #include "../world_util.h"
 
@@ -65,7 +66,7 @@ void rule_remnants(World& w, const Params& p) {
     const Constants& c = p.c;
     note_race_eras(w);
     create_missing(w, p);
-    double decay = std::pow(0.5, c.step_years / c.remnant_halflife);
+    double decay = det::half_life(c.step_years, c.remnant_halflife);
     std::vector<std::string> races;
     for (auto& r : w.remnants) {
         auto rt = p.races.find(r.race);

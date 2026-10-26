@@ -117,7 +117,7 @@ void attempt(World& w, const Params& p, Faction& f) {
     }
     f.wealth *= (1.0 - c.slay_fail_wealth_loss);
     remember(f, c, w.year, "slay_failed", 1.0, c.slay_fail_fear, 0, {"slay_failed"});
-    w.dragon.tags.insert("rage");
+    w.dragons[kPlayer].tags.insert("rage");
     if (w.wake_reason.empty()) w.wake_reason = "slay_attempt_failed";
     emit(w, "slay_attempt_failed", f.id, hero, odds, {}, cause);
 }
@@ -126,12 +126,12 @@ void attempt(World& w, const Params& p, Faction& f) {
 
 double adaptation_factor(const World& w, const Params& p) {
     const Constants& c = p.c;
-    return std::max(c.adapt_min, std::min(c.adapt_max, c.adapt_base + c.adapt_step * w.dragon.adaptation));
+    return std::max(c.adapt_min, std::min(c.adapt_max, c.adapt_base + c.adapt_step * w.dragons[kPlayer].adaptation));
 }
 
 double slayer_strength(const World& w, const Params& p, const Faction& f) {
     const Constants& c = p.c;
-    double points = c.slay_points_base + c.slay_points_hoard * std::sqrt(hoard_value(w.dragon.hoard)) + c.slay_points_growth * total_growth(w.dragon);
+    double points = c.slay_points_base + c.slay_points_hoard * std::sqrt(hoard_value(w.dragons[kPlayer].hoard)) + c.slay_points_growth * total_growth(w.dragons[kPlayer]);
     return points * era_mult(c, f.era) * adaptation_factor(w, p);
 }
 
@@ -139,7 +139,7 @@ double slaying_odds(const World& w, const Params& p, const Faction& f) {
     const Constants& c = p.c;
     double odds = clamp01(slayer_strength(w, p, f) / (health_max(w, p) * c.slay_health_div));
     if (const Person* lead = boldest_hero(w, f)) odds = clamp01(odds * (c.hero_slay_bold_base + lead->traits.bold));
-    return clamp01(odds * (1.0 + w.dragon.wounds / std::max(1.0, health_max(w, p))) * effect(w, p, "slay_mult"));
+    return clamp01(odds * (1.0 + w.dragons[kPlayer].wounds / std::max(1.0, health_max(w, p))) * effect(w, p, "slay_mult"));
 }
 
 std::string slayer_stage(const World& w, const std::string& faction) {
@@ -183,7 +183,7 @@ void adapt_after_sleep(World& w, const Params& p, double wounds_share_at_start, 
         if (k == "slay_attempt_failed") failed = true;
         if (k == "slay_attempt_failed" || k == "slayers_coming") challenged = true;
     }
-    double& a = w.dragon.adaptation;
+    double& a = w.dragons[kPlayer].adaptation;
     if (failed || wounds_share_at_start > c.near_death_wounds) a -= c.adapt_loss;
     else if (!challenged) a += a < 0 ? c.adapt_gain_negative : c.adapt_gain;
     double lo = (c.adapt_min - c.adapt_base) / c.adapt_step, hi = (c.adapt_max - c.adapt_base) / c.adapt_step;

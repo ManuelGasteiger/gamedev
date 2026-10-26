@@ -1,0 +1,30 @@
+name: hoard-web
+
+on:
+  pull_request:
+    paths: ["games/hoard/web/**", "games/hoard/sim/**", ".github/workflows/hoard-web.yml"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: games/hoard
+
+jobs:
+  pages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: playwright
+        working-directory: .
+        run: npm install --no-save playwright@1 && npx playwright install --with-deps chromium
+      - name: sandbox check
+        run: NODE_PATH=$GITHUB_WORKSPACE/node_modules node web/check.cjs
+      - name: game check
+        run: NODE_PATH=$GITHUB_WORKSPACE/node_modules node web/game-check.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: shots, path: "games/hoard/web/shots", retention-days: 7 }

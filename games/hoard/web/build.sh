@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds web/ages.wasm with wasi-sdk, web/ages-sandbox.html from sandbox.template.html and web/hoard-game.html from game.template.html.
-# `build.sh --html` skips the wasm compile and only re-embeds the existing web/ages.wasm into both pages.
+# `build.sh --html` skips the wasm compile and only re-embeds the existing web/ages.wasm into both pages; `--wasm` only compiles.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 WASI_SDK="${WASI_SDK:-/tmp/wasi}"
@@ -8,14 +8,15 @@ CXX="$WASI_SDK/bin/clang++"
 SYSROOT="$WASI_SDK/share/wasi-sysroot"
 
 if [ "${1:-}" != "--html" ]; then
-  SOURCES=$(ls sim/ages/*.cpp sim/ages/rules/*.cpp | grep -v data_io.cpp)
-  "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 \
+  SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp | grep -v data_io.cpp)
+  "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 -ffp-contract=off -fno-fast-math -DHOARD_BUILD="\"$(git rev-parse --short HEAD 2>/dev/null || echo dev)\"" \
     -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor \
     -Isim \
     -Wl,--export=ages_cmd -Wl,--export=ages_alloc -Wl,--export=ages_free \
     -Wl,--strip-all \
     $SOURCES sim/wasm/api.cpp -o web/ages.wasm
 fi
+[ "${1:-}" = "--wasm" ] && exit 0
 
 python3 - <<'EOF'
 import base64, json, pathlib

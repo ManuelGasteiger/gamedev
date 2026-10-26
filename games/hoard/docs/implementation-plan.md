@@ -68,6 +68,8 @@ Order and dependencies are `prompts/README.md`'s. Roughly three to four months o
 
 ### Iteration 1: foundation (item 17)
 
+Status 2026-10-26: built on branch `item/17-repo-determinism-ci`, pull request 2, CI green on four platforms; waiting for review. Report in `games/hoard/reports/17-repo-determinism-ci.md`. It also fixed a save/load bug (a loaded world diverged from the original).
+
 Opus, one to two agent-weeks. Layout, `docs/`, the determinism policy in CMake, `check_banned.sh`, `detmath` and the six `pow` replacements, the state hash with per-decade trace, the save header, `.hrp` record and replay covering all ten state-changing verbs (audit §5), CI on GCC, Clang, MSVC, wasm, nightly jobs, the negative controls. Also the `dragons[]` change (preamble rule 8) as its own commit, since 17 touches `World` first.
 
 Decisions first: D2.

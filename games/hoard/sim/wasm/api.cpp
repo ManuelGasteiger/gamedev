@@ -6,12 +6,21 @@
 #include "ages/genesis.h"
 #include "ages/importance.h"
 #include "ages/json.h"
+#include "ages/state_hash.h"
+#include "ages/record.h"
+#include "ages/save.h"
 #include "ages/talents.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
 
 using namespace ages;
 using nlohmann::json;
+
+// the wasm build has no files: policies arrive as text (`golden`), so a policy that cycles through others cannot load them
+bool ages::load_policy(const std::string&, const std::string& name, Policy&, std::string& err) {
+    err = "no policy files in the wasm build: " + name;
+    return false;
+}
 
 namespace {
 
@@ -20,12 +29,21 @@ struct Session {
     DataJson data;
     Params params;
     World world;
+    Recorder recorder;     // every input since the last load or reset, for "Report a problem"
+    std::string header;
 };
 
 Session g;
 std::string g_out;
 
 json fail(const std::string& msg) { return {{"ok", false}, {"error", msg}}; }
+
+void start_recording(bool genesis) {
+    g.recorder = Recorder();
+    g.recorder.world = &g.world;
+    g.world.recorder = &g.recorder;
+    g.header = replay_header(g.world, g.params, genesis);
+}
 
 json fear_faith_snapshot(const World& w) {
     json j = json::object();
@@ -61,6 +79,7 @@ json cmd_load(const json& in) {
     g.params = r.params;
     g.world = r.world;
     g.loaded = true;
+    start_recording(in.value("genesis", false));
     return {{"ok", true}};
 }
 
@@ -70,12 +89,14 @@ json cmd_reset(const json& in) {
     if (!r.ok) return fail(r.error);
     if (in.value("genesis", false) && !make_genesis(r.world, r.params, r.error)) return fail(r.error);   // v0.4 world (S2)
     g.world = r.world;
+    start_recording(in.value("genesis", false));
     return {{"ok", true}};
 }
 
+// scores the returned copies only: the world changes through the API verbs alone, so a replay sees the same state
 json events_since(size_t first) {
-    score_events(g.world, g.params);
     std::vector<Event> events(g.world.chronicle.begin() + static_cast<std::ptrdiff_t>(first), g.world.chronicle.end());
+    for (auto& e : events) if (e.importance < 0) e.importance = event_importance(g.world, g.params, e);
     return json::parse(chronicle_to_json(events), nullptr, false);
 }
 
@@ -188,7 +209,10 @@ json cmd_load_world(const json& in) {
     World w;
     std::string err;
     if (!world_from_json(in.value("world", json::object()).dump(), w, err)) return fail(err);
+    RecordScope rec(g.world);
     g.world = w;
+    g.world.recorder = &g.recorder;
+    rec.done("load_world", json({{"world", in.value("world", json::object())}}).dump());
     return {{"ok", true}};
 }
 
@@ -198,10 +222,10 @@ const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_rem
                               "accept_offer", "decline_offer", "pick_talent"};
 
 json cmd_apply_acts_wounded(const json& in) {
-    double before = g.world.dragon.wounds;
+    double before = g.world.dragons[kPlayer].wounds;
     json out = cmd_apply_acts(in);
     if (!out.value("ok", false)) return out;
-    out["wounds"] = {{"taken", g.world.dragon.wounds - before}, {"total", g.world.dragon.wounds}, {"max", health_max(g.world, g.params)}};
+    out["wounds"] = {{"taken", g.world.dragons[kPlayer].wounds - before}, {"total", g.world.dragons[kPlayer].wounds}, {"max", health_max(g.world, g.params)}};
     out["slain"] = dragon_dead(g.world);
     return out;
 }
@@ -248,10 +272,10 @@ json cmd_answer_hook(const json& in) {
     std::string id = in.value("id", ""), choice = in.value("choice", ""), reason;
     std::vector<Hook> before = g.world.hooks;
     size_t first_event = g.world.chronicle.size();
-    double wounds = g.world.dragon.wounds;
+    double wounds = g.world.dragons[kPlayer].wounds;
     if (!answer_hook(g.world, g.params, id, choice, reason)) return fail(reason);
     return {{"ok", true}, {"events", events_since(first_event)}, {"hooks_resolved", hooks_resolved_json(before)},
-            {"wounds", {{"taken", g.world.dragon.wounds - wounds}, {"total", g.world.dragon.wounds}, {"max", health_max(g.world, g.params)}}},
+            {"wounds", {{"taken", g.world.dragons[kPlayer].wounds - wounds}, {"total", g.world.dragons[kPlayer].wounds}, {"max", health_max(g.world, g.params)}}},
             {"slain", dragon_dead(g.world)}};
 }
 
@@ -269,6 +293,22 @@ bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
     else if (cmd == "answer_hook") out = cmd_answer_hook(in);
     else return false;
     return true;
+}
+
+// the state-hash golden of the native runner (`hoard-sim --golden`): a generated world, a policy, 3000 years
+json cmd_golden(const json& in) {
+    LoadResult r = load_data_from_json(g.data, in.value("seed", uint64_t{1}));
+    if (!r.ok) return fail(r.error);
+    if (!make_genesis(r.world, r.params, r.error)) return fail(r.error);
+    Policy policy;
+    std::string err;
+    if (!policy_from_json(text_of(in, "policy"), policy, err)) return fail(err);
+    Scenario s;
+    s.policy = &policy;
+    s.years = 3000;
+    s.sleep = 100;
+    run_scenario(r.world, r.params, s);
+    return {{"ok", true}, {"hash", hash_hex(state_hash(r.world).root)}};
 }
 
 json dispatch(const json& in) {
@@ -293,6 +333,14 @@ json dispatch(const json& in) {
     if (cmd == "demand") return cmd_demand(in);
     if (cmd == "catalogue") { json j = json::parse(spells_catalogue_json(g.params), nullptr, false); j["ok"] = true; return j; }
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
+    if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);
+    if (cmd == "golden") return cmd_golden(in);
+    if (cmd == "report") {   // "Report a problem": the replay of this session, the current save, the build
+        std::string hrp = g.header + "\n";
+        for (auto& l : g.recorder.lines) hrp += l + "\n";
+        hrp += json({{"end", 1}, {"year", g.world.year}, {"h", hash_hex(state_hash(g.world).root)}}).dump() + "\n";
+        return {{"ok", true}, {"hrp", hrp}, {"save", save_json(g.world, g.params)}, {"build", build_id()}};
+    }
     if (cmd == "load_world") return cmd_load_world(in);
     // v0.4 world (S2)
     if (cmd == "legends") return json::parse(legends_json(g.world, g.params), nullptr, false);

@@ -108,7 +108,7 @@ void rule_cards(World& w, const Params& p) {
         if (e.id > 0 && e.kind.rfind("act_", 0) == 0) { last_act[e.subject] = e.year; any_act = e.year; }
     double k = dts(w, p.c);
     for (auto& card : p.cards) {
-        if (w.dragon.phase < card.phase_min || w.dragon.phase > card.phase_max) continue;
+        if (w.dragons[kPlayer].phase < card.phase_min || w.dragons[kPlayer].phase > card.phase_max) continue;
         if (card.needs_dragon && has_tag(w.tags, "egg")) continue;   // v0.4 world (S2): the egg has not hatched
         for (auto& self : selves(w, card)) {
             if (self != "world" && !find_faction(w, self) && !find_region(w, self)) continue;
@@ -141,7 +141,7 @@ void rule_cards(World& w, const Params& p) {
 
 // v0.4 world (S2)
 bool fire_card_now(World& w, const Params& p, const CardDef& card) {
-    if (w.dragon.phase < card.phase_min || w.dragon.phase > card.phase_max || (card.needs_dragon && has_tag(w.tags, "egg"))) return false;
+    if (w.dragons[kPlayer].phase < card.phase_min || w.dragons[kPlayer].phase > card.phase_max || (card.needs_dragon && has_tag(w.tags, "egg"))) return false;
     std::map<std::string, int> last_act;
     int any_act = w.genesis.hatched_year;
     for (auto& e : w.chronicle)

@@ -163,6 +163,7 @@ static json faction_json(const Faction& f) {
     j["max_regions"] = f.max_regions;
     j["max_realm"] = f.max_realm;
     j["era_years"] = f.era_years;
+    j["eff"] = {{"growth", f.eff.growth}, {"cohesion_decay", f.eff.cohesion_decay}, {"era_rate", f.eff.era_rate}, {"war_chance", f.eff.war_chance}, {"settle_chance", f.eff.settle_chance}, {"anti_dragon_rate", f.eff.anti_dragon_rate}, {"diffusion", f.eff.diffusion}, {"faith_gain", f.eff.faith_gain}, {"succession_bonus", f.eff.succession_bonus}, {"vassal_wealth", f.eff.vassal_wealth}, {"memory_halflife", f.eff.memory_halflife}};
     return j;
 }
 
@@ -209,6 +210,19 @@ static Faction faction_from(const json& j) {
     get(j, "max_regions", f.max_regions);
     get(j, "max_realm", f.max_realm);
     get(j, "era_years", f.era_years);
+    if (j.contains("eff")) {
+        get(j["eff"], "growth", f.eff.growth);
+        get(j["eff"], "cohesion_decay", f.eff.cohesion_decay);
+        get(j["eff"], "era_rate", f.eff.era_rate);
+        get(j["eff"], "war_chance", f.eff.war_chance);
+        get(j["eff"], "settle_chance", f.eff.settle_chance);
+        get(j["eff"], "anti_dragon_rate", f.eff.anti_dragon_rate);
+        get(j["eff"], "diffusion", f.eff.diffusion);
+        get(j["eff"], "faith_gain", f.eff.faith_gain);
+        get(j["eff"], "succession_bonus", f.eff.succession_bonus);
+        get(j["eff"], "vassal_wealth", f.eff.vassal_wealth);
+        get(j["eff"], "memory_halflife", f.eff.memory_halflife);
+    }
     return f;
 }
 
@@ -219,6 +233,7 @@ static json region_json(const Region& r) {
     j["owner"] = r.owner;
     j["terrain"] = r.terrain;
     j["land"] = r.land;
+    j["eff_land"] = r.eff_land;
     j["burn"] = r.burn;
     j["lair"] = r.lair;
     j["tags"] = tags_json(r.tags);
@@ -240,6 +255,7 @@ static Region region_from(const json& j) {
     get(j, "hot_decades", r.hot_decades);
     get(j, "cold_decades", r.cold_decades);
     r.eff_land = r.land;
+    get(j, "eff_land", r.eff_land);
     return r;
 }
 
@@ -376,7 +392,7 @@ static json offer_json(const World& w, const Params& p, const Offer& of) {
               {"envoy_name", display_name(w, of.envoy)}, {"target", of.target}, {"target_name", display_name(w, of.target)},
               {"stated_reason", of.stated_reason}, {"expires", of.expires}, {"price", of.price}, {"marked", of.marked},
               {"ask", of.draft.ask}, {"oath", oath_json(of.draft)}};
-    if (w.dragon.knowledge >= p.c.offer_truth_knowledge) { j["eyes_say_otherwise"] = of.is_lie; j["motive"] = of.motive; }
+    if (w.dragons[kPlayer].knowledge >= p.c.offer_truth_knowledge) { j["eyes_say_otherwise"] = of.is_lie; j["motive"] = of.motive; }
     return j;
 }
 
@@ -413,7 +429,7 @@ static json world_json(const World& w) {
     for (auto& r : w.regions) j["regions"].push_back(region_json(r));
     j["factions"] = json::array();
     for (auto& f : w.factions) j["factions"].push_back(faction_json(f));
-    const Dragon& d = w.dragon;
+    const Dragon& d = w.dragons[kPlayer];
     j["dragon"] = {
         {"size", d.size}, {"knowledge", d.knowledge}, {"magic", d.magic}, {"faith_pool", d.faith_pool}, {"hunger", d.hunger},
         {"hoard", {{"gold", d.hoard.gold}, {"books", d.hoard.books}, {"artifacts", d.hoard.artifacts},
@@ -449,6 +465,7 @@ static json world_json(const World& w) {
     for (auto& g : w.graveyard) j["graveyard"].push_back(record_json(g));
     j["next_serial"] = w.next_serial;
     j["next_event_id"] = w.next_event_id;
+    j["next_offer_serial"] = w.next_offer_serial;
     j["slow_clock"] = w.slow_clock;
     j["people"] = json::array();
     for (auto& x : w.people) j["people"].push_back(person_json(x));
@@ -480,6 +497,7 @@ static json world_json(const World& w, const Params& p) {
 }
 
 std::string world_to_json(const World& w) { Params none; return world_json(w, none).dump(1); }
+json world_state_json(const World& w) { Params none; return world_json(w, none); }
 
 static const char* const era_names[] = {"bronze", "iron", "castles", "gunpowder", "arcane"};
 
@@ -490,7 +508,7 @@ static json offers_json(const World& w, const Params& p) {
 }
 
 static json phase_json(const World& w, const Params& p) {
-    const Dragon& d = w.dragon;
+    const Dragon& d = w.dragons[kPlayer];
     return {{"phase", d.phase}, {"short_sleep", short_sleep(d, p.c)}, {"long_sleep", long_sleep(d, p.c)},
             {"ready_to_moult", ready_to_moult(d, p.c)}, {"next_phase_score", phase_score(d, p.c, d.phase + 1)}, {"stiff", has_tag(d.tags, "stiff")}};
 }
@@ -608,10 +626,10 @@ std::string world_view_json(const World& w, const Params& p) {
         rj["capital"] = !r.owner.empty() && capitals[r.owner] == r.id;
     }
     j["armies"] = armies_json(w);
-    j["dragon"]["threat"] = threat(w.dragon, p.c);
+    j["dragon"]["threat"] = threat(w.dragons[kPlayer], p.c);
     j["dragon"]["hunger_need"] = hunger_need(w, p.c);
     j["dragon"]["known_names"] = json::object();
-    for (auto& k : w.dragon.known_people) j["dragon"]["known_names"][k.id] = display_name(w, k.id);
+    for (auto& k : w.dragons[kPlayer].known_people) j["dragon"]["known_names"][k.id] = display_name(w, k.id);
     j["phase"] = phase_json(w, p);
     j["offers"] = offers_json(w, p);
     j["catalogue"] = spells_json(p);
@@ -684,29 +702,29 @@ bool world_from_json(const std::string& text, World& w, std::string& err) {
     if (j.contains("factions")) for (auto& v : j["factions"]) w.factions.push_back(faction_from(v));
     if (j.contains("dragon")) {
         const json& d = j["dragon"];
-        get(d, "size", w.dragon.size);
-        get(d, "knowledge", w.dragon.knowledge);
-        get(d, "magic", w.dragon.magic);
-        get(d, "faith_pool", w.dragon.faith_pool);
-        get(d, "hunger", w.dragon.hunger);
+        get(d, "size", w.dragons[kPlayer].size);
+        get(d, "knowledge", w.dragons[kPlayer].knowledge);
+        get(d, "magic", w.dragons[kPlayer].magic);
+        get(d, "faith_pool", w.dragons[kPlayer].faith_pool);
+        get(d, "hunger", w.dragons[kPlayer].hunger);
         if (d.contains("hoard")) {
-            get(d["hoard"], "gold", w.dragon.hoard.gold);
-            get(d["hoard"], "books", w.dragon.hoard.books);
-            get(d["hoard"], "artifacts", w.dragon.hoard.artifacts);
-            get(d["hoard"], "art", w.dragon.hoard.art);
-            get(d["hoard"], "royals", w.dragon.hoard.royals);
-            get(d["hoard"], "food", w.dragon.hoard.food);
+            get(d["hoard"], "gold", w.dragons[kPlayer].hoard.gold);
+            get(d["hoard"], "books", w.dragons[kPlayer].hoard.books);
+            get(d["hoard"], "artifacts", w.dragons[kPlayer].hoard.artifacts);
+            get(d["hoard"], "art", w.dragons[kPlayer].hoard.art);
+            get(d["hoard"], "royals", w.dragons[kPlayer].hoard.royals);
+            get(d["hoard"], "food", w.dragons[kPlayer].hoard.food);
         }
         if (d.contains("lair")) {
-            get(d["lair"], "depth", w.dragon.lair_depth);
-            get(d["lair"], "library", w.dragon.lair_library);
-            get(d["lair"], "sky", w.dragon.lair_sky);
+            get(d["lair"], "depth", w.dragons[kPlayer].lair_depth);
+            get(d["lair"], "library", w.dragons[kPlayer].lair_library);
+            get(d["lair"], "sky", w.dragons[kPlayer].lair_sky);
         }
-        get(d, "lineages", w.dragon.lineages);
-        get(d, "royals_digested", w.dragon.royals_digested);
-        w.dragon.tags = tags_from(d, "tags");
-        get(d, "phase", w.dragon.phase);
-        get(d, "hostages", w.dragon.hostages);
+        get(d, "lineages", w.dragons[kPlayer].lineages);
+        get(d, "royals_digested", w.dragons[kPlayer].royals_digested);
+        w.dragons[kPlayer].tags = tags_from(d, "tags");
+        get(d, "phase", w.dragons[kPlayer].phase);
+        get(d, "hostages", w.dragons[kPlayer].hostages);
         if (d.contains("known_people"))
             for (auto& v : d["known_people"]) {
                 Known k;
@@ -715,9 +733,9 @@ bool world_from_json(const std::string& text, World& w, std::string& err) {
                 get(v, "met", k.met);
                 get(v, "how", k.how);
                 k.tags = tags_from(v, "tags");
-                w.dragon.known_people.push_back(k);
+                w.dragons[kPlayer].known_people.push_back(k);
             }
-        dragon_state_from_json(d, w.dragon);   // v0.4 (S1)
+        dragon_state_from_json(d, w.dragons[kPlayer]);   // v0.4 (S1)
     }
     if (j.contains("oaths")) for (auto& v : j["oaths"]) w.oaths.push_back(oath_from(v));
     if (j.contains("modifiers")) for (auto& v : j["modifiers"]) w.modifiers.push_back(modifier_from(v));
@@ -753,6 +771,7 @@ bool world_from_json(const std::string& text, World& w, std::string& err) {
     get(j, "race_max_era", w.race_max_era);
     get(j, "race_last_region", w.race_last_region);
     get(j, "human_share_decades", w.human_share_decades);
+    get(j, "next_offer_serial", w.next_offer_serial);
     if (j.contains("graveyard"))
         for (auto& v : j["graveyard"]) {
             FactionRecord r;

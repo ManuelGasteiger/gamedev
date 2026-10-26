@@ -1,5 +1,5 @@
 // node web/smoke.mjs  — loads web/ages.wasm, runs a short scenario, and checks both golden hashes against native.
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -13,8 +13,8 @@ data.text = readFileSync(join(root, 'data/text/en.json'), 'utf8');
 data.events = '[' + readdirSync(join(root, 'data/events')).filter((f) => f.endsWith('.json')).sort()
   .map((f) => readFileSync(join(root, 'data/events', f), 'utf8')).join(',\n') + ']';
 data.genesis = readFileSync(join(root, 'data/genesis.json'), 'utf8');   // v0.4 world (S2)
-const golden = readFileSync(join(root, 'sim/tests/golden/ages_v0.hash'), 'utf8').trim();
-const goldenRaze = readFileSync(join(root, 'sim/tests/golden/ages_v0_1_raze.hash'), 'utf8').trim();
+const golden = readFileSync(join(root, 'tests/golden/ages_v0.hash'), 'utf8').trim();
+const goldenRaze = readFileSync(join(root, 'tests/golden/ages_v0_1_raze.hash'), 'utf8').trim();
 
 function wasiShim(getMemory) {
   const dec = new TextDecoder();
@@ -128,4 +128,21 @@ while (remaining > 0) {
 }
 const hashRaze = cmd({ cmd: 'hash' }).hash;
 console.log(`golden raze: wasm ${hashRaze} native ${goldenRaze} ${hashRaze === goldenRaze ? 'MATCH' : 'MISMATCH'}`);
-process.exit(hash === golden && hashRaze === goldenRaze ? 0 : 1);
+let ok = hash === golden && hashRaze === goldenRaze;
+
+// node web/smoke.mjs --golden 1-60 --out hashes.txt: the state-hash golden, the same lines as `hoard-sim --golden`
+const gi = process.argv.indexOf('--golden');
+if (gi > 0) {
+  const [from, to] = process.argv[gi + 1].split('-').map(Number);
+  const oi = process.argv.indexOf('--out');
+  const policy = readFileSync(join(root, 'data/policies/played.json'), 'utf8');
+  const lines = [];
+  for (let seed = from; seed <= (to || from); seed++) {
+    const r = cmd({ cmd: 'golden', seed, policy });
+    if (!r.ok) { console.error('golden failed', seed, r.error); ok = false; break; }
+    lines.push(`${seed} ${r.hash}`);
+  }
+  if (oi > 0) writeFileSync(process.argv[oi + 1], lines.join('\n') + '\n'); else console.log(lines.join('\n'));
+  console.log(`state-hash golden: ${lines.length} seeds`);
+}
+process.exit(ok ? 0 : 1);

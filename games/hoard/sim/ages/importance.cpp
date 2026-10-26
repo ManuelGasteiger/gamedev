@@ -32,8 +32,8 @@ static bool under_oath(const World& w, const std::string& id) {
 
 // a person in the lair, or a court with one of its people in the lair now
 static bool hostage_of(const World& w, const std::string& id) {
-    if (contains(w.dragon.hostages, id)) return true;
-    for (auto& h : w.dragon.hostages)
+    if (contains(w.dragons[kPlayer].hostages, id)) return true;
+    for (auto& h : w.dragons[kPlayer].hostages)
         if (const Person* x = find_person(w, h)) if (x->faction == id) return true;
     return false;
 }

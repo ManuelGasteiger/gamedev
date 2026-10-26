@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -112,6 +113,7 @@ struct Scenario {
     std::string data_dir;
     int years = 3000;
     int sleep = 100;
+    std::function<void(const World&)> after_sleep;   // trace and replay checkpoints
 };
 
 void run_scenario(World& w, const Params& p, const Scenario& s);

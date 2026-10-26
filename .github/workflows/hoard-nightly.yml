@@ -1,0 +1,119 @@
+name: hoard-nightly
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: games/hoard
+
+jobs:
+  golden:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: gcc, os: ubuntu-24.04, cxx: g++ }
+          - { name: clang, os: ubuntu-24.04, cxx: clang++ }
+          - { name: msvc, os: windows-2022 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - name: build
+        shell: bash
+        env: { CXX: "${{ matrix.cxx }}" }
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release -j 4
+      - name: all tests
+        shell: bash
+        run: ctest --test-dir build -C Release --output-on-failure --no-tests=error
+      - name: state hashes, seeds 1-300
+        shell: bash
+        run: |
+          bin=$(find build -name 'hoard-sim' -o -name 'hoard-sim.exe' | head -1)
+          seq 1 300 | xargs -P 4 -I{} "$bin" --data data --golden {} | tr -d '\r' | sort -n > hashes.txt
+          diff -u tests/golden/state_hashes.txt hashes.txt
+      - name: stored replays
+        shell: bash
+        run: |
+          bin=$(find build -name 'hoard-sim' -o -name 'hoard-sim.exe' | head -1)
+          for f in tests/replays/*.hrp; do "$bin" --data data --replay "$f"; done
+      - name: stored saves load and continue
+        shell: bash
+        run: |
+          bin=$(find build -name 'hoard-sim' -o -name 'hoard-sim.exe' | head -1)
+          for f in tests/saves/*.json; do
+            seed=$(echo "$f" | sed -E 's/.*seed([0-9]+).*/\1/')
+            got=$("$bin" --data data --seed "$seed" --years 50 --policy played --load-save "$f" --state-hash --out out/save | tr -d '\r' | grep -E '^[0-9a-f]{16}$')
+            [ "$got" = "$(tr -d '\r' < "${f%.json}.expect")" ] || { echo "$f: $got"; exit 1; }
+          done
+
+  wasm:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - uses: actions/cache@v4
+        id: wasi
+        with: { path: ~/wasi-sdk, key: wasi-sdk-25 }
+      - name: wasi-sdk
+        if: steps.wasi.outputs.cache-hit != 'true'
+        working-directory: .
+        run: |
+          curl -sSL -o wasi.tgz https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-25/wasi-sdk-25.0-x86_64-linux.tar.gz
+          mkdir -p ~/wasi-sdk && tar xzf wasi.tgz -C ~/wasi-sdk --strip-components=1
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: WASI_SDK=~/wasi-sdk bash web/build.sh --wasm
+      - run: node web/smoke.mjs --golden 1-300 --out hashes.txt && diff -u tests/golden/state_hashes.txt hashes.txt
+
+  sanitize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - name: build with ASan and UBSan
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_FLAGS="-O1 -fsanitize=address,undefined,float-cast-overflow,float-divide-by-zero -fno-sanitize-recover=all -fno-omit-frame-pointer"
+          cmake --build build -j 4
+      - run: ctest --test-dir build -L fast --output-on-failure
+      - name: golden under sanitizers, seeds 1-100
+        run: seq 1 100 | xargs -P 4 -I{} ./build/hoard-sim --data data --golden {} | sort -n > hashes.txt && diff -u <(head -100 tests/golden/state_hashes.txt) hashes.txt
+
+  interest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 4 --target ages_runner
+      - run: python3 tools/interest.py --bin build/hoard-sim --data data --seeds 1-300 --years 3000 --policies idle,raze_all,played --genesis --out out/interest --jobs 4 > interest.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: interest, path: "games/hoard/interest.txt", retention-days: 30 }
+
+  perf:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { lfs: false }
+      - run: sudo apt-get install -y valgrind
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j 4 --target ages_runner
+      - name: instruction count of one 3000-year run
+        run: |
+          valgrind --tool=cachegrind --cache-sim=no --cachegrind-out-file=cg.out ./build/hoard-sim --data data --seed 1 --years 3000 --policy played --genesis --out out/perf 2> cg.txt
+          n=$(grep -E "I\s+refs" cg.txt | tr -dc '0-9')
+          echo "instructions $n" | tee perf.txt
+          python3 - "$n" <<'PY'
+          import json, sys
+          base = json.load(open('tests/perf.json')).get('instructions')
+          n = int(sys.argv[1])
+          if base:
+              print(f'baseline {base}, now {n}, {100 * (n - base) / base:+.1f} %')
+              sys.exit(1 if n > base * 1.05 else 0)
+          print('no baseline yet: copy this count into tests/perf.json')
+          PY
+      - uses: actions/upload-artifact@v4
+        with: { name: perf, path: games/hoard/perf.txt }

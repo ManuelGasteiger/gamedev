@@ -27,9 +27,9 @@ static void tribute(World& w, const Params& p) {
         if (!sworn && f.faith <= c.tribute_faith_no_oath) continue;
         double amount = f.wealth * c.tribute_rate * k * effect(w, p, "tribute_mult");
         f.wealth -= amount;
-        w.dragon.hoard.gold += amount;
-        w.dragon.hoard.food += amount * c.tribute_food;
-        w.dragon.faith_pool += f.faith * c.tribute_faith_pool * f.eff.faith_gain * k;
+        w.dragons[kPlayer].hoard.gold += amount;
+        w.dragons[kPlayer].hoard.food += amount * c.tribute_food;
+        w.dragons[kPlayer].faith_pool += f.faith * c.tribute_faith_pool * f.eff.faith_gain * k;
         if (points != c.growth_points.end()) add_growth(w, p, "dominion", amount * points->second);
         const Oath* o = active_oath_with_pred(w, f.id, "tribute");
         emit(w, "tribute_paid", f.id, "", amount, {}, because(o ? "oath" : "worship", {o ? last_event_id(w, "oath_sworn", o->id) : 0}, {{"faith", f.faith}}));

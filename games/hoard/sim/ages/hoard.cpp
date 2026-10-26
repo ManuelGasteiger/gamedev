@@ -1,4 +1,5 @@
 #include <cmath>
+#include "core/detmath.h"
 #include "ages.h"
 #include "growth.h"
 #include "step.h"
@@ -9,7 +10,7 @@ namespace ages {
 
 static double digest(double& stock, double halflife, double years) {
     if (stock <= 0 || halflife <= 0) return 0;
-    double remaining = stock * std::pow(0.5, years / halflife);
+    double remaining = stock * det::half_life(years, halflife);
     double digested = stock - remaining;
     stock = remaining;
     return digested;
@@ -35,7 +36,7 @@ static double hunt(const World& w, const Constants& c, double years) {
 
 // 17.2: a digested royal is a hostage who grows up in the lair when one is held; otherwise the old lineage tag
 static void raise_royals(World& w, const Params& p) {
-    Dragon& d = w.dragon;
+    Dragon& d = w.dragons[kPlayer];
     while (d.royals_digested >= 1.0) {
         d.royals_digested -= 1.0;
         d.knowledge += pu(p.c, "royals_knowledge");
@@ -70,7 +71,7 @@ static double bed_years(const World& w, const Constants& c, double years, double
 // plus the hunt).
 double digest_hoard(World& w, const Params& p, double years) {
     const Constants& c = p.c;
-    Dragon& d = w.dragon;
+    Dragon& d = w.dragons[kPlayer];
     double hunted = hunt(w, c, years) * effect(w, p, "hunt_mult");
     double window = std::max(1, long_sleep(d, c));
     double slept = bed_years(w, c, years, window);

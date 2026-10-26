@@ -207,7 +207,9 @@ std::vector<Hook> generate_hooks(World& w, const Params& p) {
     w.hooks.clear();
     if (b.templates.empty()) return {};
     std::vector<Candidate> all = candidates(w, p), pool, fallbacks, chosen;
-    int n = 1 + (w.rng.chance(b.second) ? 1 : 0) + (w.rng.chance(b.third) ? 1 : 0);
+    bool second = w.rng.chance(b.second);
+    bool third = w.rng.chance(b.third);
+    int n = 1 + (second ? 1 : 0) + (third ? 1 : 0);
     n = std::min(n, b.max_hooks);
     for (auto& c : all) {
         if (c.forced && static_cast<int>(chosen.size()) < b.max_hooks && !clashes(w, chosen, c)) chosen.push_back(c);

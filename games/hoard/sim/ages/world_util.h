@@ -247,11 +247,11 @@ inline bool is_person_id(const World& w, const std::string& id) {
     return false;
 }
 inline Known* find_known(World& w, const std::string& id) {
-    for (auto& k : w.dragon.known_people) if (k.id == id) return &k;
+    for (auto& k : w.dragons[kPlayer].known_people) if (k.id == id) return &k;
     return nullptr;
 }
 inline const Known* find_known(const World& w, const std::string& id) {
-    for (auto& k : w.dragon.known_people) if (k.id == id) return &k;
+    for (auto& k : w.dragons[kPlayer].known_people) if (k.id == id) return &k;
     return nullptr;
 }
 
@@ -263,8 +263,8 @@ inline Known& meet(World& w, const std::string& id, const std::string& how, doub
         n.id = id;
         n.met = w.year;
         n.how = how;
-        w.dragon.known_people.push_back(n);
-        std::sort(w.dragon.known_people.begin(), w.dragon.known_people.end(), [](const Known& a, const Known& b) { return a.id < b.id; });
+        w.dragons[kPlayer].known_people.push_back(n);
+        std::sort(w.dragons[kPlayer].known_people.begin(), w.dragons[kPlayer].known_people.end(), [](const Known& a, const Known& b) { return a.id < b.id; });
         k = find_known(w, id);
     }
     k->relationship = std::max(-1.0, std::min(1.0, k->relationship + delta));
