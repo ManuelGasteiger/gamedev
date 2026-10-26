@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -10,6 +11,7 @@
 #include "ages/state_hash.h"
 #include "ages/record.h"
 #include "ages/save.h"
+#include "analyse.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -35,6 +37,11 @@ struct Options {
     std::string replay;     // replay a .hrp and verify its checkpoints (exit 3 on the first mismatch)
     std::string save;       // write the final world as a save (temp file, rename, one .bak)
     std::string load_save;  // start from a save instead of a fresh world
+    std::string snapshots;  // item 01: core stocks per sleep (JSON lines)
+    std::string wakings;    // item 01: per waking: listed wounds, hooks, buckets (JSON lines)
+    bool buckets = false;
+    int bucket_samples = 2;
+    std::string perturb;    // burn | sleep
     bool state_hash = false;
     uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
 };
@@ -60,6 +67,11 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--replay") { if (!need(o.replay)) return false; }
         else if (k == "--save") { if (!need(o.save)) return false; }
         else if (k == "--load-save") { if (!need(o.load_save)) return false; }
+        else if (k == "--snapshots") { if (!need(o.snapshots)) return false; }
+        else if (k == "--wakings") { if (!need(o.wakings)) return false; }
+        else if (k == "--buckets") o.buckets = true;
+        else if (k == "--bucket-samples") { if (!need(v)) return false; o.bucket_samples = std::max(1, std::atoi(v.c_str())); }
+        else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -324,6 +336,14 @@ int main(int argc, char** argv) {
         trace << state_hash_json(w) << "\n";
         s.after_sleep = [&](const World& x) { trace << state_hash_json(x) << "\n"; };
     }
+    std::ofstream snaps, wakes;
+    AnalyseOptions ao;
+    if (!o.snapshots.empty()) { snaps.open(o.snapshots); ao.snapshots = &snaps; }
+    if (!o.wakings.empty()) { wakes.open(o.wakings); ao.wakings = &wakes; }
+    ao.buckets = o.buckets;
+    ao.bucket_samples = o.bucket_samples;
+    ao.perturb = o.perturb;
+    if (ao.snapshots || ao.wakings || !ao.perturb.empty()) attach_analysis(s, p, ao);
     Recorder recorder;
     std::string header;
     if (!o.record.empty()) {
