@@ -80,6 +80,7 @@ void rule_arrivals(World& w, const Params& p) {
         Pick best;
         for (auto& d : p.arrivals.kinds) {
             if (limited && !d.ignores_decade_limit) continue;
+            if (arrival_for(w, d.kind, f.id)) continue;
             if (best.def && d.specificity <= best.def->specificity) continue;
             Pick got;
             if (try_kind(w, p, f, d, got)) best = got;
