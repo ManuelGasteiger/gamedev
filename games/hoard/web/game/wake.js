@@ -47,6 +47,7 @@ function wakeHtml(w) {
   }
   const threads = (b.threads ?? []).filter((t) => t.kind !== 'hostage').map((t) => `<span class="tk">${THREAD_WORD[t.kind] ?? t.kind}</span> ${escapeHtml(t.text)}`);
   const opps = (b.opportunities ?? []).map((o, i) => `${escapeHtml(o.text)} <button class="go" data-go="${i}" title="${o.kind === 'offer' ? t('wake.go.envoy', 'land at the lair and hear the envoy') : t('wake.go.fly', 'fly there')}">${t('wake.go', 'go')}</button>`);
+  const ledge = (b.ledge ?? []).map((a) => escapeHtml(a.text));
   const hungry = w.wake_reason === 'hunger' ? ' Starving: the dragon wakes smaller and weaker.' : '';
   return `<article class="page">
     <div class="kicker"><span>${t('wake.slept', 'While you slept')}</span><span class="sep">·</span><span>${tf('wake.span', 'year {w.from} to {w.to}', { roles: { w: { fields: { from: String(w.from), to: String(w.to) } } } })}</span><span class="sep">·</span><span>${t('wake.woke', 'woke:')} ${reason}</span><span class="spacer"></span><button id="wake-skip" class="ghost" title="${t('wake.begin.title', 'Enter or Esc')}">${t('wake.begin', 'begin ⏎')}</button></div>
@@ -59,6 +60,7 @@ function wakeHtml(w) {
     <section><div class="row2"><div class="margin">${t('wake.people', 'people')}</div>${wakeListHtml(people, 'No one you know died, rose or was crowned.')}</div></section>
     <section><div class="row2"><div class="margin">${t('wake.threads', 'threads')}</div>${wakeListHtml(threads, 'No oaths, spells or remnants are running.')}</div></section>
     <section><div class="row2"><div class="margin">opportunities</div>${wakeListHtml(opps, 'Nothing calls for you.')}</div></section>
+    ${ledge.length ? `<section><div class="row2"><div class="margin">${t('wake.ledge', 'at the ledge')}</div>${wakeListHtml(ledge, '')}</div></section>` : ''}
     <footer><button id="wake-ok" class="primary">Begin the raid</button><span class="muted">Enter or Esc · “Last sleep” in the bar reopens this page · ${w.offers ?? 0} envoys on their way · stamina ${w.stamina ?? play.stamina}</span></footer>
   </article>`;
 }

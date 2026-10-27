@@ -188,6 +188,10 @@
       "text": "You carried {m%} of {s}'s wealth to the hoard.",
       "brief": "your raid on {s}'s treasury in {year}"
     },
+    "act_receive": {
+      "text": "You answered the visitors of {s}.",
+      "brief": "your answer to the visitors of {s} in {year}"
+    },
     "act_show": {
       "text": "You showed yourself over {s}.",
       "brief": "your appearance over {s} in {year}"
@@ -539,6 +543,70 @@
     "offer_declined": {
       "text": "You sent {O} of {S} away.",
       "brief": "your refusal of {s}'s envoy in {year}"
+    },
+    "arrival_envoy": {
+      "text": "An envoy of {S} climbed to your ledge.",
+      "brief": "the envoy of {s} in {year}"
+    },
+    "arrival_pilgrim": {
+      "text": "Pilgrims of {S} came up to the mouth of your cave.",
+      "brief": "the pilgrims of {s} in {year}"
+    },
+    "arrival_thief": {
+      "text": "A thief of {S} found the way into your lair.",
+      "brief": "the thief of {s} in {year}"
+    },
+    "arrival_slayer_band": {
+      "text": "A band of slayers of {S} reached your gate.",
+      "brief": "the slayers of {s} in {year}"
+    },
+    "arrival_scholar": {
+      "text": "A scholar of {S} came to ask what you know.",
+      "brief": "the scholar of {s} in {year}"
+    },
+    "arrival_kin": {
+      "text": "Kin of a captive held by you came from {S} to your ledge.",
+      "brief": "the kin who came from {s} in {year}"
+    },
+    "arrival_refugee": {
+      "text": "Refugees from {S} came up the slopes and begged for your shelter.",
+      "brief": "the refugees of {s} in {year}"
+    },
+    "arrival_prophet": {
+      "text": "A prophet of {S} came to your ledge to see the dragon of the prophecy.",
+      "brief": "the prophet of {s} in {year}"
+    },
+    "arrival_left": {
+      "text": "The visitors from {S} went home without being answered.",
+      "brief": "the visitors of {s} in {year}"
+    },
+    "foothill_shrine": {
+      "text": "The pilgrims of {S} stopped at a shrine in the foothills and left their offerings there; none dared the climb.",
+      "brief": "the foothill shrine of {s} in {year}"
+    },
+    "arrival_answered": {
+      "text": "You answered the visitors of {S}.",
+      "brief": "your answer to the visitors of {s} in {year}"
+    },
+    "arrival_receive": {
+      "text": "You received the visitors of {S} on your ledge.",
+      "brief": "your welcome to the visitors of {s} in {year}"
+    },
+    "arrival_eat": {
+      "text": "You ate the visitors of {S} on your ledge.",
+      "brief": "your meal of the visitors of {s} in {year}"
+    },
+    "arrival_turn_away": {
+      "text": "You turned the visitors of {S} away from your ledge.",
+      "brief": "your refusal of the visitors of {s} in {year}"
+    },
+    "act_hunt": {
+      "text": "You hunted on {S} and ate well.",
+      "brief": "your hunt on {s} in {year}"
+    },
+    "hook_pilgrims_turn_away": {
+      "text": "You turned the pilgrims of {s} away from the mouth of the cave.",
+      "brief": "your answer at {o} in {year}"
     },
     "person_died_old_age": {
       "text": "{S}, {role} of {O}, died at the age of {p:age0}.",
@@ -1236,6 +1304,35 @@
     "horde": "the horde's camp"
   },
   "misc": {
+    "ledge_line": "{head}, because {because}.",
+    "ledge.envoy": "An envoy of {court} waits on your ledge",
+    "ledge.pilgrim": "Pilgrims of {court} wait at the mouth of your cave",
+    "ledge.thief": "A thief of {court} has been seen in your lair",
+    "ledge.slayer_band": "A band of slayers of {court} stands at your gate",
+    "ledge.scholar": "A scholar of {court} waits on your ledge",
+    "ledge.kin": "Kin of your captive from {court} wait on your ledge",
+    "ledge.refugee": "Refugees from {court} wait on your slopes",
+    "ledge.prophet": "A prophet of {court} waits on your ledge",
+    "because.lair_on_record": "the court holds a written record of where you lie",
+    "because.cohesion": "it is united enough to send someone",
+    "because.route_open": "the road to your mountain is open",
+    "because.faith_share": "its people have faith in you",
+    "because.knows_lair": "the court knows where your lair is",
+    "because.knows_lair_exact": "someone of the court has seen your lair",
+    "because.awe_eff": "it holds you in awe",
+    "because.gold_rumour": "word of your gold has reached it",
+    "because.era": "it has grown bold enough to try",
+    "because.slayer_order": "it keeps an order of slayers",
+    "because.dread_eff": "it fears you",
+    "because.dread_eff_low": "it does not fear you much",
+    "because.band_ready": "the band is ready",
+    "because.taught": "you taught it something",
+    "because.library": "it keeps a library",
+    "because.relative_held": "you hold one of its blood",
+    "because.lost_region": "it has lost its land",
+    "because.awe_or_oath": "it trusts you or is bound to you",
+    "because.prophecy_or_cult": "it has a prophecy or a cult of you",
+    "because.piety": "its people are pious",
     "an_envoy": "An envoy",
     "led_by": ", led by {name},",
     "brief_fallback": "the {kind} of {year}",

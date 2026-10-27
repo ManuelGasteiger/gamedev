@@ -3,6 +3,7 @@
 #include "memory_tiers.h"
 #include "unrecorded.h"
 #include "ages.h"
+#include "arrivals.h"
 #include "oaths.h"
 #include "rules/rules.h"
 #include "world_util.h"
@@ -58,53 +59,55 @@ static bool was_deceived(const Faction& f) {
     return false;
 }
 
-struct Draft {
-    const OfferDef* def = nullptr;
-    std::string target, motive, region;
-    const Person* envoy = nullptr;
-    bool plan_to_slay_true = false;
-};
-
-// the envoys' lies roll on an rng derived from the world stream (as the forecast does), so the history itself does not
-// depend on how many courts came to the lair
-static const uint64_t kOfferSalt = 0x0FFE25A17ull;
-
-static void add(World& w, Rng& rng, const Params& p, const Faction& f, const Draft& d) {
+// the envoy's lie rolls on a keyed stream per arrival, so the history does not depend on how many courts came
+void roll_envoy_lie(const World& w, const Params& p, const Faction& f, const EnvoyDraft& d, Rng& rng, std::string& stated, bool& is_lie) {
     const Constants& c = p.c;
-    Offer of;
-    of.kind = d.def->kind;
-    of.id = "offer_" + f.id + "_" + of.kind + "_" + std::to_string(w.year);
-    of.from_faction = f.id;
-    of.envoy = d.envoy ? d.envoy->id : "";
-    of.target = d.target;
-    of.motive = d.motive;
-    of.text_key = "offer." + of.kind;
-    of.expires = w.year + d.def->expires_years;
-    of.price = f.wealth * d.def->price_rate;
-    of.marked = was_deceived(f);
-    double cunning = d.envoy ? d.envoy->traits.cunning : 0.5;
-    bool lie = d.def->can_lie && !d.def->pretexts.empty() && awe_eff(f) < c.mem.honest_awe &&
+    const OfferDef* def = offer_def(p, d.kind);
+    const Person* envoy = find_person(w, d.person);
+    double cunning = envoy ? envoy->traits.cunning : 0.5;
+    bool lie = def && def->can_lie && !def->pretexts.empty() && awe_eff(f) < c.mem.honest_awe &&
                rng.chance(c.offer_lie_base + c.offer_lie_authority * f.culture.traits.authority + c.offer_lie_cunning * cunning);
     if (lie) {
-        of.stated_reason = d.def->pretexts[static_cast<size_t>(rng.range(0, static_cast<int>(d.def->pretexts.size())))];
-        of.is_lie = !(of.stated_reason == "plan_to_slay" && d.plan_to_slay_true);
-    } else of.stated_reason = of.motive;
+        stated = def->pretexts[static_cast<size_t>(rng.range(0, static_cast<int>(def->pretexts.size())))];
+        is_lie = !(stated == "plan_to_slay" && d.slay_true);
+    } else {
+        stated = d.motive;
+        is_lie = false;
+    }
+}
+
+static void add(World& w, const Params& p, const Faction& f, const Arrival& a) {
+    const OfferDef* def = offer_def(p, a.offer_kind);
+    if (!def) return;
+    Offer of;
+    of.kind = def->kind;
+    of.id = "offer_" + f.id + "_" + of.kind + "_" + std::to_string(a.year);
+    of.from_faction = f.id;
+    of.envoy = a.person;
+    of.target = a.target;
+    of.motive = a.motive;
+    of.text_key = "offer." + of.kind;
+    of.expires = w.year + def->expires_years;
+    of.price = f.wealth * def->price_rate;
+    of.marked = was_deceived(f);
+    of.stated_reason = a.stated_reason;
+    of.is_lie = a.is_lie;
     Oath& o = of.draft;
     o.id = of.id;
     o.parties[0] = "dragon";
     o.parties[1] = f.id;
     o.sworn = w.year;
     o.expires = of.expires;
-    for (auto& pred : d.def->clauses) {
+    for (auto& pred : def->clauses) {
         Clause cl;
         cl.who = pred == "tribute" ? f.id : "dragon";
         cl.pred = pred;
         if (pred == "tribute") cl.params["amount"] = of.price;
         o.clauses.push_back(cl);
     }
-    o.breach_by_dragon = contains(d.def->clauses, "defend") || contains(d.def->clauses, "no_harm") ? "betrayal" : "none";
-    o.ask = d.def->pred;
-    o.target = d.target;
+    o.breach_by_dragon = contains(def->clauses, "defend") || contains(def->clauses, "no_harm") ? "betrayal" : "none";
+    o.ask = def->pred;
+    o.target = a.target;
     o.motive = of.motive;
     o.kind = of.kind;
     o.envoy = of.envoy;
@@ -113,19 +116,22 @@ static void add(World& w, Rng& rng, const Params& p, const Faction& f, const Dra
     w.offers.push_back(of);
 }
 
-static void offers_of(World& w, Rng& rng, const Params& p, const Faction& f) {
+// every offer row whose trigger holds for the court now, in the order of the table
+std::vector<EnvoyDraft> envoy_drafts(const World& w, const Params& p, const Faction& f) {
     const Constants& c = p.c;
+    std::vector<EnvoyDraft> out;
     auto propose = [&](const char* kind, const std::string& target, const std::string& motive, const std::string& region = "", bool slay_true = false) {
         const OfferDef* def = offer_def(p, kind);
         if (!def) return;
-        Draft d;
-        d.def = def;
+        EnvoyDraft d;
+        d.kind = kind;
         d.target = target;
         d.motive = motive.empty() ? def->motive : motive;
         d.region = region;
-        d.plan_to_slay_true = slay_true;
-        d.envoy = def->envoy == "self" ? find_person(w, target) : envoy_for(w, f, def->envoy);
-        add(w, rng, p, f, d);
+        d.slay_true = slay_true;
+        const Person* envoy = def->envoy == "self" ? find_person(w, target) : envoy_for(w, f, def->envoy);
+        d.person = envoy ? envoy->id : "";
+        out.push_back(d);
     };
     if (losing(w, c, f)) {
         const Faction* e = strongest_enemy(w, c, f);
@@ -172,13 +178,16 @@ static void offers_of(World& w, Rng& rng, const Params& p, const Faction& f) {
         if (g && affinity(p, f, *g) < c.offer_elope_affinity) { propose("elope", x.id, "escape_marriage"); break; }
     }
     if (f.era >= c.offer_exit_era && f.faith > c.offer_exit_faith) propose("rite", "", "exit");
+    return out;
 }
 
+// the envoys that came during the sleep bring their offers to the waking
 void generate_offers(World& w, const Params& p) {
     w.offers.clear();
-    Rng rng;
-    rng.seed(w.rng.state ^ kOfferSalt);
-    for (auto& f : w.factions) offers_of(w, rng, p, f);
+    for (auto& a : w.arrivals) {
+        if (a.kind != "envoy") continue;
+        if (const Faction* f = find_faction(w, a.court)) add(w, p, *f, a);
+    }
 }
 
 // ---- fulfilment and the ledger -------------------------------------------------------------------------------------
@@ -266,7 +275,9 @@ bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, st
     meet(w, id, "kill", c.known_kill_envoy);
     int act = last_event_id(w, "act_kill", f->id, "", "", w.year);
     kill_person_now(w, p, id, "killed_by_dragon", because(envoy ? "envoy_killed" : "dragon_will", {act}));
+    if (envoy) w.arrival_fired[f->id + "|envoy_killed"] = w.year;
     w.offers.erase(std::remove_if(w.offers.begin(), w.offers.end(), [&](const Offer& o) { return o.envoy == id || o.target == id; }), w.offers.end());
+    w.arrivals.erase(std::remove_if(w.arrivals.begin(), w.arrivals.end(), [&](const Arrival& a) { return a.person == id; }), w.arrivals.end());
     return true;
 }
 

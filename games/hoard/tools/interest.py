@@ -367,6 +367,7 @@ def seed_metrics(events, world, stats, idle_events, numbers=None):
         "death": stats.get("dragon_death"),   # v0.4 (S1): {cause: wounds | slaying, year, court, warned} or None
         "hooks": stats.get("hooks"),          # v0.4 hooks (S3): wakings, with_hook, offered, answered, by_kind, fights, reward_growth
         "growth": (stats.get("dragon_growth") or {}).get("points"),
+        "arrivals": arrivals_count(stats.get("wakings_log", [])),
         "agency_chain": agency_chain(events, stats.get("wakings_log", []), (world.get("genesis") or {}).get("hatched_year", 0)),
         "sift": sift_seed(stats.get("wakings_log", []), world),   # item 14
     }
@@ -629,6 +630,7 @@ def summarise_policy(policy, per_seed):
         "dragon_slain_seeds": sum(1 for s in seeds if per_seed[s]["outcome"]["dragon_slain"]),
         "deaths": deaths_summary([per_seed[s].get("death") for s in seeds]),   # v0.4 (S1)
         "hooks": hooks_summary([per_seed[s].get("hooks") for s in seeds], [per_seed[s].get("growth") for s in seeds]),   # v0.4 hooks (S3)
+        "arrivals": arrivals_summary([per_seed[s].get("arrivals") for s in seeds]),
         "sift": sift_summary([per_seed[s].get("sift") for s in seeds], BANK_IDS),   # item 14
         "flatness_flags": flags,
         "most_interesting": [headline(s, per_seed[s]) for s in ranked[::-1][:5]],
@@ -694,6 +696,32 @@ def deaths_summary(deaths):
     return {"wounds": sum(1 for d in dead if d["cause"] == "wounds"), "slaying": sum(1 for d in dead if d["cause"] == "slaying"),
             "median_year": statistics.median(years) if years else None,
             "unwarned": sum(1 for d in dead if d["cause"] == "slaying" and not d.get("warned", True))}
+
+
+def arrivals_count(wakings_log, after=200):
+    """item 06: visitors waiting at the lair at each waking from `after` years past the hatching."""
+    kinds, because, wakings = Counter(), Counter(), 0
+    for w in wakings_log:
+        if w.get("since_hatch", 0) < after:
+            continue
+        wakings += 1
+        for a in w.get("arrivals", []):
+            kinds[a["kind"]] += 1
+            because[" + ".join(a["because"])] += 1
+    return {"wakings": wakings, "kinds": dict(kinds), "because": dict(because)}
+
+
+def arrivals_summary(runs):
+    runs = [r for r in runs if r]
+    wakings = sum(r["wakings"] for r in runs)
+    kinds, because = Counter(), Counter()
+    for r in runs:
+        kinds.update(r["kinds"])
+        because.update(r["because"])
+    total = sum(kinds.values())
+    return {"wakings": wakings, "total": total, "per_waking": total / wakings if wakings else 0.0,
+            "by_kind": {k: v / wakings if wakings else 0.0 for k, v in sorted(kinds.items())},
+            "top_because": because.most_common(10), "runs_with_none": sum(1 for r in runs if not r["kinds"])}
 
 
 # ---------------------------------------------------------------- item 14: the sifter's briefings (research-story-sifting.md s7)
@@ -891,6 +919,12 @@ def print_table(summaries):
                   f"{h['kinds_seen']} kinds (max share {100 * h['max_kind_share']:.0f}%), {h['fights']} fights of {h['fight_wounds_mean']:.1f} wounds")
             print(f"[{s['policy']}] hooks by kind: " + ", ".join(f"{k} {100 * v:.0f}%" for k, v in h["by_kind"].items()))
             print(f"[{s['policy']}] growth per run: " + ", ".join(f"{k} {v:.0f} ({100 * h['reward_growth_share'][k]:.0f}% from hooks)" for k, v in h["growth_mean"].items()))
+        ar = s.get("arrivals")
+        if ar and ar["wakings"]:   # item 06
+            print(f"[{s['policy']}] arrivals: {ar['per_waking']:.2f} per waking after year 200 ({ar['total']} in {ar['wakings']} wakings, {ar['runs_with_none']} runs with none)")
+            print(f"[{s['policy']}] arrivals per waking by kind: " + ", ".join(f"{k} {v:.3f}" for k, v in ar["by_kind"].items()))
+            for text, n in ar["top_because"]:
+                print(f"[{s['policy']}]   because {n:6d}  {text}")
         for label, key in (("most", "most_interesting"), ("least", "least_interesting")):
             print(f"[{s['policy']}] {label} interesting seeds:")
             for h in s[key]:

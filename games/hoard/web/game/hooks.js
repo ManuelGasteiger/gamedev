@@ -69,7 +69,7 @@ function hookActionsHtml(regionId) {
     const acts = h.resolve?.acts ?? [];
     const fight = h.fight_damage > 0 ? `<span class="fight">a fight</span> about ${Math.round(h.fight_damage)} wounds` : '';
     const buttons = choices.length
-      ? choices.map((c) => `<button data-hookans="${h.id}" data-choice="${escapeHtml(c)}">${escapeHtml(capFirst(c))}</button>`).join(' ')
+      ? choices.map((c) => `<button data-hookans="${h.id}" data-choice="${escapeHtml(c)}">${escapeHtml(capFirst(c.replace(/_/g, " ")))}</button>`).join(' ')
       : acts.map((a) => `<button data-hookans="${h.id}" data-act="${escapeHtml(a)}">${escapeHtml(capFirst(a === 'kill_person' ? `kill ${nameOf(h.resolve?.person || h.person)}` : hookVerb(h, a)))}</button>`).join(' ');
     return `<div class="hookact"><div><b>◆ ${escapeHtml(h.title)}</b> ${fight}</div>
       <div class="muted">${h.reward_text ? 'pays ' + escapeHtml(h.reward_text) : ''}</div><div class="ctl">${buttons}</div></div>`;

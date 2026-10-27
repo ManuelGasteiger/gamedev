@@ -8,30 +8,7 @@
       "id": "thief",
       "kind": "thief",
       "priority": 50,
-      "when": [
-        {
-          "adjacent": "lair"
-        },
-        {
-          "field": "dread",
-          "lt": 0.3
-        },
-        {
-          "field": "gold",
-          "on": "dragon",
-          "gte": 60
-        },
-        {
-          "field": "asleep_years",
-          "on": "dragon",
-          "gte": 50
-        },
-        {
-          "field": "effect:thief_guard",
-          "on": "dragon",
-          "eq": 0
-        }
-      ],
+      "arrival": "thief",
       "where": "near_lair",
       "acts": [
         "take",
@@ -49,18 +26,11 @@
         "text": "While you slept, someone from {faction} crept into the lair and carried gold down to {region}.",
         "reward_text": "the gold back and more, and fear in {faction}",
         "ignore_text": "the gold is gone and {faction} grows rich on it"
-      },
-      "force_if": [
-        {
-          "event": "treasure_hunters",
-          "self_as": "subject",
-          "event_tag": "robbed",
-          "this_sleep": true
-        }
-      ]
+      }
     },
     {
       "id": "slayers_premonition",
+      "arrival": "slayer_band",
       "kind": "slayers",
       "priority": 100,
       "when": [
@@ -99,6 +69,7 @@
     },
     {
       "id": "slayers_ready",
+      "arrival": "slayer_band",
       "kind": "slayers",
       "priority": 100,
       "when": [
@@ -258,45 +229,18 @@
       "id": "pilgrims",
       "kind": "pilgrims",
       "priority": 40,
-      "when": [
-        {
-          "field": "faith",
-          "gte": 0.5
-        },
-        {
-          "field": "awe",
-          "gte": 0.15
-        }
-      ],
-      "force_if": [
-        {
-          "field": "effect:cult",
-          "on": "dragon",
-          "gt": 0
-        }
-      ],
+      "arrival": "pilgrim",
       "pick": "self.faith",
       "where": "lair",
       "choices": [
         "receive",
-        "eat"
+        "eat",
+        "turn_away"
       ],
       "choice_reward": {
-        "receive": {
-          "faith_pool": 1,
-          "growth_dominion": 2,
-          "faith": 0.1,
-          "awe": 0.1,
-          "growth_lore": 1
-        },
-        "eat": {
-          "food": 15,
-          "hunger_add": -0.2,
-          "dread": 0.25,
-          "awe": -0.1,
-          "faith": -0.3,
-          "growth_might": 1
-        }
+        "receive": {},
+        "eat": {},
+        "turn_away": {}
       },
       "ignore": {
         "faith_add": -0.15

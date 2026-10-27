@@ -25,6 +25,7 @@ wasm = base64.b64encode((root / 'web/ages.wasm').read_bytes()).decode()
 data = {k: (root / f'data/{k}.json').read_text() for k in ['constants', 'races', 'reactions', 'regions', 'factions', 'shocks', 'names', 'offers']}
 data.update({k: (root / f'data/{k}.json').read_text() for k in ['talents', 'defences']})   # v0.4 (S1)
 data['hooks'] = (root / 'data/hooks.json').read_text()   # v0.4 hooks (S3)
+data['arrivals'] = (root / 'data/arrivals.json').read_text()   # item 06
 data['text'] = (root / 'data/text/en/narrator.json').read_text()
 data['importance'] = (root / 'data/importance.json').read_text()
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it

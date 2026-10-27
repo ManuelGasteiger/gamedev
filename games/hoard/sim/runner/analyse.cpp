@@ -126,7 +126,9 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
         if (!o.wakings) return;
         json hooks = json::array();
         for (auto& h : w.hooks) hooks.push_back({{"kind", h.kind}, {"refs", h.refs}});
-        *pending = {{"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
+        json arrivals = json::array();
+        for (auto& a : w.arrivals) arrivals.push_back({{"kind", a.kind}, {"court", a.court}, {"because", a.because}});
+        *pending = {{"arrivals", arrivals}, {"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
         if (w.sift.on && w.sift.lines_year == w.year) (*pending)["sift"] = sift_waking(w, p);

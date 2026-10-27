@@ -155,6 +155,8 @@ struct Faction {
     int max_realm = 0;   // own plus vassal regions
     std::vector<int> era_years;
     Effective eff;
+    int lair_known = -1;        // item 06: year the court last learned where the lair is (-1 never); fades with the oral tier
+    bool lair_exact = false;    // a returned person or a thief who came back has seen it
 };
 
 struct FactionRecord {
@@ -320,6 +322,16 @@ struct Offer {
     double price = 0;
 };
 
+// item 06: a visitor waiting at the lair for the dragon to wake; `because` holds the satisfied clause keys; an envoy
+// carries the offer row it brings (offer_kind, target, motive, region) and what it will say (stated_reason, is_lie)
+struct Arrival {
+    std::string id, kind, court, person;
+    int year = 0;
+    std::vector<std::string> because;
+    std::string offer_kind, target, motive, region, stated_reason;
+    bool is_lie = false, slay_true = false;
+};
+
 struct War {
     std::string a, b;
     int started = 0;
@@ -454,6 +466,8 @@ struct World {
     std::vector<Person> people;            // sorted by id
     std::vector<DeadPerson> dead_people;   // the ones the briefing may still have to name
     std::map<std::string, int> person_counters;   // race -> next number for `<race><n>` ids
+    std::vector<Arrival> arrivals;         // item 06: visitors at the lair in the order they came; the dragon's sleep sends them home
+    std::map<std::string, int> arrival_fired;   // "<court>|<kind>|<cause>" and "<court>" -> year of the last arrival
     std::vector<Offer> offers;             // current offers, generated at wake
     int next_offer_serial = 1;
     int dt = 10;                           // years of the current step; rules scale per-decade rates by dt / step_years

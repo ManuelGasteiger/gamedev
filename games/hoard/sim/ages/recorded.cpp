@@ -1,5 +1,6 @@
 #include "record.h"
 #include "unrecorded.h"
+#include "arrivals.h"
 
 namespace ages {
 
@@ -56,6 +57,20 @@ bool kill_person(World& w, const Params& p, const std::string& id, std::string& 
     RecordScope rec(w);
     bool ok = kill_person_unrecorded(w, p, id, reason, lines);
     if (ok) rec.done("kill_person", args_of({{"id", id}}));
+    return ok;
+}
+
+bool receive(World& w, const Params& p, const std::string& id, const std::string& outcome, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = receive_unrecorded(w, p, id, outcome, reason);
+    if (ok) rec.done("receive", args_of({{"id", id}, {"outcome", outcome}}));
+    return ok;
+}
+
+bool hunt(World& w, const Params& p, const std::string& region, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = hunt_unrecorded(w, p, region, reason);
+    if (ok) rec.done("hunt", args_of({{"region", region}}));
     return ok;
 }
 

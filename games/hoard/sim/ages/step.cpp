@@ -1,4 +1,5 @@
 #include "step.h"
+#include "arrivals.h"
 #include "rules/rules.h"
 #include "rules/world_rules.h"
 
@@ -26,6 +27,7 @@ void step(World& w, const Params& p, int dt) {
     if (slow) rule_hegemony(w, p);
     rule_land(w, p);
     rule_oaths(w, p);
+    rule_arrivals(w, p);   // item 06
     if (slow) rule_shocks(w, p);
     rule_cards(w, p);
     rule_world(w, p);   // v0.4 world (S2)

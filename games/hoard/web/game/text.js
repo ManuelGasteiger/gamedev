@@ -187,6 +187,7 @@ function cleanBriefing(b, events = []) {
   for (const t of out.threads ?? []) t.text = cleanSimText(t.text, null, { race_plural: t.kind === 'remnant' ? racePlural(t.id) : '' });
   for (const p of out.people ?? []) p.text = cleanSimText(p.text, byId.get(p.event));
   for (const o of out.opportunities ?? []) o.text = cleanSimText(o.text);
+  for (const a of out.ledge ?? []) a.text = cleanSimText(a.text);
   if (out.phase?.text) out.phase.text = cleanSimText(out.phase.text);
   return out;
 }

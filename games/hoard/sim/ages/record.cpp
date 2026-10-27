@@ -1,5 +1,6 @@
 #include "record.h"
 #include "ages.h"
+#include "arrivals.h"
 #include "json.h"
 #include "state_hash.h"
 #include "talents.h"
@@ -55,7 +56,7 @@ uint64_t data_hash(const DataJson& d) {
     };
     add("constants", d.constants); add("races", d.races); add("reactions", d.reactions); add("regions", d.regions);
     add("factions", d.factions); add("shocks", d.shocks); add("names", d.names); add("offers", d.offers); add("text", d.text);
-    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("genesis", d.genesis);
+    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("arrivals", d.arrivals); add("genesis", d.genesis);
     add("importance", d.importance);
     if (!d.patterns.empty()) { add("patterns", d.patterns); add("base_rates", d.base_rates); }   // item 14
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
@@ -91,6 +92,8 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "decline_offer") return decline_offer(w, p, a.value("index", size_t{0}));
     if (verb == "answer_hook") return answer_hook(w, p, str(a, "id"), str(a, "choice"), err);
     if (verb == "kill_person") return kill_person(w, p, str(a, "id"), err);
+    if (verb == "receive") return receive(w, p, str(a, "id"), str(a, "outcome"), err);
+    if (verb == "hunt") return hunt(w, p, str(a, "region"), err);
     if (verb == "cast") return cast_spell(w, p, str(a, "spell"), str(a, "target"), str(a, "region"), str(a, "against")).cast;
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }
