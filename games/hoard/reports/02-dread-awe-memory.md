@@ -91,6 +91,8 @@ Speed: a 3000-year played run on seed 42 took 1.1 s against 0.5 to 0.8 s for the
 2. Played outcome entropy fell from 4.03 to 3.87 bits (the band is 4.5; it failed in v0.4 too). Orcs are still the largest race in most played valleys.
 3. Played deaths are 8 % (band 5 to 25 %, v0.4 21 %). Inside the band; say if you want them nearer v0.4.
 
+CI: green on GCC, Clang, MSVC and wasm. The first hoard-web run failed its game check and the next one passed with no change to the page; I could not read that log, so the game check now writes failing checks as annotations.
+
 ## 6. How to verify in five minutes
 
 ```
