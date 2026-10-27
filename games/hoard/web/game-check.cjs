@@ -960,14 +960,14 @@ async function checksV04() {
   await fly('deep_wood');
   await act('take', { region: 'deep_wood', category: 'books', magnitude: 0.6 });
 
-  // 5. the sleep panel: the bet for each length (healing, growth per axis as the page estimates it, the danger line)
+  // 5. the sleep panel: the bet for each length (healing, growth per axis from the forecast, the danger line)
   await page.evaluate(() => game.land());
   await page.evaluate(() => game.setLairTab('sleep'));
   const bet = await text('#lair-body');
   await shot('v04-sleep-bet');
   const betMoult = /Moult \(10 years\)(.*?)not ready/.exec(bet)?.[1] ?? '';
   const estimated = /grows (Might|Lore|Arcana|Flame) \+([\d.]+)/.exec(betMoult);
-  check('v04.sleep_bet', /heals all [\d.]+ wounds/.test(bet) && /Might \+[\d.]+/.test(bet) && /Flame \+[\d.]+/.test(bet) && /\(estimate\)/.test(bet) && /danger: /.test(bet) && estimated, (bet.match(/heals[^·]*·[^·]*·[^·]*/) ?? [''])[0].slice(0, 160));
+  check('v04.sleep_bet', /heals all [\d.]+ wounds/.test(bet) && /Might \+[\d.]+/.test(bet) && /Flame \+[\d.]+/.test(bet) && /danger: /.test(bet) && estimated, (bet.match(/heals[^·]*·[^·]*·[^·]*/) ?? [''])[0].slice(0, 160));
 
   // 1. a moult: the wake page leads with the hooks, then the chronicle, the arms race, what you grew (the sim's
   // growth_gained, which the estimate must have matched); closing it opens the growth screen: two big cards, keys 1 and 2
