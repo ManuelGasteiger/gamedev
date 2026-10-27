@@ -314,10 +314,13 @@ struct Picker {
                 if (!used[i] && pred(cands[i]) && !(cands[i].kind == "line" && repeats(cands[i])) && (best == cands.size() || adjusted(i) > adjusted(best))) best = i;
             return best;
         };
-        // 4. tier 4 always gets a line
-        for (size_t i; left > 0 && (i = best_of([](const Candidate& c) { return c.tier == 4; })) < cands.size();) take(i, "line");
-        // 5. callbacks, the ends of shown threads first
+        // 4. tier 4 always gets a line; a callback among them counts against the callback limit
         int callbacks = 0;
+        for (size_t i; left > 0 && (i = best_of([&](const Candidate& c) { return c.tier == 4 && (c.kind != "callback" || callbacks < k.max_callbacks); })) < cands.size();) {
+            if (cands[i].kind == "callback") ++callbacks;
+            take(i, cands[i].kind);
+        }
+        // 5. callbacks, the ends of shown threads first
         for (size_t i; left > 0 && callbacks < k.max_callbacks &&
                        (i = best_of([](const Candidate& c) { return c.kind == "callback" && (c.thread->state == "closed" || c.thread->state == "cut"); })) < cands.size();) {
             take(i, "callback");
