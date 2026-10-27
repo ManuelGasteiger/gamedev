@@ -26,6 +26,7 @@ POLICIES = ["rest_only", "moult_only", "long_1000", "raid_then_1000", "played", 
 REPLAYED = {"played", "newcomer"}
 LETHALITY = ["played", "long_1000"]
 BUCKETS = [1, 10, 30, 100, 300, 1000, 3000]
+GROWTH_TIE = 0.02
 HOARD = ["gold", "books", "artifacts", "art", "royals", "food", "embers"]
 AXES = ["might", "flame", "arcana", "lore", "dominion"]
 STOCK_COLUMNS = ["seed", "century", "year", "since_hatch", "phase", "health_max", "wounds", "slain"] + \
@@ -133,11 +134,30 @@ def run_job(job):
         result = {"seed": seed, "policy": policy, "mode": mode, "seconds": time.time() - t0, "end": end_metrics(chron, world, stats),
                   "rows": rows, "courts": courts, "wakings": waking_rows(wakings),
                   "might_100": might100[-1] if might100 else 0.0,
+                  "phase_years": {ph: next((x["since_hatch"] for x in snaps if x["phase"] >= ph), None) for ph in (2, 3)},
                   "marks": {m: next(([s["phase"], s["hoard"].get("gold", 0), sum(s["hoard"].values())] for s in reversed(snaps) if s["since_hatch"] <= m), None)
                             for m in MARKS}}
         return result
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def run_cached(job):
+    """a finished run is kept in out/cache, so an interrupted sweep resumes (delete out/cache after a change to the sim or data)"""
+    binary, data, seed, years, policy, mode, out_dir, samples = job
+    path = os.path.join(out_dir, "cache", f"{policy}-{mode}-{seed}.json")
+    if os.path.exists(path):
+        with open(path) as f:
+            r = json.load(f)
+        r["marks"] = {int(k): v for k, v in r["marks"].items()}
+        r["phase_years"] = {int(k): v for k, v in r["phase_years"].items()}
+        return r
+    r = run_job(job)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path + ".tmp", "w") as f:
+        json.dump(r, f)
+    os.replace(path + ".tmp", path)
+    return r
 
 
 # ---------------------------------------------------------------- summaries
@@ -200,6 +220,7 @@ def policy_summary(policy, results, years):
                        "first_tower_waking_mean": statistics.fmean(met) if met else None, "first_tower_met_share": len(met) / n,
                        "hooks_answered_mean": statistics.fmean(e["hooks_answered_first_hour"] for e in ends),
                        "might_100_mean": statistics.fmean(r["might_100"] for r in results)},
+        "phase_year_median": {f"p{ph}": median_or_none([r["phase_years"][ph] for r in results if r["phase_years"][ph] is not None]) for ph in (2, 3)},
         "seconds": sum(r["seconds"] for r in results),
     }
 
@@ -207,7 +228,7 @@ def policy_summary(policy, results, years):
 def bucket_table(results):
     """per wake state the best bucket for survival (lowest P(dead) + 0.5 P(slayer band ready)) and growth (most points);
     ties split; 'decisive' counts only states where the buckets differ"""
-    wins = {k: Counter() for k in ("survival", "growth", "survival_decisive", "growth_decisive")}
+    wins = {k: Counter() for k in ("survival", "growth", "growth_tol", "survival_decisive", "growth_decisive", "growth_tol_decisive")}
     states = 0
     decisive = Counter()
     for r in results:
@@ -216,8 +237,12 @@ def bucket_table(results):
             if not b:
                 continue
             states += 1
-            for k, score in (("survival", [-(x["dead"] + 0.5 * x["ready"]) for x in b]), ("growth", [x["growth"] for x in b])):
-                best = [x["years"] for x, v in zip(b, score) if v == max(score)]
+            # growth_tol: buckets within GROWTH_TIE of the best count as tied (a saturated hoard leaves long sleeps a rounding apart)
+            for k, score in (("survival", [-(x["dead"] + 0.5 * x["ready"]) for x in b]), ("growth", [x["growth"] for x in b]),
+                             ("growth_tol", [x["growth"] for x in b])):
+                top = max(score)
+                near = top * (1 - GROWTH_TIE) if k == "growth_tol" else top
+                best = [x["years"] for x, v in zip(b, score) if v >= near]
                 tied = len(best) == len(b)
                 decisive[k] += not tied
                 for y in best:
@@ -226,8 +251,9 @@ def bucket_table(results):
                         wins[k + "_decisive"][y] += 1 / len(best)
     if not states:
         return None
-    out = {"states": states, "decisive_survival": decisive["survival"] / states, "decisive_growth": decisive["growth"] / states}
-    for k in ("survival", "growth"):
+    out = {"states": states, "decisive_survival": decisive["survival"] / states, "decisive_growth": decisive["growth"] / states,
+           "decisive_growth_tol": decisive["growth_tol"] / states}
+    for k in ("survival", "growth", "growth_tol"):
         out[k] = {y: wins[k][y] / states for y in BUCKETS}
         out[k + "_decisive"] = {y: wins[k + "_decisive"][y] / decisive[k] if decisive[k] else 0.0 for y in BUCKETS}
     return out
@@ -268,6 +294,26 @@ def perturb_table(base, perturbed):
         out[mode] = {"seeds": len(results), "applied": applied, "flips": flips, "flip_share": flips / len(results) if results else None}
     out["either_flip_share"] = len(any_flip) / len(seeds) if seeds else None
     return out
+
+
+def median_or_none(xs):
+    return statistics.median(xs) if xs else None
+
+
+TOP_GROWTH = ["moult_only", "long_1000", "raid_then_1000", "played", "newcomer", "raze_all"]
+
+
+def top_growth(by):
+    """per seed, the policy with the most growth points in its last century row (the run's end, or the death)"""
+    totals = defaultdict(dict)
+    cols = [STOCK_COLUMNS.index(f"growth_{k}") for k in AXES]
+    for p in TOP_GROWTH:
+        for r in by.get((p, "run"), []):
+            if r["rows"]:
+                totals[r["seed"]][p] = sum(r["rows"][-1][c] for c in cols)
+    seeds = [t for t in totals.values() if len(t) == len(TOP_GROWTH)]
+    wins = Counter(max(t, key=lambda k: (t[k], k)) for t in seeds)
+    return {"seeds": len(seeds), "share": {p: wins[p] / len(seeds) for p in TOP_GROWTH} if seeds else {}}
 
 
 def bands_from(summary):
@@ -314,6 +360,12 @@ def markdown(summary):
         f = s["first_hour"]
         out.append(f"| {p} | {', '.join(f'{y} {k}' for y, k in f['deaths']) or '-'} | {f['deaths_before_80']} | {fmt(f['first_tower_waking_mean'])} | "
                    f"{pct(f['first_tower_met_share'])} | {fmt(f['hooks_answered_mean'], 2)} | {fmt(f['might_100_mean'])} |")
+    out += ["", "Phase reached, median year since hatching (first snapshot at or past it):", ""]
+    for p, s in pols.items():
+        out.append(f"- {p}: phase 2 {fmt(s['phase_year_median']['p2'], 0)}, phase 3 {fmt(s['phase_year_median']['p3'], 0)}")
+    tg = summary.get("top_growth")
+    if tg and tg["seeds"]:
+        out += ["", f"Policy with the most growth points at the end, per seed ({tg['seeds']} seeds): " + ", ".join(f"{k} {pct(v)}" for k, v in sorted(tg["share"].items(), key=lambda kv: -kv[1]))]
     out += ["", "Largest race at the end:", ""]
     for p, s in pols.items():
         out.append(f"- {p}: " + ", ".join(f"{k} {v}" for k, v in s["outcome"]["largest_race"].items()))
@@ -326,6 +378,8 @@ def markdown(summary):
                 "| survival, decisive | " + " | ".join(pct(bt["survival_decisive"][y]) for y in BUCKETS) + " |",
                 "| growth, all states | " + " | ".join(pct(bt["growth"][y]) for y in BUCKETS) + " |",
                 "| growth, decisive | " + " | ".join(pct(bt["growth_decisive"][y]) for y in BUCKETS) + " |"]
+        if "growth_tol_decisive" in bt:
+            out.append(f"| growth, decisive, within {pct(GROWTH_TIE)} tied | " + " | ".join(pct(bt["growth_tol_decisive"][y]) for y in BUCKETS) + " |")
     for p, t in summary.get("lethality", {}).items():
         out += ["", f"Lethality (listed wounds of the waking's acts / current health), {p}:", "", "| era x phase | wakings | mean | max | > 1 |", "|---|---|---|---|---|"]
         for k, v in t.items():
@@ -337,7 +391,8 @@ def markdown(summary):
             if k in pt:
                 v = pt[k]
                 out.append(f"- {k[8:]}: {v['flips']} of {v['seeds']} flip ({pct(v['flip_share'])}); applied in {v['applied']}")
-        out.append(f"- either: {pct(pt['either_flip_share'])}")
+        if pt.get("either_flip_share") is not None:
+            out.append(f"- either: {pct(pt['either_flip_share'])}")
     return "\n".join(out) + "\n"
 
 
@@ -373,7 +428,7 @@ def sweep(args):
     by = defaultdict(list)
     done = 0
     with ProcessPoolExecutor(max_workers=args.jobs) as ex:
-        for fut in as_completed([ex.submit(run_job, j) for j in jobs]):
+        for fut in as_completed([ex.submit(run_cached, j) for j in jobs]):
             r = fut.result()
             by[(r["policy"], r["mode"] if r["mode"].startswith("perturb") else "run")].append(r)
             done += 1
@@ -389,6 +444,7 @@ def sweep(args):
     if played:
         summary["buckets"] = bucket_table(played)
         summary["perturbation"] = perturb_table(played, {m: by[("played", m)] for m in ("perturb_burn", "perturb_sleep") if by[("played", m)]})
+    summary["top_growth"] = top_growth(by)
     summary["lethality"] = {p: lethality_table(by[(p, "run")]) for p in LETHALITY if by[(p, "run")]}
     summary["bucket_seconds"] = sum(r["seconds"] for r in played if r["mode"] == "buckets")
     summary["wall_seconds"] = time.time() - t0

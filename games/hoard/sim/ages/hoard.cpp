@@ -65,10 +65,20 @@ static double bed_years(const World& w, const Constants& c, double years, double
     return full + c.bed_overtime * (years - full);
 }
 
+// the gold above the phase's floor is eaten at gold_burn per long window slept; the floor is what the dragon keeps
+static double eat_gold(Dragon& d, const Constants& c, double windows) {
+    double floor = c.gold_floor_base * c.floor_phase_mult[static_cast<size_t>(phase_index(d))];
+    double excess = std::max(0.0, d.hoard.gold - floor);
+    double left = excess * det::pow(1.0 - c.gold_burn, windows);
+    d.hoard.gold -= excess - left;
+    return excess - left;
+}
+
 // v0.4: digestion runs on the phase clock (half-life = growth_halflife[kind] x the phase's long window) and feeds the
-// growth axes and the pools; gold is not eaten but slept on: Might = bed_rate x sqrt(gold) per long window slept, at
-// bed_overtime past the first window. A moult doubles both. Returns the nourishment (everything digested but embers,
-// plus the hunt).
+// growth axes and the pools. Gold, bed_mode consumed: the gold above the floor is eaten and gives gold_pts Might each;
+// bed_mode window: gold is slept on, Might = bed_rate x sqrt(gold) per long window slept and nothing is eaten. Past the
+// sleep's first long window the bed runs at bed_overtime; a moult doubles it all. Returns the nourishment (everything
+// digested but embers and gold, plus the hunt).
 double digest_hoard(World& w, const Params& p, double years) {
     const Constants& c = p.c;
     Dragon& d = w.dragons[kPlayer];
@@ -76,7 +86,8 @@ double digest_hoard(World& w, const Params& p, double years) {
     double window = std::max(1, long_sleep(d, c));
     double slept = bed_years(w, c, years, window);
     if (w.moulting) { years *= c.moult_digest_mult; slept *= c.moult_digest_mult; }
-    double bed = c.bed_rate * std::sqrt(std::max(0.0, d.hoard.gold)) * slept / window * effect(w, p, "bed_mult");
+    double bed = c.bed_mode == "consumed" ? eat_gold(d, c, slept / window) * c.gold_pts : c.bed_rate * std::sqrt(std::max(0.0, d.hoard.gold)) * slept / window;
+    bed *= effect(w, p, "bed_mult");
     auto eat = [&](double& stock, const char* kind) { return digest(stock, of(c.growth_halflife, kind) * window, years); };
     double books = eat(d.hoard.books, "books");
     double art = eat(d.hoard.art, "art");

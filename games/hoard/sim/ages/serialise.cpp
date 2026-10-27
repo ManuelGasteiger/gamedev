@@ -736,6 +736,10 @@ std::string forecast_to_json(const Forecast& f) {
     j["knowledge"] = f.knowledge;
     j["magic"] = f.magic;
     j["hunger"] = f.hunger;
+    j["hoard_after"] = {{"gold", f.hoard_after.gold}, {"books", f.hoard_after.books}, {"artifacts", f.hoard_after.artifacts},
+                        {"art", f.hoard_after.art}, {"royals", f.hoard_after.royals}, {"food", f.hoard_after.food}, {"embers", f.hoard_after.embers}};
+    j["growth_gained"] = f.growth_gained;
+    j["healed"] = f.healed;
     j["strongest"] = f.strongest;
     j["strongest_era"] = f.strongest_era;
     j["slay_possible"] = f.slay_possible;

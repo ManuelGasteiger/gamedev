@@ -527,13 +527,29 @@ async function finishSleep() {
   const p3 = (await state()).pos;
   // camera yaw 45°: D moves +x −z on the map, W/ArrowUp moves −x −z, A moves −x +z
   check('i.keys', p1[0] > p0[0] + 0.5 && p1[1] < p0[1] - 0.5 && p2[0] < p1[0] - 0.5 && p2[1] < p1[1] - 0.5 && p3[0] < p2[0] - 0.5, `D ${p0.map((v) => v.toFixed(1))} -> ${p1.map((v) => v.toFixed(1))}, ArrowUp -> ${p2.map((v) => v.toFixed(1))}, A -> ${p3.map((v) => v.toFixed(1))}`);
-  const target = await page.evaluate(() => game.screenPos('east_marches'));
+  // the camera follows the dragon: let it come to rest, then click a region the map shows uncovered (the panels at the
+  // bottom grow with the dragon's options and may lie over east_marches)
+  for (let i = 0, last = ''; i < 25; i++) {
+    const now = (await state()).pos.map((v) => v.toFixed(2)).join();
+    if (now === last) break;
+    last = now;
+    await page.waitForTimeout(200);
+  }
+  const [goal, target] = await page.evaluate(() => {
+    const here = game.state().region;
+    for (const id of ['east_marches', ...game.world().regions.map((r) => r.id)]) {
+      if (id === here || id === 'lair') continue;
+      const p = game.screenPos(id);
+      if (p && document.elementFromPoint(p[0], p[1])?.tagName === 'CANVAS') return [id, p];
+    }
+    return ['east_marches', game.screenPos('east_marches')];
+  });
   await page.mouse.move(target[0], target[1]);
   await page.mouse.click(target[0], target[1]);
-  await page.waitForFunction(() => game.state().region === 'east_marches', null, { timeout: 30000 }).catch(() => {});
+  await page.waitForFunction((g) => game.state().region === g, goal, { timeout: 30000 }).catch(() => {});
   const clicked = (await state()).region;
   await shot('i-click');
-  check('i.click', clicked === 'east_marches', `click on east_marches at (${target.map((v) => v.toFixed(0))}) -> dragon over ${clicked}`);
+  check('i.click', clicked === goal, `click on ${goal} at (${target.map((v) => v.toFixed(0))}) -> dragon over ${clicked}`);
   await page.keyboard.press('c');
   const chronOpen = !(await page.$eval('#chron', (e) => e.classList.contains('hidden')));
   await page.keyboard.press('Escape');
@@ -985,14 +1001,14 @@ async function checksV04() {
   await fly('deep_wood');
   await act('take', { region: 'deep_wood', category: 'books', magnitude: 0.6 });
 
-  // 5. the sleep panel: the bet for each length (healing, growth per axis as the page estimates it, the danger line)
+  // 5. the sleep panel: the bet for each length (healing, growth per axis from the forecast, the danger line)
   await page.evaluate(() => game.land());
   await page.evaluate(() => game.setLairTab('sleep'));
   const bet = await text('#lair-body');
   await shot('v04-sleep-bet');
   const betMoult = /Moult \(10 years\)(.*?)not ready/.exec(bet)?.[1] ?? '';
   const estimated = /grows (Might|Lore|Arcana|Flame) \+([\d.]+)/.exec(betMoult);
-  check('v04.sleep_bet', /heals all [\d.]+ wounds/.test(bet) && /Might \+[\d.]+/.test(bet) && /Flame \+[\d.]+/.test(bet) && /\(estimate\)/.test(bet) && /danger: /.test(bet) && estimated, (bet.match(/heals[^·]*·[^·]*·[^·]*/) ?? [''])[0].slice(0, 160));
+  check('v04.sleep_bet', /heals all [\d.]+ wounds/.test(bet) && /Might \+[\d.]+/.test(bet) && /Flame \+[\d.]+/.test(bet) && /danger: /.test(bet) && estimated, (bet.match(/heals[^·]*·[^·]*·[^·]*/) ?? [''])[0].slice(0, 160));
 
   // 1. a moult: the wake page leads with the hooks, then the chronicle, the arms race, what you grew (the sim's
   // growth_gained, which the estimate must have matched); closing it opens the growth screen: two big cards, keys 1 and 2

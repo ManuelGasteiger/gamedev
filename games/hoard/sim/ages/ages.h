@@ -39,6 +39,9 @@ struct Forecast {
     int years = 0;
     std::string wake_reason;
     double size = 0, knowledge = 0, magic = 0, hunger = 0;
+    Hoard hoard_after;                                 // item 03: exact, not blurred; the lair is the dragon's own
+    std::map<std::string, double> growth_gained;
+    double healed = 0;
     std::string strongest;
     int strongest_era = 0;
     bool slay_possible = false;

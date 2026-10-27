@@ -7,7 +7,7 @@
 
 namespace ages {
 
-constexpr int kRulesVersion = 6;    // bump with every deliberate golden change
+constexpr int kRulesVersion = 7;    // bump with every deliberate golden change
 constexpr int kReplayFormat = 1;
 
 // every state-changing API call, recorded once at the outermost call (nested calls inside it are not inputs)
