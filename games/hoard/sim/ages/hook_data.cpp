@@ -26,6 +26,7 @@ bool load_template(const json& v, HookDef& h, std::string& err) {
     if (v.contains("force_if") && !card_preds_from_json(v["force_if"], h.force_if, err)) return false;
     get(v, "where", h.where);
     get(v, "pick", h.pick);
+    get(v, "arrival", h.arrival);
     get(v, "acts", h.acts);
     get(v, "choices", h.choices);
     get(v, "priority", h.priority);

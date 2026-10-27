@@ -4,6 +4,7 @@
     "needs_dragon": true,
     "trigger": [
       {"adjacent": "lair"},
+      {"field": "lair_exact", "gte": 1},
       {"field": "dread", "lt": 0.3, "ref": "act_take@self"},
       {"field": "gold", "on": "dragon", "gte": 60},
       {"field": "asleep_years", "on": "dragon", "gte": 50}

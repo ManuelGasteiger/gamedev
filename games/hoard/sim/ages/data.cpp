@@ -471,6 +471,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
     }
     if (!dragon_data_from_json(d, p, err)) return false;   // v0.4 (S1)
     if (!hooks_from_json(d, p, err)) return false;         // v0.4 hooks (S3)
+    if (!arrivals_from_json(d, p, err)) return false;      // item 06
     return true;
 }
 

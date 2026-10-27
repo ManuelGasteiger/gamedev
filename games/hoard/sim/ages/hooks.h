@@ -20,6 +20,7 @@ const HookDef* hook_def(const Params& p, const Hook& h);
 bool hook_matches(const World& w, const Hook& h, const Act& a);
 void resolve_hooks(World& w, const Params& p, const Act& a);   // answers every open hook the act matches
 bool answer_hook(World& w, const Params& p, const std::string& id, const std::string& choice, std::string& reason);
+std::map<std::string, double> apply_reward(World& w, const Params& p, const std::string& faction, const std::string& other, const std::map<std::string, double>& r);   // item 06: the reward keys of hooks.json
 double hook_fight_damage(const World& w, const Params& p, const Hook& h);   // after armor
 void apply_hook_ignore(World& w, const Params& p, const Hook& h);
 

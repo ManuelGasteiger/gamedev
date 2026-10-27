@@ -75,6 +75,7 @@ json cmd_load(const json& in) {
     g.data.talents = text_of(d, "talents");     // v0.4 (S1)
     g.data.defences = text_of(d, "defences");
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
+    g.data.arrivals = text_of(d, "arrivals");   // item 06
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.importance = text_of(d, "importance");
     g.data.text_bundles.clear();
@@ -228,7 +229,7 @@ json cmd_load_world(const json& in) {
 // ---- v0.4 (S1): wounds in apply_acts, a slain dragon refuses its verbs, talents -----------------------------------
 
 const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_remnant", "cast", "terraform", "demand",
-                              "accept_offer", "decline_offer", "pick_talent"};
+                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt"};
 
 json cmd_apply_acts_wounded(const json& in) {
     double before = g.world.dragons[kPlayer].wounds;
@@ -296,7 +297,24 @@ json cmd_kill_person_hooked(const json& in) {
     return out;
 }
 
+json cmd_receive(const json& in) {
+    std::string id = in.value("id", ""), outcome = in.value("outcome", ""), reason;
+    std::vector<Hook> before = g.world.hooks;
+    size_t first_event = g.world.chronicle.size();
+    if (!receive(g.world, g.params, id, outcome, reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}, {"hooks_resolved", hooks_resolved_json(before)}, {"slain", dragon_dead(g.world)}};
+}
+
+json cmd_hunt(const json& in) {
+    std::string region = in.value("region", ""), reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!hunt(g.world, g.params, region, reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
 bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
+    if (cmd == "receive") { out = cmd_receive(in); return true; }
+    if (cmd == "hunt") { out = cmd_hunt(in); return true; }
     if (cmd == "apply_acts") out = cmd_apply_acts_hooked(in);
     else if (cmd == "kill_person") out = cmd_kill_person_hooked(in);
     else if (cmd == "answer_hook") out = cmd_answer_hook(in);

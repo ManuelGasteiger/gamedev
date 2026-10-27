@@ -194,6 +194,8 @@ static json faction_json(const Faction& f) {
     j["max_regions"] = f.max_regions;
     j["max_realm"] = f.max_realm;
     j["era_years"] = f.era_years;
+    if (f.lair_known >= 0) j["lair_known"] = f.lair_known;
+    if (f.lair_exact) j["lair_exact"] = f.lair_exact;
     j["eff"] = {{"growth", f.eff.growth}, {"cohesion_decay", f.eff.cohesion_decay}, {"era_rate", f.eff.era_rate}, {"war_chance", f.eff.war_chance}, {"settle_chance", f.eff.settle_chance}, {"anti_dragon_rate", f.eff.anti_dragon_rate}, {"diffusion", f.eff.diffusion}, {"faith_gain", f.eff.faith_gain}, {"succession_bonus", f.eff.succession_bonus}, {"vassal_wealth", f.eff.vassal_wealth}, {"memory_halflife", f.eff.memory_halflife}};
     return j;
 }
@@ -251,6 +253,8 @@ static Faction faction_from(const json& j) {
     get(j, "max_regions", f.max_regions);
     get(j, "max_realm", f.max_realm);
     get(j, "era_years", f.era_years);
+    get(j, "lair_known", f.lair_known);
+    get(j, "lair_exact", f.lair_exact);
     if (j.contains("eff")) {
         get(j["eff"], "growth", f.eff.growth);
         get(j["eff"], "cohesion_decay", f.eff.cohesion_decay);
@@ -526,6 +530,14 @@ static json world_json(const World& w) {
                   {"motive", of.motive}, {"stated_reason", of.stated_reason}, {"is_lie", of.is_lie}, {"marked", of.marked}, {"expires", of.expires}, {"price", of.price}, {"oath", oath_json(of.draft)}};
         j["offers_pending"].push_back(o);
     }
+    if (!w.arrivals.empty()) {
+        j["arrivals"] = json::array();
+        for (auto& a : w.arrivals)
+            j["arrivals"].push_back({{"id", a.id}, {"kind", a.kind}, {"court", a.court}, {"person", a.person}, {"year", a.year}, {"because", a.because},
+                                     {"offer_kind", a.offer_kind}, {"target", a.target}, {"motive", a.motive}, {"region", a.region},
+                                     {"stated_reason", a.stated_reason}, {"is_lie", a.is_lie}, {"slay_true", a.slay_true}});
+    }
+    if (!w.arrival_fired.empty()) j["arrival_fired"] = w.arrival_fired;
     j["sleep_started"] = w.sleep_started;
     j["threads_open"] = w.threads_open;
     j["timed_tags"] = json::array();
@@ -872,6 +884,25 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
         }
     get(j, "person_counters", w.person_counters);
     if (j.contains("offers_pending")) for (auto& v : j["offers_pending"]) w.offers.push_back(offer_from(v));
+    if (j.contains("arrivals"))
+        for (auto& v : j["arrivals"]) {
+            Arrival a;
+            get(v, "id", a.id);
+            get(v, "kind", a.kind);
+            get(v, "court", a.court);
+            get(v, "person", a.person);
+            get(v, "year", a.year);
+            get(v, "because", a.because);
+            get(v, "offer_kind", a.offer_kind);
+            get(v, "target", a.target);
+            get(v, "motive", a.motive);
+            get(v, "region", a.region);
+            get(v, "stated_reason", a.stated_reason);
+            get(v, "is_lie", a.is_lie);
+            get(v, "slay_true", a.slay_true);
+            w.arrivals.push_back(a);
+        }
+    get(j, "arrival_fired", w.arrival_fired);
     get(j, "sleep_started", w.sleep_started);
     get(j, "threads_open", w.threads_open);
     if (j.contains("timed_tags"))

@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include "arrivals.h"
 #include "defences.h"
 #include "names.h"
 #include "rules/card_ctx.h"
@@ -136,6 +137,7 @@ std::vector<Candidate> candidates(const World& w, const Params& p) {
         Candidate keep;
         for (auto& self : selves(w, t)) {
             if (on_cooldown(w, t, self)) continue;
+            if (!t.arrival.empty() && !arrival_for(w, t.arrival, self)) continue;   // item 06
             CardCtx ctx;
             ctx.last_act = &last_act;
             ctx.any_act = any_act;
@@ -151,7 +153,8 @@ std::vector<Candidate> candidates(const World& w, const Params& p) {
             c.def = &t;
             c.self = self;
             c.weight = t.priority * (offered_last_waking(w, t.kind) ? p.hooks.repeat_mult : 1.0);
-            if (!t.force_if.empty()) { CardCtx probe = ctx; c.forced = card_holds(w, p, t.force_if, probe); }
+            c.forced = !t.arrival.empty();
+            if (!t.force_if.empty()) { CardCtx probe = ctx; c.forced = c.forced || card_holds(w, p, t.force_if, probe); }
             double v = t.pick.empty() ? 0 : pick_value(w, p, t, ctx);
             if (have && !(v > best)) continue;
             have = true;

@@ -1,6 +1,7 @@
 #include "ages.h"
 #include "unrecorded.h"
 #include "dragon_acts.h"
+#include "arrivals.h"
 #include "hooks.h"
 #include "importance.h"
 #include "memory_tiers.h"
@@ -31,6 +32,7 @@ static std::string gain_key(const Act& a, const std::string& rel) {
         auto s = a.payload.find("soldiers");
         kind = s != a.payload.end() && s->second > 0 ? "army" : (a.item.empty() ? "civilians" : "person");
     } else if (a.type == "take" && !a.item.empty()) kind = "item";
+    else if (a.type == "receive") kind = a.item == "receive" ? "" : a.item;
     else if (a.type == "miracle") kind = rel;
     return kind.empty() ? a.type : a.type + "." + kind;
 }
@@ -160,6 +162,7 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
 
 // the relationship row the act is read through (section 5); the narrated line is keyed by the same row
 static std::string relationship(const World& w, const Params& p, const Faction& f, const Act& a) {
+    if (a.type == "receive") return a.item;
     if (is_harm(a.type)) return harm_relationship(w, p, f);
     if (a.type == "defend") return losing(w, p.c, f) ? "losing" : "not_losing";
     if (a.type == "miracle") {
@@ -296,6 +299,7 @@ std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const
             notes.push_back(n);
         } else notes.push_back(react_to(w, p, *f, act, m, act_index));
         witnesses(w, p, act, *f, m, act_index, notes);
+        note_lair_sight(w, p, act);   // item 06
         emit(w, "act_" + act.type, act.target, act.region, m, act_tags(act));
         note_act(w, p, act, m);
         resolve_hooks(w, p, act);   // v0.4 hooks (S3)
