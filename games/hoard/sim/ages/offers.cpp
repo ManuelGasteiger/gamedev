@@ -275,7 +275,7 @@ bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, st
     meet(w, id, "kill", c.known_kill_envoy);
     int act = last_event_id(w, "act_kill", f->id, "", "", w.year);
     kill_person_now(w, p, id, "killed_by_dragon", because(envoy ? "envoy_killed" : "dragon_will", {act}));
-    if (envoy) w.tags.insert("envoy_killed:" + f->id);
+    if (envoy) w.arrival_fired[f->id + "|envoy_killed"] = w.year;
     w.offers.erase(std::remove_if(w.offers.begin(), w.offers.end(), [&](const Offer& o) { return o.envoy == id || o.target == id; }), w.offers.end());
     w.arrivals.erase(std::remove_if(w.arrivals.begin(), w.arrivals.end(), [&](const Arrival& a) { return a.person == id; }), w.arrivals.end());
     return true;

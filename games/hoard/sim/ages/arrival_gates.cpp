@@ -76,7 +76,7 @@ bool value_of(const GateCtx& g, const std::string& n, double& v) {
     if (n == "route_open") return b(route_open(w, f));
     if (n == "motive") return b(g.motive);
     if (n == "debt") return b(any_oath(w, f.id));
-    if (n == "envoy_killed") return b(has_tag(f.tags, "envoy_killed"));
+    if (n == "envoy_killed") { auto it = w.arrival_fired.find(f.id + "|envoy_killed"); return b(it != w.arrival_fired.end() && w.year - it->second < g.p.arrivals.envoy_kill_generations * 30); }
     if (n == "gold_rumour") return b(gold_rumour(w, g.p, f));
     if (n == "thief_guard") return b(effect(w, g.p, "thief_guard") > 0);
     if (n == "slayer_order") return b(has_tag(f.tags, "slayers"));
