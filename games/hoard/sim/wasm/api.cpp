@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include "ages/ages.h"
+#include "ages/arrivals.h"
 #include "ages/dragon_json.h"
 #include "ages/hook_json.h"
 #include "ages/genesis.h"
