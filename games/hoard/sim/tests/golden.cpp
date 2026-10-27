@@ -2,6 +2,8 @@
 #include <fstream>
 #include "fixtures.h"
 #include "ages/genesis.h"
+#include "ages/state_hash.h"
+#include "sift/sift_json.h"
 
 using namespace ages;
 
@@ -84,5 +86,15 @@ int main() {
         run_scenario(g.world, g.params, sc);
         ok = check_text("chronicle/seed-" + std::to_string(seed) + ".txt", chronicle_text(g.world.chronicle)) && ok;
     }
+
+    // item 14: seed 42, generated world, played, 3000 years, the bank on: the episodes, stories and threads it kept
+    LoadResult b = load_or_die(42);
+    CHECK(!b.params.sift.patterns.empty(), "the pattern bank loads");
+    CHECK(make_genesis(b.world, b.params, err), err.c_str());
+    Scenario sb;
+    sb.policy = &played;
+    sb.data_dir = AGES_DATA_DIR;
+    run_scenario(b.world, b.params, sb);
+    ok = check("sift_bank_v1.hash", hex(state_hash_of_json(nlohmann::json{{"sift", sift_state_json(b.world.sift)}}).root)) && ok;
     return ok ? 0 : 1;
 }

@@ -3,7 +3,7 @@
 # (docs/research-determinism-ci.md section 1). The vendored json.h and the own math in core/detmath.* are exempt.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-files=$(find sim/ages sim/core sim/wasm -name '*.cpp' -o -name '*.h' | grep -v -e 'sim/ages/json.h' -e 'sim/core/detmath\.')
+files=$(find sim/ages sim/core sim/sift sim/wasm -name '*.cpp' -o -name '*.h' | grep -v -e 'sim/ages/json.h' -e 'sim/core/detmath\.')
 math='exp|exp2|expm1|log|log2|log10|log1p|pow|sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|cbrt|hypot|erf|erfc|tgamma|lgamma|fma|fmod|remainder|nextafter'
 fail=0
 check() {

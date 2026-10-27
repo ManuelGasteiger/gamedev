@@ -67,7 +67,7 @@
     },
     "outcome_by": {
       "type": "object",
-      "description": "clause field → mapping of its value to an outcome word used in the emitted event and the text key",
+      "description": "one clause field (\"c.kind\" or \"c.tag\") mapping its value to an outcome word used in the emitted event's tags and the text key",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": {
@@ -103,13 +103,14 @@
             "type": "string"
           }
         },
-        "importance": {
+        "tier": {
           "type": "integer",
           "minimum": 0,
-          "maximum": 5
+          "maximum": 5,
+          "description": "the compound's tier (0 log only ... 5 irreversible)"
         }
       },
-      "description": "the compound event; its text is data/text/<lang>/patterns.json under pat.<id>.title, pat.<id>.line and pat.<id>.line.<outcome>"
+      "description": "the compound event; its text is data/text/<lang>/patterns.json under pat.<id>.title, pat.<id>.line, pat.<id>.line.<outcome>, pat.<id>.open, pat.<id>.cut and pat.<id>.cb.<closed|cut|advanced>"
     },
     "stakes_for_dragon": {
       "type": "number",
@@ -142,6 +143,19 @@
           "type": "boolean"
         }
       }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "prophecy",
+          "ending"
+        ]
+      },
+      "description": "the run-phase bonus (research s3): threads of these patterns gain up to run_bonus_max"
+    },
+    "note": {
+      "type": "string"
     }
   },
   "$defs": {
@@ -151,7 +165,7 @@
     },
     "varOrConst": {
       "type": "string",
-      "pattern": "^(\\?[a-z][a-z0-9_]*|dragon|[a-z][a-z0-9_]*\\.[a-z][a-z0-9_.]*)$"
+      "pattern": "^(\\?[a-z][a-z0-9_]*|dragon|[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_:]*)*)$"
     },
     "eventMatch": {
       "type": "object",
@@ -199,8 +213,7 @@
         },
         "magnitude_gte": {
           "type": "number",
-          "minimum": 0,
-          "maximum": 1
+          "minimum": 0
         },
         "same_thread_as": {
           "type": "string",
@@ -251,6 +264,69 @@
           "propertyNames": {
             "pattern": "^\\?[a-z][a-z0-9_]*$"
           },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "any_of": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                ]
+              },
+              "subject": {
+                "$ref": "#/$defs/varOrConst"
+              },
+              "object": {
+                "$ref": "#/$defs/varOrConst"
+              },
+              "tags_all": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "tags_any": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "tags_none": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "magnitude_gte": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "alternatives; the clause matches when one does (the clause's own kind lists their kinds for the lint)"
+        },
+        "where": {
+          "type": "object",
+          "description": "path == ?var or literal after the clause binds; paths are <clause>.<subject|object|winner|tag:prefix>[.court|.race]",
           "additionalProperties": {
             "type": "string"
           }

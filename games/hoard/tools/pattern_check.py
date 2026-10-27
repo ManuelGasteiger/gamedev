@@ -1,4 +1,4 @@
-"""Schema and lint for story patterns. Usage: python3 pattern_check.py pattern.schema.json vocab.json seed.json"""
+"""Schema and lint for story patterns. Usage: python3 pattern_check.py docs/patterns/pattern.schema.json docs/patterns/vocab.json data/patterns/bank.json"""
 import json, re, sys
 import jsonschema
 
@@ -6,6 +6,7 @@ VAR = re.compile(r"\?[a-z][a-z0-9_]*")
 KINDS_LEVEL0 = None
 
 def kinds_of(m):
+    if "kind" not in m: return [k for a in m.get("any_of", []) for k in kinds_of(a)]
     k = m["kind"]; return k if isinstance(k, list) else [k]
 
 def check(p, vocab, errors):
@@ -23,13 +24,16 @@ def check(p, vocab, errors):
         if "same_thread_as" in c and c["same_thread_as"] not in ids[:i]: e(f"clause {c['as']}: same_thread_as refers to a later clause")
         if i == 0 and "within_years" in c: e("first clause has within_years")
         if i > 0 and "within_years" not in c: e(f"clause {c['as']}: within_years missing (every clause after the first needs one)")
-        used = set(VAR.findall(json.dumps({k: v for k, v in c.items() if k != "bind"})))
+        for a in c.get("any_of", []):
+            for k in kinds_of(a):
+                if k not in kinds_of({"kind": c["kind"]} if "kind" in c else a): e(f"clause {c['as']}: any_of kind {k!r} missing from the clause's kind list")
+        used = set(VAR.findall(json.dumps({k: v for k, v in c.items() if k not in ("bind", "where")})))
         newly = used - bound
         bound |= used | set(c.get("bind", {}).keys())
         for bk, bv in c.get("bind", {}).items():
             if not bv.split(".")[0] in ids[:i + 1]: e(f"clause {c['as']}: bind {bk} reads unknown clause {bv.split('.')[0]!r}")
         for t in c.get("tags_all", []) + c.get("tags_any", []) + c.get("tags_none", []):
-            if t not in vocab["tags"] and t != "dragon_blood": e(f"clause {c['as']}: tag {t!r} not in vocab")
+            if t not in vocab["tags"] and t != "dragon_blood" and not t.startswith("outcome:"): e(f"clause {c['as']}: tag {t!r} not in vocab")
     for u in p.get("unless", []):
         a, b = u["between"]
         if a not in ids or b not in ids or ids.index(a) >= ids.index(b): e(f"unless between {a},{b}: bad clause order")
@@ -44,6 +48,7 @@ def check(p, vocab, errors):
         for field in p["outcome_by"]:
             cid = field.split(".")[0]
             if cid not in ids: e(f"outcome_by refers to unknown clause {cid!r}")
+            if not (field.endswith(".kind") or field.endswith(".tag")): e(f"outcome_by {field}: only .kind or .tag")
             if field.endswith(".kind"):
                 clause = next(c for c in p["clauses"] if c["as"] == cid)
                 for k in p["outcome_by"][field]:
@@ -57,7 +62,10 @@ def check(p, vocab, errors):
 def main(argv):
     schema, vocab = json.load(open(argv[1])), json.load(open(argv[2]))
     v = jsonschema.Draft202012Validator(schema); errors = []
-    pats = [x for f in argv[3:] for x in json.load(open(f))]
+    pats = []
+    for f in argv[3:]:
+        d = json.load(open(f))
+        pats += d["patterns"] if isinstance(d, dict) else d
     ids = [x["id"] for x in pats]
     if len(ids) != len(set(ids)): errors.append("duplicate pattern ids")
     for p in pats:

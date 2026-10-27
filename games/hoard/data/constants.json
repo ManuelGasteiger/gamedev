@@ -328,5 +328,24 @@
       "adapt_max": 1.6,
       "near_death_wounds": 0.7
     }
+  },
+  "sift": {
+    "note": "item 14, research-story-sifting.md sections 3 to 5: thread score weights, selection, line budget, sources",
+    "weights": {"dragon": 0.20, "stakes": 0.15, "causal": 0.15, "continuity": 0.15, "proximity": 0.10, "surprise": 0.10, "reversals": 0.10, "irreversible": 0.05},
+    "shown_end_bonus": 0.20, "tier5_bonus": 0.30, "recent_headline_penalty": 0.25, "recent_headline_wakings": 3,
+    "floor": 0.30, "same_pattern_penalty": 0.20, "diversity_start": 0.20, "diversity_end": 0.05, "run_bonus_max": 0.15, "run_phase_wakings": 30,
+    "t_major": 0.9, "t_breather": 0.5, "arc_k": 2.0, "headline_pool": 3, "max_callbacks": 2, "min_lines": 2, "max_lines": 9, "max_ages": 3,
+    "partial_cap": 64, "dragon_hops": 4, "because_hops": 3, "because_stop_importance": 0.2,
+    "oral_reroll": 0.15, "blame_dread": 0.6, "generation_years": 30,
+    "reversal_score": [0.2, 0.7, 1.0, 1.0, 0.6, 0.3],
+    "fortune": {"act_burn": -1, "act_take": -1, "act_kill": -1, "act_take_hostage": -1, "act_defend": 1, "act_give": 1, "region_taken": 1,
+                "sack_of_the_capital": 1, "collapse": -1, "faction_destroyed": -1, "plague": -1, "great_plague": -1, "bad_century": -1,
+                "golden_age": 1, "hegemony": 1, "hegemony_ended": -1, "era_advance": 1, "fading_begins": -1, "fading_ends": 1,
+                "succession_crisis": -1, "vassal_sworn": -1, "vassal_freed": 1, "region_abandoned": -1, "tyrant_rises": -1, "tyrant_died": 1,
+                "slay_attempt_failed": -1, "dragon_temple_raised": 1, "person_crowned": 1, "restored_line": 1, "exodus": -1, "revenge_for_the_sack": 1},
+    "irreversible": ["collapse", "faction_destroyed", "race_extinct", "the_last_of_their_kind", "elves_departed", "hegemony_ended", "dragon_slain", "vale_broke", "fen_drowned"],
+    "motivating": ["grudge", "grudge_against_the_dragon", "grudge_dragon", "old_enemies", "old_enemies_again", "oath_sworn", "oath_of_recovery",
+                   "oath_breached_by_dragon", "oath_breached_by_them", "act_burn", "act_take", "act_kill", "act_take_hostage", "prophecy", "slayers_founded"],
+    "harm": ["war_started", "region_taken", "sack_of_the_capital", "joined_war", "holy_war", "vassal_absorbed"]
   }
 }
