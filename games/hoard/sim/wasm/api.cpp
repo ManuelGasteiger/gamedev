@@ -77,6 +77,8 @@ json cmd_load(const json& in) {
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.importance = text_of(d, "importance");
+    g.data.patterns = text_of(d, "patterns");       // item 14
+    g.data.base_rates = text_of(d, "base_rates");
     g.data.text_bundles.clear();
     if (d.contains("text_bundles") && d["text_bundles"].is_object())
         for (auto it = d["text_bundles"].begin(); it != d["text_bundles"].end(); ++it)
@@ -308,6 +310,7 @@ bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
 json cmd_golden(const json& in) {
     LoadResult r = load_data_from_json(g.data, in.value("seed", uint64_t{1}));
     if (!r.ok) return fail(r.error);
+    if (!in.value("bank", false)) r.params.sift.patterns.clear();   // item 14: the golden suite runs with the bank off
     if (!make_genesis(r.world, r.params, r.error)) return fail(r.error);
     Policy policy;
     std::string err;

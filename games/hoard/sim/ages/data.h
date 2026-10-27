@@ -4,6 +4,7 @@
 #include <vector>
 #include "cards.h"
 #include "genesis_data.h"
+#include "../sift/bank.h"
 #include "state.h"
 
 namespace ages {
@@ -528,6 +529,7 @@ struct Params {
     DefenceBook defences;         // v0.4 (S1)
     HookBook hooks;               // v0.4 hooks (S3)
     GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
+    SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
 };
 
 struct PolicyAct {
@@ -565,6 +567,7 @@ struct DataJson {
     std::string hooks;                 // v0.4 hooks (S3); optional
     std::string genesis;               // v0.4 world (S2): data/genesis.json; optional
     std::string importance;            // data/importance.json
+    std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
@@ -572,6 +575,7 @@ bool params_from_json(const DataJson& d, Params& out, std::string& err);
 bool world_from_data_json(const DataJson& d, const Params& p, World& out, std::string& err);
 bool dragon_data_from_json(const DataJson& d, Params& out, std::string& err);   // v0.4 (S1), dragon_data.cpp
 bool hooks_from_json(const DataJson& d, Params& out, std::string& err);         // v0.4 hooks (S3), hook_data.cpp
+bool sift_bank_from_json(const DataJson& d, SiftBank& out, std::string& err);   // item 14, sim/sift/bank_data.cpp
 
 // file IO, data_io.cpp (not part of the wasm build)
 bool load_data_json(const std::string& dir, DataJson& out, std::string& err);

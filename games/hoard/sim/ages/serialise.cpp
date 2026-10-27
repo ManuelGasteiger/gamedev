@@ -10,6 +10,7 @@
 #include "offers.h"
 #include "step.h"
 #include "world_util.h"
+#include "../sift/sift_json.h"
 
 namespace ages {
 
@@ -373,14 +374,14 @@ static Modifier modifier_from(const json& j) {
     return m;
 }
 
-static json event_json(const Event& e) {
+json event_json(const Event& e) {
     return {{"id", e.id}, {"year", e.year}, {"kind", e.kind}, {"subject", e.subject}, {"object", e.object},
             {"magnitude", e.magnitude}, {"text_key", e.text_key}, {"tags", tags_json(e.tags)}, {"count", e.count},
             {"cause", {{"refs", e.cause.refs}, {"text_key", e.cause.text_key}, {"params", e.cause.params}}}, {"thread", e.thread},
             {"importance", e.importance}};
 }
 
-static Event event_from(const json& j) {
+Event event_from(const json& j) {
     Event e;
     get(j, "id", e.id);
     get(j, "year", e.year);
@@ -533,6 +534,7 @@ static json world_json(const World& w) {
         j["timed_tags"].push_back({{"on", t.on}, {"target", t.target}, {"tag", t.tag}, {"from", t.from}, {"until", t.until}, {"event", t.event}, {"inherit", t.inherit}});
     j["card_fired"] = w.card_fired;
     genesis_fields_to_json(w, j);   // v0.4 world (S2)
+    if (w.sift.on) j["sift"] = sift_state_json(w.sift);   // item 14
     return j;
 }
 
@@ -691,6 +693,7 @@ std::string world_view_json(const World& w, const Params& p) {
     j["catalogue"] = spells_json(p);
     j["wake_reason"] = w.wake_reason;
     dragon_view_to_json(w, p, j);   // v0.4 (S1)
+    if (w.sift.on) j["sift_threads"] = sift_view_json(w, p);   // item 14: open and recently closed threads
     return j.dump();
 }
 
@@ -889,6 +892,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
     get(j, "card_fired", w.card_fired);
     hooks_state_from_json(j, w);   // v0.4 hooks (S3)
     genesis_fields_from_json(j, w);   // v0.4 world (S2)
+    if (j.contains("sift")) sift_state_from_json(j["sift"], w.sift);   // item 14
     sort_by_id(w);
     return true;
 }
