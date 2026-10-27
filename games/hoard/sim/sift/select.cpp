@@ -405,14 +405,19 @@ void sift_wake(World& w, const Params& p, int since_year) {
         }
     }
     d.headline_pattern = head;
+    // a person from an earlier briefing: in the cast of a shown thread or the subject or object of a shown event
+    auto is_person = [&](const std::string& id) {
+        return find_person(w, id) || std::any_of(w.dead_people.begin(), w.dead_people.end(), [&](const DeadPerson& x) { return x.id == id; });
+    };
     for (auto& l : lines) {
-        std::string who;
-        for (auto& c : pk.cands) if (c.thread && c.thread->id == l.thread && l.thread) who = c.protagonist;
-        if (!l.thread) if (const Event* e = sift_event(w, l.event)) who = e->subject;
-        bool person = find_person(w, who) || std::any_of(w.dead_people.begin(), w.dead_people.end(), [&](const DeadPerson& x) { return x.id == who; });
-        if (!who.empty() && person && w.sift.named.count(who)) d.names_earlier = true;
+        std::vector<std::string> ids;
+        for (auto& kv : l.params) if (kv.first.rfind("role:", 0) == 0) ids.push_back(kv.second);
+        if (const Event* e = sift_event(w, l.event)) { ids.push_back(e->subject); ids.push_back(e->object); }
+        for (auto& id : ids) if (!id.empty() && is_person(id) && w.sift.named.count(id)) d.names_earlier = true;
     }
     for (auto& l : lines) {
+        if (const Event* e = sift_event(w, l.event)) for (auto* id : {&e->subject, &e->object}) if (is_person(*id)) w.sift.named.insert(*id);
+        for (auto& kv : l.params) if (kv.first.rfind("role:", 0) == 0 && is_person(kv.second)) w.sift.named.insert(kv.second);
         if (!l.thread) { if (const Event* e = sift_event(w, l.event)) if (!e->subject.empty()) w.sift.named.insert(e->subject); continue; }
         for (auto& t : w.sift.threads)
             if (t.id == l.thread && (t.shown.empty() || t.shown.back().waking != w.sift.waking + 0 || t.shown.back().year != w.year)) {
