@@ -293,6 +293,11 @@ struct Constants {
     std::map<std::string, double> growth_points;     // books, royals, artifacts, art, tribute, embers, food
     double bed_rate = 0.4;                           // might per sqrt(gold) per long window slept
     double bed_overtime = 1;                         // the bed's rate past the sleep's first long window
+    std::string bed_mode = "window";                 // "window": Might from sqrt(gold) and nothing consumed; "consumed": Might from the gold eaten above the floor
+    double gold_burn = 0.15;                         // share of the gold above the floor eaten per long window slept
+    double gold_floor_base = 50;                     // the floor is this x floor_phase_mult[phase]
+    std::vector<double> floor_phase_mult;            // 5 entries
+    double gold_pts = 0.08;                          // Might per gold eaten
     double size_per_might = 0.05;
     std::vector<double> phase_points;                // total points that open phases 2..5; empty: the old thresholds
     double health_base = 100;

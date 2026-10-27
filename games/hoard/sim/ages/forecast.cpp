@@ -24,6 +24,9 @@ Forecast forecast(const World& world, const Params& p, int years) {
     Forecast f;
     f.years = r.years_slept;
     f.wake_reason = r.wake_reason;
+    f.hoard_after = w.dragons[kPlayer].hoard;
+    f.growth_gained = r.growth_gained;
+    f.healed = r.healed;
     double amplitude = p.c.forecast_noise / (1.0 + world.dragons[kPlayer].knowledge) * effect(world, p, "forecast_mult");
     f.size = blur(w.dragons[kPlayer].size, amplitude, noise);
     f.knowledge = blur(w.dragons[kPlayer].knowledge, amplitude, noise);

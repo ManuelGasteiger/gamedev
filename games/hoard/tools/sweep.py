@@ -133,6 +133,7 @@ def run_job(job):
         result = {"seed": seed, "policy": policy, "mode": mode, "seconds": time.time() - t0, "end": end_metrics(chron, world, stats),
                   "rows": rows, "courts": courts, "wakings": waking_rows(wakings),
                   "might_100": might100[-1] if might100 else 0.0,
+                  "phase_years": {ph: next((x["since_hatch"] for x in snaps if x["phase"] >= ph), None) for ph in (2, 3)},
                   "marks": {m: next(([s["phase"], s["hoard"].get("gold", 0), sum(s["hoard"].values())] for s in reversed(snaps) if s["since_hatch"] <= m), None)
                             for m in MARKS}}
         return result
@@ -200,6 +201,7 @@ def policy_summary(policy, results, years):
                        "first_tower_waking_mean": statistics.fmean(met) if met else None, "first_tower_met_share": len(met) / n,
                        "hooks_answered_mean": statistics.fmean(e["hooks_answered_first_hour"] for e in ends),
                        "might_100_mean": statistics.fmean(r["might_100"] for r in results)},
+        "phase_year_median": {f"p{ph}": median_or_none([r["phase_years"][ph] for r in results if r["phase_years"][ph] is not None]) for ph in (2, 3)},
         "seconds": sum(r["seconds"] for r in results),
     }
 
@@ -270,6 +272,26 @@ def perturb_table(base, perturbed):
     return out
 
 
+def median_or_none(xs):
+    return statistics.median(xs) if xs else None
+
+
+TOP_GROWTH = ["moult_only", "long_1000", "raid_then_1000", "played", "newcomer", "raze_all"]
+
+
+def top_growth(by):
+    """per seed, the policy with the most growth points in its last century row (the run's end, or the death)"""
+    totals = defaultdict(dict)
+    cols = [STOCK_COLUMNS.index(f"growth_{k}") for k in AXES]
+    for p in TOP_GROWTH:
+        for r in by.get((p, "run"), []):
+            if r["rows"]:
+                totals[r["seed"]][p] = sum(r["rows"][-1][c] for c in cols)
+    seeds = [t for t in totals.values() if len(t) == len(TOP_GROWTH)]
+    wins = Counter(max(t, key=lambda k: (t[k], k)) for t in seeds)
+    return {"seeds": len(seeds), "share": {p: wins[p] / len(seeds) for p in TOP_GROWTH} if seeds else {}}
+
+
 def bands_from(summary):
     b = {}
     bt = summary.get("buckets")
@@ -314,6 +336,12 @@ def markdown(summary):
         f = s["first_hour"]
         out.append(f"| {p} | {', '.join(f'{y} {k}' for y, k in f['deaths']) or '-'} | {f['deaths_before_80']} | {fmt(f['first_tower_waking_mean'])} | "
                    f"{pct(f['first_tower_met_share'])} | {fmt(f['hooks_answered_mean'], 2)} | {fmt(f['might_100_mean'])} |")
+    out += ["", "Phase reached, median year since hatching (first snapshot at or past it):", ""]
+    for p, s in pols.items():
+        out.append(f"- {p}: phase 2 {fmt(s['phase_year_median']['p2'], 0)}, phase 3 {fmt(s['phase_year_median']['p3'], 0)}")
+    tg = summary.get("top_growth")
+    if tg and tg["seeds"]:
+        out += ["", f"Policy with the most growth points at the end, per seed ({tg['seeds']} seeds): " + ", ".join(f"{k} {pct(v)}" for k, v in sorted(tg["share"].items(), key=lambda kv: -kv[1]))]
     out += ["", "Largest race at the end:", ""]
     for p, s in pols.items():
         out.append(f"- {p}: " + ", ".join(f"{k} {v}" for k, v in s["outcome"]["largest_race"].items()))
@@ -389,6 +417,7 @@ def sweep(args):
     if played:
         summary["buckets"] = bucket_table(played)
         summary["perturbation"] = perturb_table(played, {m: by[("played", m)] for m in ("perturb_burn", "perturb_sleep") if by[("played", m)]})
+    summary["top_growth"] = top_growth(by)
     summary["lethality"] = {p: lethality_table(by[(p, "run")]) for p in LETHALITY if by[(p, "run")]}
     summary["bucket_seconds"] = sum(r["seconds"] for r in played if r["mode"] == "buckets")
     summary["wall_seconds"] = time.time() - t0

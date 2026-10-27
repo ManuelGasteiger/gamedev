@@ -26,6 +26,11 @@ void load_constants(const json& j, Constants& c) {
     get(j, "points", c.growth_points);
     get(j, "bed_rate", c.bed_rate);
     get(j, "bed_overtime", c.bed_overtime);
+    get(j, "bed_mode", c.bed_mode);
+    get(j, "gold_burn", c.gold_burn);
+    get(j, "gold_floor_base", c.gold_floor_base);
+    get(j, "floor_phase_mult", c.floor_phase_mult);
+    get(j, "gold_pts", c.gold_pts);
     get(j, "size_per_might", c.size_per_might);
     get(j, "phase_points", c.phase_points);
     get(j, "health_base", c.health_base);
@@ -138,6 +143,7 @@ bool dragon_data_from_json(const DataJson& d, Params& p, std::string& err) {
     json j;
     if (!parse(d.constants, "constants", j, err)) return false;
     if (j.contains("dragon")) load_constants(j["dragon"], p.c);
+    if (p.c.floor_phase_mult.size() < 5 || (p.c.bed_mode != "consumed" && p.c.bed_mode != "window")) { err = "constants: dragon.floor_phase_mult needs 5 entries and bed_mode is consumed or window"; return false; }
     if (!d.talents.empty()) {
         if (!parse(d.talents, "talents", j, err) || !load_talents(j, p.talents, err)) return false;
     }

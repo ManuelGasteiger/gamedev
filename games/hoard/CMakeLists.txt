@@ -165,6 +165,7 @@ ages_test(save_roundtrip fast)
 ages_test(replay_verify fast)
 ages_test(dread_awe_update fast)
 ages_test(memory_tiers fast)
+ages_test(digestion_consumes fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)
