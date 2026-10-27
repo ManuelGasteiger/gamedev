@@ -26,6 +26,7 @@ POLICIES = ["rest_only", "moult_only", "long_1000", "raid_then_1000", "played", 
 REPLAYED = {"played", "newcomer"}
 LETHALITY = ["played", "long_1000"]
 BUCKETS = [1, 10, 30, 100, 300, 1000, 3000]
+GROWTH_TIE = 0.02
 HOARD = ["gold", "books", "artifacts", "art", "royals", "food", "embers"]
 AXES = ["might", "flame", "arcana", "lore", "dominion"]
 STOCK_COLUMNS = ["seed", "century", "year", "since_hatch", "phase", "health_max", "wounds", "slain"] + \
@@ -209,7 +210,7 @@ def policy_summary(policy, results, years):
 def bucket_table(results):
     """per wake state the best bucket for survival (lowest P(dead) + 0.5 P(slayer band ready)) and growth (most points);
     ties split; 'decisive' counts only states where the buckets differ"""
-    wins = {k: Counter() for k in ("survival", "growth", "survival_decisive", "growth_decisive")}
+    wins = {k: Counter() for k in ("survival", "growth", "growth_tol", "survival_decisive", "growth_decisive", "growth_tol_decisive")}
     states = 0
     decisive = Counter()
     for r in results:
@@ -218,8 +219,12 @@ def bucket_table(results):
             if not b:
                 continue
             states += 1
-            for k, score in (("survival", [-(x["dead"] + 0.5 * x["ready"]) for x in b]), ("growth", [x["growth"] for x in b])):
-                best = [x["years"] for x, v in zip(b, score) if v == max(score)]
+            # growth_tol: buckets within GROWTH_TIE of the best count as tied (a saturated hoard leaves long sleeps a rounding apart)
+            for k, score in (("survival", [-(x["dead"] + 0.5 * x["ready"]) for x in b]), ("growth", [x["growth"] for x in b]),
+                             ("growth_tol", [x["growth"] for x in b])):
+                top = max(score)
+                near = top * (1 - GROWTH_TIE) if k == "growth_tol" else top
+                best = [x["years"] for x, v in zip(b, score) if v >= near]
                 tied = len(best) == len(b)
                 decisive[k] += not tied
                 for y in best:
@@ -228,8 +233,9 @@ def bucket_table(results):
                         wins[k + "_decisive"][y] += 1 / len(best)
     if not states:
         return None
-    out = {"states": states, "decisive_survival": decisive["survival"] / states, "decisive_growth": decisive["growth"] / states}
-    for k in ("survival", "growth"):
+    out = {"states": states, "decisive_survival": decisive["survival"] / states, "decisive_growth": decisive["growth"] / states,
+           "decisive_growth_tol": decisive["growth_tol"] / states}
+    for k in ("survival", "growth", "growth_tol"):
         out[k] = {y: wins[k][y] / states for y in BUCKETS}
         out[k + "_decisive"] = {y: wins[k + "_decisive"][y] / decisive[k] if decisive[k] else 0.0 for y in BUCKETS}
     return out
@@ -354,6 +360,8 @@ def markdown(summary):
                 "| survival, decisive | " + " | ".join(pct(bt["survival_decisive"][y]) for y in BUCKETS) + " |",
                 "| growth, all states | " + " | ".join(pct(bt["growth"][y]) for y in BUCKETS) + " |",
                 "| growth, decisive | " + " | ".join(pct(bt["growth_decisive"][y]) for y in BUCKETS) + " |"]
+        if "growth_tol_decisive" in bt:
+            out.append(f"| growth, decisive, within {pct(GROWTH_TIE)} tied | " + " | ".join(pct(bt["growth_tol_decisive"][y]) for y in BUCKETS) + " |")
     for p, t in summary.get("lethality", {}).items():
         out += ["", f"Lethality (listed wounds of the waking's acts / current health), {p}:", "", "| era x phase | wakings | mean | max | > 1 |", "|---|---|---|---|---|"]
         for k, v in t.items():
@@ -365,7 +373,8 @@ def markdown(summary):
             if k in pt:
                 v = pt[k]
                 out.append(f"- {k[8:]}: {v['flips']} of {v['seeds']} flip ({pct(v['flip_share'])}); applied in {v['applied']}")
-        out.append(f"- either: {pct(pt['either_flip_share'])}")
+        if pt.get("either_flip_share") is not None:
+            out.append(f"- either: {pct(pt['either_flip_share'])}")
     return "\n".join(out) + "\n"
 
 
