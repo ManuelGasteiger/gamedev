@@ -409,7 +409,8 @@ void sift_wake(World& w, const Params& p, int since_year) {
         std::string who;
         for (auto& c : pk.cands) if (c.thread && c.thread->id == l.thread && l.thread) who = c.protagonist;
         if (!l.thread) if (const Event* e = sift_event(w, l.event)) who = e->subject;
-        if (!who.empty() && w.sift.named.count(who)) d.names_earlier = true;
+        bool person = find_person(w, who) || std::any_of(w.dead_people.begin(), w.dead_people.end(), [&](const DeadPerson& x) { return x.id == who; });
+        if (!who.empty() && person && w.sift.named.count(who)) d.names_earlier = true;
     }
     for (auto& l : lines) {
         if (!l.thread) { if (const Event* e = sift_event(w, l.event)) if (!e->subject.empty()) w.sift.named.insert(e->subject); continue; }

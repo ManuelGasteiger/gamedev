@@ -89,11 +89,16 @@ int reversal_count(const World& w, const Params& p, const Candidate& c) {
     for (int id : c.events) {
         const Event* e = sift_event(w, id);
         if (!e) continue;
-        auto it = p.sift.c.fortune.find(e->kind);
-        if (it == p.sift.c.fortune.end()) continue;
         int s = 0;
-        if (e->subject == c.protagonist) s = it->second;
-        else if (e->object == c.protagonist) s = -it->second;
+        if (e->kind == "war_ended") {   // the winner gains, the loser loses
+            std::string won = war_winner(w, *e);
+            if (!won.empty() && (e->subject == c.protagonist || e->object == c.protagonist)) s = won == c.protagonist ? 1 : -1;
+        } else {
+            auto it = p.sift.c.fortune.find(e->kind);
+            if (it == p.sift.c.fortune.end()) continue;
+            if (e->subject == c.protagonist) s = it->second;
+            else if (e->object == c.protagonist) s = -it->second;
+        }
         if (s == 0) continue;
         if (last != 0 && s != last) ++changes;
         last = s;

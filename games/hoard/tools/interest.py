@@ -722,6 +722,7 @@ def sift_seed(wakings_log, world):
         "shown_open": len(shown_open), "ended": len(ended),
         "names_earlier": sum(1 for r in rows if r["names_earlier"]),
         "lift": [r["mean_shown"] - r["mean_candidate"] for r in rows if r["candidates"]],
+        "lift_crowded": [r["mean_shown"] - r["mean_candidate"] for r in rows if r["candidates"] > len(r["lines"])],
         "tier5": sum(r["tier5"] for r in rows), "tier5_shown": sum(r["tier5_shown"] for r in rows),
         "fallbacks": sum(1 for r in rows if r["fallbacks"] > 0),
         "exact": sum(1 for r, b in zip(rows, body) if b == r["budget"]), "over": sum(1 for r, b in zip(rows, body) if b > r["budget"]),
@@ -755,6 +756,7 @@ def sift_summary(rows, bank_ids):
         "headline_reversals_mean": statistics.fmean(h["reversals"] for h in pattern_heads) if pattern_heads else 0.0,
         "names_earlier_share": sum(r["names_earlier"] for r in runs) / wakings if wakings else 0.0,
         "selection_lift": statistics.fmean(lift) if lift else 0.0,
+        "selection_lift_crowded": statistics.fmean(x for r in runs for x in r["lift_crowded"]) if any(r["lift_crowded"] for r in runs) else 0.0,
         "tier5_shown_share": sum(r["tier5_shown"] for r in runs) / sum(r["tier5"] for r in runs) if sum(r["tier5"] for r in runs) else 1.0,
         "fallback_share": sum(r["fallbacks"] for r in runs) / wakings if wakings else 0.0,
         "pattern_headline_share": {p: c / len(heads) for p, c in by_pattern.most_common()},
@@ -787,7 +789,7 @@ def print_sift(s):
         return
     print(f"[{s['policy']}] briefings: {s['wakings']} wakings, {s['headlines']} headlines; D>=0.6 {100 * s['headline_dragon_share']:.0f}% (40-70), "
           f"shown threads ended {100 * s['shown_ended_share']:.0f}% (>=60), headline reversals {s['headline_reversals_mean']:.2f} (1-3), "
-          f"names an earlier one {100 * s['names_earlier_share']:.0f}% (30-60), lift {s['selection_lift']:+.2f} (>0.15), "
+          f"names an earlier one {100 * s['names_earlier_share']:.0f}% (30-60), lift {s['selection_lift']:+.2f} (>0.15; {s['selection_lift_crowded']:+.2f} where candidates outnumber lines), "
           f"tier 5 shown {100 * s['tier5_shown_share']:.0f}% (100), fallbacks {100 * s['fallback_share']:.0f}% (<=10), "
           f"top pattern in a run {100 * s['largest_pattern_share_in_a_run']:.0f}% max, {100 * s['largest_pattern_share_in_a_run_mean']:.0f}% mean (<=15), "
           f"lines = L(y) {100 * s['lines_exact_share']:.0f}%, over {s['lines_over']}")
