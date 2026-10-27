@@ -1,6 +1,7 @@
 #include "ages.h"
 #include "unrecorded.h"
 #include "chronicle.h"
+#include "arrivals.h"
 #include "hooks.h"
 #include "importance.h"
 #include "offers.h"
@@ -10,6 +11,7 @@
 #include "talents.h"
 #include "world_util.h"
 #include "wounds.h"
+#include "../sift/sift.h"
 
 namespace ages {
 
@@ -55,6 +57,7 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     w.dragons[kPlayer].tags.erase("stiff");
     rebuild_defences(w);
     expire_hooks(w, p);   // v0.4 hooks (S3): what the raid left unanswered
+    arrivals_depart(w, p);   // item 06: so are the visitors
     int slept = 0, remaining = years;
     double atrophy = 0;
     emit(w, "sleep_begin", "dragon", "", years, w.moulting ? Tags{"moult"} : Tags{}, {}, "", false);
@@ -84,8 +87,9 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     adapt_after_sleep(w, p, wounded_share, start);
     emit(w, "wake", "dragon", res.wake_reason, slept, {}, {}, "", false);
     score_events(w, p);
-    if (!has_tag(w.tags, "dragon_slain")) generate_offers(w, p);
+    if (!has_tag(w.tags, "dragon_slain")) { arrivals_at_wake(w, p); rule_arrivals(w, p); generate_offers(w, p); }
     if (!has_tag(w.tags, "dragon_slain")) res.hooks = generate_hooks(w, p);   // v0.4 hooks (S3): after everything the sleep brought
+    sift_wake(w, p, w.sleep_started);   // item 14: the briefing's lines, recorded as shown
     res.chronicle.assign(w.chronicle.begin() + static_cast<std::ptrdiff_t>(start), w.chronicle.end());
     res.growth_gained = growth_since(growth_before, w.dragons[kPlayer]);
     res.healed = std::max(0.0, wounds_before - w.dragons[kPlayer].wounds);

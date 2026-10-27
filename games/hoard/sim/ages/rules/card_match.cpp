@@ -111,6 +111,8 @@ bool faction_num(const World& w, const Params& p, const CardCtx& ctx, const Fact
     else if (k == "awe_years") v = f.awe_since < 0 ? 0 : w.year - f.awe_since;
     else if (k == "monuments") v = static_cast<double>(f.monuments.size());
     else if (k == "faith") v = f.faith;
+    else if (k == "lair_known") v = f.lair_known >= 0 ? 1 : 0;
+    else if (k == "lair_exact") v = f.lair_known >= 0 && f.lair_exact ? 1 : 0;
     else if (k == "anti_dragon") v = f.anti_dragon;
     else if (k == "power") v = power(f, c);
     else if (k == "threat_ratio") v = power(f, c) / std::max(1e-9, threat(w.dragons[kPlayer], c));

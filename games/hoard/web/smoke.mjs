@@ -8,6 +8,7 @@ const data = Object.fromEntries(['constants', 'races', 'reactions', 'regions', '
   .map(k => [k, readFileSync(join(root, 'data', k + '.json'), 'utf8')]));
 for (const k of ['talents', 'defences']) data[k] = readFileSync(join(root, 'data', k + '.json'), 'utf8');   // v0.4 (S1)
 data.hooks = readFileSync(join(root, 'data/hooks.json'), 'utf8');   // v0.4 hooks (S3)
+data.arrivals = readFileSync(join(root, 'data/arrivals.json'), 'utf8');   // item 06
 data.text = readFileSync(join(root, 'data/text/en/narrator.json'), 'utf8');
 data.importance = readFileSync(join(root, 'data/importance.json'), 'utf8');
 data.text_bundles = Object.fromEntries(readdirSync(join(root, 'data/text'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {
@@ -19,6 +20,10 @@ data.text_bundles = Object.fromEntries(readdirSync(join(root, 'data/text'), { wi
 data.events = '[' + readdirSync(join(root, 'data/events')).filter((f) => f.endsWith('.json')).sort()
   .map((f) => readFileSync(join(root, 'data/events', f), 'utf8')).join(',\n') + ']';
 data.genesis = readFileSync(join(root, 'data/genesis.json'), 'utf8');   // v0.4 world (S2)
+// item 14: the pattern bank joined as data_io.cpp does, and the dry-run base rates
+data.patterns = '[' + readdirSync(join(root, 'data/patterns')).filter((f) => f.endsWith('.json') && f !== 'base_rates.json').sort()
+  .map((f) => readFileSync(join(root, 'data/patterns', f), 'utf8')).join(',\n') + ']';
+data.base_rates = readFileSync(join(root, 'data/patterns/base_rates.json'), 'utf8');
 const golden = readFileSync(join(root, 'tests/golden/ages_v0.hash'), 'utf8').trim();
 const goldenRaze = readFileSync(join(root, 'tests/golden/ages_v0_1_raze.hash'), 'utf8').trim();
 

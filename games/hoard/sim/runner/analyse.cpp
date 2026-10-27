@@ -10,6 +10,7 @@
 #include "ages/rules/slayers.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
+#include "ages/ages.h"
 
 namespace ages {
 
@@ -88,6 +89,21 @@ int towers(const World& w, const Params& p) {
     return n;
 }
 
+// item 14: the sifter's pick at this waking with its numbers, for interest.py
+json sift_waking(const World& w, const Params& p) {
+    const SiftDiag& d = w.sift.diag;
+    json b = json::parse(briefing_json(w, p, w.sleep_started), nullptr, false);
+    json lines = json::array();
+    for (auto& l : b.value("lines", json::array()))
+        lines.push_back({{"kind", l["kind"]}, {"tier", l["tier"]}, {"score", l["score"]}, {"text_key", l["text_key"]}, {"text", l["text"]},
+                         {"thread", l.value("sift_thread", 0)}, {"because", l["because_chain"].size()}});
+    return {{"waking", w.sift.waking}, {"slept", w.year - w.sleep_started}, {"candidates", d.candidates}, {"fallbacks", d.fallbacks},
+            {"budget", d.budget}, {"tier5", d.tier5}, {"tier5_shown", d.tier5_shown}, {"mean_candidate", d.mean_candidate},
+            {"mean_shown", d.mean_shown}, {"headline_pattern", d.headline_pattern}, {"headline_dragon", d.headline_dragon},
+            {"headline_reversals", d.headline_reversals}, {"names_earlier", d.names_earlier}, {"lines", lines},
+            {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())}};
+}
+
 int next_bucket(int years) {
     for (int b : kBuckets) if (b > years) return b;
     return years;
@@ -110,9 +126,12 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
         if (!o.wakings) return;
         json hooks = json::array();
         for (auto& h : w.hooks) hooks.push_back({{"kind", h.kind}, {"refs", h.refs}});
-        *pending = {{"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
+        json arrivals = json::array();
+        for (auto& a : w.arrivals) arrivals.push_back({{"kind", a.kind}, {"court", a.court}, {"because", a.because}});
+        *pending = {{"arrivals", arrivals}, {"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
+        if (w.sift.on && w.sift.lines_year == w.year) (*pending)["sift"] = sift_waking(w, p);
     };
     if (o.perturb == "sleep")
         s.adjust_sleep = [](int years, int index) { return index == 0 ? next_bucket(years) : years; };

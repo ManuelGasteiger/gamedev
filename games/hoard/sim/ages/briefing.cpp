@@ -1,11 +1,15 @@
 #include <cstdio>
 #include "memory_tiers.h"
 #include "ages.h"
+#include "arrivals.h"
 #include "importance.h"
 #include "json.h"
 #include "names.h"
 #include "offers.h"
 #include "world_util.h"
+#include "../sift/line_text.h"
+#include "../sift/sift.h"
+#include "../sift/sift_util.h"
 
 // 17.5: the narrator. Every sentence is a template from data/text/en/narrator.json filled with names and numbers; a cause clause
 // is appended when the event's refs point at an earlier event (a "<cause>@<kind>" text, keyed by the kind of the cited
@@ -255,6 +259,77 @@ bool skip_in_briefing(const World& w, const Event& e) {
 
 }
 
+// item 14: once the bank has run, the sifter's lines replace the headline and "while you slept"
+static void sift_block(const World& w, const Params& p, const Narrator& n, int since_year, json& out) {
+    bool stored = w.sift.lines_year == w.year && w.sift.lines_since == since_year;
+    std::vector<SiftLine> lines = stored ? w.sift.lines : briefing_lines(w, p, since_year);
+    if (lines.empty()) return;
+    auto text_of = [&](const SiftLine& l) {
+        std::string s = sift_line_text(w, p, l);
+        const Event* e = sift_event(w, l.event);
+        if (s.empty() && e && e->id >= kCompoundBase && !e->cause.refs.empty()) e = sift_event(w, e->cause.refs.back());
+        if (s.empty() && e && e->id < kCompoundBase) s = n.sentence(*e);
+        return s;
+    };
+    auto year_of = [&](const SiftLine& l) {
+        if (const Event* e = sift_event(w, l.event)) return e->year;
+        return l.params.count("from") ? std::atoi(l.params.at("from").c_str()) : since_year;
+    };
+    json sources = json::array();
+    std::vector<Source> made;
+    auto line_json = [&](const SiftLine& l) {
+        json j = {{"text", text_of(l)}, {"year", year_of(l)}, {"event", l.event}, {"importance", l.tier / 5.0}, {"kind", l.kind},
+                  {"tier", l.tier}, {"score", l.score}, {"text_key", l.text_key}, {"params", l.params}, {"because_chain", l.because},
+                  {"sources", l.sources}};
+        if (l.thread) j["sift_thread"] = l.thread;
+        json kept = json::array();
+        for (auto& sid : l.sources) {
+            size_t a = sid.find(':'), b = sid.find(':', a + 1);
+            Source s = make_source(w, p, std::atoi(sid.substr(a + 1, b - a - 1).c_str()), sid.substr(b + 1));
+            if (s.medium.empty()) continue;   // the thread was cut and is gone: nobody tells it
+            kept.push_back(sid);
+            bool disputed = false;
+            for (auto& m : made) if (m.match == s.match && sources_conflict(w, m, s)) disputed = true;
+            made.push_back(s);
+            sources.push_back({{"id", sid}, {"match", s.match}, {"court", s.court}, {"medium", s.medium}, {"start", s.start}, {"omit", s.omit},
+                               {"printed", s.printed}, {"passive", s.passive}, {"blame", s.blame}, {"stated_cause", s.stated_cause},
+                               {"hedge", s.hedge}, {"archetype", s.archetype}, {"disputed", disputed}});
+        }
+        j["sources"] = kept;
+        return j;
+    };
+    json all = json::array();
+    for (auto& l : lines) all.push_back(line_json(l));
+    if (stored && !w.sift.diag.pair.empty()) {   // the human check's pair, top-scored first
+        json pair = json::array();
+        for (auto& l : w.sift.diag.pair) pair.push_back({{"text", text_of(l)}, {"score", l.score}, {"text_key", l.text_key}});
+        out["sift_pair"] = pair;
+    }
+    out["lines"] = all;
+    out["sources"] = sources;
+    for (auto& j : all)
+        if (j["kind"] == "headline") {
+            out["headline"] = {{"text", j["text"]}, {"event", j["event"]}, {"year", j["year"]}, {"importance", j["importance"]}, {"tier", j["tier"]},
+                               {"kind", "sift"}};
+            if (j.contains("sift_thread")) out["headline"]["thread"] = j["sift_thread"];
+        }
+    // the ages of a long sleep become the groups; otherwise one group for the whole sleep
+    std::vector<std::pair<int, int>> spans;
+    for (auto& j : all) if (j["kind"] == "age") spans.push_back({std::atoi(j["params"]["from"].get<std::string>().c_str()), std::atoi(j["params"]["to"].get<std::string>().c_str())});
+    if (spans.empty() || spans.front().first > since_year) spans.insert(spans.begin(), {since_year, spans.empty() ? w.year : spans.front().first});
+    json groups = json::array();
+    for (size_t i = 0; i < spans.size(); ++i) {
+        json g_lines = json::array();
+        for (auto& j : all) {
+            int y = std::max(since_year, j["year"].get<int>());
+            bool last = i + 1 == spans.size();
+            if (y >= spans[i].first && (y < spans[i].second || last)) g_lines.push_back(j);
+        }
+        if (!g_lines.empty()) groups.push_back({{"from", spans[i].first}, {"to", spans[i].second}, {"lines", g_lines}});
+    }
+    out["while_you_slept"] = groups;
+}
+
 std::string event_sentence(const World& w, const Params& p, const Event& e) { return Narrator(w, p).sentence(e); }
 
 std::string briefing_json(const World& w, const Params& p, int since_year) {
@@ -330,6 +405,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         groups.push_back({{"from", from}, {"to", std::min(w.year, from + c.briefing_group_years - 1)}, {"lines", lines}});
     }
     out["while_you_slept"] = groups;
+    sift_block(w, p, n, since_year, out);
 
     // 3. people: known people who died, rose or were crowned; the rulers of every court the dragon has an oath with
     json people = json::array();
@@ -476,6 +552,10 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
                           {"awe_tiers", {{"oral", f.awe.oral}, {"written", f.awe.written}, {"monumental", f.awe.monumental}}},
                           {"monuments", static_cast<int>(f.monuments.size())}});
     out["courts"] = courts;
+    json ledge = json::array();   // item 06: who waits at the lair, and why
+    for (auto& a : w.arrivals)
+        ledge.push_back({{"id", a.id}, {"kind", a.kind}, {"court", a.court}, {"person", a.person}, {"text", ledge_text(w, p, a)}, {"because", a.because}});
+    out["ledge"] = ledge;
 
     std::string ph = n.misc("phase_line");
     size_t pi = static_cast<size_t>(phase_index(w.dragons[kPlayer]));

@@ -33,6 +33,7 @@ META_KINDS = {"sleep_begin", "wake"}
 ENTITY_SKIP = {"", "dragon", "world"}
 LONG_MEMORY_YEARS = 500
 VASSAL_REVERSAL_YEARS = 100
+BANK_IDS = []   # item 14: the pattern ids of the data dir, set in main
 
 
 # ---------------------------------------------------------------- running
@@ -366,7 +367,9 @@ def seed_metrics(events, world, stats, idle_events, numbers=None):
         "death": stats.get("dragon_death"),   # v0.4 (S1): {cause: wounds | slaying, year, court, warned} or None
         "hooks": stats.get("hooks"),          # v0.4 hooks (S3): wakings, with_hook, offered, answered, by_kind, fights, reward_growth
         "growth": (stats.get("dragon_growth") or {}).get("points"),
+        "arrivals": arrivals_count(stats.get("wakings_log", [])),
         "agency_chain": agency_chain(events, stats.get("wakings_log", []), (world.get("genesis") or {}).get("hatched_year", 0)),
+        "sift": sift_seed(stats.get("wakings_log", []), world),   # item 14
     }
     if numbers:
         out["world"] = world_metrics(events, world, numbers)
@@ -627,6 +630,8 @@ def summarise_policy(policy, per_seed):
         "dragon_slain_seeds": sum(1 for s in seeds if per_seed[s]["outcome"]["dragon_slain"]),
         "deaths": deaths_summary([per_seed[s].get("death") for s in seeds]),   # v0.4 (S1)
         "hooks": hooks_summary([per_seed[s].get("hooks") for s in seeds], [per_seed[s].get("growth") for s in seeds]),   # v0.4 hooks (S3)
+        "arrivals": arrivals_summary([per_seed[s].get("arrivals") for s in seeds]),
+        "sift": sift_summary([per_seed[s].get("sift") for s in seeds], BANK_IDS),   # item 14
         "flatness_flags": flags,
         "most_interesting": [headline(s, per_seed[s]) for s in ranked[::-1][:5]],
         "least_interesting": [headline(s, per_seed[s]) for s in ranked[:5]],
@@ -691,6 +696,135 @@ def deaths_summary(deaths):
     return {"wounds": sum(1 for d in dead if d["cause"] == "wounds"), "slaying": sum(1 for d in dead if d["cause"] == "slaying"),
             "median_year": statistics.median(years) if years else None,
             "unwarned": sum(1 for d in dead if d["cause"] == "slaying" and not d.get("warned", True))}
+
+
+def arrivals_count(wakings_log, after=200):
+    """item 06: visitors waiting at the lair at each waking from `after` years past the hatching."""
+    kinds, because, wakings = Counter(), Counter(), 0
+    for w in wakings_log:
+        if w.get("since_hatch", 0) < after:
+            continue
+        wakings += 1
+        for a in w.get("arrivals", []):
+            kinds[a["kind"]] += 1
+            because[" + ".join(a["because"])] += 1
+    return {"wakings": wakings, "kinds": dict(kinds), "because": dict(because)}
+
+
+def arrivals_summary(runs):
+    runs = [r for r in runs if r]
+    wakings = sum(r["wakings"] for r in runs)
+    kinds, because = Counter(), Counter()
+    for r in runs:
+        kinds.update(r["kinds"])
+        because.update(r["because"])
+    total = sum(kinds.values())
+    return {"wakings": wakings, "total": total, "per_waking": total / wakings if wakings else 0.0,
+            "by_kind": {k: v / wakings if wakings else 0.0 for k, v in sorted(kinds.items())},
+            "top_because": because.most_common(10), "runs_with_none": sum(1 for r in runs if not r["kinds"])}
+
+
+# ---------------------------------------------------------------- item 14: the sifter's briefings (research-story-sifting.md s7)
+
+def sift_seed(wakings_log, world):
+    rows = [w["sift"] for w in wakings_log if w.get("sift")]
+    if not rows:
+        return None
+    shown_open, ended = set(), set()
+    heads = []
+    for r in rows:
+        for l in r["lines"]:
+            key, t = l["text_key"], l["thread"]
+            if not t:
+                continue
+            if l["kind"] != "callback" and key.endswith(".open"):
+                shown_open.add(t)
+            if l["kind"] == "callback" and (".cb.closed" in key or key.endswith(".cb.cut")) and t in shown_open:
+                ended.add(t)
+        heads.append({"pattern": r["headline_pattern"], "dragon": r["headline_dragon"], "reversals": r["headline_reversals"],
+                      "has": any(l["kind"] == "headline" for l in r["lines"])})
+    body = [sum(1 for l in r["lines"] if l["kind"] != "headline" and l["tier"] < 5) for r in rows]
+    return {
+        "wakings": len(rows),
+        "heads": heads,
+        "shown_open": len(shown_open), "ended": len(ended),
+        "names_earlier": sum(1 for r in rows if r["names_earlier"]),
+        "lift": [r["mean_shown"] - r["mean_candidate"] for r in rows if r["candidates"]],
+        "lift_crowded": [r["mean_shown"] - r["mean_candidate"] for r in rows if r["candidates"] > len(r["lines"])],
+        "tier5": sum(r["tier5"] for r in rows), "tier5_shown": sum(r["tier5_shown"] for r in rows),
+        "fallbacks": sum(1 for r in rows if r["fallbacks"] > 0),
+        "exact": sum(1 for r, b in zip(rows, body) if b == r["budget"]), "over": sum(1 for r, b in zip(rows, body) if b > r["budget"]),
+        "lines": sum(body), "budget": sum(r["budget"] for r in rows),
+        "completed": sorted({c["text_key"][4:] for c in (world.get("sift") or {}).get("compounds", [])}),
+        "pairs": [r["pair"] for r in rows if r.get("pair")][:3],
+    }
+
+
+def sift_summary(rows, bank_ids):
+    runs = [r for r in rows if r]
+    if not runs:
+        return None
+    heads = [h for r in runs for h in r["heads"] if h["has"]]
+    by_pattern = Counter(h["pattern"] for h in heads if h["pattern"])
+    seeds = len(runs)
+    completion = Counter(p for r in runs for p in r["completed"])
+    per_run_max = []
+    for r in runs:
+        c = Counter(h["pattern"] for h in r["heads"] if h["has"] and h["pattern"])
+        n = sum(1 for h in r["heads"] if h["has"])
+        per_run_max.append(max(c.values()) / n if c and n else 0.0)
+    pattern_heads = [h for h in heads if h["pattern"]]
+    shown = sum(r["shown_open"] for r in runs)
+    lift = [x for r in runs for x in r["lift"]]
+    wakings = sum(r["wakings"] for r in runs)
+    return {
+        "seeds": seeds, "wakings": wakings, "headlines": len(heads),
+        "headline_dragon_share": sum(1 for h in heads if h["dragon"] >= 0.6) / len(heads) if heads else 0.0,
+        "shown_ended_share": sum(r["ended"] for r in runs) / shown if shown else 0.0,
+        "headline_reversals_mean": statistics.fmean(h["reversals"] for h in pattern_heads) if pattern_heads else 0.0,
+        "names_earlier_share": sum(r["names_earlier"] for r in runs) / wakings if wakings else 0.0,
+        "selection_lift": statistics.fmean(lift) if lift else 0.0,
+        "selection_lift_crowded": statistics.fmean(x for r in runs for x in r["lift_crowded"]) if any(r["lift_crowded"] for r in runs) else 0.0,
+        "tier5_shown_share": sum(r["tier5_shown"] for r in runs) / sum(r["tier5"] for r in runs) if sum(r["tier5"] for r in runs) else 1.0,
+        "fallback_share": sum(r["fallbacks"] for r in runs) / wakings if wakings else 0.0,
+        "pattern_headline_share": {p: c / len(heads) for p, c in by_pattern.most_common()},
+        "raw_headline_share": sum(1 for h in heads if not h["pattern"]) / len(heads) if heads else 0.0,
+        "largest_pattern_share_in_a_run": max(per_run_max) if per_run_max else 0.0,
+        "largest_pattern_share_in_a_run_mean": statistics.fmean(per_run_max) if per_run_max else 0.0,
+        "never_headline": [p for p in bank_ids if p not in by_pattern],
+        "lines_exact_share": sum(r["exact"] for r in runs) / wakings if wakings else 0.0,
+        "lines_over": sum(r["over"] for r in runs),
+        "lines_per_budget": sum(r["lines"] for r in runs) / sum(r["budget"] for r in runs) if sum(r["budget"] for r in runs) else 0.0,
+        "completion_share": {p: completion[p] / seeds for p in bank_ids},
+        "pairs": [p for r in runs for p in r["pairs"]][:15],
+    }
+
+
+def bank_ids(data):
+    out = []
+    folder = os.path.join(data, "patterns")
+    if not os.path.isdir(folder):
+        return out
+    for f in sorted(os.listdir(folder)):
+        if f.endswith(".json") and f != "base_rates.json":
+            d = json.load(open(os.path.join(folder, f)))
+            out += [p["id"] for p in (d["patterns"] if isinstance(d, dict) else d)]
+    return out
+
+
+def print_sift(s):
+    if not s:
+        return
+    print(f"[{s['policy']}] briefings: {s['wakings']} wakings, {s['headlines']} headlines; D>=0.6 {100 * s['headline_dragon_share']:.0f}% (40-70), "
+          f"shown threads ended {100 * s['shown_ended_share']:.0f}% (>=60), headline reversals {s['headline_reversals_mean']:.2f} (1-3), "
+          f"names an earlier one {100 * s['names_earlier_share']:.0f}% (30-60), lift {s['selection_lift']:+.2f} (>0.15; {s['selection_lift_crowded']:+.2f} where candidates outnumber lines), "
+          f"tier 5 shown {100 * s['tier5_shown_share']:.0f}% (100), fallbacks {100 * s['fallback_share']:.0f}% (<=10), "
+          f"top pattern in a run {100 * s['largest_pattern_share_in_a_run']:.0f}% max, {100 * s['largest_pattern_share_in_a_run_mean']:.0f}% mean (<=15), "
+          f"lines = L(y) {100 * s['lines_exact_share']:.0f}%, over {s['lines_over']}")
+    print(f"[{s['policy']}] headline share: raw events {100 * s['raw_headline_share']:.0f}%, " +
+          ", ".join(f"{p} {100 * v:.1f}%" for p, v in s["pattern_headline_share"].items()))
+    print(f"[{s['policy']}] never headline: {', '.join(s['never_headline']) or 'none'}")
+    print(f"[{s['policy']}] completion (share of seeds; keep 10-60%): " + ", ".join(f"{p} {100 * v:.0f}%" for p, v in s["completion_share"].items()))
 
 
 def hooks_summary(hooks, growth):
@@ -777,12 +911,20 @@ def print_table(summaries):
         if a and s["policy"] != "idle":
             print(f"[{s['policy']}] agency: hooks reaching a dragon act {100 * a['hook_dragon_share']:.1f}% (with any refs {100 * a['hook_with_refs_share']:.1f}%), "
                   f"events {100 * a['event_chain_share']:.1f}%, waking headlines {100 * a['headline_chain_share']:.1f}%, Jaccard vs idle {s['agency']:.3f}")
+        if s.get("sift"):   # item 14
+            print_sift({**s["sift"], "policy": s["policy"]})
         h = s.get("hooks")
         if h:   # v0.4 hooks (S3)
             print(f"[{s['policy']}] hooks: {h['per_waking']:.2f} per waking, coverage {100 * h['coverage']:.1f}%, answered {100 * h['answered_share']:.1f}%, "
                   f"{h['kinds_seen']} kinds (max share {100 * h['max_kind_share']:.0f}%), {h['fights']} fights of {h['fight_wounds_mean']:.1f} wounds")
             print(f"[{s['policy']}] hooks by kind: " + ", ".join(f"{k} {100 * v:.0f}%" for k, v in h["by_kind"].items()))
             print(f"[{s['policy']}] growth per run: " + ", ".join(f"{k} {v:.0f} ({100 * h['reward_growth_share'][k]:.0f}% from hooks)" for k, v in h["growth_mean"].items()))
+        ar = s.get("arrivals")
+        if ar and ar["wakings"]:   # item 06
+            print(f"[{s['policy']}] arrivals: {ar['per_waking']:.2f} per waking after year 200 ({ar['total']} in {ar['wakings']} wakings, {ar['runs_with_none']} runs with none)")
+            print(f"[{s['policy']}] arrivals per waking by kind: " + ", ".join(f"{k} {v:.3f}" for k, v in ar["by_kind"].items()))
+            for text, n in ar["top_because"]:
+                print(f"[{s['policy']}]   because {n:6d}  {text}")
         for label, key in (("most", "most_interesting"), ("least", "least_interesting")):
             print(f"[{s['policy']}] {label} interesting seeds:")
             for h in s[key]:
@@ -1011,6 +1153,7 @@ def main():
                     help="check the bands file (generated worlds, played-style policies; sweep bands from --sweep); exit 1 on a failed v0.4 band")
     ap.add_argument("--sweep", default="out/sweep/summary.json", help="sweep.py summary for the sweep.* bands")
     args = ap.parse_args()
+    BANK_IDS[:] = bank_ids(args.data)
 
     if args.read:
         with open(os.path.join(args.out, "summary.json")) as f:

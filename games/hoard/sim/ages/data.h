@@ -4,6 +4,7 @@
 #include <vector>
 #include "cards.h"
 #include "genesis_data.h"
+#include "../sift/bank.h"
 #include "state.h"
 
 namespace ages {
@@ -495,6 +496,7 @@ struct HookDef {
     std::string id, kind, scope = "faction";
     std::vector<CardPred> when, force_if;
     std::string where = "capital", pick;
+    std::string arrival;   // item 06: an arrival kind; the template holds on the courts with one waiting, and is always shown
     std::vector<std::string> acts, choices;
     double priority = 10;
     bool fallback = false;
@@ -511,6 +513,31 @@ struct HookBook {
     int max_hooks = 3;
     double second = 0.6, third = 0.15;   // chance of a second and a third hook per waking
     double repeat_mult = 0.5;            // priority of a kind offered on the previous waking
+};
+
+// item 06: data/arrivals.json. A clause names a gate (arrival_gates.cpp) and bounds its value; no bound means the gate
+// must be true. `unless` names a gate that voids the clause; `event` and `faith_pool` give a blocked clause its
+// side effect (the foothill shrine)
+struct ArrivalGateDef {
+    std::string gate, unless, event;
+    bool has_gte = false, has_lte = false, has_gt = false, has_lt = false;
+    double gte = 0, lte = 0, gt = 0, lt = 0;
+    double faith_pool = 0;
+};
+
+struct ArrivalDef {
+    std::string kind, person_role, window = "wake", text_key, cause;   // window: wake | short (leaves after the phase's short sleep)
+    int specificity = 0, cooldown_years = 100;
+    bool ignores_decade_limit = false;
+    std::vector<ArrivalGateDef> requires_, blocked_when;
+    std::map<std::string, std::map<std::string, double>> answers;       // receive outcome -> reward keys of hooks.json
+};
+
+struct ArrivalBook {
+    std::vector<ArrivalDef> kinds;
+    double oral_floor = 0.05, lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
+    int rumour_years = 150, thief_era = 1, refugee_years = 20, envoy_kill_generations = 2, sight_regions = 2;
+    int lair_memory_years = 100;
 };
 
 struct Params {
@@ -532,7 +559,9 @@ struct Params {
     TalentBook talents;           // v0.4 (S1)
     DefenceBook defences;         // v0.4 (S1)
     HookBook hooks;               // v0.4 hooks (S3)
+    ArrivalBook arrivals;         // item 06
     GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
+    SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
 };
 
 struct PolicyAct {
@@ -570,6 +599,8 @@ struct DataJson {
     std::string hooks;                 // v0.4 hooks (S3); optional
     std::string genesis;               // v0.4 world (S2): data/genesis.json; optional
     std::string importance;            // data/importance.json
+    std::string arrivals;              // item 06: data/arrivals.json
+    std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
@@ -577,6 +608,8 @@ bool params_from_json(const DataJson& d, Params& out, std::string& err);
 bool world_from_data_json(const DataJson& d, const Params& p, World& out, std::string& err);
 bool dragon_data_from_json(const DataJson& d, Params& out, std::string& err);   // v0.4 (S1), dragon_data.cpp
 bool hooks_from_json(const DataJson& d, Params& out, std::string& err);         // v0.4 hooks (S3), hook_data.cpp
+bool arrivals_from_json(const DataJson& d, Params& out, std::string& err);      // item 06, arrival_data.cpp
+bool sift_bank_from_json(const DataJson& d, SiftBank& out, std::string& err);   // item 14, sim/sift/bank_data.cpp
 
 // file IO, data_io.cpp (not part of the wasm build)
 bool load_data_json(const std::string& dir, DataJson& out, std::string& err);

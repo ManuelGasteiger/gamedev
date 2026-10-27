@@ -1,4 +1,5 @@
 #include "hooks.h"
+#include "arrivals.h"
 #include "memory_tiers.h"
 #include "unrecorded.h"
 #include "defences.h"
@@ -35,10 +36,10 @@ void mark(World& w, const Params& p, Faction& f, const char* type, double dread,
     if (faith != 0) remember(f, p.c, w.year, type, 1.0, faith, {"hook"});
 }
 
-std::map<std::string, double> reward(World& w, const Params& p, const Hook& h, const std::map<std::string, double>& r) {
+std::map<std::string, double> reward(World& w, const Params& p, const std::string& faction, const std::string& other, const std::map<std::string, double>& r) {
     Hoard& hoard = w.dragons[kPlayer].hoard;
-    Faction* f = find_faction(w, h.faction);
-    Faction* o = find_faction(w, h.other);
+    Faction* f = find_faction(w, faction);
+    Faction* o = find_faction(w, other);
     double gold = of(r, "gold");
     if (f && of(r, "gold_share") > 0) { double amt = f->wealth * of(r, "gold_share"); f->wealth -= amt; gold += amt; }
     hoard.gold += gold;
@@ -77,8 +78,14 @@ void resolve(World& w, const Params& p, const Hook& h, const std::string& choice
     fight(w, p, h);
     if (dragon_dead(w)) return;
     auto cr = t->choice_reward.find(choice);
-    std::map<std::string, double> grown = reward(w, p, h, cr == t->choice_reward.end() ? t->reward : cr->second);
+    std::map<std::string, double> grown = reward(w, p, h.faction, h.other, cr == t->choice_reward.end() ? t->reward : cr->second);
     if (h.kind == "slayers") if (Faction* f = find_faction(w, h.faction)) disperse_slayers(w, *f);
+    if (!t->arrival.empty()) {   // item 06: the visitor is answered; a choice is a receive
+        if (const Arrival* a = arrival_for(w, t->arrival, h.faction)) {
+            if (choice.empty()) arrival_consume(w, a->id);
+            else receive_outcome(w, p, *a, choice);
+        }
+    }
     std::map<std::string, double> params = grown;
     params["fight"] = hook_fight_damage(w, p, h);
     emit(w, "hook_resolved", h.faction, h.region, 0, {h.kind}, because("hook", {}, params));
@@ -89,6 +96,10 @@ void drop(World& w, const std::string& id) {
     w.hooks.erase(std::remove_if(w.hooks.begin(), w.hooks.end(), [&](const Hook& x) { return x.id == id; }), w.hooks.end());
 }
 
+}
+
+std::map<std::string, double> apply_reward(World& w, const Params& p, const std::string& faction, const std::string& other, const std::map<std::string, double>& r) {
+    return reward(w, p, faction, other, r);
 }
 
 double hook_fight_damage(const World& w, const Params& p, const Hook& h) {
@@ -164,6 +175,7 @@ void apply_hook_ignore(World& w, const Params& p, const Hook& h) {
         w.dragons[kPlayer].hoard.gold -= amt;
         if (Faction* f = find_faction(w, h.faction)) f->wealth += amt;
     }
+    arrival_ignored(w, p, h);
 }
 
 }

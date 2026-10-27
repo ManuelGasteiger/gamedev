@@ -34,14 +34,14 @@ static bool read_json(const std::string& path, json& out, std::string& err) {
 }
 
 // data/events/*.json in file-name order, joined into one JSON array; a missing folder means no cards
-static bool read_cards(const std::string& dir, std::string& out, std::string& err) {
+static bool read_folder(const std::string& dir, const char* sub, std::string& out, std::string& err, const char* skip = "") {
     namespace fs = std::filesystem;
     std::error_code ec;
-    fs::path folder = fs::path(dir) / "events";
+    fs::path folder = fs::path(dir) / sub;
     if (!fs::is_directory(folder, ec)) { out.clear(); return true; }
     std::vector<std::string> files;
     for (auto& entry : fs::directory_iterator(folder, ec))
-        if (entry.path().extension() == ".json") files.push_back(entry.path().string());
+        if (entry.path().extension() == ".json" && entry.path().filename() != skip) files.push_back(entry.path().string());
     std::sort(files.begin(), files.end());
     out = "[";
     for (size_t i = 0; i < files.size(); ++i) {
@@ -70,9 +70,10 @@ bool load_data_json(const std::string& dir, DataJson& d, std::string& err) {
            read_text(dir + "/factions.json", d.factions, err) && read_text(dir + "/shocks.json", d.shocks, err) &&
            read_text(dir + "/names.json", d.names, err) && read_text(dir + "/offers.json", d.offers, err) &&
            read_text(dir + "/text/en/narrator.json", d.text, err) && read_text(dir + "/importance.json", d.importance, err) &&
-           text::bundles_dir_json(dir + "/text", d.text_bundles, err) && read_cards(dir, d.events, err) &&
-           read_dragon_files(dir, d) && read_optional(dir + "/hooks.json", d.hooks) &&   // v0.4 hooks (S3)
-           read_optional(dir + "/genesis.json", d.genesis);
+           text::bundles_dir_json(dir + "/text", d.text_bundles, err) && read_folder(dir, "events", d.events, err) &&
+           read_dragon_files(dir, d) && read_optional(dir + "/hooks.json", d.hooks) && read_optional(dir + "/arrivals.json", d.arrivals) &&   // v0.4 hooks (S3), item 06
+           read_optional(dir + "/genesis.json", d.genesis) &&
+           read_folder(dir, "patterns", d.patterns, err, "base_rates.json") && read_optional(dir + "/patterns/base_rates.json", d.base_rates);   // item 14
 }
 
 bool load_params(const std::string& dir, Params& out, std::string& err) {

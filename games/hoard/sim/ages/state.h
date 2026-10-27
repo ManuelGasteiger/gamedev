@@ -155,6 +155,8 @@ struct Faction {
     int max_realm = 0;   // own plus vassal regions
     std::vector<int> era_years;
     Effective eff;
+    int lair_known = -1;        // item 06: year the court last learned where the lair is (-1 never); fades with the oral tier
+    bool lair_exact = false;    // a returned person or a thief who came back has seen it
 };
 
 struct FactionRecord {
@@ -320,6 +322,16 @@ struct Offer {
     double price = 0;
 };
 
+// item 06: a visitor waiting at the lair for the dragon to wake; `because` holds the satisfied clause keys; an envoy
+// carries the offer row it brings (offer_kind, target, motive, region) and what it will say (stated_reason, is_lie)
+struct Arrival {
+    std::string id, kind, court, person;
+    int year = 0;
+    std::vector<std::string> because;
+    std::string offer_kind, target, motive, region, stated_reason;
+    bool is_lie = false, slay_true = false;
+};
+
 struct War {
     std::string a, b;
     int started = 0;
@@ -367,6 +379,64 @@ struct Genesis {
     std::map<std::string, std::string> deal;
 };
 
+// item 14: one match of a story pattern (research-story-sifting.md section 2). latent below a third of its clauses,
+// open from there, closed when complete, cut by an unless, a lapsed window, a dead cast member or the partial cap
+struct SiftShown {
+    int waking = 0, stage = 0, year = 0;
+    std::string state;
+};
+
+struct SiftThread {
+    int id = 0;
+    std::string pattern;
+    std::map<std::string, std::string> cast;
+    std::vector<int> events;   // the kernel event of each matched clause
+    std::vector<int> years;
+    std::string state = "latent";
+    int opened = 0, advanced = 0, ended = 0;
+    std::string outcome, cut_by;
+    int emitted = 0;   // the compound event once closed
+    std::vector<SiftShown> shown;
+};
+
+// a briefing line as the sifter picked it: kind headline | line | callback | age
+struct SiftLine {
+    int thread = 0, event = 0, tier = 0;
+    double score = 0;
+    std::string kind, text_key;
+    std::map<std::string, std::string> params;
+    std::vector<int> because;
+    std::vector<std::string> sources;
+};
+
+// numbers for the interest tool about the last selection; not saved, not hashed
+struct SiftDiag {
+    int candidates = 0, fallbacks = 0, tier5 = 0, tier5_shown = 0, budget = 0;
+    double mean_candidate = 0, mean_shown = 0, headline_dragon = 0;
+    int headline_reversals = 0;
+    bool names_earlier = false;
+    std::string headline_pattern;
+    std::vector<SiftLine> pair;   // the human check: the top-scored candidate and a random one
+};
+
+constexpr int kCompoundBase = 1000000000;   // ids of emitted episodes and stories; sim events stay below
+
+struct SiftState {
+    bool on = false;
+    int cursor = 0;   // the last chronicle event id the acceptors saw
+    int next_thread = 1;
+    int next_event = kCompoundBase;
+    std::vector<SiftThread> threads;   // live partials and ended threads not yet told, by id
+    std::vector<Event> compounds;      // by id
+    std::set<std::string> once, barred;
+    int waking = 0;
+    std::vector<std::string> headlines;   // the headline's pattern per waking ("" for a raw event)
+    std::set<std::string> named;          // protagonists of lines already shown
+    std::vector<SiftLine> lines;          // the last waking's selection
+    int lines_since = -1, lines_year = -1;
+    SiftDiag diag;
+};
+
 struct Recorder;
 
 constexpr size_t kPlayer = 0;
@@ -396,6 +466,8 @@ struct World {
     std::vector<Person> people;            // sorted by id
     std::vector<DeadPerson> dead_people;   // the ones the briefing may still have to name
     std::map<std::string, int> person_counters;   // race -> next number for `<race><n>` ids
+    std::vector<Arrival> arrivals;         // item 06: visitors at the lair in the order they came; the dragon's sleep sends them home
+    std::map<std::string, int> arrival_fired;   // "<court>|<kind>|<cause>" and "<court>" -> year of the last arrival
     std::vector<Offer> offers;             // current offers, generated at wake
     int next_offer_serial = 1;
     int dt = 10;                           // years of the current step; rules scale per-decade rates by dt / step_years
@@ -413,6 +485,7 @@ struct World {
     int last_major = 0;                    // storyteller: year of the last major event
     int story_quiet_wakings = 0;           // wakings in a row without a major event
     bool story_breather = false;           // the coming waking is a breather (the last one had a major event)
+    SiftState sift;                        // item 14: saved and hashed only once the bank has run
     Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
 };
 

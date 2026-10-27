@@ -33,6 +33,7 @@ struct Options {
     bool briefing = false;
     bool narrate = false;
     bool genesis = false;   // v0.4 world (S2)
+    bool no_bank = false;   // item 14: run without the pattern bank (the goldens run so)
     std::string trace;      // one state-hash line per sleep
     std::string record;     // write every input and a checkpoint per sleep as a .hrp
     std::string replay;     // replay a .hrp and verify its checkpoints (exit 3 on the first mismatch)
@@ -63,6 +64,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--briefing") o.briefing = true;
         else if (k == "--narrate") o.narrate = true;
         else if (k == "--genesis") o.genesis = true;
+        else if (k == "--no-bank") o.no_bank = true;
         else if (k == "--trace") { if (!need(o.trace)) return false; }
         else if (k == "--state-hash") o.state_hash = true;
         else if (k == "--render-batch") { if (!need(o.render_batch)) return false; }
@@ -247,6 +249,7 @@ int golden(const Options& o) {
         LoadResult loaded = load_data(o.data, seed);
         if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
         std::string err;
+        loaded.params.sift.patterns.clear();   // item 14: the golden suite runs with the bank off
         if (!make_genesis(loaded.world, loaded.params, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
         Policy policy;
         if (!load_policy(o.data, "played", policy, err)) { std::fprintf(stderr, "%s\n", err.c_str()); return 1; }
@@ -306,7 +309,7 @@ int main(int argc, char** argv) {
     Options o;
     if (argc >= 3 && std::string(argv[1]) == "--golden") o.years = 3000;
     if (!parse(argc, argv, o)) {
-        std::fprintf(stderr, "usage: hoard-sim --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] [--trace t.jsonl] [--state-hash] --out out/\n       hoard-sim --data data/ --golden 1-300\n");
+        std::fprintf(stderr, "usage: hoard-sim --data data/ --seed N --years Y [--acts log.json] [--policy name] [--sleep 100] [--briefing] [--narrate] [--genesis] [--no-bank] [--trace t.jsonl] [--state-hash] --out out/\n       hoard-sim --data data/ --golden 1-300\n");
         return 2;
     }
     if (o.golden_to) return golden(o);
@@ -315,6 +318,7 @@ int main(int argc, char** argv) {
     if (!o.replay.empty()) return replay(o);
     LoadResult loaded = load_data(o.data, o.seed);
     if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
+    if (o.no_bank) loaded.params.sift.patterns.clear();
     World& w = loaded.world;
     const Params& p = loaded.params;
     std::string gerr, legends;

@@ -240,3 +240,20 @@ sim/ages/hook_json.h/.cpp       hooks in the save and the view, the forecast pre
 ```
 
 Measured (300 seeds x 3000 years, `tools/interest.py`): on the default world idle gets 2.00 hooks per waking on 100 % of wakings (11 kinds, herd largest at 25 %), played 1.66 on 99.4 % (15 kinds, library largest at 16 %) and answers 63 %; raze_all's burns and takes answer 36 % in passing. Played dies in 7.7 % of runs (23 slayings, all warned; 13.0 % without hooks on the same tree, since slayers met at the gate disperse), raze_all in 99 %, idle never. Played's fights cost 48 wounds on average (a fifth of health after armor). Hooks pay about half of played's Lore, Arcana and Dominion: 43, 29 and 22 points per run against 10, 6 and 5 without hooks. On generated worlds (`--genesis`): idle 2.05 per waking on 100 %, played 1.78 on 98.9 %, 17 kinds, answered 62 %, played deaths 21.3 % (25.7 % without hooks).
+
+## Item 06: access gating for visitors
+
+Nobody comes to the lair at random. `data/arrivals.json` lists eight kinds (envoy, pilgrim, thief, slayer band, scholar, kin, refugee, prophet) with `requires`, `blocked_when`, `cooldown_years`, `specificity` and a `person_role`. `rule_arrivals` runs after oaths: per court per tick the most specific kind whose gates hold, none blocked, off cooldown, comes. One visitor per court per decade (the slayer band is exempt), and a kind already waiting for that court does not come twice. An arrival carries `because`, the gate keys that let it through. Visitors wait at the lair until the dragon sleeps; `arrivals_depart` sends them home, and whoever walked home gives the court exact knowledge of the lair. A killed envoy blocks the court's envoys for `envoy_kill_generations` x 30 years.
+
+Lair knowledge is `Faction.lair_known` (year learned, -1 never) and `lair_exact`. A witnessed act within `sight_regions` of the lair, a show at a capital or a returned hostage teaches it; it fades with the oral tier when no written record keeps it. `route_open` is false when an orc court or wasteland sits on every path.
+
+Verbs: `receive {id, outcome}` (receive | eat | turn_away; the outcomes of a kind are its `answers`) and `hunt {region}` (food from the lair slopes or unowned land). The thief, slayers and pilgrims hooks carry an `arrival` key and are generated from the arrival. The briefing has a `ledge` block: one line per waiting visitor with its because-line.
+
+```
+data/arrivals.json              kinds, gates, answers
+sim/ages/arrival_data.cpp       loader
+sim/ages/arrival_gates.cpp      gate values, lair knowledge, route_open
+sim/ages/arrivals.cpp           arrival bookkeeping, ledge text
+sim/ages/arrival_acts.cpp       receive and hunt
+sim/ages/rules/arrivals.cpp     the rule
+```

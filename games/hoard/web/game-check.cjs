@@ -18,6 +18,15 @@ let page;
 function check(id, ok, detail) { results.push({ id, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + id + (detail ? '  ' + detail : '')); return ok; }
 async function shot(name) { await page.screenshot({ path: path.join(shots, name + '.png'), timeout: 180000 }); }   // swiftshader on a busy machine is slow
 const state = () => page.evaluate(() => game.state());
+// item 06: an envoy climbs only to a lair its court has seen, so the lab lets every court see it before a sleep
+async function seeLair() {
+  await page.evaluate(() => {
+    const w = game.world();
+    for (const f of w.factions) { f.lair_known = w.year; f.lair_exact = true; }
+    game.loadWorld(w);
+  });
+  await page.waitForTimeout(100);
+}
 const oathStatus = (st) => ({ active: 'active', expired: 'expired', breached_by_dragon: 'broken by you', breached_by_them: 'broken by them' })[st] ?? st;
 const actions = () => page.evaluate(() => game.actions());
 const fly = (id) => page.evaluate((id) => game.flyTo(id), id);
@@ -178,6 +187,7 @@ async function finishSleep() {
   let defOffer = await besieged();
   // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
   for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
+    await seeLair();
     await sleepThrough(100);
     await finishSleep();
     await page.waitForTimeout(100);
@@ -311,7 +321,14 @@ async function finishSleep() {
   await sleepThrough(300);
   const kinds2 = await playMontage();
   await shot('c-wake');
-  const s6 = await state();
+  let s6 = await state();
+  // item 06 moved the history on; whether the breached court's oath breaks inside these 300 years is chance, so sleep on until one does
+  for (let extra = 0; extra < 10 && !s6.oaths.some((o) => o.status !== 'active'); extra++) {
+    if ((await page.evaluate(() => game.wake())).open) await beginRaid();
+    await sleepThrough(100);
+    kinds2.push(...await playMontage());
+    s6 = await state();
+  }
   check('d.betrayal', s6.oaths.some((o) => o.status !== 'active') && s6.ages[1].events > 0, `oath statuses after the sleep: ${s6.oaths.map((o) => o.party + ' ' + oathStatus(o.status)).join(', ')}`);
   await beginRaid();
   // age 3: ward hill_hold from the raid panel (magic has regrown), burn two outlying regions hard, sleep 300
@@ -338,7 +355,8 @@ async function finishSleep() {
   const closeWake = async () => { if ((await page.evaluate(() => game.wake())).open) await beginRaid(); };
   // a full valley has no open land to settle: then a lab world frees an outlying region (burn 0) next to another court
   let settleLab = '';
-  if (!captured.region_settled) {
+  // the land may be taken again before anyone settles it, so the lab opens a region again before each extra century
+  const openLand = async () => {
     await closeWake();
     settleLab = await page.evaluate(() => {
       const w = game.world();
@@ -357,7 +375,8 @@ async function finishSleep() {
       game.loadWorld(w);
       return r.id;
     });
-  }
+  };
+  if (!captured.region_settled) await openLand();
   // a valley of one-region courts has no conquest (a court's last region makes it a vassal instead): then a lab gives a
   // weaker neighbour a second region and starts a war it is bound to lose
   let conquestLab = '';
@@ -371,6 +390,8 @@ async function finishSleep() {
         for (const ra of A.regions) for (const n of reg(ra).neighbours) {
           const B = fac(reg(n)?.owner);
           if (!B || B.id === A.id || B.race === 'orc' || A.overlord === B.id || B.overlord === A.id) continue;
+          // a warded or dug-in border, or an orc court, holds most decades of a five-decade war
+          if (B.dominant_race === 'orc' || reg(n).tags.includes('dug_in') || (w.modifiers ?? []).some((m) => m.target === n && m.var === 'invasion_chance')) continue;
           const X = reg(n).neighbours.map(reg).find((r) => r && !r.lair && r.owner !== A.id && r.owner !== B.id);
           if (!X) continue;
           const C = X.owner ? fac(X.owner) : null;
@@ -382,7 +403,7 @@ async function finishSleep() {
           w.wars = (w.wars ?? []).filter((x) => alive.has(x.a) && alive.has(x.b) && ![x.a, x.b].includes(A.id) && ![x.a, x.b].includes(B.id));
           w.wars.push({ a: A.id, b: B.id, started: w.year, decades: 0, taken_from_a: 0, taken_from_b: 0, allies_a: [], allies_b: [], coalition: false, years_fought: 0, declared: 0, thread: `war:${A.id}:${B.id}:${w.year}` });
           A.at_war_with = [B.id]; B.at_war_with = [A.id];
-          B.wealth = Math.max(B.wealth, 20); A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
+          B.wealth = 1; A.wealth = Math.max(A.wealth, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
           game.loadWorld(w);
           return `${A.id} at war with ${B.id}, which also holds ${X.id}`;
         }
@@ -392,6 +413,7 @@ async function finishSleep() {
   let extraSleeps = 0;
   while (extraSleeps < 10 && (!captured.plague || !captured.region_settled || !captured.region_taken || !captured.spell_expired || (await spellsLeft()).length) && !(await page.evaluate(() => game.world().tags.includes('dragon_slain')))) {
     extraSleeps += 1;
+    if (!captured.region_settled) await openLand();
     await closeWake();
     await sleepThrough(100);
     kindsAll.push(...await playMontage());
@@ -431,9 +453,11 @@ async function finishSleep() {
       for (const x of w.factions) x.cohesion = Math.min(x.cohesion, 0.2);
       game.loadWorld(w);
     });
-    await sleepThrough(100);
-    await playMontage();
-    await beginRaid();
+    for (let extra = 0; extra < 8 && !captured.orcs_spawned; extra++) {   // item 06 moved the history on: give the horde a few centuries
+      await sleepThrough(100);
+      await playMontage();
+      await beginRaid();
+    }
   }
   const orcs = (await state()).factions.filter((f) => f.race === 'orc');
   check('c.orcs', captured.orcs_spawned && orcs.length > 0 && told('orcs_spawned', /orc/i), `"${captured.orcs_spawned?.ticker}"${orcLab}; orc factions now ${orcs.map((o) => o.id).join(', ')}`);
@@ -786,6 +810,7 @@ async function finishSleep() {
   // envoys when their situation calls for it, so sleep on a century at a time (at most ten) until two have come in person
   const envoysWaiting = () => page.evaluate(() => game.world().offers.filter((o) => o.envoy && game.people().some((p) => p.id === o.envoy)).length);
   for (let extra = 0; extra < 10 && (await envoysWaiting()) < 2; extra++) {
+    await seeLair();
     await sleepThrough(100);
     await finishSleep();
     if ((await page.evaluate(() => game.wake())).open) await beginRaid();

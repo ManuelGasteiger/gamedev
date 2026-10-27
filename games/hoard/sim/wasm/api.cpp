@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include "ages/ages.h"
+#include "ages/arrivals.h"
 #include "ages/dragon_json.h"
 #include "ages/hook_json.h"
 #include "ages/genesis.h"
@@ -75,8 +76,11 @@ json cmd_load(const json& in) {
     g.data.talents = text_of(d, "talents");     // v0.4 (S1)
     g.data.defences = text_of(d, "defences");
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
+    g.data.arrivals = text_of(d, "arrivals");   // item 06
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.importance = text_of(d, "importance");
+    g.data.patterns = text_of(d, "patterns");       // item 14
+    g.data.base_rates = text_of(d, "base_rates");
     g.data.text_bundles.clear();
     if (d.contains("text_bundles") && d["text_bundles"].is_object())
         for (auto it = d["text_bundles"].begin(); it != d["text_bundles"].end(); ++it)
@@ -228,7 +232,7 @@ json cmd_load_world(const json& in) {
 // ---- v0.4 (S1): wounds in apply_acts, a slain dragon refuses its verbs, talents -----------------------------------
 
 const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_remnant", "cast", "terraform", "demand",
-                              "accept_offer", "decline_offer", "pick_talent"};
+                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt"};
 
 json cmd_apply_acts_wounded(const json& in) {
     double before = g.world.dragons[kPlayer].wounds;
@@ -296,7 +300,24 @@ json cmd_kill_person_hooked(const json& in) {
     return out;
 }
 
+json cmd_receive(const json& in) {
+    std::string id = in.value("id", ""), outcome = in.value("outcome", ""), reason;
+    std::vector<Hook> before = g.world.hooks;
+    size_t first_event = g.world.chronicle.size();
+    if (!receive(g.world, g.params, id, outcome, reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}, {"hooks_resolved", hooks_resolved_json(before)}, {"slain", dragon_dead(g.world)}};
+}
+
+json cmd_hunt(const json& in) {
+    std::string region = in.value("region", ""), reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!hunt(g.world, g.params, region, reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
 bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
+    if (cmd == "receive") { out = cmd_receive(in); return true; }
+    if (cmd == "hunt") { out = cmd_hunt(in); return true; }
     if (cmd == "apply_acts") out = cmd_apply_acts_hooked(in);
     else if (cmd == "kill_person") out = cmd_kill_person_hooked(in);
     else if (cmd == "answer_hook") out = cmd_answer_hook(in);
@@ -308,6 +329,7 @@ bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
 json cmd_golden(const json& in) {
     LoadResult r = load_data_from_json(g.data, in.value("seed", uint64_t{1}));
     if (!r.ok) return fail(r.error);
+    if (!in.value("bank", false)) r.params.sift.patterns.clear();   // item 14: the golden suite runs with the bank off
     if (!make_genesis(r.world, r.params, r.error)) return fail(r.error);
     Policy policy;
     std::string err;
