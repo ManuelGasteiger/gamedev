@@ -527,20 +527,29 @@ async function finishSleep() {
   const p3 = (await state()).pos;
   // camera yaw 45°: D moves +x −z on the map, W/ArrowUp moves −x −z, A moves −x +z
   check('i.keys', p1[0] > p0[0] + 0.5 && p1[1] < p0[1] - 0.5 && p2[0] < p1[0] - 0.5 && p2[1] < p1[1] - 0.5 && p3[0] < p2[0] - 0.5, `D ${p0.map((v) => v.toFixed(1))} -> ${p1.map((v) => v.toFixed(1))}, ArrowUp -> ${p2.map((v) => v.toFixed(1))}, A -> ${p3.map((v) => v.toFixed(1))}`);
-  // the camera follows the dragon: let it come to rest first, or the region drifts under the pixel before the click lands
+  // the camera follows the dragon: let it come to rest, then click a region the map shows uncovered (the panels at the
+  // bottom grow with the dragon's options and may lie over east_marches)
   for (let i = 0, last = ''; i < 25; i++) {
     const now = (await state()).pos.map((v) => v.toFixed(2)).join();
     if (now === last) break;
     last = now;
     await page.waitForTimeout(200);
   }
-  const target = await page.evaluate(() => game.screenPos('east_marches'));
+  const [goal, target] = await page.evaluate(() => {
+    const here = game.state().region;
+    for (const id of ['east_marches', ...game.world().regions.map((r) => r.id)]) {
+      if (id === here || id === 'lair') continue;
+      const p = game.screenPos(id);
+      if (p && document.elementFromPoint(p[0], p[1])?.tagName === 'CANVAS') return [id, p];
+    }
+    return ['east_marches', game.screenPos('east_marches')];
+  });
   await page.mouse.move(target[0], target[1]);
   await page.mouse.click(target[0], target[1]);
-  await page.waitForFunction(() => game.state().region === 'east_marches', null, { timeout: 30000 }).catch(() => {});
+  await page.waitForFunction((g) => game.state().region === g, goal, { timeout: 30000 }).catch(() => {});
   const clicked = (await state()).region;
   await shot('i-click');
-  check('i.click', clicked === 'east_marches', `click on east_marches at (${target.map((v) => v.toFixed(0))}) -> dragon over ${clicked}`);
+  check('i.click', clicked === goal, `click on ${goal} at (${target.map((v) => v.toFixed(0))}) -> dragon over ${clicked}`);
   await page.keyboard.press('c');
   const chronOpen = !(await page.$eval('#chron', (e) => e.classList.contains('hidden')));
   await page.keyboard.press('Escape');
