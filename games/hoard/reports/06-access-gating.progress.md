@@ -4,17 +4,11 @@ Branch `item/06-access-gating`, from 3836e41.
 
 ## Done
 
-- data/arrivals.json, the arrival rule (rules/arrivals.cpp), lair knowledge and routes (arrival_gates.cpp).
-- Verbs `receive` and `hunt`: recorded wrappers, `apply_input` cases, wasm commands.
-- Hooks thief, slayers and pilgrims now read the arrival table (`arrival` key in data/hooks.json).
-- Briefing block `ledge`, narrator lines, importance rows, ui lines in en and de.
-- Tests `arrival_gating` and `arrival_cooldown` (fast, pass).
-- interest.py prints arrivals per waking by kind and the ten most common because-lines.
+- Arrival table, rule, lair knowledge, routes, verbs `receive` and `hunt`, hooks on arrivals, briefing ledge block, text, tests.
+- Measured: idle 0 arrivals over 300 seeds, played 1.36 per waking.
+- game-check 90/90, l10n-check passed, `ctest -L fast` 15/15.
+- README section, final report `reports/06-access-gating.md`.
 
 ## Left
 
-- Measure idle and played over 300 seeds, tune the gates if arrivals per waking are outside 0.5 to 1.5.
-- game-check.cjs and l10n-check.cjs.
-- README file list and constants.
-- Golden commit with the rules version bump, regenerated goldens, replays, save expect, wasm and html.
-- Final report.
+- Golden commit, push.
