@@ -24,7 +24,7 @@
     "release":              { "dread": 0,    "awe": 0.10 },
     "bless":                { "dread": 0,    "awe": 0.25 },
     "show":                 { "dread": 0.10, "awe": 0.20 },
-    "defend":               { "dread": 0,    "awe": 0.25 },
+    "defend":               { "dread": 0.08, "awe": 0.40 },
     "defend.attacker":      { "dread": 0.20, "awe": 0 },
     "receive":              { "dread": 0,    "awe": 0.10 },
     "receive.eat":          { "dread": 0.25, "awe": -0.10 },
