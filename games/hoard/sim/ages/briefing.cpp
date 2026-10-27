@@ -281,9 +281,12 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
                   {"tier", l.tier}, {"score", l.score}, {"text_key", l.text_key}, {"params", l.params}, {"because_chain", l.because},
                   {"sources", l.sources}};
         if (l.thread) j["sift_thread"] = l.thread;
+        json kept = json::array();
         for (auto& sid : l.sources) {
             size_t a = sid.find(':'), b = sid.find(':', a + 1);
             Source s = make_source(w, p, std::atoi(sid.substr(a + 1, b - a - 1).c_str()), sid.substr(b + 1));
+            if (s.medium.empty()) continue;   // the thread was cut and is gone: nobody tells it
+            kept.push_back(sid);
             bool disputed = false;
             for (auto& m : made) if (m.match == s.match && sources_conflict(w, m, s)) disputed = true;
             made.push_back(s);
@@ -291,6 +294,7 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
                                {"printed", s.printed}, {"passive", s.passive}, {"blame", s.blame}, {"stated_cause", s.stated_cause},
                                {"hedge", s.hedge}, {"archetype", s.archetype}, {"disputed", disputed}});
         }
+        j["sources"] = kept;
         return j;
     };
     json all = json::array();

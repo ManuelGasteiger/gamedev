@@ -6,6 +6,7 @@ One line per decision, newest first, with the doc that carries the detail. A new
 
 | date | decision | detail in |
 |---|---|---|
+| 2026-10-27 | The sifter only watches: episodes and stories live in `World.sift`, outside the chronicle, so a run tells the same history with the pattern bank on or off and the bank can change without new goldens. Runner-set: tiers per template in `importance.json`, the same-court penalty is the falling diversity penalty (0.20 to 0.05), a sleep with no tier-3 candidate has no headline. | `reports/14-story-sifting.md` |
 | 2026-10-26 | Fear is gone: dread and awe per court in oral, written and monumental stocks (item 02). Runner-set start values: oral half-life 60 years at human memory (scaled by race), research 0.016 per decade x era x dread factor x wealth/(wealth + 20), 50 wealth per unit of research; the written-grievance slayer trigger stays off (founding holds without it). | `reports/02-dread-awe-memory.md` |
 | 2026-10-26 | Witnesses are the owner (1.0) and the neighbouring courts (0.5); the sim derives them and ignores what a shell sends. Sage and envoy presence waits for people with places (item 07). | `act-api.md` §4, `reports/02-dread-awe-memory.md` |
 | 2026-10-26 | `no_walls` and `no_settle` hold while the court remembers the dragon (dread or awe at 0.2) and break by chance at 1 - stability per decade (resentment). | `act-api.md` §6.4, `reports/02-dread-awe-memory.md` |
