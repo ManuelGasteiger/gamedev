@@ -1,5 +1,6 @@
 #include <cstdio>
 #include "ages.h"
+#include "memory_tiers.h"
 #include "dragon_json.h"
 #include "hook_json.h"
 #include "genesis_json.h"
@@ -81,10 +82,36 @@ static json memory_json(const MemoryEntry& m) {
     j["type"] = m.type;
     j["magnitude"] = m.magnitude;
     j["weight"] = m.weight;
-    j["fear"] = m.fear;
+    j["axis"] = m.axis;
+    j["tier"] = m.tier;
+    j["strength"] = m.strength;
     j["faith"] = m.faith;
+    j["act"] = m.act;
     j["tags"] = tags_json(m.tags);
     return j;
+}
+
+static json tiers_json(const Tiers& t) { return {{"oral", t.oral}, {"written", t.written}, {"monumental", t.monumental}}; }
+
+static void tiers_from(const json& j, Tiers& t) {
+    get(j, "oral", t.oral);
+    get(j, "written", t.written);
+    get(j, "monumental", t.monumental);
+}
+
+static json monument_json(const Monument& m) {
+    return {{"region", m.region}, {"act", m.act}, {"bias", m.bias}, {"built", m.built}, {"dread", m.dread}, {"awe", m.awe}};
+}
+
+static Monument monument_from(const json& j) {
+    Monument m;
+    get(j, "region", m.region);
+    get(j, "act", m.act);
+    get(j, "bias", m.bias);
+    get(j, "built", m.built);
+    get(j, "dread", m.dread);
+    get(j, "awe", m.awe);
+    return m;
 }
 
 static json culture_json(const Culture& c) {
@@ -146,7 +173,11 @@ static json faction_json(const Faction& f) {
     j["cohesion"] = f.cohesion;
     j["era"] = f.era;
     j["era_progress"] = f.era_progress;
-    j["fear"] = f.fear;
+    j["dread"] = tiers_json(f.dread);
+    j["awe"] = tiers_json(f.awe);
+    j["monuments"] = json::array();
+    for (auto& m : f.monuments) j["monuments"].push_back(monument_json(m));
+    j["awe_since"] = f.awe_since;
     j["faith"] = f.faith;
     j["memory"] = json::array();
     for (auto& m : f.memory) j["memory"].push_back(memory_json(m));
@@ -179,8 +210,14 @@ static Faction faction_from(const json& j) {
     get(j, "cohesion", f.cohesion);
     get(j, "era", f.era);
     get(j, "era_progress", f.era_progress);
-    get(j, "fear", f.fear);
     get(j, "faith", f.faith);
+    // rules 2 and older kept one fear number: it becomes oral dread, half the faith becomes oral awe (item 02)
+    if (j.contains("dread") && j["dread"].is_object()) tiers_from(j["dread"], f.dread);
+    else if (j.contains("fear")) f.dread.oral = j["fear"].get<double>();
+    if (j.contains("awe") && j["awe"].is_object()) tiers_from(j["awe"], f.awe);
+    else if (j.contains("fear")) f.awe.oral = clamp01(f.faith * 0.5);
+    if (j.contains("monuments")) for (auto& m : j["monuments"]) f.monuments.push_back(monument_from(m));
+    get(j, "awe_since", f.awe_since);
     if (j.contains("memory"))
         for (auto& m : j["memory"]) {
             MemoryEntry e;
@@ -188,9 +225,13 @@ static Faction faction_from(const json& j) {
             get(m, "type", e.type);
             get(m, "magnitude", e.magnitude);
             get(m, "weight", e.weight);
-            get(m, "fear", e.fear);
+            get(m, "axis", e.axis);
+            get(m, "tier", e.tier);
+            get(m, "strength", e.strength);
             get(m, "faith", e.faith);
+            get(m, "act", e.act);
             e.tags = tags_from(m, "tags");
+            if (m.contains("fear") && e.faith == 0 && !has_tag(e.tags, "betrayal")) continue;   // a rules-2 fear entry: carried by dread.oral now
             f.memory.push_back(e);
         }
     if (j.contains("ruler")) {
@@ -583,7 +624,7 @@ static json spells_json(const Params& p) {
     }
     json t = {{"gate_size", p.terraform.gate_size}, {"cost_size_fraction", p.terraform.cost_size_fraction}, {"kinds", json::array()}};
     for (auto& kv : p.terraform.kinds) t["kinds"].push_back({{"kind", kv.first}, {"tag", kv.second.tag}});
-    json d = {{"gate_knowledge", p.c.demand_knowledge}, {"fear", p.c.demand_fear}, {"tribute_rate", p.c.demand_tribute_rate},
+    json d = {{"gate_knowledge", p.c.demand_knowledge}, {"dread", p.c.mem.demand_dread}, {"tribute_rate", p.c.demand_tribute_rate},
               {"preds", json::array({"tribute", "no_walls", "no_settle"})}};
     return {{"spells", arr}, {"terraform", t}, {"demand", d}};
 }
@@ -612,6 +653,15 @@ std::string world_view_json(const World& w, const Params& p) {
         for (auto& x : w.wars)
             if (x.coalition && (x.a == f.id || contains(x.allies_a, f.id))) coalitions.push_back(x.b);
         fj["coalition_against"] = coalitions;
+        fj["dread_eff"] = dread_eff(f);
+        fj["awe_eff"] = awe_eff(f);
+        fj["memory_tier"] = memory_tier(f, p.c.mem);
+        fj["unlocks"] = {{"pilgrims", awe_eff(f) >= p.c.mem.pilgrims_awe}, {"honest_envoys", awe_eff(f) >= p.c.mem.honest_awe},
+                         {"cult", awe_eff(f) >= p.c.mem.cult_awe}, {"consecrate", awe_eff(f) >= p.c.mem.temple_awe},
+                         {"demands", dread_eff(f) >= p.c.mem.demand_dread}, {"slayers", dread_eff(f) >= p.c.mem.slayer_dread},
+                         {"garrisons_flee", dread_eff(f) >= p.c.mem.flee_dread}};
+        fj["slayer_pressure"] = slayer_pressure(f, p.c.mem);
+        fj["oath_stability"] = oath_stability(f, p.c.mem);
         fj["hostage_taken"] = has_tag(f.tags, "hostage_taken");
         fj["altar"] = f.faith > p.c.reaction_faith_high;
         fj["loot"] = f.culture.loot;
@@ -674,6 +724,8 @@ std::string forecast_to_json(const Forecast& f) {
     j["strongest"] = f.strongest;
     j["strongest_era"] = f.strongest_era;
     j["slay_possible"] = f.slay_possible;
+    j["courts"] = json::array();
+    for (auto& c : f.courts) j["courts"].push_back({{"id", c.id}, {"dread", c.dread}, {"awe", c.awe}, {"pressure", c.pressure}, {"slay_odds", c.slay_odds}});
     forecast_hook_to_json(f, j);   // v0.4 hooks (S3)
     return j.dump();
 }

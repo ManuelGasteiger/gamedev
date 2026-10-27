@@ -50,7 +50,7 @@ function slayersHtml(view = world) {
 function armsCourtHtml(fid) {
   const f = world.factions.find((x) => x.id === fid), n = armsOf(fid), stage = f?.slayers?.stage ?? '';
   const slay = stage === 'ready' ? `<b class="down">slayer band ready: they strike in your next sleep (odds ${oddsText(f)})</b>` : stage === 'forming' ? `<b class="warn">slayer band forming (strength ${fmt(f.slayers.strength, 1)})</b>` : '';
-  const race = n && (n.progress > 0 || f.fear > 0) ? `arms race: ${Math.round(n.progress * 100)}% of the way to ${escapeHtml(armsLabel(n.id))} <span class="armsbar"><i style="width:${n.progress * 100}%"></i></span>` : '';
+  const race = n && (n.progress > 0 || f.dread_eff > 0) ? `arms race: ${Math.round(n.progress * 100)}% of the way to ${escapeHtml(armsLabel(n.id))} <span class="armsbar"><i style="width:${n.progress * 100}%"></i></span>` : '';
   if (!slay && !race) return '';
   return `<div class="arms">${slay}${slay && race ? '<br>' : ''}${race}<span class="cost-note">Fear feeds their work: the more they dread you, the faster it goes.</span></div>`;
 }

@@ -30,7 +30,7 @@
       {"do": "untag", "tag": "prophecy"}
     ],
     "branches": [
-      {"if": [{"event": ["act_burn", "act_kill", "act_take"], "self_as": "subject", "within_years": 10}], "text_key": "prophecy_fire", "effects": [{"do": "field", "field": "faith", "mul": 0.5}, {"do": "field", "field": "fear", "add": 0.3, "tags": ["prophecy"]}, {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 2.0, "decades": 30}, {"do": "tag", "tag": "prophecy_of_fire", "decades": 50, "inherit": true}]},
+      {"if": [{"event": ["act_burn", "act_kill", "act_take"], "self_as": "subject", "within_years": 10}], "text_key": "prophecy_fire", "effects": [{"do": "field", "field": "faith", "mul": 0.5}, {"do": "field", "field": "dread", "add": 0.3, "tags": ["prophecy"]}, {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 2.0, "decades": 30}, {"do": "tag", "tag": "prophecy_of_fire", "decades": 50, "inherit": true}]},
       {"text_key": "prophecy_grace", "weight": 1, "effects": [{"do": "field", "field": "faith", "add": 0.4, "tags": ["prophecy", "gift"]}, {"do": "tag", "tag": "prophecy_of_grace", "decades": 50, "inherit": true}]}
     ]
   }

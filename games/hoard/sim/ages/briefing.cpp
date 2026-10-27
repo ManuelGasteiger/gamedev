@@ -1,4 +1,5 @@
 #include <cstdio>
+#include "memory_tiers.h"
 #include "ages.h"
 #include "importance.h"
 #include "json.h"
@@ -451,14 +452,14 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         opps.push_back({{"text", s}, {"kind", "war"}, {"faction", f.id}});
     }
     std::vector<const Faction*> rich;
-    for (auto& f : w.factions) if (f.fear < c.briefing_rich_fear) rich.push_back(&f);
+    for (auto& f : w.factions) if (dread_eff(f) < c.briefing_rich_dread) rich.push_back(&f);
     std::sort(rich.begin(), rich.end(), [](const Faction* a, const Faction* b) { return a->wealth > b->wealth || (a->wealth == b->wealth && a->id < b->id); });
     for (size_t i = 0; i < rich.size() && i < static_cast<size_t>(c.briefing_rich_count); ++i) {
         std::string s = n.misc("opportunity_rich");
         Narrator::replace_all(s, "{faction}", Narrator::cap(rich[i]->id));
         Narrator::replace_all(s, "{wealth}", Narrator::num(rich[i]->wealth, 0));
-        Narrator::replace_all(s, "{fear}", Narrator::num(rich[i]->fear, 2));
-        opps.push_back({{"text", s}, {"kind", "rich"}, {"faction", rich[i]->id}, {"wealth", rich[i]->wealth}, {"fear", rich[i]->fear}});
+        Narrator::replace_all(s, "{dread}", Narrator::num(dread_eff(*rich[i]), 2));
+        opps.push_back({{"text", s}, {"kind", "rich"}, {"faction", rich[i]->id}, {"wealth", rich[i]->wealth}, {"dread", dread_eff(*rich[i])}, {"awe", awe_eff(*rich[i])}});
     }
     for (auto& f : w.factions) {
         if (has_tag(f.tags, "slayers") || f.anti_dragon < c.briefing_slayers_forming) continue;
@@ -468,6 +469,13 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         opps.push_back({{"text", s}, {"kind", "slayers"}, {"faction", f.id}, {"progress", f.anti_dragon}});
     }
     out["opportunities"] = opps;
+    json courts = json::array();   // item 02: what each court feels, and in which tier it remembers it
+    for (auto& f : w.factions)
+        courts.push_back({{"faction", f.id}, {"dread", dread_eff(f)}, {"awe", awe_eff(f)}, {"memory_tier", memory_tier(f, c.mem)},
+                          {"dread_tiers", {{"oral", f.dread.oral}, {"written", f.dread.written}, {"monumental", f.dread.monumental}}},
+                          {"awe_tiers", {{"oral", f.awe.oral}, {"written", f.awe.written}, {"monumental", f.awe.monumental}}},
+                          {"monuments", static_cast<int>(f.monuments.size())}});
+    out["courts"] = courts;
 
     std::string ph = n.misc("phase_line");
     size_t pi = static_cast<size_t>(phase_index(w.dragons[kPlayer]));

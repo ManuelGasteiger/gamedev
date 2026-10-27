@@ -40,11 +40,13 @@ LoadSave load_save(const std::string& text, World& out, std::string& err, bool* 
     if (version > kSaveFormat) { err = "written by a newer build (" + j.value("build", std::string("?")) + ")"; return LoadSave::newer_format; }
     for (int v = version; v < kSaveFormat; ++v)
         if (v >= 1 && kMigrate[v - 1]) j = kMigrate[v - 1](j);
+    // the hash is checked on the world as saved, so a save from older rules verifies before its fields are read into
+    // this build's state (rules 1: no sex; rules 2: one fear number)
+    if (!j.contains("world") || !j["world"].is_object()) { err = "no world"; return LoadSave::bad_world; }
+    if (hash_hex(state_hash_of_json(j["world"]).root) != j.value("state_hash", "")) { err = "state hash mismatch: the save is damaged"; return LoadSave::hash_mismatch; }
     World w;
-    if (!j.contains("world") || !world_from_json_as_saved(j["world"].dump(), w, err)) { if (err.empty()) err = "no world"; return LoadSave::bad_world; }
-    if (hash_hex(state_hash(w).root) != j.value("state_hash", "")) { err = "state hash mismatch: the save is damaged"; return LoadSave::hash_mismatch; }
+    if (!world_from_json(j["world"].dump(), w, err)) { if (err.empty()) err = "no world"; return LoadSave::bad_world; }
     if (replay_verifiable) *replay_verifiable = j.value("rules_version", 0) == kRulesVersion;
-    fill_person_sex(w);   // rules 1 had no sex field
     out = w;
     return LoadSave::ok;
 }

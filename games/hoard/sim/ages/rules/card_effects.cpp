@@ -1,4 +1,6 @@
 #include "card_ctx.h"
+#include "../defences.h"
+#include "../memory_tiers.h"
 #include "rules.h"
 #include "../names.h"
 #include "../world_util.h"
@@ -41,6 +43,25 @@ Cause card_cause(const CardCtx& ctx, const std::string& key = "") {
     return because(key.empty() ? ctx.card->cause : key, {ctx.event});
 }
 
+// a temple remembers the act that left the most awe on the court, a memorial the one that left the most dread; it
+// stands where that act happened, or at the capital when that land is lost or waste
+void raise_monument(World& w, Faction& f, const std::string& bias) {
+    std::string axis = bias == "dragon_temple" ? "awe" : "dread";
+    const MemoryEntry* best = nullptr;
+    for (auto& m : f.memory)
+        if (m.axis == axis && m.act >= 0 && (!best || m.strength * m.weight > best->strength * best->weight)) best = &m;
+    Monument mon;
+    mon.bias = bias;
+    mon.built = w.year;
+    mon.act = best ? best->act : -1;
+    if (mon.act >= 0 && static_cast<size_t>(mon.act) < w.acts.size()) {
+        const Region* r = find_region(w, w.acts[static_cast<size_t>(mon.act)].region);
+        if (r && r->owner == f.id && !has_tag(r->tags, "wasteland")) mon.region = r->id;
+    }
+    if (mon.region.empty()) mon.region = capital_region(w, f);
+    f.monuments.push_back(mon);
+}
+
 void faction_field(World& w, const Params& p, Faction& f, const CardEffect& e, const std::string& source) {
     const Constants& c = p.c;
     std::string k = str(e, "field");
@@ -62,13 +83,18 @@ void faction_field(World& w, const Params& p, Faction& f, const CardEffect& e, c
     else if (k == "openness") shift(t.openness, true);
     else if (k == "militarism") shift(t.militarism, true);
     else if (k == "piety") shift(t.piety, true);
-    else if (k == "faith" || k == "fear") {
-        // fear and faith are memories: a set or a floor becomes the entry that moves them there
-        double now = k == "faith" ? f.faith : f.fear, want = now;
+    else if (k == "faith") {
+        // faith is a memory: a set or a floor becomes the entry that moves it there
+        double now = f.faith, want = now;
         shift(want, true);
         Tags tags(e.tags.begin(), e.tags.end());
-        if (k == "faith" && (has(e, "set") || has(e, "mul"))) set_faith(f, c, w.year, source, 1.0, want, 0, tags);
-        else if (want != now) remember(f, c, w.year, source, 1.0, k == "fear" ? want - now : 0, k == "faith" ? want - now : 0, tags);
+        if (has(e, "set") || has(e, "mul")) set_faith(f, c, w.year, source, 1.0, want, tags);
+        else if (want != now) remember(f, c, w.year, source, 1.0, want - now, tags);
+    } else if (k == "dread" || k == "awe") {   // the oral tier moves so the effective value becomes the wanted one
+        Tiers& tiers = k == "dread" ? f.dread : f.awe;
+        double want = tiers_eff(tiers);
+        shift(want, true);
+        set_eff(tiers, want);
     }
 }
 
@@ -144,7 +170,8 @@ void split(World& w, const Params& p, const CardEffect& e, CardCtx& ctx, const s
     Faction s = found_faction(w, p, parent.race, pick, share, p.c.successor_cohesion, parent.era);
     s.culture = parent.culture;
     s.pop = parent.pop;
-    s.fear = parent.fear;
+    s.dread = parent.dread;
+    s.awe = parent.awe;
     s.faith = parent.faith;
     s.memory = parent.memory;
     s.anti_dragon = parent.anti_dragon;
@@ -261,8 +288,18 @@ void apply_card_effect(World& w, const Params& p, const CardEffect& e, CardCtx& 
             if (Faction* f = find_faction(w, id)) {
                 Tags tags;
                 for (auto& x : e.tags) tags.insert(subst(ctx, x));
-                remember(*f, p.c, w.year, str(e, "type", source), num(e, "magnitude", 1), num(e, "fear"), num(e, "faith") * (num(e, "faith") > 0 ? f->eff.faith_gain : 1), tags);
+                Deposit d;
+                d.type = str(e, "type", source);
+                d.magnitude = num(e, "magnitude", 1);
+                d.dread = num(e, "dread");
+                d.awe = num(e, "awe");
+                d.tags = tags;
+                deposit(w, p, *f, d);
+                double faith = num(e, "faith");
+                if (faith != 0) remember(*f, p.c, w.year, d.type, d.magnitude, faith * (faith > 0 ? f->eff.faith_gain : 1), tags);
             }
+        } else if (t == "monument") {
+            if (Faction* f = find_faction(w, id)) raise_monument(w, *f, str(e, "bias", "neutral"));
         } else if (t == "war") war(w, e, ctx, id);
         else if (t == "spawn_person") spawn_person(w, p, e, ctx, id);
         else if (t == "crown") crown(w, p, e, ctx, id);

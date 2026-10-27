@@ -3,7 +3,7 @@
  "reason.unknown_demand": "diese Forderung gibt es nicht ({r.pred})",
  "reason.needs_knowledge": "braucht Wissen {r.n}",
  "reason.already_sworn": "schon geschworen",
- "reason.not_cowed": "ihre Furcht ist {r.fear}, unter {r.need}, und sie sind nicht schwach",
+ "reason.not_cowed": "ihre Furcht ist {r.dread}, unter {r.need}, und sie sind nicht schwach",
  "reason.needs_knowledge_or_magic": "braucht Wissen oder Magie {r.n}",
  "reason.needs_axis": "braucht {r.axis} {r.n}",
  "reason.no_region": "diese Gegend gibt es nicht",

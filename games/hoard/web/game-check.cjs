@@ -85,7 +85,7 @@ async function finishSleep() {
     const silent = list.filter((a) => !a.ok && !a.why);
     const text = await panelText();
     const flat = text.replace(/\s+/g, ' ');
-    const hasFacts = /terrain/.test(flat) && (r.owner ? /race .* era .* wealth .* fear .* faith/.test(flat) : true);
+    const hasFacts = /terrain/.test(flat) && (r.owner ? /race .* era .* wealth .* dread .* awe .* faith/.test(flat) : true);
     if (missing.length || stubbed.length || silent.length || !hasFacts) { panelOk = false; console.log('  panel problem at', r.id, { missing, stubbed: stubbed.map((a) => a.id), silent: silent.map((a) => a.id), hasFacts }); }
     if (!seenTerrain.has(r.terrain)) { seenTerrain.add(r.terrain); await shot(`a${shotIndex++}-panel-${r.terrain}`); }
   }
@@ -101,16 +101,16 @@ async function finishSleep() {
   await shot('a-burn');
   const s1 = await state();
   const aldAfter = s1.factions.find((f) => f.id === 'aldmere');
-  check('a.burn', r1 && r1.ok && aldAfter.wealth < aldBefore.wealth && aldAfter.fear > aldBefore.fear, `aldmere wealth ${aldBefore.wealth.toFixed(1)} -> ${aldAfter.wealth.toFixed(1)}, fear ${aldAfter.fear.toFixed(2)}`);
+  check('a.burn', r1 && r1.ok && aldAfter.wealth < aldBefore.wealth && aldAfter.dread > aldBefore.dread, `aldmere wealth ${aldBefore.wealth.toFixed(1)} -> ${aldAfter.wealth.toFixed(1)}, dread ${aldAfter.dread.toFixed(2)}`);
   const rTake = await act('take', { region: 'east_vale', category: 'gold', magnitude: 0.3 });
   const rBooks = (await fly('deep_wood'), await act('take', { region: 'deep_wood', category: 'books', magnitude: 0.3 }));
   const rArt = (await fly('hill_hold'), await act('take', { region: 'hill_hold', category: 'artifacts', magnitude: 0.6 }));
   const hoard = (await state()).dragon.hoard;
   check('a.take', rTake?.ok && rBooks?.ok && rArt?.ok && hoard.gold > 0 && hoard.books > 0 && hoard.artifacts > 0 && cats.includes('royals') && cats.includes('food') && cats.includes('gold'), `east_vale (human, era 0) offers ${cats.join('/')}; elves give books, dwarves artifacts; hoard gold ${hoard.gold.toFixed(1)} books ${hoard.books.toFixed(1)} artifacts ${hoard.artifacts.toFixed(1)}`);
-  const dorunFear0 = (await state()).factions.find((f) => f.id === 'dorun').fear;
+  const dorunDread0 = (await state()).factions.find((f) => f.id === 'dorun').dread;
   const rRoar = await act('show', { region: 'hill_hold' });
-  const dorunFear1 = (await state()).factions.find((f) => f.id === 'dorun').fear;
-  check('a.roar', rRoar?.ok && dorunFear1 > dorunFear0, `dorun fear ${dorunFear0.toFixed(2)} -> ${dorunFear1.toFixed(2)}`);
+  const dorunDread1 = (await state()).factions.find((f) => f.id === 'dorun').dread;
+  check('a.roar', rRoar?.ok && dorunDread1 > dorunDread0, `dorun dread ${dorunDread0.toFixed(2)} -> ${dorunDread1.toFixed(2)}`);
   const giveBefore = await state();
   const rGive = await act('give', { region: 'hill_hold', gold: 2 });
   const giveAfter = await state();
@@ -170,7 +170,12 @@ async function finishSleep() {
   const readOffers = () => page.evaluate(() => game.world().offers.map((o) => ({ key: o.text_key, party: o.oath.parties[1], clauses: o.oath.clauses.map((c) => c.pred) })));
   let s3 = await state();
   let offers = await readOffers();
-  let defOffer = offers.findIndex((o) => /protect/.test(o.key));
+  // a protect offer from a court that an army is marching on (the defend check below needs that army)
+  const besieged = () => page.evaluate(() => {
+    const w = game.world();
+    return w.offers.findIndex((o) => /protect/.test(o.text_key) && (w.armies ?? []).some((a) => a.defender === o.oath.parties[1] && (w.factions.find((f) => f.id === a.defender)?.at_war_with ?? []).includes(a.attacker)));
+  });
+  let defOffer = await besieged();
   // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
   for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
     await sleepThrough(100);
@@ -181,7 +186,7 @@ async function finishSleep() {
     await frames(2);
     s3 = await state();
     offers = await readOffers();
-    defOffer = offers.findIndex((o) => /protect/.test(o.key));
+    defOffer = await besieged();
   }
   check('d.envoys', s3.offers > 0 && s3.envoys === s3.offers && defOffer >= 0 && s3.armies > 0, `${s3.offers} offers (${offers.map((o) => o.key.slice(6) + ':' + o.party).join(', ')}), ${s3.envoys} envoy figures, ${s3.armies} armies, ${s3.arrows} war arrows`);
   await page.waitForTimeout(800);
@@ -254,7 +259,7 @@ async function finishSleep() {
   const partyAfter = (await state()).factions.find((f) => f.id === party);
   await page.waitForTimeout(300);
   await shot('d-breach');
-  check('d.breach', rBreach?.ok && partyAfter.faith <= 0.03 && rBreach.changed.some((c) => c.id === party && c.after.fear > c.before.fear), `burned ${party} under oath: faith ${partyAfter.faith.toFixed(3)} (betrayal sets 0.02), fear ${partyAfter.fear.toFixed(2)}`);
+  check('d.breach', rBreach?.ok && partyAfter.faith <= 0.03 && rBreach.changed.some((c) => c.id === party && c.after.dread > c.before.dread), `burned ${party} under oath: faith ${partyAfter.faith.toFixed(3)} (betrayal sets 0.02), dread ${partyAfter.dread.toFixed(2)}`);
 
   // ---- e. spells tab: curse before sleeping (magic 2.5 covers 1.5), ward shown gated with its reason ----------------
   await page.evaluate(() => game.land());
@@ -377,7 +382,7 @@ async function finishSleep() {
           w.wars = (w.wars ?? []).filter((x) => alive.has(x.a) && alive.has(x.b) && ![x.a, x.b].includes(A.id) && ![x.a, x.b].includes(B.id));
           w.wars.push({ a: A.id, b: B.id, started: w.year, decades: 0, taken_from_a: 0, taken_from_b: 0, allies_a: [], allies_b: [], coalition: false, years_fought: 0, declared: 0, thread: `war:${A.id}:${B.id}:${w.year}` });
           A.at_war_with = [B.id]; B.at_war_with = [A.id];
-          A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.15;
+          B.wealth = Math.max(B.wealth, 20); A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
           game.loadWorld(w);
           return `${A.id} at war with ${B.id}, which also holds ${X.id}`;
         }
@@ -402,7 +407,7 @@ async function finishSleep() {
   const told = (k, re) => captured[k] && (captured[k].worthy ? re.test(captured[k].ticker) : true);
   check('c.war', have('war_started') && captured.war_started && captured.war_started.arrows > 0 && told('war_started', /declared war/), `arrows ${captured.war_started?.arrows}, army groups ${captured.war_started?.armies}, ticker "${captured.war_started?.ticker}"`);
   check('c.conquest', have('region_taken') && captured.region_taken && recoloured.length > 0, `"${captured.region_taken?.ticker}"; rings recoloured since age 2: ${recoloured.join(', ')}${conquestLab ? ` (lab: ${conquestLab})` : ''}`);
-  check('c.collapse', have('collapse') && told('collapse', /collapsed/), captured.collapse?.ticker);
+  check('c.collapse', have('collapse') && told('collapse', /fell/), captured.collapse?.ticker);   // narrator.json: "fell apart into" / "fell, and a new house"
   check('c.era', have('era_advance') && told('era_advance', /entered the \w+ age/) && eraAfter !== eraBefore, `"${captured.era_advance?.ticker}"; hill_hold settlement meshes ${eraBefore} -> ${eraAfter}`);
   check('c.plague', have('plague') && told('plague', /plague/i), `${captured.plague?.ticker}${more}`);
   check('c.settled', have('region_settled') && told('region_settled', /settled/), `${captured.region_settled?.ticker}${captured.region_settled?.worthy ? '' : ' (below the ticker threshold: map only)'}${settleLab ? ` (lab: ${settleLab} left open)` : ''}${more}`);
@@ -579,7 +584,7 @@ async function finishSleep() {
     if (!w.remnants.some((r) => r.race === 'orc')) w.remnants.push({ race: 'orc', strength: 0.3, origin: 'north_scar', max_era: 0 });
     else w.remnants.find((r) => r.race === 'orc').strength = 0.3;
     const pious = w.factions.find((f) => f.id === 'dorun') || w.factions[0];
-    pious.memory.push({ year: w.year, type: 'gift', magnitude: 1, weight: 1, fear: 0, faith: 0.8, tags: ['gift'] });
+    pious.memory.push({ year: w.year, type: 'gift', magnitude: 1, weight: 1, axis: 'faith', tier: 'oral', strength: 0, faith: 0.8, act: -1, tags: ['gift'] });
     pious.faith = 0.8;
     game.loadWorld(w);
   });
@@ -602,9 +607,9 @@ async function finishSleep() {
   const faithAfterMiracle = (await state()).factions.find((f) => f.id === pious.id).faith;
   const fp2 = (await state()).dragon.faith_pool;
   const rTerror = await act('miracle', { region: pious.capital, terror: true });
-  const fearAfterTerror = (await state()).factions.find((f) => f.id === pious.id).fear;
+  const dreadAfterTerror = (await state()).factions.find((f) => f.id === pious.id).dread;
   await shot('l-miracle');
-  check('a.miracle', rMir?.ok && rTerror?.ok && fp2 < fp1 && fearAfterTerror > 0.3, `protect: faith ${faithBeforeMiracle.toFixed(2)} -> ${faithAfterMiracle.toFixed(2)} (capped at 1), faith pool ${fp1.toFixed(2)} -> ${fp2.toFixed(2)}; terror: fear ${fearAfterTerror.toFixed(2)}`);
+  check('a.miracle', rMir?.ok && rTerror?.ok && fp2 < fp1 && dreadAfterTerror > 0.3, `protect: faith ${faithBeforeMiracle.toFixed(2)} -> ${faithAfterMiracle.toFixed(2)} (capped at 1), faith pool ${fp1.toFixed(2)} -> ${fp2.toFixed(2)}; terror: dread ${dreadAfterTerror.toFixed(2)}`);
   const blessRow = (await actions()).find((a) => a.id === 'spell-bless');
   const rBless = await act('cast', { region: pious.capital, spell: 'bless' });
   const blessLabel = (await (async () => { await frames(2); return page.evaluate(() => game.labels()); })()).find((l) => l.id === pious.capital);
@@ -863,12 +868,12 @@ async function checksV04() {
   // a lab world: `fn` edits the world view `w` (with `a` = arg) inside the page, then the page loads it
   const lab = (fn, arg = null) => page.evaluate(([src, a, helpers]) => { const w = game.world(); eval(helpers + '\n(' + src + ')();'); return game.loadWorld(w); }, [fn.toString(), arg, `const armBand = ${armBand.toString()};`]);
   const file = 'file://' + path.resolve(__dirname, 'hoard-game.html');
-  // a court whose slayer band is forming or ready (a lab helper evaluated inside the page): the sim recomputes fear from
-  // memory each step, so the fear goes in as a memory too
-  const armBand = (w, id, stage, fear = 0.8) => {
+  // a court whose slayer band is forming or ready (a lab helper evaluated inside the page): its dread goes in as oral
+  // dread plus the memory of a burn
+  const armBand = (w, id, stage, dread = 0.8) => {
     const f = w.factions.find((x) => x.id === id);
-    f.tags = [...new Set([...f.tags, 'slayers'])]; f.anti_dragon = Math.max(f.anti_dragon, 1.05); f.fear = fear;
-    f.memory.push({ year: w.year, type: 'burn', magnitude: 1, weight: 1, fear, faith: 0, tags: ['burn'] });
+    f.tags = [...new Set([...f.tags, 'slayers'])]; f.anti_dragon = Math.max(f.anti_dragon, 1.05); f.dread = { oral: dread, written: 0, monumental: 0 };
+    f.memory.push({ year: w.year, type: 'burn', magnitude: 1, weight: 1, axis: 'dread', tier: 'oral', strength: dread, faith: 0, act: -1, tags: ['burn'] });
     w.timed_tags.push({ on: 'faction', target: id, tag: 'slayers_' + stage, from: w.year - 10, until: 1e9, event: 0, inherit: false });
   };
 
@@ -1001,7 +1006,7 @@ async function checksV04() {
   await page.evaluate(() => game.takeOff());
 
   // 2. every look key on the dragon, in two sets (plates and fire have one value each); a rank adds its step
-  const lookA = ['thick_hide', 'great_wings', 'fury', 'old_bones', 'earth_shaker', 'hotter_breath', 'spell_sense', 'glamour', 'ward_craft', 'keen_eyes', 'riddle_master', 'gilded_throne', 'dragon_king'];
+  const lookA = ['thick_hide', 'great_wings', 'laden_flight', 'old_bones', 'earth_shaker', 'hotter_breath', 'spell_sense', 'glamour', 'ward_craft', 'keen_eyes', 'riddle_master', 'gilded_throne', 'dragon_king'];
   await lab(() => { w.dragon.growth = { might: 60, flame: 30, arcana: 30, lore: 30, dominion: 30 }; w.dragon.talents = a; w.dragon.wounds = 0; w.dragon.hoard.gold = 40; }, lookA);
   await fly('lair');
   await page.evaluate(() => game.openGrowth());
@@ -1011,7 +1016,7 @@ async function checksV04() {
   const keysA = ['plates', 'fire', 'wings', 'spikes', 'horns', 'runes', 'crest', 'eyes', 'veins', 'shadow', 'aura', 'hoard_glitter', 'banners', 'scale'].filter((k) => la.look[k] !== undefined);
   check('v04.look_a', keysA.length === 14 && la.look.plates === 'dark' && la.look.fire === 'gold' && la.scale > 1, `look ${JSON.stringify(la.look)}; model scale ${la.scale.toFixed(2)}`);
   await page.evaluate(() => game.closeGrowth());
-  await lab(() => { w.dragon.growth = { might: 30, flame: 60, arcana: 60, lore: 30, dominion: 0 }; w.dragon.talents = a; }, ['iron_scales', 'tower_breaker', 'arcane_hide', 'sleepers_ward', 'long_memory']);
+  await lab(() => { w.dragon.growth = { might: 30, flame: 60, arcana: 60, lore: 30, dominion: 0 }; w.dragon.talents = a; }, ['iron_scales', 'tower_breaker', 'arcane_hide', 'sleepers_ward', 'chronicler']);
   await page.evaluate(() => game.openGrowth());
   await frames(3);
   const lb = await v04();
@@ -1028,9 +1033,9 @@ async function checksV04() {
   await lab(() => {
     const f = (id) => w.factions.find((x) => x.id === id);
     w.dragon.growth = { might: 10, flame: 0, arcana: 20, lore: 0, dominion: 0 }; w.dragon.talents = ['dragon_sight']; w.dragon.wounds = 0;
-    Object.assign(f('aldmere'), { era: 2, anti_dragon: 0.25, fear: 0 });
-    Object.assign(f('dorun'), { era: 4, anti_dragon: 4.2, fear: 0 });   // cannons: era 2 and anti-dragon 4 (data/defences.json)
-    Object.assign(f('ilvareth'), { era: 2, fear: 0 });
+    Object.assign(f('aldmere'), { era: 2, anti_dragon: 0.25, dread: { oral: 0, written: 0, monumental: 0 } });
+    Object.assign(f('dorun'), { era: 4, anti_dragon: 4.2, dread: { oral: 0, written: 0, monumental: 0 } });   // cannons: era 2 and anti-dragon 4 (data/defences.json)
+    Object.assign(f('ilvareth'), { era: 2, dread: { oral: 0, written: 0, monumental: 0 } });
     f('vessary').era = 1;
     armBand(w, 'vessary', 'ready');
   });

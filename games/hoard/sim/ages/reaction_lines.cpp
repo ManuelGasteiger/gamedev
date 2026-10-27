@@ -52,6 +52,7 @@ struct Teller {
         if ((act == "take_hostage" || act == "release") && person_of(n).empty()) return text(act + ".nobody");
         std::vector<std::string> keys;
         if (act == "kill" && is_person_id(w, n.item)) keys = {"kill_person." + rel, "kill_person.any"};
+        if (n.awe) keys.push_back(act + (act == "defend" ? ".saved" : (act == "give" ? ".gift" : ".awe")));
         for (auto& k : {act + "." + rel + "." + race, act + "." + rel, act + ".any"}) keys.push_back(k);
         if (is_harm(act)) { keys.push_back("harm." + rel + "." + race); keys.push_back("harm." + rel); }
         return first_of(keys);

@@ -41,7 +41,7 @@ void load_constants(const json& j, Constants& c) {
     get(j, "start_hoard", c.start_hoard);
     if (j.contains("slayers")) {
         const json& s = j["slayers"];
-        get(s, "lapse_fear", c.slay_lapse_fear);
+        get(s, "lapse_dread", c.slay_lapse_dread);
         get(s, "ready_rate", c.slay_ready_rate);
         get(s, "health_div", c.slay_health_div);
         get(s, "points_base", c.slay_points_base);
@@ -68,6 +68,7 @@ TalentLook look_from(const json& j) {
 }
 
 bool load_talents(const json& j, TalentBook& b, std::string& err) {
+    get(j, "flight", b.flight);
     get(j, "nodes", b.nodes);
     get(j, "node_phase", b.node_phase);
     b.node_phase.resize(b.nodes.size(), 1);
@@ -110,7 +111,6 @@ bool load_talents(const json& j, TalentBook& b, std::string& err) {
 }
 
 void load_defences(const json& j, DefenceBook& b) {
-    get(j, "fear_damp", b.fear_damp);
     get(j, "hero_bonus", b.hero_bonus);
     if (!j.contains("defences")) return;
     for (auto& v : j["defences"]) {

@@ -1,4 +1,6 @@
+#include <cmath>
 #include "fixtures.h"
+#include "ages/memory_tiers.h"
 
 using namespace ages;
 
@@ -12,7 +14,7 @@ static void betrayal() {
     World& w = r.world;
     w.oaths.push_back(make_oath("aldmere", "no_harm"));
     Faction* f = find_faction(w, "aldmere");
-    remember(*f, r.params.c, 0, "gift", 1.0, 0, 0.6, {"gift"});
+    remember(*f, r.params.c, 0, "gift", 1.0, 0.6, {"gift"});
     apply_acts(w, r.params, {make_act("burn", "aldmere", 0.4, "east_vale")});
     CHECK(memory_has(*f, "betrayal"), "burn under no_harm oath must leave a betrayal memory");
     CHECK(f->faith < 0.05, "faith must collapse below 0.05 on betrayal");
@@ -59,8 +61,16 @@ static void strong_vs_weak() {
     apply_acts(strong.world, strong.params, {make_act("burn", "aldmere", 0.5, "east_vale")});
     apply_acts(weak.world, weak.params, {make_act("burn", "aldmere", 0.5, "east_vale")});
     CHECK(s->anti_dragon > 0, "strong faction must gain anti_dragon progress when burned");
-    CHECK(s->fear < k->fear, "strong faction must fear less than a weak one for the same burn");
+    CHECK(dread_eff(*s) < dread_eff(*k), "strong faction must dread less than a weak one for the same burn");
     CHECK(k->anti_dragon == 0, "weak faction gains no anti_dragon from a burn");
+    // item 02: its research then runs at the dread factor and is paid for out of its wealth
+    s->era = std::max(s->era, strong.params.c.anti_dragon_min_era);
+    s->at_war_with.clear();
+    double wealth = s->wealth, anti = s->anti_dragon;
+    rule_era(strong.world, strong.params);
+    double progress = s->anti_dragon - anti;
+    CHECK(progress > 0, "a strong court at research era must progress against the dragon");
+    CHECK(std::fabs((wealth - s->wealth) - strong.params.c.mem.research_spend * progress) < 1e-9, "research must cost research_spend wealth per unit of progress");
 }
 
 int main() {

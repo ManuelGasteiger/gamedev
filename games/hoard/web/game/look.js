@@ -24,13 +24,13 @@ function fireTexture() { return lookOf().fire ? lookTexture('flame', [[0, '255,2
 const EFFECT_SEE = {
   stamina_add: 'a longer stamina bar', speed_mult: 'faster flight', armor_mult: 'smaller wound numbers', arcane_armor_mult: 'smaller tower damage', health_add: 'a longer health bar',
   heal_mult: 'more healing in the sleep panel', burn_cost_mult: 'cheaper burns in the action panel', burn_mult: 'bigger burns for the same stamina', kill_mult: 'harder kills',
-  witness_mult: 'fewer witnesses in the action panel', sight: 'every range ring and its damage', lie_sight: 'the lie in an envoy\'s eyes', premonition: 'a warning before slayers come',
+  witness_mult: 'neighbours who take less notice', sight: 'every range ring and its damage', lie_sight: 'the lie in an envoy\'s eyes', premonition: 'a warning before slayers come',
   forecast_mult: 'a sharper forecast', crush: 'a Crush row in the action panel', burn_spread: 'fire leaping to the neighbours', tower_breaker: 'towers falling where you burn',
-  ward_breaker: 'wards that no longer halve your fire', molten_gold: 'more gold from burning towns', fear_mult: 'bigger fear numbers', tribute_mult: 'bigger tribute', bed_mult: 'more Might from each sleep',
+  ward_breaker: 'wards that no longer halve your fire', molten_gold: 'more gold from burning towns', dread_mult: 'bigger dread numbers', burn_dread_mult: 'bigger dread from your fire', protect_awe_mult: 'more awe when you protect', awe_gain_mult: 'bigger awe numbers', tribute_mult: 'bigger tribute', bed_mult: 'more Might from each sleep',
   digest_mult: 'more growth from each sleep', teach_mult: 'teaching that lasts', demand_mult: 'Demand opening sooner', thief_guard: 'no more thieves in the hoard', hunt_mult: 'more food from the hunt',
   cult: 'a court that keeps its faith', brood: 'dragon-raised courts that stay yours', oath_steadfast: 'oaths that hold', slay_mult: 'a safer forecast', lair_ward: 'a ward over your lair',
-  spell_cost_mult: 'cheaper spells', undead_cost_mult: 'cheaper undead', hex: 'curses that slow their weapons', memory_mult: 'fear that lasts', faith_mult: 'bigger faith numbers', ember_mult: 'more embers',
-  burn_linger: 'char that lingers', hostage_lore_mult: 'more Lore from hostages', fury: 'stronger fire after a wound',
+  spell_cost_mult: 'cheaper spells', undead_cost_mult: 'cheaper undead', hex: 'curses that slow their weapons', oral_dread_decay_mult: 'dread that lasts', burn_tier_up: 'burns they write down', carry_add: 'a bigger carry gauge', gold_weight_mult: 'gold that weighs less', chronicle_books: 'a clearer chronicle', faith_mult: 'bigger faith numbers', ember_mult: 'more embers',
+  burn_linger: 'char that lingers', hostage_lore_mult: 'more Lore from hostages',
 };
 function lookSeeText(t) {
   const word = (k, v) => (Array.isArray(LOOK_WORDS[k]) ? LOOK_WORDS[k][clamp(Math.round(v) - 1, 0, LOOK_WORDS[k].length - 1)] : LOOK_WORDS[k]?.[v]);

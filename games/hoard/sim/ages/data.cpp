@@ -1,5 +1,6 @@
 #include "data.h"
 #include "json.h"
+#include "memory_data.h"
 #include "world_util.h"
 
 namespace ages {
@@ -25,6 +26,7 @@ static void get_tags(const json& j, const char* key, Tags& out) {
 }
 
 static void load_constants(const json& j, Constants& c) {
+    if (j.contains("memory")) memory_constants_from_json(j["memory"], c.mem);
     get(j, "step_years", c.step_years);
     get(j, "land_wealth_scale", c.land_wealth_scale);
     get(j, "wealth_upkeep", c.wealth_upkeep);
@@ -34,9 +36,7 @@ static void load_constants(const json& j, Constants& c) {
     get(j, "era_threshold", c.era_threshold);
     get(j, "era_diffusion", c.era_diffusion);
     get(j, "era_diffusion_gap", c.era_diffusion_gap);
-    get(j, "anti_dragon_fear", c.anti_dragon_fear);
     get(j, "anti_dragon_min_era", c.anti_dragon_min_era);
-    get(j, "anti_dragon_rate", c.anti_dragon_rate);
     get(j, "slayers_at", c.slayers_at);
     get(j, "war_siege_anti_dragon", c.war_siege_anti_dragon);
     get(j, "war_penalty", c.war_penalty);
@@ -65,11 +65,10 @@ static void load_constants(const json& j, Constants& c) {
     get(j, "tribute_faith_no_oath", c.tribute_faith_no_oath);
     get(j, "tribute_rate", c.tribute_rate);
     get(j, "tribute_faith_pool", c.tribute_faith_pool);
-    get(j, "slay_fear", c.slay_fear);
     get(j, "slay_attempt_rate", c.slay_attempt_rate);
     get(j, "slay_success_div", c.slay_success_div);
     get(j, "slay_fail_wealth_loss", c.slay_fail_wealth_loss);
-    get(j, "slay_fail_fear", c.slay_fail_fear);
+    get(j, "slay_fail_dread", c.slay_fail_dread);
     get(j, "elf_withdraw_ratio", c.elf_withdraw_ratio);
     get(j, "dug_in_invasion_mult", c.dug_in_invasion_mult);
     get(j, "orc_spawn_burn", c.orc_spawn_burn);
@@ -90,7 +89,8 @@ static void load_constants(const json& j, Constants& c) {
     get(j, "wasteland_clear_decades", c.wasteland_clear_decades);
     get(j, "oath_tribute_min_faith", c.oath_tribute_min_faith);
     get(j, "oath_walls_era", c.oath_walls_era);
-    get(j, "oath_fade_fear", c.oath_fade_fear);
+    get(j, "oath_fade_memory", c.oath_fade_memory);
+    get(j, "oath_breach_rate", c.oath_breach_rate);
     get(j, "act_kill_cohesion", c.act_kill_cohesion);
     get(j, "act_defend_attacker_loss", c.act_defend_attacker_loss);
     get(j, "act_accept_offering_faith_pool", c.act_accept_offering_faith_pool);
@@ -119,7 +119,6 @@ static void load_constants(const json& j, Constants& c) {
     get(j, "offer_tribute_worship", c.offer_tribute_worship);
     get(j, "offer_tribute_rival", c.offer_tribute_rival);
     get(j, "demand_knowledge", c.demand_knowledge);
-    get(j, "demand_fear", c.demand_fear);
     get(j, "demand_tribute_rate", c.demand_tribute_rate);
     get(j, "demand_refused_resolve", c.demand_refused_resolve);
     get(j, "home_land_mult", c.home_land_mult);
@@ -223,7 +222,7 @@ static void load_constants(const json& j, Constants& c) {
         get(v, "ward_piety", c.offer_ward_piety);
         get(v, "teach_openness", c.offer_teach_openness);
         get(v, "envoy_kill_magnitude", c.envoy_kill_magnitude);
-        get(v, "envoy_kill_fear", c.envoy_kill_fear);
+        get(v, "envoy_kill_dread", c.envoy_kill_dread);
         get(v, "bless_faith", c.offer_bless_faith);
         get(v, "affinity_rival", c.offer_affinity_rival);
         get(v, "elope_affinity", c.offer_elope_affinity);
@@ -241,7 +240,7 @@ static void load_constants(const json& j, Constants& c) {
     if (j.contains("briefing")) {
         const json& v = j["briefing"];
         get(v, "group_years", c.briefing_group_years);
-        get(v, "rich_fear", c.briefing_rich_fear);
+        get(v, "rich_dread", c.briefing_rich_dread);
         get(v, "slayers_forming", c.briefing_slayers_forming);
         get(v, "rich_count", c.briefing_rich_count);
         get(v, "importance_default", c.importance_default);
@@ -251,7 +250,7 @@ static void load_constants(const json& j, Constants& c) {
         get(v, "importance_hostage", c.importance_hostage);
     }
     get(j, "elf_withdraw_affinity", c.elf_withdraw_affinity);
-    get(j, "elf_withdraw_fear", c.elf_withdraw_fear);
+    get(j, "elf_withdraw_dread", c.elf_withdraw_dread);
     get(j, "elf_withdraw_chance", c.elf_withdraw_chance);
     get(j, "tribute_food", c.tribute_food);
     get(j, "hegemony_end_share", c.hegemony_end_share);
@@ -324,7 +323,7 @@ static void load_oath_effects(const json& j, std::map<std::string, OathEffect>& 
         OathEffect e;
         const json& v = it.value();
         if (v.contains("faith_set")) { e.has_faith_set = true; e.faith_set = v["faith_set"].get<double>(); }
-        get(v, "fear_add", e.fear_add);
+        get(v, "dread_add", e.dread_add);
         get_tags(v, "tags", e.tags);
         if (v.contains("modifier")) {
             const json& m = v["modifier"];
@@ -450,20 +449,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
         for (auto& b : a.second)
             if (!p.race_affinity[b.first].count(a.first)) p.race_affinity[b.first][a.first] = b.second;
 
-    if (!parse_json(d.reactions, "reactions", j, err)) return false;
-    for (auto& v : j) {
-        Reaction r;
-        get(v, "acts", r.acts);
-        get(v, "relationship", r.relationship);
-        get(v, "fear_per_m", r.fear_per_m);
-        get(v, "fear_flat", r.fear_flat);
-        get(v, "faith_per_m", r.faith_per_m);
-        get(v, "faith_flat", r.faith_flat);
-        get(v, "anti_dragon_per_m", r.anti_dragon_per_m);
-        if (v.contains("faith_set")) { r.has_faith_set = true; r.faith_set = v["faith_set"].get<double>(); }
-        get_tags(v, "tags", r.tags);
-        p.reactions.push_back(r);
-    }
+    if (!parse_json(d.reactions, "reactions", j, err) || !reactions_from_json(j, p, err)) return false;
 
     if (!parse_json(d.shocks, "shocks", j, err)) return false;
     Shocks& s = p.shocks;
@@ -520,7 +506,7 @@ bool world_from_data_json(const DataJson& d, const Params& p, World& w, std::str
         get(v, "wealth", f.wealth);
         get(v, "cohesion", f.cohesion);
         get(v, "era", f.era);
-        get(v, "fear", f.fear);
+        if (v.contains("dread")) f.dread.oral = v["dread"].get<double>();
         get(v, "faith", f.faith);
         get_tags(v, "tags", f.tags);
         f.born = 0;

@@ -7,7 +7,7 @@
     { "type": "burn",   "target": "has_slayers", "region": "largest", "magnitude": 0.5 }
   ],
   "talents": ["thick_hide", "iron_scales", "old_bones", "hotter_breath", "clinging_fire", "white_fire", "tower_breaker",
-              "spell_sense", "ward_craft", "dragon_sight", "sleepers_ward", "keen_eyes", "premonition", "patient_mind", "long_memory",
+              "spell_sense", "ward_craft", "dragon_sight", "sleepers_ward", "keen_eyes", "premonition", "patient_mind", "chronicler",
               "tithe", "kobold_servants", "gilded_throne", "brood_of_mortals"],
   "sleep_cycle": ["short", "short", "long"],
   "min_sleep": 10,

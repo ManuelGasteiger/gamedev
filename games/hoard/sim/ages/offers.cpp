@@ -1,4 +1,6 @@
 #include "offers.h"
+#include "talents.h"
+#include "memory_tiers.h"
 #include "unrecorded.h"
 #include "ages.h"
 #include "oaths.h"
@@ -81,7 +83,7 @@ static void add(World& w, Rng& rng, const Params& p, const Faction& f, const Dra
     of.price = f.wealth * d.def->price_rate;
     of.marked = was_deceived(f);
     double cunning = d.envoy ? d.envoy->traits.cunning : 0.5;
-    bool lie = d.def->can_lie && !d.def->pretexts.empty() &&
+    bool lie = d.def->can_lie && !d.def->pretexts.empty() && awe_eff(f) < c.mem.honest_awe &&
                rng.chance(c.offer_lie_base + c.offer_lie_authority * f.culture.traits.authority + c.offer_lie_cunning * cunning);
     if (lie) {
         of.stated_reason = d.def->pretexts[static_cast<size_t>(rng.range(0, static_cast<int>(d.def->pretexts.size())))];
@@ -210,7 +212,7 @@ static void fulfil(World& w, const Params& p, Oath& o, const Act& a) {
         return;
     }
     double target = std::min(1.0, f->faith * c.offer_honest_faith_mult);
-    if (target > f->faith) set_faith(*f, c, w.year, "offer_fulfilled", 1.0, target, 0, {"gratitude"});
+    if (target > f->faith) set_faith(*f, c, w.year, "offer_fulfilled", 1.0, target, {"gratitude"});
     if (o.price > 0 && !contains_pred(o, "tribute")) w.dragons[kPlayer].hoard.gold += o.price;
     if (Known* k = find_known(w, o.envoy)) k->relationship = std::min(1.0, k->relationship + c.known_help);
     emit(w, "offer_fulfilled", f->id, o.envoy, f->faith, {o.kind, o.motive}, because("honest_offer", {sworn, act}, {{"faith", f->faith}, {"gold", o.price}}), "oath:" + o.id);
@@ -254,7 +256,13 @@ bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, st
     if (envoy) for (auto& r : w.regions) if (r.lair) a.region = r.id;   // v0.4: an envoy dies in the lair, out of reach of its court's defences
     std::vector<ReactionLine> told = apply_acts(w, p, {a});
     if (lines) *lines = told;
-    remember(*f, c, w.year, "kill_person", 1.0, c.envoy_kill_fear, 0, {envoy ? "envoy_killed" : "murder"});
+    Deposit d;
+    d.type = "kill_person";
+    d.magnitude = 1.0;
+    d.dread = c.envoy_kill_dread * effect(w, p, "dread_mult");
+    d.act = static_cast<int>(w.acts.size()) - 1;
+    d.tags = {envoy ? "envoy_killed" : "murder"};
+    deposit(w, p, *f, d);
     meet(w, id, "kill", c.known_kill_envoy);
     int act = last_event_id(w, "act_kill", f->id, "", "", w.year);
     kill_person_now(w, p, id, "killed_by_dragon", because(envoy ? "envoy_killed" : "dragon_will", {act}));

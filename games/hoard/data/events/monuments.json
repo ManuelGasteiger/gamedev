@@ -1,0 +1,45 @@
+[
+  {
+    "id": "dragon_temple_raised",
+    "trigger": [
+      {"field": "awe_years", "gte": 50},
+      {"tag": "dragon_temple", "absent": true}
+    ],
+    "chance": 1,
+    "cooldown_decades": 5,
+    "object": "dragon",
+    "effects": [
+      {"do": "monument", "bias": "dragon_temple"},
+      {"do": "tag", "tag": "dragon_temple", "decades": 300, "inherit": true}
+    ]
+  },
+  {
+    "id": "slayer_memorial",
+    "trigger": [
+      {"event": "slayers_founded", "self_as": "subject", "within_years": 10},
+      {"tag": "dragon_memorial", "absent": true}
+    ],
+    "chance": 1,
+    "cooldown_decades": 5,
+    "object": "dragon",
+    "effects": [
+      {"do": "monument", "bias": "memorial"},
+      {"do": "tag", "tag": "dragon_memorial", "decades": 300, "inherit": true}
+    ]
+  },
+  {
+    "id": "fire_memorial",
+    "trigger": [
+      {"event": "act_burn", "self_as": "subject", "within_years": 10, "min_magnitude": 0.5},
+      {"field": "era", "gte": 1},
+      {"tag": "dragon_memorial", "absent": true}
+    ],
+    "chance": 0.3,
+    "cooldown_decades": 5,
+    "object": "dragon",
+    "effects": [
+      {"do": "monument", "bias": "memorial"},
+      {"do": "tag", "tag": "dragon_memorial", "decades": 300, "inherit": true}
+    ]
+  }
+]

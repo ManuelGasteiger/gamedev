@@ -1,16 +1,17 @@
 #include "rules.h"
+#include "../memory_tiers.h"
 #include "../world_util.h"
 
 namespace ages {
 
 // 17.7: elves withdraw from a border region when a human neighbour is overwhelming (power > elf_withdraw_ratio x theirs)
-// AND cold toward them (affinity < elf_withdraw_affinity), or when their own fear of the dragon passes elf_withdraw_fear;
+// AND cold toward them (affinity < elf_withdraw_affinity), or when their own dread of the dragon passes elf_withdraw_dread;
 // at war with that neighbour they yield at once, otherwise with chance elf_withdraw_chance per decade
 static double withdraw_pressure(const Params& p, const Faction& elves, const Faction& human, double ratio) {
     const Constants& c = p.c;
     if (at_war(elves, human.id) && ratio > c.elf_withdraw_ratio) return 1;
     bool pressed = ratio > c.elf_withdraw_ratio && affinity(p, elves, human) < c.elf_withdraw_affinity;
-    bool afraid = elves.fear > c.elf_withdraw_fear;
+    bool afraid = dread_eff(elves) > c.elf_withdraw_dread;
     return pressed || afraid ? c.elf_withdraw_chance : 0;
 }
 
@@ -40,9 +41,9 @@ static void elves_withdraw(World& w, const Params& p) {
         f.last_region_lost = w.year;
         r->owner.clear();
         r->tags.insert("elf_withdrawn");
-        bool afraid = f.fear > c.elf_withdraw_fear;
+        bool afraid = dread_eff(f) > c.elf_withdraw_dread;
         int ref = afraid ? last_event_id(w, "act_burn", f.id) : std::max(last_event_id(w, "war_started", pressing, f.id), last_event_id(w, "region_taken", pressing));
-        emit(w, "elves_withdrew", f.id, border, pressure, {pressing}, because(afraid ? "fear_of_dragon" : "pressed", {ref}, {{"fear", f.fear}}));
+        emit(w, "elves_withdrew", f.id, border, pressure, {pressing}, because(afraid ? "fear_of_dragon" : "pressed", {ref}, {{"dread", dread_eff(f)}}));
     }
 }
 

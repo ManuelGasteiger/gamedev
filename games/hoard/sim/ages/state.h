@@ -75,14 +75,35 @@ struct Region {
     int empty_years = 0;       // years without an owner
 };
 
+// what a court remembers of one act: axis dread | awe | faith; tier is the highest it was written into (oral, written,
+// monumental) and sets its decay; strength is the signed deposit (dread, awe) at weight 1, faith the faith delta; act is
+// the index of the act in World.acts (-1 for cards, hooks and oaths)
 struct MemoryEntry {
     int year = 0;
     std::string type;
     double magnitude = 0;
     double weight = 1;
-    double fear = 0;
+    std::string axis = "faith";
+    std::string tier = "oral";
+    double strength = 0;
     double faith = 0;
+    int act = -1;
     Tags tags;
+};
+
+// dread or awe held as stocks per memory tier (act-api section 6.3); monumental is the sum over the court's monuments
+struct Tiers {
+    double oral = 0, written = 0, monumental = 0;
+};
+
+// a dragon temple or an anti-dragon memorial: it remembers one act (index in World.acts) where it happened and holds
+// its own share of the monumental tier
+struct Monument {
+    std::string region;
+    int act = -1;
+    std::string bias = "neutral";   // dragon_temple | memorial | neutral
+    int built = 0;
+    double dread = 0, awe = 0;
 };
 
 struct Ruler {
@@ -115,7 +136,9 @@ struct Faction {
     double cohesion = 1;
     int era = 0;
     double era_progress = 0;
-    double fear = 0;
+    Tiers dread, awe;
+    std::vector<Monument> monuments;
+    int awe_since = -1;   // year awe_eff last rose to the temple level (-1 below it)
     double faith = 0;
     std::vector<MemoryEntry> memory;
     Ruler ruler;

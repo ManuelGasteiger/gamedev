@@ -57,7 +57,7 @@ function woundsFrom(res, ctx = {}) {
   model.dragon.wounds = w.total;
   if (world?.dragon) world.dragon.wounds = w.total;
   if (typeof w.max === 'number') model.dragon.health_max = w.max;
-  if (w.taken > 0) { hitFeedback(w.taken); play.fury = true; logHit(ctx, w.taken); }
+  if (w.taken > 0) { hitFeedback(w.taken); logHit(ctx, w.taken); }
   renderHealthHud();
   refreshWoundTexts();
 }

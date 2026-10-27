@@ -1,4 +1,5 @@
 #include "oaths.h"
+#include "memory_tiers.h"
 #include "talents.h"
 #include "world_util.h"
 
@@ -35,8 +36,9 @@ bool clause_holds(const World& w, const Params& p, const Oath& o, const Clause& 
     std::string who = cl.who.empty() ? mortal_party(o) : cl.who;
     const Faction* f = find_faction(w, who == "dragon" ? mortal_party(o) : who);
     if (!f) return true;
-    // v0.4: a clause sworn out of fear holds while the fear does; Dragon-king (oath_steadfast) keeps it past forgetting
-    bool remembered = f->fear >= c.oath_fade_fear || effect(w, p, "oath_steadfast") > 0;
+    // a clause holds while the court still remembers the dragon, in dread or in awe; Dragon-king (oath_steadfast) keeps
+    // it past forgetting
+    bool remembered = std::max(dread_eff(*f), awe_eff(*f)) >= c.oath_fade_memory || effect(w, p, "oath_steadfast") > 0;
 
     if (cl.pred == "tribute") {
         auto amt = cl.params.find("amount");
@@ -79,10 +81,16 @@ void apply_oath_effect(World& w, const Params& p, const std::string& effect, con
     const OathEffect& e = it->second;
     Faction* f = find_faction(w, faction);
     if (!f) return;
-    if (e.has_faith_set || e.fear_add != 0 || !e.tags.empty()) {
-        if (e.has_faith_set) set_faith(*f, p.c, w.year, "oath_" + effect, 1.0, e.faith_set, e.fear_add, e.tags);
-        else remember(*f, p.c, w.year, "oath_" + effect, 1.0, e.fear_add, 0, e.tags);
+    if (e.dread_add != 0) {
+        Deposit d;
+        d.type = "oath_" + effect;
+        d.magnitude = 1.0;
+        d.dread = e.dread_add;
+        d.tags = e.tags;
+        deposit(w, p, *f, d);
     }
+    if (e.has_faith_set) set_faith(*f, p.c, w.year, "oath_" + effect, 1.0, e.faith_set, e.tags);
+    else if (!e.tags.empty()) remember(*f, p.c, w.year, "oath_" + effect, 1.0, 0, e.tags);
     if (e.has_modifier) add_modifier(w, "oath." + effect, faction, e.mod_var, e.mod_op, e.mod_value, e.mod_decades);
 }
 

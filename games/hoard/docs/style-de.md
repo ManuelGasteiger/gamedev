@@ -56,6 +56,6 @@ Status: draft from item 19, before Manu's read of the 30 seeds. His corrections 
 | remnant | Versprengte | |
 | cairn | Steinmal | |
 | chronicle | Chronik | |
-| Endings (page) | „Enden“ | open: Ausgänge? |
+| Endings (page) | „Enden“ | decided 2026-10-26 |
 | knowledge | Wissen | |
 | magic | Magie | |

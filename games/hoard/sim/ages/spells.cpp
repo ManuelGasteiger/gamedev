@@ -1,4 +1,5 @@
 #include <cmath>
+#include "memory_tiers.h"
 #include "unrecorded.h"
 #include <cstdio>
 #include "ages.h"
@@ -182,7 +183,11 @@ TerraformResult terraform_unrecorded(World& w, const Params& p, const std::strin
     r.cost = w.dragons[kPlayer].size * t.cost_size_fraction;
     w.dragons[kPlayer].size -= r.cost;
     reg->tags.insert(k->second.tag);
-    if (k->second.tag == "wasteland") { reg->hot_decades = 0; reg->cold_decades = 0; }
+    if (k->second.tag == "wasteland") {
+        reg->hot_decades = 0;
+        reg->cold_decades = 0;
+        for (auto& f : w.factions) raze_monuments(f, reg->id, "");
+    }
     r.tag = k->second.tag;
     if (k->second.modifier.present) {
         r.modifier = make_modifier(w, "dragon.terraform." + kind, reg->id, k->second.modifier);

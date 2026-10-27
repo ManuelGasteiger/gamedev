@@ -1,4 +1,5 @@
 #include "dragon_json.h"
+#include <cmath>
 #include "defences.h"
 #include "growth.h"
 #include "rules/slayers.h"
@@ -55,6 +56,19 @@ void dragon_state_from_json(const json& dragon, Dragon& d) {
     if (dragon.contains("hoard") && dragon["hoard"].contains("embers")) d.hoard.embers = dragon["hoard"]["embers"].get<double>();
 }
 
+// talents-v2 section 4: the flight numbers every shell reads, from talents.json "flight" and the taken talents
+static json flight_json(const World& w, const Params& p) {
+    auto base = [&](const char* k) { auto it = p.talents.flight.find(k); return it == p.talents.flight.end() ? 0.0 : it->second; };
+    double speed = effect(w, p, "speed_mult");
+    double hostage = effect(w, p, "hostage_weight");
+    return {{"cruise", base("cruise") * speed}, {"surge", base("surge") * speed}, {"stall", base("stall")}, {"turn", base("turn")},
+            {"travel_speed", base("travel_speed")}, {"travel_altitude", base("travel_altitude")},
+            {"carry_cap", base("carry_cap") + effect(w, p, "carry_add")},
+            {"stamina_budget", base("stamina_base") + base("stamina_per_sqrt_points") * std::sqrt(total_growth(w.dragons[kPlayer])) + effect(w, p, "stamina_add")},
+            {"surge_drain", base("surge_drain") * effect(w, p, "surge_drain_mult")}, {"breath_cost", base("breath_cost") * effect(w, p, "burn_cost_mult")},
+            {"hostage_weight", hostage > 0 ? hostage : base("hostage_weight")}, {"gold_weight", base("gold_weight") * effect(w, p, "gold_weight_mult")}};
+}
+
 void dragon_view_to_json(const World& w, const Params& p, json& view) {
     const Dragon& d = w.dragons[kPlayer];
     json& dj = view["dragon"];
@@ -73,6 +87,7 @@ void dragon_view_to_json(const World& w, const Params& p, json& view) {
     dj["look"] = look_json(merged_look(w, p));
     dj["look"]["rank_step"] = steps;
     dj["health_max"] = health_max(w, p);
+    dj["flight"] = flight_json(w, p);
     dj["slain"] = dragon_dead(w);
     dj["slayer_adaptation"] = adaptation_factor(w, p);
     bool lair_ward = effect(w, p, "lair_ward") > 0;

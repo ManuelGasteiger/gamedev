@@ -48,7 +48,8 @@ static Faction make_successor(World& w, const Params& p, const Faction& parent, 
     s.cohesion = c.successor_cohesion;
     s.era = parent.era;
     s.era_progress = parent.era_progress;
-    s.fear = parent.fear;
+    s.dread = parent.dread;
+    s.awe = parent.awe;
     s.faith = parent.faith;
     s.memory = parent.memory;
     s.anti_dragon = parent.anti_dragon;

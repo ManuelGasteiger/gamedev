@@ -9,7 +9,7 @@ int main() {
     w.oaths.push_back(o);
     Faction* a = find_faction(w, "aldmere");
     Faction* v = find_faction(w, "vessary");
-    remember(*a, r.params.c, 0, "gift", 1.0, 0, 0.7, {"gift"});
+    remember(*a, r.params.c, 0, "gift", 1.0, 0.7, {"gift"});
     a->cohesion = 0.3;
     a->wealth = 5;
     v->wealth = 5000;

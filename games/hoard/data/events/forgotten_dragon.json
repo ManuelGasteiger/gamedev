@@ -4,7 +4,7 @@
     "needs_dragon": true,
     "scope": "world",
     "trigger": [
-      {"field": "max_fear", "on": "world", "lt": 0.1},
+      {"field": "max_dread", "on": "world", "lt": 0.1},
       {"field": "max_faith", "on": "world", "lt": 0.1},
       {"field": "quiet_years", "on": "world", "gte": 500},
       {"tag": "dragon_forgotten", "on": "world", "absent": true},
@@ -30,7 +30,7 @@
     "effects": [
       {"do": "untag", "on": "world", "tag": "dragon_forgotten"},
       {"do": "tag", "on": "world", "tag": "dragon_returned", "decades": 50},
-      {"do": "memory", "on": "all", "type": "seen", "fear": 0.1, "tags": ["seen"]}
+      {"do": "memory", "on": "all", "type": "seen", "dread": 0.1, "tags": ["seen"]}
     ]
   }
 ]

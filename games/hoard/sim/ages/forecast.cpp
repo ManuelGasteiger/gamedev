@@ -1,4 +1,5 @@
 #include "ages.h"
+#include "memory_tiers.h"
 #include "step.h"
 #include "talents.h"
 #include "world_util.h"
@@ -35,6 +36,16 @@ Forecast forecast(const World& world, const Params& p, int years) {
     if (strongest) {
         f.strongest = strongest->id;
         f.strongest_era = static_cast<int>(blur(strongest->era, amplitude, noise) + 0.5);
+    }
+    for (auto& x : w.factions) {
+        CourtForecast c;
+        c.id = x.id;
+        c.dread = clamp01(blur(dread_eff(x), amplitude, noise));
+        c.awe = clamp01(blur(awe_eff(x), amplitude, noise));
+        c.pressure = clamp01(blur(slayer_pressure(x, p.c.mem), amplitude, noise));
+        bool can = has_tag(x.tags, "slayers") && dread_eff(x) >= p.c.mem.slayer_dread;
+        c.slay_odds = can ? clamp01(blur(slaying_odds(w, p, x), amplitude, noise)) : 0;
+        f.courts.push_back(c);
     }
     // only a band that is ready when the dragon lies down can try in this sleep (the slayer clock), so this is exact
     for (auto& x : world.factions)

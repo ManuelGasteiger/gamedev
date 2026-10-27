@@ -1,4 +1,5 @@
 #include "rules.h"
+#include "../memory_tiers.h"
 #include "../world_util.h"
 
 namespace ages {
@@ -18,6 +19,7 @@ void rule_land(World& w, const Params& p) {
         if (!waste && r.hot_decades >= c.wasteland_decades * c.step_years) {
             r.tags.insert("wasteland");
             r.hot_decades = 0;
+            for (auto& f : w.factions) raze_monuments(f, r.id, "");   // nothing stands on waste
             emit(w, "wasteland_formed", r.id, "", 0, {}, because("repeated_fire", {last_event_id(w, "act_burn", "", r.id)}));
         } else if (waste && r.cold_decades >= c.wasteland_clear_decades * c.step_years) {
             r.tags.erase("wasteland");

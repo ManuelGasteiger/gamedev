@@ -1,7 +1,7 @@
 // The narration strip: for the act just done, one sentence for what happened and one per court for how it took it.
 // Uses the `lines` the sim returns with apply_acts when present ([{faction, text}]); until then the lines are built here
 // from the before/after state, the act and the court's relationship to the dragon, the way acts.cpp picks a reaction
-// (oath active -> betrayal, faithful -> disillusion, strong -> resolve, weak -> fear; witnesses at war with the victim
+// (oath active -> betrayal, faithful -> disillusion, strong -> resolve, weak -> cowed; witnesses at war with the victim
 // approve, kin are dismayed).
 const NARR = { lines: [], max: 6, group: 0 };
 const NARR_EXTRA = ['offer_fulfilled', 'deceived_dragon', 'war_ended', 'coalition_ended', 'vassal_freed', 'person_crowned', 'race_returned', 'undead_raised', 'oath_breached_by_dragon', 'demand_refused'];
@@ -13,7 +13,7 @@ function oathBinds(fid) {
 
 function narrationBefore() {
   const factions = {};
-  for (const f of world.factions) factions[f.id] = { fear: f.fear, faith: f.faith, wealth: f.wealth, power: f.power ?? 0, race: f.dominant_race ?? f.race, at_war_with: [...f.at_war_with], oath: oathBinds(f.id) };
+  for (const f of world.factions) factions[f.id] = { dread: f.dread_eff, awe: f.awe_eff, faith: f.faith, wealth: f.wealth, power: f.power ?? 0, race: f.dominant_race ?? f.race, at_war_with: [...f.at_war_with], oath: oathBinds(f.id) };
   const known = new Map((world.dragon.known_people ?? []).map((k) => [k.id, k.relationship]));
   return { factions, known, threat: world.dragon.threat ?? 0 };
 }
@@ -79,7 +79,7 @@ function moodOf(a, f, b, before) {
     if (a.kind === 'kill_person') return 'murder';
     if (b.oath) return 'betrayal';
     if (b.faith > (CONSTANTS.reaction_faith_high ?? 0.5)) return 'disillusion';
-    return b.power >= (CONSTANTS.reaction_weak_ratio ?? 0.5) * before.threat ? 'resolve' : 'fear';
+    return b.power >= (CONSTANTS.reaction_weak_ratio ?? 0.5) * before.threat ? 'resolve' : 'cowed';
   }
   if (!isTarget) return a.kind === 'defend' && f.id === a.against ? 'loss' : 'shift';
   const moods = { show: 'awe', decline_offer: 'awe', accept_offer: 'shift', give: 'gratitude', accept_offering: 'devotion', destroy_altar: 'sacrilege', take_hostage: 'grief', release: 'relief', demand: a.sworn ? 'submission' : 'defiance' };
@@ -92,7 +92,7 @@ const MOOD_TEXT = {
   betrayal: (F) => `${F} trusted your oath and calls this betrayal; its faith in you is gone`,
   disillusion: (F) => `${F} prayed to you and now doubts you`,
   resolve: (F) => `${F} is strong enough to hate you for it, and talk of slayers grows`,
-  fear: (F) => `${F} is too weak to answer and cowers`,
+  cowed: (F) => `${F} is too weak to answer and cowers`,
   approval: (F, a) => `${F}, at war with ${factionTitle(a.target)}, is glad of your fire`,
   kin: (F, a) => `${F} watched its kin in ${factionTitle(a.target)} burn`,
   unease: (F) => `${F} watched the smoke from across the border`,
@@ -114,7 +114,8 @@ const MOOD_TEXT = {
 
 function deltaText(d) {
   const parts = [];
-  if (Math.abs(d.fear) >= 0.005) parts.push(`fear ${signed(d.fear)}`);
+  if (Math.abs(d.dread) >= 0.005) parts.push(`dread ${signed(d.dread)}`);
+  if (Math.abs(d.awe) >= 0.005) parts.push(`awe ${signed(d.awe)}`);
   if (Math.abs(d.faith) >= 0.005) parts.push(`faith ${signed(d.faith)}`);
   if (Math.abs(d.wealth) >= 0.4) parts.push(`wealth ${signed(d.wealth, 0)}`);
   return parts.length ? ` (${parts.join(', ')})` : '';
@@ -126,8 +127,8 @@ function reactionLines(a, before) {
   for (const f of world.factions) {
     const b = before.factions[f.id];
     if (!b) continue;
-    const d = { fear: f.fear - b.fear, faith: f.faith - b.faith, wealth: f.wealth - b.wealth };
-    const moved = Math.abs(d.fear) >= 0.005 || Math.abs(d.faith) >= 0.005 || Math.abs(d.wealth) >= 0.4;
+    const d = { dread: f.dread_eff - b.dread, awe: f.awe_eff - b.awe, faith: f.faith - b.faith, wealth: f.wealth - b.wealth };
+    const moved = Math.abs(d.dread) >= 0.005 || Math.abs(d.awe) >= 0.005 || Math.abs(d.faith) >= 0.005 || Math.abs(d.wealth) >= 0.4;
     if (!moved && !(forced && f.id === a.target)) continue;
     const mood = moodOf(a, f, b, before);
     lines.push({ faction: f.id, mood, text: MOOD_TEXT[mood](factionTitle(f.id), a) + deltaText(d) + '.', first: f.id === a.target });

@@ -15,6 +15,7 @@ struct ReactionNote {
     std::string item;     // the person acted on, if any
     double magnitude = 0;
     std::string loot;     // what a take carried off (the largest payload share)
+    bool awe = false;     // the act left awe and the court now stands in awe (pilgrims_awe): the awe row is told first
 };
 
 // the lines of apply_acts: per court the weightiest note, told by narrator.json "reactions" plus at most one sentence on an

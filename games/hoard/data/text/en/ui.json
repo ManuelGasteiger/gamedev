@@ -3,7 +3,7 @@
  "reason.unknown_demand": "no such demand ({r.pred})",
  "reason.needs_knowledge": "needs knowledge {r.n}",
  "reason.already_sworn": "already sworn",
- "reason.not_cowed": "their fear is {r.fear}, under {r.need}, and they are not weak",
+ "reason.not_cowed": "their dread is {r.dread}, under {r.need}, and they are not weak",
  "reason.needs_knowledge_or_magic": "needs knowledge or magic {r.n}",
  "reason.needs_axis": "needs {r.axis} {r.n}",
  "reason.no_region": "no such region",

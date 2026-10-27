@@ -1,4 +1,5 @@
 #include "card_ctx.h"
+#include "../memory_tiers.h"
 #include <cctype>
 #include "../talents.h"
 #include <cstdlib>
@@ -76,7 +77,7 @@ int lookup_ref(const World& w, const CardCtx& ctx, const std::string& ref, const
 
 double burn_memory(const Faction& f) {
     double top = 0;
-    for (auto& m : f.memory) if (m.type == "burn") top = std::max(top, m.weight);
+    for (auto& m : f.memory) if (m.type == "burn" && m.axis == "dread") top = std::max(top, m.weight);
     return top;
 }
 
@@ -104,7 +105,11 @@ bool faction_num(const World& w, const Params& p, const CardCtx& ctx, const Fact
     if (k == "wealth") v = f.wealth;
     else if (k == "cohesion") v = f.cohesion;
     else if (k == "era") v = f.era;
-    else if (k == "fear") v = f.fear;
+    else if (k == "dread") v = dread_eff(f);
+    else if (k == "awe") v = awe_eff(f);
+    else if (k == "dread_written") v = f.dread.written;
+    else if (k == "awe_years") v = f.awe_since < 0 ? 0 : w.year - f.awe_since;
+    else if (k == "monuments") v = static_cast<double>(f.monuments.size());
     else if (k == "faith") v = f.faith;
     else if (k == "anti_dragon") v = f.anti_dragon;
     else if (k == "power") v = power(f, c);
@@ -166,9 +171,9 @@ bool num_field(const World& w, const Params& p, const CardCtx& ctx, const std::s
         }
         else if (k == "quiet_years") v = w.year - ctx.any_act;
         else if (k == "factions") v = static_cast<double>(w.factions.size());
-        else if (k == "max_fear" || k == "max_faith") {
+        else if (k == "max_dread" || k == "max_awe" || k == "max_faith") {
             v = 0;
-            for (auto& f : w.factions) v = std::max(v, k == "max_fear" ? f.fear : f.faith);
+            for (auto& f : w.factions) v = std::max(v, k == "max_dread" ? dread_eff(f) : (k == "max_awe" ? awe_eff(f) : f.faith));
         } else if (k.rfind("remnant:", 0) == 0) {
             v = 0;
             for (auto& r : w.remnants) if (r.race == subst(ctx, k.substr(8))) v = r.strength;

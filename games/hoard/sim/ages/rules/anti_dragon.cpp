@@ -1,10 +1,11 @@
 #include "rules.h"
+#include "../memory_tiers.h"
 #include <cstdlib>
 #include "../defences.h"
 #include "../world_util.h"
 
-// v0.4 (S1): a court's research against the dragon. Below anti_dragon_min_era a court that fears the dragon and
-// remembers its fire still researches, at dread_research x fear x the burn memory per decade (the era rule covers the
+// v0.4 (S1): a court's research against the dragon. Below anti_dragon_min_era a court that dreads the dragon and
+// remembers its fire still researches, at dread_research x dread x the burn memory per decade (the era rule covers the
 // rest). The chronicle tells each share of anti_dragon_marks passed on the way to the next defence the court would
 // raise (anti_dragon_progress, object the defence id); the last mark told is kept as anti_dragon_mark:<defence>:<i>.
 
@@ -27,7 +28,7 @@ double passed_level(const Params& p, const Faction& f) {
 
 double burn_memory(const Faction& f) {
     double top = 0;
-    for (auto& m : f.memory) if (m.type == "burn") top = std::max(top, m.weight);
+    for (auto& m : f.memory) if (m.type == "burn" && m.axis == "dread") top = std::max(top, m.weight);
     return top;
 }
 
@@ -35,8 +36,8 @@ void dread_research(World& w, const Params& p) {
     const Constants& c = p.c;
     if (c.dread_research <= 0) return;
     for (auto& f : w.factions)
-        if (f.era < c.anti_dragon_min_era && f.fear > c.anti_dragon_fear)
-            f.anti_dragon += c.dread_research * f.fear * burn_memory(f) * dts(w, c);
+        if (f.era < c.anti_dragon_min_era && dread_eff(f) >= c.mem.slayer_dread)
+            f.anti_dragon += c.dread_research * dread_eff(f) * burn_memory(f) * dts(w, c);
 }
 
 }

@@ -8,7 +8,28 @@
 
 namespace ages {
 
+// constants.json "memory": tiers, deposits, witnesses, unlocks, research (act-api 6.1, 6.3, 6.4)
+struct MemoryConstants {
+    double oral_halflife = 30, written_halflife = 250, monumental_halflife = 1000;
+    double oral_reference = 150;   // the race memory_halflife at which the oral tier keeps oral_halflife
+    double written_deposit = 0.6, monumental_deposit = 0.4;
+    double rep_years = 30, rep_floor = 0.25;
+    double witness_owner = 1, witness_neighbour = 0.5;
+    double library_burn = 0.1;
+    double temple_convert = 0.5;
+    double entry_drop = 0.002;
+    double tier_shown = 0.1;
+    double kept_oath_awe = 0.02;
+    double pilgrims_awe = 0.15, honest_awe = 0.30, cult_awe = 0.30, temple_awe = 0.50, faith_floor = 0.3;
+    int temple_years = 50;
+    double demand_dread = 0.30, slayer_dread = 0.50, flee_dread = 0.70;
+    double grievance_written = 0;   // > 0: a written dread stock this high may found an order too (pacing-model finding 2)
+    double stability_dread = 0.8, pressure_awe = 0.7, research_dread = 2.0;
+    double research_base = 0.01, research_spend = 50, research_wealth_half = 100;
+};
+
 struct Constants {
+    MemoryConstants mem;
     int step_years = 10;
     double land_wealth_scale = 100;
     double wealth_upkeep = 0.01;
@@ -19,9 +40,7 @@ struct Constants {
     double era_diffusion = 4;
     int era_diffusion_gap = 2;
 
-    double anti_dragon_fear = 0.5;
     int anti_dragon_min_era = 2;
-    double anti_dragon_rate = 0.02;
     double slayers_at = 1.0;
     double war_siege_anti_dragon = 0.005;
 
@@ -54,11 +73,10 @@ struct Constants {
     double tribute_faith_no_oath = 0.8;
     double tribute_rate = 0.02;
     double tribute_faith_pool = 0.1;
-    double slay_fear = 0.6;
     double slay_attempt_rate = 0.05;
     double slay_success_div = 3;
     double slay_fail_wealth_loss = 0.3;
-    double slay_fail_fear = 0.2;
+    double slay_fail_dread = 0.2;
 
     double elf_withdraw_ratio = 2.0;
     double dug_in_invasion_mult = 0.5;
@@ -82,7 +100,8 @@ struct Constants {
 
     double oath_tribute_min_faith = 0.2;
     int oath_walls_era = 2;
-    double oath_fade_fear = 0.2;
+    double oath_fade_memory = 0.2;    // no_walls and no_settle hold while dread or awe stays this high
+    double oath_breach_rate = 0.05;   // and break by chance, this per decade at stability 0 (act-api 6.4)
 
     double act_kill_cohesion = 0.05;
     double act_defend_attacker_loss = 0.15;
@@ -118,7 +137,6 @@ struct Constants {
 
     // demand (section 8): a knowledge-gated oath the dragon imposes on a cowed court
     double demand_knowledge = 0.5;
-    double demand_fear = 0.3;
     double demand_tribute_rate = 0.1;
     double demand_refused_resolve = 0.05;
 
@@ -234,7 +252,7 @@ struct Constants {
     double offer_ward_piety = 0.6;
     double offer_teach_openness = 0.5;
     double envoy_kill_magnitude = 0.05;
-    double envoy_kill_fear = 0.3;
+    double envoy_kill_dread = 0.3;
     double offer_bless_faith = 0.3;
     double offer_affinity_rival = 0.0;
     double offer_elope_affinity = 0.0;
@@ -250,7 +268,7 @@ struct Constants {
 
     // 17.5 briefing
     int briefing_group_years = 100;
-    double briefing_rich_fear = 0.2;
+    double briefing_rich_dread = 0.2;
     double briefing_slayers_forming = 0.5;
     int briefing_rich_count = 3;
     double importance_default = 0.2;   // kinds data/importance.json does not list
@@ -261,7 +279,7 @@ struct Constants {
 
     // 17.7
     double elf_withdraw_affinity = 0.2;
-    double elf_withdraw_fear = 0.6;
+    double elf_withdraw_dread = 0.6;
     double elf_withdraw_chance = 0.3;
     double tribute_food = 0.3;
 
@@ -287,7 +305,7 @@ struct Constants {
     double brood_faith = 0.6;
     // "slayers": the band's lapse, its threat points and odds against health (strength / (health x health_div)), the
     // adaptation factor (adapt_base + adapt_step x adaptation, clamped), the wounds share that makes a sleep a near death
-    double slay_lapse_fear = 0.4;
+    double slay_lapse_dread = 0.4;
     double slay_ready_rate = 0.05;   // per decade, once a waking has passed since the band formed
     double slay_health_div = 1;
     double slay_points_base = 2;
@@ -297,7 +315,7 @@ struct Constants {
     double adapt_base = 0.8, adapt_step = 0.1, adapt_min = 0.4, adapt_max = 1.6;
     double near_death_wounds = 0.7;
     std::vector<double> anti_dragon_marks;   // shares of the way to the next defence the chronicle reports
-    double dread_research = 0;               // research per decade below anti_dragon_min_era (x fear x burn memory)
+    double dread_research = 0;               // research per decade below anti_dragon_min_era (x dread x burn memory)
     std::map<std::string, double> start_hoard;   // the hoard the egg lies on (gold, books, artifacts, art, food)
 };
 
@@ -339,16 +357,25 @@ struct Texts {
     std::vector<std::string> era_names, phase_names, numbers;   // numbers: words for 0..n ("no", "one", ...)
 };
 
+// data/reactions.json (act-api section 6.2): base dread and awe gains per act or "<act>.<kind>" at m = 1 for the owner,
+// and rows read through the court's relationship that multiply them (who: owner | witness) and carry v0.4's faith,
+// research and tags
+struct Gain {
+    double dread = 0, awe = 0;
+};
+
 struct Reaction {
     std::vector<std::string> acts;
     std::string relationship;
-    double fear_per_m = 0, fear_flat = 0;
+    std::string who = "owner";
+    double dread_mult = 1, awe_mult = 1;
     double faith_per_m = 0, faith_flat = 0;
     double anti_dragon_per_m = 0;
     bool has_faith_set = false;
     double faith_set = 0;
     Tags tags;
 };
+
 
 struct Shocks {
     double plague_chance = 0.01, plague_wealth_mult = 0.7, plague_cohesion = -0.1;
@@ -361,7 +388,7 @@ struct Shocks {
 struct OathEffect {
     bool has_faith_set = false;
     double faith_set = 0;
-    double fear_add = 0;
+    double dread_add = 0;
     Tags tags;
     bool has_modifier = false;
     std::string mod_var, mod_op;
@@ -430,6 +457,7 @@ struct TalentAxis {
 };
 
 struct TalentBook {
+    std::map<std::string, double> flight;     // "flight": the v0.4 flight numbers the dragon.flight block starts from
     std::vector<TalentAxis> axes;
     std::vector<double> nodes;                 // points per node
     std::vector<int> node_phase;               // phase a node needs
@@ -439,7 +467,7 @@ struct TalentBook {
 
 // opens at min_era for races_any (any race when empty) when anti_dragon >= min_anti_dragon or a tag of tags_any is on
 // the court (always when neither is given), or wherever a ward modifier holds the region if ward_modifier; a defence
-// with a radius is ranged (arcane armor applies); a fearless one is not damped by the court's fear
+// with a radius is ranged (arcane armor applies); a fearless one stands when the garrisons flee (dread >= flee_dread)
 struct DefenceDef {
     std::string id, label;
     int min_era = 0;
@@ -447,12 +475,11 @@ struct DefenceDef {
     std::vector<std::string> tags_any, races_any;
     bool ward_modifier = false;
     double per_act = 0, passive = 0, radius = 0, burn_mult = 1, era_scale = 0;
-    bool fearless = false;   // fear does not damp it
+    bool fearless = false;   // dread does not make its crew flee
 };
 
 struct DefenceBook {
     std::vector<DefenceDef> defences;
-    double fear_damp = 0.6;
     double hero_bonus = 5;
 };
 
@@ -486,6 +513,7 @@ struct Params {
     uint64_t data_hash = 0;   // of the loaded data, set by load_data_from_json (record.cpp)
     std::map<std::string, Race> races;
     std::map<std::string, std::map<std::string, double>> race_affinity;
+    std::map<std::string, Gain> gains;
     std::vector<Reaction> reactions;
     Shocks shocks;
     std::map<std::string, OathEffect> oath_effects;
