@@ -18,6 +18,15 @@ let page;
 function check(id, ok, detail) { results.push({ id, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + id + (detail ? '  ' + detail : '')); return ok; }
 async function shot(name) { await page.screenshot({ path: path.join(shots, name + '.png'), timeout: 180000 }); }   // swiftshader on a busy machine is slow
 const state = () => page.evaluate(() => game.state());
+// item 06: an envoy climbs only to a lair its court has seen, so the lab lets every court see it before a sleep
+async function seeLair() {
+  await page.evaluate(() => {
+    const w = game.world();
+    for (const f of w.factions) { f.lair_known = w.year; f.lair_exact = true; }
+    game.loadWorld(w);
+  });
+  await page.waitForTimeout(100);
+}
 const oathStatus = (st) => ({ active: 'active', expired: 'expired', breached_by_dragon: 'broken by you', breached_by_them: 'broken by them' })[st] ?? st;
 const actions = () => page.evaluate(() => game.actions());
 const fly = (id) => page.evaluate((id) => game.flyTo(id), id);
@@ -178,11 +187,7 @@ async function finishSleep() {
   let defOffer = await besieged();
   // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
   for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
-    // item 06: an envoy climbs only to a lair its court knows, so the dragon shows itself over every capital first
-    for (const f of (await state()).factions.filter((x) => x.capital)) {
-      await fly(f.capital);
-      await act('show', { region: f.capital });
-    }
+    await seeLair();
     await sleepThrough(100);
     await finishSleep();
     await page.waitForTimeout(100);
@@ -316,7 +321,14 @@ async function finishSleep() {
   await sleepThrough(300);
   const kinds2 = await playMontage();
   await shot('c-wake');
-  const s6 = await state();
+  let s6 = await state();
+  // item 06 moved the history on; whether the breached court's oath breaks inside these 300 years is chance, so sleep on until one does
+  for (let extra = 0; extra < 10 && !s6.oaths.some((o) => o.status !== 'active'); extra++) {
+    if ((await page.evaluate(() => game.wake())).open) await beginRaid();
+    await sleepThrough(100);
+    kinds2.push(...await playMontage());
+    s6 = await state();
+  }
   check('d.betrayal', s6.oaths.some((o) => o.status !== 'active') && s6.ages[1].events > 0, `oath statuses after the sleep: ${s6.oaths.map((o) => o.party + ' ' + oathStatus(o.status)).join(', ')}`);
   await beginRaid();
   // age 3: ward hill_hold from the raid panel (magic has regrown), burn two outlying regions hard, sleep 300
@@ -436,9 +448,11 @@ async function finishSleep() {
       for (const x of w.factions) x.cohesion = Math.min(x.cohesion, 0.2);
       game.loadWorld(w);
     });
-    await sleepThrough(100);
-    await playMontage();
-    await beginRaid();
+    for (let extra = 0; extra < 8 && !captured.orcs_spawned; extra++) {   // item 06 moved the history on: give the horde a few centuries
+      await sleepThrough(100);
+      await playMontage();
+      await beginRaid();
+    }
   }
   const orcs = (await state()).factions.filter((f) => f.race === 'orc');
   check('c.orcs', captured.orcs_spawned && orcs.length > 0 && told('orcs_spawned', /orc/i), `"${captured.orcs_spawned?.ticker}"${orcLab}; orc factions now ${orcs.map((o) => o.id).join(', ')}`);
@@ -791,6 +805,7 @@ async function finishSleep() {
   // envoys when their situation calls for it, so sleep on a century at a time (at most ten) until two have come in person
   const envoysWaiting = () => page.evaluate(() => game.world().offers.filter((o) => o.envoy && game.people().some((p) => p.id === o.envoy)).length);
   for (let extra = 0; extra < 10 && (await envoysWaiting()) < 2; extra++) {
+    await seeLair();
     await sleepThrough(100);
     await finishSleep();
     if ((await page.evaluate(() => game.wake())).open) await beginRaid();
