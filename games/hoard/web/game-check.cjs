@@ -527,6 +527,13 @@ async function finishSleep() {
   const p3 = (await state()).pos;
   // camera yaw 45°: D moves +x −z on the map, W/ArrowUp moves −x −z, A moves −x +z
   check('i.keys', p1[0] > p0[0] + 0.5 && p1[1] < p0[1] - 0.5 && p2[0] < p1[0] - 0.5 && p2[1] < p1[1] - 0.5 && p3[0] < p2[0] - 0.5, `D ${p0.map((v) => v.toFixed(1))} -> ${p1.map((v) => v.toFixed(1))}, ArrowUp -> ${p2.map((v) => v.toFixed(1))}, A -> ${p3.map((v) => v.toFixed(1))}`);
+  // the camera follows the dragon: let it come to rest first, or the region drifts under the pixel before the click lands
+  for (let i = 0, last = ''; i < 25; i++) {
+    const now = (await state()).pos.map((v) => v.toFixed(2)).join();
+    if (now === last) break;
+    last = now;
+    await page.waitForTimeout(200);
+  }
   const target = await page.evaluate(() => game.screenPos('east_marches'));
   await page.mouse.move(target[0], target[1]);
   await page.mouse.click(target[0], target[1]);
