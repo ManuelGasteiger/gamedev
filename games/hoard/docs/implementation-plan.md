@@ -97,6 +97,8 @@ Gate: slayer founding under `played` in 300 to 600 (v0.4: about 400); every v0.4
 
 ### Iteration 4: digestion, visitors, sifting (03, 06, 14 in parallel; 12a may start)
 
+Status 2026-10-27: all three merged (pull requests 9, 10, 11; rules version 7; reports `03-digestion.md`, `06-access-gating.md`, `14-story-sifting.md`). 03: targets a, c, d met (played deaths 9 %, phase 2 at year 40, phase 3 at 390); b, the bucket wins, not met (3 of 7 at 10 % or more), needs a scoring or slayer-clock decision; floor base 10 and `gold_pts` 1.0 instead of the brief's 50. 06: no arrivals in idle runs, 1.36 per waking under `played`. 14: dragon-linked headlines 58 %, shown threads ended 63 %, no pattern above 9.8 % of headlines; reversals, people from earlier briefings, selection lift and fallbacks outside their bands (reasons in the report). Open for Manu: the 15 pairs (`reports/14-pairs.md`), the bucket scoring, the gold scale, folding repeated tier-4 lines, prophet frequency and whether a show tells a court where the lair is. 12a not started.
+
 - 03 (Sonnet): consumption, `bed_mode: consumed`, forecast fields; the four tuning targets.
 - 06 (Sonnet): arrivals with reasons and routes, `receive`, `hunt`.
 - 14 (Opus): pattern bank, acceptors, threads, headline, line budget, callbacks, source transform.
