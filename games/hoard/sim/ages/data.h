@@ -531,6 +531,7 @@ struct ArrivalBook {
     std::vector<ArrivalDef> kinds;
     double oral_floor = 0.05, lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
     int rumour_years = 150, thief_era = 1, refugee_years = 20, envoy_kill_generations = 2, sight_regions = 2;
+    int lair_memory_years = 100;
 };
 
 struct Params {

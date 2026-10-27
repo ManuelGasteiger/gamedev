@@ -178,6 +178,11 @@ async function finishSleep() {
   let defOffer = await besieged();
   // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
   for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
+    // item 06: an envoy climbs only to a lair its court knows, so the dragon shows itself over every capital first
+    for (const f of (await state()).factions.filter((x) => x.capital)) {
+      await fly(f.capital);
+      await act('show', { region: f.capital });
+    }
     await sleepThrough(100);
     await finishSleep();
     await page.waitForTimeout(100);

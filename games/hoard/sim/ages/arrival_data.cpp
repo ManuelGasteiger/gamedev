@@ -43,6 +43,7 @@ bool arrivals_from_json(const DataJson& d, Params& p, std::string& err) {
     get(j, "hunt_food", b.hunt_food);
     get(j, "slopes_hunt_mult", b.slopes_hunt_mult);
     get(j, "rumour_years", b.rumour_years);
+    get(j, "lair_memory_years", b.lair_memory_years);
     get(j, "thief_era", b.thief_era);
     get(j, "refugee_years", b.refugee_years);
     get(j, "envoy_kill_generations", b.envoy_kill_generations);

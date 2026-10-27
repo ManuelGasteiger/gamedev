@@ -140,7 +140,7 @@ void note_lair_sight(World& w, const Params& p, const Act& a) {
 void refresh_lair_knowledge(World& w, const Params& p) {
     for (auto& f : w.factions) {
         if (f.lair_known < 0) continue;
-        if (memory_rank(f, p.c.mem) >= 2 || oral_eff(f) >= p.arrivals.oral_floor) continue;
+        if (memory_rank(f, p.c.mem) >= 2 || oral_eff(f) >= p.arrivals.oral_floor || w.year - f.lair_known < p.arrivals.lair_memory_years) continue;
         f.lair_known = -1;
         f.lair_exact = false;
     }

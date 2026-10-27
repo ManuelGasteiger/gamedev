@@ -3,6 +3,7 @@
   "oral_floor": 0.05,
   "lure_gold": 60,
   "rumour_years": 150,
+  "lair_memory_years": 100,
   "refugee_years": 20,
   "envoy_kill_generations": 2,
   "sight_regions": 2,
