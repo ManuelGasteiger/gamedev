@@ -4265,6 +4265,7 @@
 2700 rank_gained dragon flame 14 growth
 2700 wake dragon planned 300 -
 2700 arrival_left drakok envoy 0 arrival_left
+2700 arrival drakok envoy 0 arrival
 2700 act_defend aldsary - 1 -
 2700 act_give aldsary - 0.1 -
 2700 dragon_wounded gorothrat deep_hold 2.24 defences
@@ -4290,6 +4291,7 @@
 2700 arrival_left lorareth prophet 0 arrival_left
 2700 arrival_left brumdal slayer_band 0 arrival_left
 2700 arrival_left aldsary slayer_band 0 arrival_left
+2700 arrival_left drakok envoy 0 arrival_left
 2700 sleep_begin dragon - 100 -
 2710 slayers_forming aldsary - 70.1227 slayers
 2710 slayers_forming brumdal - 70.1227 slayers
@@ -4455,6 +4457,7 @@
 2800 person_rose human439 aldsary 0 keeper_again
 2800 dragon_atrophied dragon - 0.1 hunger
 2800 wake dragon planned 100 -
+2800 arrival_left drakok envoy 0 arrival_left
 2800 act_defend corholm - 1 -
 2800 act_give corholm - 0.1 -
 2800 dragon_wounded gorzagzag deep_hold 2.24 defences
@@ -4476,7 +4479,6 @@
 2800 act_burn lorareth west_marches 0.5 -
 2800 act_take aldsary south_fen 0.3 -
 2800 hook_resolved aldsary south_fen 0 hook
-2800 arrival_left drakok envoy 0 arrival_left
 2800 arrival_left lorareth prophet 0 arrival_left
 2800 sleep_begin dragon - 100 -
 2810 slayers_ready drakok dwarf200 0.0509965 slayers_led

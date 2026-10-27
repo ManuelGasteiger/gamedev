@@ -1208,6 +1208,7 @@
 790 person_rose human174 galmere 0 keeper_again
 790 person_rose human175 bersary 0 line_continues
 790 wake dragon planned 10 -
+790 arrival corholm envoy 0 arrival
 790 act_defend tordale - 1 -
 790 act_give tordale - 0.1 -
 790 dragon_wounded tordale west_marches 1.12 defences
@@ -1223,6 +1224,7 @@
 790 hook_ignored bruak north_scar 0 -
 790 arrival_left aldmarch envoy 0 arrival_left
 790 arrival_left torsary envoy 0 arrival_left
+790 arrival_left corholm envoy 0 arrival_left
 790 sleep_begin dragon - 100 -
 800 warlord_died durzag - 0 warlord_death
 800 vassal_freed aldmarch galford 0 overlord_weak
@@ -1230,6 +1232,7 @@
 800 successor_founded uzgoth deep_hold 0 collapse
 800 hegemony_ended galford - 4 realm_shrank
 800 arrival aldmarch thief 0 arrival
+800 arrival corholm thief 0 arrival
 800 bad_century east_vale - 0 chance
 800 tyrant_rises tordale - 60 great_ruler
 800 golden_age torsary - 60 great_ruler
@@ -1457,6 +1460,7 @@
 890 act_take aldmarch east_marches 0.3 -
 890 hook_resolved aldmarch east_marches 0 hook
 890 hook_ignored torsary deep_wood 0 -
+890 arrival_left corholm thief 0 arrival_left
 890 arrival_left corholm envoy 0 arrival_left
 890 arrival_left torsary thief 0 arrival_left
 890 arrival_left berdale envoy 0 arrival_left
