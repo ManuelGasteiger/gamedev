@@ -355,7 +355,8 @@ async function finishSleep() {
   const closeWake = async () => { if ((await page.evaluate(() => game.wake())).open) await beginRaid(); };
   // a full valley has no open land to settle: then a lab world frees an outlying region (burn 0) next to another court
   let settleLab = '';
-  if (!captured.region_settled) {
+  // the land may be taken again before anyone settles it, so the lab opens a region again before each extra century
+  const openLand = async () => {
     await closeWake();
     settleLab = await page.evaluate(() => {
       const w = game.world();
@@ -374,7 +375,8 @@ async function finishSleep() {
       game.loadWorld(w);
       return r.id;
     });
-  }
+  };
+  if (!captured.region_settled) await openLand();
   // a valley of one-region courts has no conquest (a court's last region makes it a vassal instead): then a lab gives a
   // weaker neighbour a second region and starts a war it is bound to lose
   let conquestLab = '';
@@ -411,6 +413,7 @@ async function finishSleep() {
   let extraSleeps = 0;
   while (extraSleeps < 10 && (!captured.plague || !captured.region_settled || !captured.region_taken || !captured.spell_expired || (await spellsLeft()).length) && !(await page.evaluate(() => game.world().tags.includes('dragon_slain')))) {
     extraSleeps += 1;
+    if (!captured.region_settled) await openLand();
     await closeWake();
     await sleepThrough(100);
     kindsAll.push(...await playMontage());
