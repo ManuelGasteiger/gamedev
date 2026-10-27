@@ -8,14 +8,11 @@ Branch `item/03-digestion`, from main after item 02 (rules 3). The brief came in
 - Non-gold categories already left the hoard in the tree (`digest` sets `stock = remaining`), so scope item 1 is gold only.
 - Forecast: `hoard_after`, `growth_gained`, `healed` (exact, not blurred).
 - Test `digestion_consumes`. `golden` fails until the golden commit.
-- `tools/sweep.py`: top growth policy per seed, median year of phase 2 and 3.
+- `tools/sweep.py`: top growth policy per seed, median year of phase 2 and 3, tied growth buckets, resumable runs (`<out>/cache`).
+- Tuning on 30 seeds (floor / burn / pts): a 50/0.15/0.08 (played deaths 63 %, Might starved), b 10/0.15/0.1 (67 %), d 10/0.15/0.5 (phase 3 at 650), c 10/0.15/1.0 (deaths 7 %, phase 2 at 40, phase 3 at 390, raid_then_1000 top in 0 %). c is committed. At equilibrium the gold eaten equals the gold raided, so `gold_pts` sets the Might scale; floor and burn set how large the hoard stays.
+- Finding: hatchlings hold 40 to 60 gold, so the brief's floor of 50 leaves nothing to eat. The "180 gold" of the brief is not what genesis hatchlings hold.
 
 ## Next
 
-- Tuning rounds (scratch variants via `variant.py`, 30 seeds): a = 50/0.15/0.08 (brief start), b = 10/0.15/0.1.
-- Hunger check in raze_all, seed 42 forecast check.
-- Final 100-seed sweep, interest bands, report, then the golden commit, wasm and page checks, push.
-
-## Finding so far
-
-Hatchlings hold 40 to 60 gold, so a floor of 50 leaves nothing to eat and Might stalls (seed 42: Might 1.1 at year 70, phase 1; before: 46 at year 150, phase 2 at year 40). The brief's "180 gold" is not what genesis hatchlings hold.
+- Final 100-seed sweep: `python3 tools/sweep.py --seeds 100 --years 3000 --jobs 2 --policy-seeds rest_only=10 --bucket-seeds 100 --perturb-seeds 100 --out <scratch>/sw-final`. Background jobs are cut at 2 h and the machine is loaded; rerun the same command until `summary.json` exists (finished runs are cached).
+- Then: interest bands, `ctest -R policies` (raze_all hunger), forecast check on seed 42 through the wasm, report, golden commit, wasm and page checks, push.

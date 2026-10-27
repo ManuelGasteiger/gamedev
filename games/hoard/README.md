@@ -185,7 +185,7 @@ Growth, talents, health and wounds, defences, the slayer clock and the oath fix 
 
 ```
 sim/ages/growth.h/.cpp          growth points per axis, size from Might, the egg's hoard (dragon.start_hoard)
-sim/ages/hoard.cpp              digestion on the phase clock (half-life = share x long window), the gold bed, nourishment
+sim/ages/hoard.cpp              digestion on the phase clock (half-life = share x long window), the gold bed (bed_mode consumed: gold above the phase floor is eaten and gives Might), nourishment
 sim/ages/talents.h/.cpp         effects and look merged from talents and ranks, ranks (geometric cost, milestones), picks
 sim/ages/defences.h/.cpp        a settled region's defences derived from its court, the next anti-dragon unlock
 sim/ages/dragon_acts.h/.cpp     defences strike harmful acts, the wound act, wards, embers, spread, linger, molten gold
@@ -196,7 +196,7 @@ sim/ages/dragon_json.h/.cpp     world view and save fields, the talent catalogue
 sim/ages/dragon_data.cpp        loaders for the three data sources
 ```
 
-Rules beyond the contract text: courts below `anti_dragon_min_era` that fear the dragon and remember its fire research at `dread_research` x fear x burn memory per decade (without it raze_all terrifies the valley into a harmless ruin and never dies); slayer bands are `fearless`; the slaying odds set the band's strength ((2 + 0.1 sqrt(hoard) + 0.02 growth) x era multiplier x adaptation) against health x `health_div`; the gold bed pays `bed_overtime` (0.1) past a sleep's first long window and doubles in a moult; the egg lies on 40 gold.
+Rules beyond the contract text: courts below `anti_dragon_min_era` that fear the dragon and remember its fire research at `dread_research` x fear x burn memory per decade (without it raze_all terrifies the valley into a harmless ruin and never dies); slayer bands are `fearless`; the slaying odds set the band's strength ((2 + 0.1 sqrt(hoard) + 0.02 growth) x era multiplier x adaptation) against health x `health_div`; the gold bed eats `gold_burn` (0.15) of the gold above `gold_floor_base` x `floor_phase_mult[phase]` per long window slept (10 x 1, 2, 4, 8, 16) and pays `gold_pts` (1.0) Might per gold eaten (`bed_mode window` keeps the old `bed_rate` x sqrt(gold) bed); both run at `bed_overtime` (0.1) past a sleep's first long window and double in a moult; the egg lies on 40 gold.
 
 Changed from the plan's start numbers: health per Might 3 -> 1 (raids never reached a third of health), points per book/artifact/art 0.12/0.15/0.12 -> 0.3/0.4/0.3 and per ember 2.5 -> 3 (Lore and Arcana never reached a node), food 0 -> 0.05 Might, food half-life 0.1 -> 1.0 window (a stockpile fed only the first decades of a moult), bed rate 0.4 -> 1.0 (picks on 3 of the first 10 wakings), levies era scale 1, fear damping 0.6 -> 0.5. The `played` policy takes a mixed payload, burns its target, picks talents by a preference list and sleeps short, short, long (at least 10 years).
 

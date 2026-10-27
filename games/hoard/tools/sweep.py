@@ -142,6 +142,24 @@ def run_job(job):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def run_cached(job):
+    """a finished run is kept in out/cache, so an interrupted sweep resumes (delete out/cache after a change to the sim or data)"""
+    binary, data, seed, years, policy, mode, out_dir, samples = job
+    path = os.path.join(out_dir, "cache", f"{policy}-{mode}-{seed}.json")
+    if os.path.exists(path):
+        with open(path) as f:
+            r = json.load(f)
+        r["marks"] = {int(k): v for k, v in r["marks"].items()}
+        r["phase_years"] = {int(k): v for k, v in r["phase_years"].items()}
+        return r
+    r = run_job(job)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path + ".tmp", "w") as f:
+        json.dump(r, f)
+    os.replace(path + ".tmp", path)
+    return r
+
+
 # ---------------------------------------------------------------- summaries
 
 def entropy(counter):
@@ -410,7 +428,7 @@ def sweep(args):
     by = defaultdict(list)
     done = 0
     with ProcessPoolExecutor(max_workers=args.jobs) as ex:
-        for fut in as_completed([ex.submit(run_job, j) for j in jobs]):
+        for fut in as_completed([ex.submit(run_cached, j) for j in jobs]):
             r = fut.result()
             by[(r["policy"], r["mode"] if r["mode"].startswith("perturb") else "run")].append(r)
             done += 1
