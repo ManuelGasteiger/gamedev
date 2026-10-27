@@ -1,1 +1,1188 @@
-{"note": "written by tools/sift_rates.py", "rates": {}, "merged": {}, "magnitudes": {}}
+{
+ "note": "tools/sift_rates.py over played seeds 1-300: completed matches per pattern and valley era, property counts, merged properties, magnitude deciles",
+ "rates": {
+  "burned_to_waste|1": {
+   "n": 29,
+   "p:dragon=1": 29,
+   "p:span=mid": 19,
+   "p:outcome=haunted": 6,
+   "p:span=long": 10
+  },
+  "burned_to_waste|2": {
+   "n": 323,
+   "p:dragon=1": 323,
+   "p:span=long": 126,
+   "p:span=mid": 197,
+   "p:outcome=haunted": 58
+  },
+  "burned_to_waste|3": {
+   "n": 30,
+   "p:dragon=1": 30,
+   "p:span=mid": 19,
+   "p:outcome=haunted": 3,
+   "p:span=long": 11
+  },
+  "debt_of_the_saved|1": {
+   "n": 19,
+   "p:dragon=0": 19,
+   "p:race=elf": 2,
+   "p:span=mid": 10,
+   "p:race=dwarf": 13,
+   "p:span=short": 9,
+   "p:outcome=tribute": 4,
+   "p:race=human": 4
+  },
+  "debt_of_the_saved|2": {
+   "n": 127,
+   "p:dragon=0": 127,
+   "p:outcome=tribute": 14,
+   "p:race=human": 26,
+   "p:span=short": 38,
+   "p:race=dwarf": 93,
+   "p:span=mid": 89,
+   "p:outcome=feast": 2,
+   "p:race=elf": 6,
+   "p:race=undead": 2,
+   "p:outcome=temple": 2
+  },
+  "debt_of_the_saved|3": {
+   "n": 5,
+   "p:dragon=0": 5,
+   "p:race=dwarf": 5,
+   "p:span=mid": 3,
+   "p:span=short": 2
+  },
+  "dragon_broke_hegemon|1": {
+   "n": 6,
+   "p:dragon=0": 6,
+   "p:outcome=fell": 5,
+   "p:race=undead": 1,
+   "p:span=short": 2,
+   "p:race=human": 3,
+   "p:outcome=bent": 1,
+   "p:race=elf": 1,
+   "p:race=dwarf": 1
+  },
+  "dragon_broke_hegemon|2": {
+   "n": 31,
+   "p:dragon=0": 31,
+   "p:outcome=bent": 17,
+   "p:race=human": 23,
+   "p:outcome=fell": 14,
+   "p:race=elf": 6,
+   "p:race=dwarf": 2,
+   "p:span=short": 3
+  },
+  "dragon_broke_hegemon|3": {
+   "n": 1,
+   "p:dragon=0": 1,
+   "p:outcome=bent": 1,
+   "p:race=human": 1
+  },
+  "exiles_return|0": {
+   "n": 2,
+   "p:dragon=0": 2,
+   "p:outcome=others": 2,
+   "p:race=human": 2,
+   "p:span=short": 1,
+   "p:span=mid": 1
+  },
+  "exiles_return|1": {
+   "n": 56,
+   "p:dragon=0": 56,
+   "p:outcome=home": 31,
+   "p:race=elf": 5,
+   "p:span=mid": 31,
+   "p:race=orc": 9,
+   "p:span=long": 21,
+   "p:race=undead": 5,
+   "p:outcome=others": 25,
+   "p:race=human": 29,
+   "p:span=short": 4,
+   "p:race=dwarf": 8
+  },
+  "exiles_return|2": {
+   "n": 96,
+   "p:dragon=0": 96,
+   "p:outcome=others": 35,
+   "p:race=human": 48,
+   "p:span=long": 48,
+   "p:span=mid": 44,
+   "p:race=elf": 16,
+   "p:outcome=home": 61,
+   "p:race=dwarf": 20,
+   "p:race=orc": 9,
+   "p:span=short": 4,
+   "p:race=undead": 3
+  },
+  "exiles_return|3": {
+   "n": 3,
+   "p:dragon=0": 3,
+   "p:outcome=home": 3,
+   "p:race=dwarf": 3,
+   "p:span=long": 2,
+   "p:span=mid": 1
+  },
+  "fall_after_defeat|0": {
+   "n": 1,
+   "p:dragon=0": 1,
+   "p:span=short": 1
+  },
+  "fall_after_defeat|1": {
+   "n": 12,
+   "p:dragon=0": 12,
+   "p:race=human": 3,
+   "p:span=short": 8,
+   "p:span=mid": 4
+  },
+  "fall_after_defeat|2": {
+   "n": 67,
+   "p:dragon=0": 67,
+   "p:span=mid": 32,
+   "p:span=short": 35,
+   "p:race=human": 2
+  },
+  "fall_after_defeat|3": {
+   "n": 6,
+   "p:dragon=0": 6,
+   "p:span=short": 5,
+   "p:span=mid": 1
+  },
+  "golden_age_burned|1": {
+   "n": 64,
+   "p:dragon=1": 64,
+   "p:outcome=dimmed": 21,
+   "p:race=elf": 10,
+   "p:outcome=emptied": 15,
+   "p:race=dwarf": 13,
+   "p:race=human": 23,
+   "p:race=orc": 18,
+   "p:span=short": 5,
+   "p:outcome=crisis": 11
+  },
+  "golden_age_burned|2": {
+   "n": 646,
+   "p:dragon=1": 646,
+   "p:outcome=dimmed": 200,
+   "p:race=dwarf": 85,
+   "p:outcome=crisis": 241,
+   "p:race=human": 412,
+   "p:span=short": 31,
+   "p:outcome=emptied": 87,
+   "p:race=orc": 120,
+   "p:race=elf": 28,
+   "p:race=saurian": 1,
+   "p:span=long": 2
+  },
+  "golden_age_burned|3": {
+   "n": 47,
+   "p:dragon=1": 47,
+   "p:outcome=emptied": 6,
+   "p:race=elf": 1,
+   "p:outcome=crisis": 20,
+   "p:race=human": 32,
+   "p:race=orc": 10,
+   "p:outcome=dimmed": 11,
+   "p:race=dwarf": 4,
+   "p:span=short": 3
+  },
+  "grudge_to_answer|1": {
+   "n": 34,
+   "p:dragon=1": 34,
+   "p:span=mid": 27,
+   "p:span=long": 7,
+   "p:outcome=fell": 1
+  },
+  "grudge_to_answer|2": {
+   "n": 342,
+   "p:dragon=1": 342,
+   "p:outcome=fell": 9,
+   "p:span=mid": 235,
+   "p:outcome=armed": 23,
+   "p:span=long": 107
+  },
+  "grudge_to_answer|3": {
+   "n": 30,
+   "p:dragon=1": 30,
+   "p:span=mid": 21,
+   "p:outcome=armed": 3,
+   "p:span=long": 9
+  },
+  "hegemony_arc|1": {
+   "n": 31,
+   "p:dragon=1": 23,
+   "p:race=undead": 3,
+   "p:span=long": 10,
+   "p:race=elf": 15,
+   "p:race=human": 12,
+   "p:span=mid": 20,
+   "p:dragon=0": 8,
+   "p:outcome=revolt": 6,
+   "p:outcome=coalition": 2,
+   "p:span=short": 1,
+   "p:race=dwarf": 1
+  },
+  "hegemony_arc|2": {
+   "n": 116,
+   "p:dragon=1": 72,
+   "p:race=human": 84,
+   "p:span=mid": 69,
+   "p:dragon=0": 44,
+   "p:outcome=revolt": 19,
+   "p:span=long": 42,
+   "p:race=elf": 14,
+   "p:outcome=coalition": 25,
+   "p:race=dwarf": 18,
+   "p:span=short": 5
+  },
+  "hegemony_arc|3": {
+   "n": 9,
+   "p:dragon=1": 5,
+   "p:race=human": 6,
+   "p:span=mid": 5,
+   "p:race=dwarf": 3,
+   "p:span=long": 4,
+   "p:dragon=0": 4,
+   "p:outcome=revolt": 1,
+   "p:outcome=coalition": 3
+  },
+  "hostage_raised|1": {
+   "n": 2,
+   "p:dragon=1": 2
+  },
+  "hostage_raised|2": {
+   "n": 30,
+   "p:dragon=1": 30,
+   "p:race=dwarf": 5
+  },
+  "hostage_raised|3": {
+   "n": 2,
+   "p:dragon=1": 2
+  },
+  "last_of_their_kind|1": {
+   "n": 22,
+   "p:dragon=0": 22,
+   "p:span=mid": 19,
+   "p:span=long": 3
+  },
+  "last_of_their_kind|2": {
+   "n": 65,
+   "p:dragon=0": 65,
+   "p:span=mid": 46,
+   "p:span=short": 12,
+   "p:span=long": 7
+  },
+  "last_of_their_kind|3": {
+   "n": 3,
+   "p:dragon=0": 3,
+   "p:span=mid": 3
+  },
+  "martyrs_remembered|1": {
+   "n": 3,
+   "p:dragon=0": 3,
+   "p:outcome=refounded": 3,
+   "p:race=elf": 1,
+   "p:span=mid": 3,
+   "p:race=undead": 2
+  },
+  "martyrs_remembered|2": {
+   "n": 132,
+   "p:dragon=0": 132,
+   "p:outcome=spread": 74,
+   "p:race=human": 76,
+   "p:span=mid": 69,
+   "p:outcome=refounded": 23,
+   "p:race=dwarf": 30,
+   "p:race=elf": 23,
+   "p:span=long": 13,
+   "p:outcome=outlived": 35,
+   "p:span=short": 50,
+   "p:race=undead": 3
+  },
+  "martyrs_remembered|3": {
+   "n": 10,
+   "p:dragon=0": 10,
+   "p:outcome=refounded": 5,
+   "p:race=dwarf": 3,
+   "p:span=mid": 4,
+   "p:race=human": 6,
+   "p:outcome=spread": 2,
+   "p:span=long": 1,
+   "p:outcome=outlived": 3,
+   "p:span=short": 5,
+   "p:race=elf": 1
+  },
+  "oath_of_recovery|1": {
+   "n": 72,
+   "p:dragon=1": 72,
+   "p:span=long": 5
+  },
+  "oath_of_recovery|2": {
+   "n": 164,
+   "p:dragon=1": 164,
+   "p:span=long": 4,
+   "p:outcome=thieves": 4
+  },
+  "oath_of_recovery|3": {
+   "n": 3,
+   "p:dragon=1": 3
+  },
+  "order_rise_and_fall|1": {
+   "n": 8,
+   "p:dragon=0": 8,
+   "p:race=elf": 4,
+   "p:span=mid": 5,
+   "p:race=undead": 4,
+   "p:span=long": 3
+  },
+  "order_rise_and_fall|2": {
+   "n": 158,
+   "p:dragon=0": 158,
+   "p:race=human": 88,
+   "p:span=mid": 78,
+   "p:race=dwarf": 31,
+   "p:race=elf": 29,
+   "p:span=long": 80,
+   "p:outcome=fell": 22,
+   "p:race=undead": 10,
+   "p:outcome=slew": 6
+  },
+  "order_rise_and_fall|3": {
+   "n": 14,
+   "p:dragon=0": 14,
+   "p:race=dwarf": 4,
+   "p:span=long": 7,
+   "p:race=human": 7,
+   "p:span=mid": 7,
+   "p:race=elf": 3,
+   "p:outcome=slew": 2,
+   "p:outcome=fell": 2
+  },
+  "plague_war|0": {
+   "n": 8,
+   "p:dragon=0": 8,
+   "p:outcome=submitted": 8,
+   "p:race=elf": 4,
+   "p:span=mid": 6,
+   "p:span=short": 2,
+   "p:race=orc": 1,
+   "p:race=human": 2,
+   "p:race=dwarf": 1
+  },
+  "plague_war|1": {
+   "n": 102,
+   "p:dragon=0": 102,
+   "p:outcome=submitted": 68,
+   "p:race=elf": 12,
+   "p:span=mid": 79,
+   "p:race=dwarf": 20,
+   "p:span=short": 23,
+   "p:race=undead": 6,
+   "p:race=orc": 8,
+   "p:outcome=spent": 15,
+   "p:race=human": 56,
+   "p:outcome=conquered": 14
+  },
+  "plague_war|2": {
+   "n": 581,
+   "p:dragon=0": 581,
+   "p:outcome=spent": 94,
+   "p:race=dwarf": 123,
+   "p:span=mid": 392,
+   "p:outcome=submitted": 398,
+   "p:race=human": 328,
+   "p:span=short": 189,
+   "p:race=orc": 36,
+   "p:race=undead": 27,
+   "p:race=elf": 66,
+   "p:outcome=conquered": 56,
+   "p:race=saurian": 1
+  },
+  "plague_war|3": {
+   "n": 29,
+   "p:dragon=0": 29,
+   "p:outcome=spent": 3,
+   "p:race=dwarf": 9,
+   "p:span=mid": 17,
+   "p:outcome=submitted": 23,
+   "p:race=human": 14,
+   "p:span=short": 12,
+   "p:race=orc": 4,
+   "p:race=undead": 2,
+   "p:outcome=conquered": 2
+  },
+  "prophecy_answered|1": {
+   "n": 77,
+   "p:dragon=1": 77,
+   "p:outcome=taking": 23,
+   "p:race=elf": 39,
+   "p:race=dwarf": 20,
+   "p:outcome=fire": 52,
+   "p:race=undead": 13,
+   "p:race=human": 5,
+   "p:span=short": 7,
+   "p:outcome=grace": 2
+  },
+  "prophecy_answered|2": {
+   "n": 1449,
+   "p:dragon=1": 1449,
+   "p:outcome=taking": 520,
+   "p:race=elf": 226,
+   "p:outcome=fire": 690,
+   "p:race=human": 898,
+   "p:race=dwarf": 306,
+   "p:outcome=grace": 239,
+   "p:span=short": 286,
+   "p:race=undead": 19
+  },
+  "prophecy_answered|3": {
+   "n": 122,
+   "p:dragon=1": 122,
+   "p:outcome=fire": 56,
+   "p:race=dwarf": 32,
+   "p:outcome=grace": 19,
+   "p:race=human": 76,
+   "p:outcome=taking": 47,
+   "p:race=elf": 13,
+   "p:span=short": 15,
+   "p:race=saurian": 1
+  },
+  "ruler_slain|1": {
+   "n": 90,
+   "p:dragon=1": 90,
+   "p:race=orc": 17,
+   "p:race=dwarf": 10,
+   "p:race=human": 22,
+   "p:race=elf": 41,
+   "p:outcome=fell": 4
+  },
+  "ruler_slain|2": {
+   "n": 584,
+   "p:dragon=1": 584,
+   "p:race=human": 213,
+   "p:race=dwarf": 106,
+   "p:race=orc": 114,
+   "p:race=elf": 150,
+   "p:race=saurian": 1,
+   "p:outcome=fell": 14,
+   "p:outcome=crisis": 3
+  },
+  "ruler_slain|3": {
+   "n": 28,
+   "p:dragon=1": 28,
+   "p:race=dwarf": 4,
+   "p:race=elf": 4,
+   "p:outcome=fell": 4,
+   "p:race=orc": 9,
+   "p:race=human": 11
+  },
+  "sack_and_revenge|0": {
+   "n": 4,
+   "p:dragon=0": 4,
+   "p:race=human": 4
+  },
+  "sack_and_revenge|1": {
+   "n": 43,
+   "p:dragon=0": 43,
+   "p:race=dwarf": 6,
+   "p:race=human": 31,
+   "p:race=undead": 2,
+   "p:span=short": 5,
+   "p:race=orc": 2,
+   "p:race=elf": 2,
+   "p:outcome=fell": 1
+  },
+  "sack_and_revenge|2": {
+   "n": 139,
+   "p:dragon=0": 139,
+   "p:race=human": 85,
+   "p:span=short": 22,
+   "p:race=dwarf": 20,
+   "p:race=orc": 20,
+   "p:race=undead": 6,
+   "p:race=elf": 8,
+   "p:outcome=fell": 5
+  },
+  "sack_and_revenge|3": {
+   "n": 6,
+   "p:dragon=0": 6,
+   "p:race=orc": 1,
+   "p:race=human": 4,
+   "p:span=short": 2,
+   "p:race=dwarf": 1
+  },
+  "succession_war|0": {
+   "n": 27,
+   "p:dragon=0": 27,
+   "p:outcome=submitted": 22,
+   "p:span=mid": 14,
+   "p:span=short": 13,
+   "p:outcome=won": 3,
+   "p:outcome=spent": 2
+  },
+  "succession_war|1": {
+   "n": 155,
+   "p:dragon=0": 155,
+   "p:outcome=submitted": 97,
+   "p:span=mid": 81,
+   "p:outcome=spent": 30,
+   "p:outcome=won": 11,
+   "p:span=short": 74
+  },
+  "succession_war|2": {
+   "n": 826,
+   "p:dragon=0": 826,
+   "p:outcome=submitted": 581,
+   "p:span=mid": 380,
+   "p:span=short": 446,
+   "p:outcome=spent": 78,
+   "p:outcome=won": 88
+  },
+  "succession_war|3": {
+   "n": 47,
+   "p:dragon=0": 47,
+   "p:outcome=submitted": 34,
+   "p:span=short": 29,
+   "p:outcome=spent": 3,
+   "p:span=mid": 18,
+   "p:outcome=won": 6
+  },
+  "temple_to_the_dragon|1": {
+   "n": 1,
+   "p:dragon=1": 1,
+   "p:outcome=fell": 1,
+   "p:span=mid": 1
+  },
+  "temple_to_the_dragon|2": {
+   "n": 38,
+   "p:dragon=1": 38,
+   "p:outcome=blessed": 26,
+   "p:span=mid": 11,
+   "p:span=long": 27,
+   "p:outcome=betrayed": 10,
+   "p:outcome=fell": 2
+  },
+  "temple_to_the_dragon|3": {
+   "n": 8,
+   "p:dragon=1": 8,
+   "p:outcome=blessed": 4,
+   "p:span=mid": 4,
+   "p:outcome=betrayed": 4,
+   "p:span=long": 4
+  },
+  "the_fading|1": {
+   "n": 12,
+   "p:dragon=0": 12,
+   "p:outcome=sailed": 1,
+   "p:span=mid": 10,
+   "p:span=long": 2,
+   "p:outcome=fell": 1
+  },
+  "the_fading|2": {
+   "n": 102,
+   "p:dragon=0": 102,
+   "p:span=mid": 39,
+   "p:span=long": 62,
+   "p:outcome=fell": 9,
+   "p:outcome=sailed": 1,
+   "p:span=short": 1
+  },
+  "the_fading|3": {
+   "n": 5,
+   "p:dragon=0": 5,
+   "p:span=long": 2,
+   "p:span=mid": 3
+  },
+  "treasure_hunt|1": {
+   "n": 15,
+   "p:dragon=1": 15,
+   "p:race=human": 11,
+   "p:race=elf": 2,
+   "p:race=dwarf": 1,
+   "p:outcome=fire": 1,
+   "p:race=undead": 1
+  },
+  "treasure_hunt|2": {
+   "n": 72,
+   "p:dragon=1": 72,
+   "p:race=human": 57,
+   "p:race=elf": 3,
+   "p:race=dwarf": 12,
+   "p:outcome=fire": 1
+  },
+  "treasure_hunt|3": {
+   "n": 1,
+   "p:dragon=1": 1,
+   "p:race=human": 1
+  },
+  "tyrant_falls|0": {
+   "n": 11,
+   "p:dragon=0": 11,
+   "p:outcome=crisis": 3,
+   "p:race=human": 6,
+   "p:outcome=thaw": 2,
+   "p:outcome=war": 2,
+   "p:outcome=fell": 4
+  },
+  "tyrant_falls|1": {
+   "n": 158,
+   "p:dragon=0": 158,
+   "p:outcome=fell": 92,
+   "p:outcome=crisis": 37,
+   "p:race=human": 76,
+   "p:outcome=thaw": 8,
+   "p:outcome=war": 21,
+   "p:race=dwarf": 3
+  },
+  "tyrant_falls|2": {
+   "n": 1197,
+   "p:dragon=0": 1197,
+   "p:outcome=fell": 661,
+   "p:race=human": 576,
+   "p:outcome=war": 197,
+   "p:outcome=thaw": 108,
+   "p:race=dwarf": 46,
+   "p:outcome=crisis": 231,
+   "p:race=elf": 5
+  },
+  "tyrant_falls|3": {
+   "n": 95,
+   "p:dragon=0": 95,
+   "p:outcome=crisis": 22,
+   "p:race=human": 35,
+   "p:outcome=fell": 62,
+   "p:outcome=thaw": 4,
+   "p:outcome=war": 7,
+   "p:race=dwarf": 3
+  },
+  "vengeance_for_burning|1": {
+   "n": 17,
+   "p:dragon=1": 17,
+   "p:outcome=failed": 4,
+   "p:race=elf": 9,
+   "p:span=long": 13,
+   "p:race=undead": 8,
+   "p:span=mid": 4
+  },
+  "vengeance_for_burning|2": {
+   "n": 118,
+   "p:dragon=1": 118,
+   "p:race=human": 46,
+   "p:span=mid": 52,
+   "p:race=dwarf": 31,
+   "p:span=long": 66,
+   "p:race=elf": 31,
+   "p:race=undead": 10
+  },
+  "vengeance_for_burning|3": {
+   "n": 8,
+   "p:dragon=1": 8,
+   "p:race=elf": 3,
+   "p:span=long": 4,
+   "p:race=human": 3,
+   "p:span=mid": 4,
+   "p:race=dwarf": 2
+  },
+  "war_lost_to_dragon_fire|1": {
+   "n": 28,
+   "p:dragon=1": 28,
+   "p:race=elf": 5,
+   "p:span=short": 19,
+   "p:race=dwarf": 5,
+   "p:span=mid": 9,
+   "p:race=orc": 9,
+   "p:race=undead": 1,
+   "p:race=human": 8
+  },
+  "war_lost_to_dragon_fire|2": {
+   "n": 303,
+   "p:dragon=1": 303,
+   "p:race=human": 158,
+   "p:span=mid": 139,
+   "p:span=short": 164,
+   "p:race=orc": 85,
+   "p:race=dwarf": 46,
+   "p:race=elf": 5,
+   "p:race=undead": 9
+  },
+  "war_lost_to_dragon_fire|3": {
+   "n": 27,
+   "p:dragon=1": 27,
+   "p:race=orc": 10,
+   "p:span=short": 15,
+   "p:race=human": 12,
+   "p:span=mid": 12,
+   "p:race=dwarf": 5
+  },
+  "war_won_by_dragon_act|1": {
+   "n": 51,
+   "p:dragon=1": 51,
+   "p:race=elf": 5,
+   "p:race=undead": 3,
+   "p:race=dwarf": 26,
+   "p:race=human": 16,
+   "p:outcome=turned": 1,
+   "p:race=orc": 1
+  },
+  "war_won_by_dragon_act|2": {
+   "n": 279,
+   "p:dragon=1": 279,
+   "p:race=human": 96,
+   "p:race=orc": 19,
+   "p:race=dwarf": 145,
+   "p:race=elf": 14,
+   "p:outcome=turned": 9,
+   "p:span=short": 4,
+   "p:race=undead": 5
+  },
+  "war_won_by_dragon_act|3": {
+   "n": 16,
+   "p:dragon=1": 16,
+   "p:race=dwarf": 9,
+   "p:race=human": 3,
+   "p:race=orc": 3,
+   "p:race=undead": 1
+  }
+ },
+ "merged": {
+  "succession_war": {
+   "p:race=human": "p:dragon=0"
+  },
+  "tyrant_falls": {
+   "p:span=mid": "p:dragon=0",
+   "p:race=orc": "p:outcome=fell"
+  },
+  "war_won_by_dragon_act": {
+   "p:span=mid": "p:dragon=1",
+   "p:outcome=held": "p:dragon=1"
+  },
+  "debt_of_the_saved": {
+   "p:outcome=ingratitude": "p:dragon=0"
+  },
+  "oath_of_recovery": {
+   "p:race=elf": "p:dragon=1",
+   "p:outcome=hunt": "p:dragon=1",
+   "p:span=mid": "p:dragon=1"
+  },
+  "grudge_to_answer": {
+   "p:race=dwarf": "p:dragon=1",
+   "p:outcome=fire": "p:dragon=1"
+  },
+  "treasure_hunt": {
+   "p:span=mid": "p:dragon=1",
+   "p:outcome=robbed_again": "p:dragon=1"
+  },
+  "prophecy_answered": {
+   "p:span=mid": "p:dragon=1"
+  },
+  "sack_and_revenge": {
+   "p:outcome=repaid": "p:dragon=0",
+   "p:span=mid": "p:dragon=0"
+  },
+  "hostage_raised": {
+   "p:outcome=died": "p:dragon=1",
+   "p:span=mid": "p:dragon=1",
+   "p:race=human": "p:dragon=1"
+  },
+  "golden_age_burned": {
+   "p:span=mid": "p:dragon=1",
+   "p:outcome=fell": "p:race=orc"
+  },
+  "burned_to_waste": {
+   "p:outcome=orcs": "p:dragon=1",
+   "p:race=orc": "p:dragon=1",
+   "p:race=undead": "p:outcome=haunted"
+  },
+  "vengeance_for_burning": {
+   "p:outcome=marched": "p:dragon=1"
+  },
+  "order_rise_and_fall": {
+   "p:outcome=failed": "p:dragon=0"
+  },
+  "temple_to_the_dragon": {
+   "p:race=human": "p:dragon=1"
+  },
+  "ruler_slain": {
+   "p:span=short": "p:dragon=1",
+   "p:outcome=succeeded": "p:dragon=1"
+  },
+  "hegemony_arc": {
+   "p:outcome=dragon": "p:dragon=1"
+  },
+  "the_fading": {
+   "p:race=elf": "p:dragon=0",
+   "p:outcome=recovered": "p:dragon=0"
+  },
+  "dragon_broke_hegemon": {
+   "p:span=mid": "p:dragon=0"
+  },
+  "fall_after_defeat": {
+   "p:race=orc": "p:dragon=0"
+  }
+ },
+ "magnitudes": {
+  "act_burn": [
+   0.3,
+   0.3,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5
+  ],
+  "act_kill": [
+   0.05,
+   0.05,
+   0.05,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3
+  ],
+  "anti_dragon_progress": [
+   0.25,
+   0.25,
+   0.25,
+   0.5,
+   0.5,
+   0.75,
+   0.75,
+   0.75,
+   0.95
+  ],
+  "collapse": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "court_founded": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   2.0,
+   2.0,
+   3.0
+  ],
+  "dragon_atrophied": [
+   0.01,
+   0.01,
+   0.01,
+   0.02,
+   0.02,
+   0.04,
+   0.07,
+   0.09999999999999999,
+   0.11999999999999998
+  ],
+  "dragon_moulted": [
+   2.0,
+   2.0,
+   2.0,
+   3.0,
+   3.0,
+   3.0,
+   4.0,
+   4.0,
+   4.0
+  ],
+  "dragon_slain": [
+   16.356371866465622,
+   16.95525700557169,
+   18.89078054011564,
+   24.39111208113247,
+   25.80023231686582,
+   28.50392984702403,
+   32.393442875370944,
+   33.949686872703104,
+   37.29975748880928
+  ],
+  "dragon_starving": [
+   0.907287059027134,
+   0.9142264137762387,
+   0.9208980456984559,
+   0.92772999698057,
+   0.9349891251827336,
+   0.9433550739569145,
+   0.9537212806918406,
+   0.9681185558059091,
+   0.9899502833005892
+  ],
+  "dragon_wounded": [
+   2.2399999999999998,
+   2.2399999999999998,
+   5.039999999999999,
+   6.751169225658718,
+   7.601075608250017,
+   7.84,
+   8.852053617637274,
+   13.439999999999998,
+   13.439999999999998
+  ],
+  "elves_withdrew": [
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5,
+   0.5
+  ],
+  "era_advance": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   2.0,
+   2.0,
+   2.0
+  ],
+  "fading_begins": [
+   0.7182661768757282,
+   0.7304205394083587,
+   0.7410674882126534,
+   0.7511537062682805,
+   0.7579080926749218,
+   0.7724075414739086,
+   0.7815995497329904,
+   0.7962099487607709,
+   0.831917287353625
+  ],
+  "fading_ends": [
+   0.11953874059093429,
+   0.34797508970276364,
+   0.40483639731798426,
+   0.4606378648747433,
+   0.4741487739519045,
+   0.5009425573202346,
+   0.5215115224385398,
+   0.5306890744226355,
+   0.5419432998956389
+  ],
+  "golden_age": [
+   40.0,
+   40.0,
+   40.0,
+   60.0,
+   60.0,
+   60.0,
+   90.0,
+   190.0,
+   250.0
+  ],
+  "hegemony": [
+   6.0,
+   6.0,
+   6.0,
+   6.0,
+   6.0,
+   6.0,
+   6.0,
+   6.0,
+   6.0
+  ],
+  "hegemony_ended": [
+   0.0,
+   0.0,
+   3.0,
+   4.0,
+   4.0,
+   4.0,
+   4.0,
+   4.0,
+   4.0
+  ],
+  "person_rose": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "race_extinct": [
+   0.0,
+   20.0,
+   30.0,
+   40.0,
+   50.0,
+   70.0,
+   100.0,
+   130.0,
+   180.0
+  ],
+  "race_returned": [
+   0.0,
+   0.15,
+   0.15,
+   0.23213474903135872,
+   0.26850752127839184,
+   0.2799098974610423,
+   0.28978089867745366,
+   0.29586981134800777,
+   0.3231309654403546
+  ],
+  "raised_in_lair": [
+   20.0,
+   20.0,
+   20.0,
+   20.0,
+   20.0,
+   20.0,
+   20.0,
+   20.0,
+   20.0
+  ],
+  "rank_gained": [
+   1.0,
+   2.0,
+   2.0,
+   3.0,
+   4.0,
+   4.0,
+   5.0,
+   6.0,
+   8.0
+  ],
+  "region_abandoned": [
+   0.8199999999999998,
+   0.8499999999999999,
+   0.8799999999999998,
+   0.9199999999999995,
+   0.952500000000001,
+   0.98,
+   0.9899999999999999,
+   1.0,
+   1.0
+  ],
+  "remnant_formed": [
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3,
+   0.3883213996887207
+  ],
+  "slay_attempt_failed": [
+   0.018992444167588593,
+   0.024121325553192068,
+   0.027323569198672508,
+   0.030713648644663784,
+   0.034696368910368,
+   0.03840728120808774,
+   0.04178708766280374,
+   0.04644962364273529,
+   0.05272240483651135
+  ],
+  "slayers_coming": [
+   0.018871903831292943,
+   0.02297790102924283,
+   0.026437020110065972,
+   0.029683829492500185,
+   0.03324372548194727,
+   0.03641268090653019,
+   0.03948615291605843,
+   0.043800343893284764,
+   0.05206550398296006
+  ],
+  "slayers_forming": [
+   14.291637344322679,
+   17.740603892598227,
+   20.054471230878974,
+   22.183699872640087,
+   24.494671135165337,
+   27.5779015299386,
+   30.129838822624965,
+   33.84430171882251,
+   41.10484793688713
+  ],
+  "slayers_ready": [
+   0.015046809538469865,
+   0.01860244717864631,
+   0.02120006718112515,
+   0.023745680785040454,
+   0.026475045807987332,
+   0.028689206595489652,
+   0.03152519839062728,
+   0.035185272164964185,
+   0.041632531464668804
+  ],
+  "talent_taken": [
+   3.0,
+   3.0,
+   8.0,
+   8.0,
+   8.0,
+   15.0,
+   15.0,
+   25.0,
+   25.0
+  ],
+  "tribute_paid": [
+   0.08144947206335175,
+   0.1484675886702837,
+   0.2031316392353495,
+   0.27549717077329544,
+   0.34866638666401006,
+   0.41497730933737825,
+   0.4819579335819342,
+   0.5630655946347466,
+   0.7166194616958903
+  ],
+  "tyrant_rises": [
+   40.0,
+   40.0,
+   40.0,
+   60.0,
+   60.0,
+   60.0,
+   90.0,
+   190.0,
+   250.0
+  ],
+  "undying_fell": [
+   200.0,
+   400.0,
+   550.0,
+   670.0,
+   1250.0,
+   1410.0,
+   1850.0,
+   1960.0,
+   2230.0
+  ],
+  "world_began": [
+   3.0,
+   3.0,
+   3.0,
+   4.0,
+   4.0,
+   4.0,
+   4.0,
+   5.0,
+   5.0
+  ]
+ }
+}
