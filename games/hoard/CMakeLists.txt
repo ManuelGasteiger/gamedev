@@ -44,6 +44,15 @@ add_library(ages STATIC
   sim/ages/oaths.cpp
   sim/ages/offers.cpp
   sim/ages/briefing.cpp
+  sim/sift/acceptor.cpp
+  sim/sift/bank_data.cpp
+  sim/sift/because.cpp
+  sim/sift/line_text.cpp
+  sim/sift/score.cpp
+  sim/sift/select.cpp
+  sim/sift/sift_json.cpp
+  sim/sift/sift_util.cpp
+  sim/sift/source.cpp
   sim/ages/card_data.cpp
   sim/ages/policy.cpp
   sim/ages/policy_json.cpp
@@ -173,6 +182,8 @@ ages_test(dread_awe_update fast)
 ages_test(memory_tiers fast)
 ages_test(arrival_gating fast)
 ages_test(arrival_cooldown fast)
+ages_test(sift_acceptor fast)
+ages_test(sift_budget fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)

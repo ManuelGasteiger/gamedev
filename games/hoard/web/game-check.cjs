@@ -388,6 +388,8 @@ async function finishSleep() {
         for (const ra of A.regions) for (const n of reg(ra).neighbours) {
           const B = fac(reg(n)?.owner);
           if (!B || B.id === A.id || B.race === 'orc' || A.overlord === B.id || B.overlord === A.id) continue;
+          // a warded or dug-in border, or an orc court, holds most decades of a five-decade war
+          if (B.dominant_race === 'orc' || reg(n).tags.includes('dug_in') || (w.modifiers ?? []).some((m) => m.target === n && m.var === 'invasion_chance')) continue;
           const X = reg(n).neighbours.map(reg).find((r) => r && !r.lair && r.owner !== A.id && r.owner !== B.id);
           if (!X) continue;
           const C = X.owner ? fac(X.owner) : null;
@@ -399,7 +401,7 @@ async function finishSleep() {
           w.wars = (w.wars ?? []).filter((x) => alive.has(x.a) && alive.has(x.b) && ![x.a, x.b].includes(A.id) && ![x.a, x.b].includes(B.id));
           w.wars.push({ a: A.id, b: B.id, started: w.year, decades: 0, taken_from_a: 0, taken_from_b: 0, allies_a: [], allies_b: [], coalition: false, years_fought: 0, declared: 0, thread: `war:${A.id}:${B.id}:${w.year}` });
           A.at_war_with = [B.id]; B.at_war_with = [A.id];
-          B.wealth = Math.max(B.wealth, 20); A.wealth = Math.max(A.wealth, B.wealth * 20, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
+          B.wealth = 1; A.wealth = Math.max(A.wealth, 300); A.cohesion = 1; B.cohesion = 0.5;   // B loses land (cohesion under war_target_cohesion 0.6) before it can fall apart
           game.loadWorld(w);
           return `${A.id} at war with ${B.id}, which also holds ${X.id}`;
         }

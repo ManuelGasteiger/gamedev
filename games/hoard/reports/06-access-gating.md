@@ -77,7 +77,7 @@ Checks: `ctest -L fast` 15/15, `web/game-check.cjs` 90/90 with no console errors
 
 ## Goldens
 
-Last commit `golden:` bumps `kRulesVersion` 3 to 4 and regenerates `tests/golden/state_hashes.txt`, the two chronicle hashes and the three chronicle texts, `tests/replays/played-1..3.hrp`, `web/ages.wasm`, `web/hoard-game.html` and `web/ages-sandbox.html`. `tests/saves/v1-seed4.expect` was regenerated and is the same value (a7d97d81cde0a9df). I read the chronicle diffs: arrival lines are added, and from the first arrival on the histories diverge.
+Two `golden:` commits on the branch (the second after lair memory and the waking check changed the world stream), the first bumping `kRulesVersion` 3 to 4. Each regenerates `tests/golden/state_hashes.txt`, the chronicle hashes and texts, `tests/replays/played-1..3.hrp`, `web/ages.wasm`, `web/hoard-game.html` and `web/ages-sandbox.html`. The arrival lines are added to the chronicle, and from the first arrival on the histories diverge. On merging with item 14 the lead regenerated everything once more under rules 6.
 
 ## German lines, unreviewed
 

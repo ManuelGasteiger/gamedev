@@ -11,6 +11,7 @@
 #include "talents.h"
 #include "world_util.h"
 #include "wounds.h"
+#include "../sift/sift.h"
 
 namespace ages {
 
@@ -88,6 +89,7 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     score_events(w, p);
     if (!has_tag(w.tags, "dragon_slain")) { arrivals_at_wake(w, p); rule_arrivals(w, p); generate_offers(w, p); }
     if (!has_tag(w.tags, "dragon_slain")) res.hooks = generate_hooks(w, p);   // v0.4 hooks (S3): after everything the sleep brought
+    sift_wake(w, p, w.sleep_started);   // item 14: the briefing's lines, recorded as shown
     res.chronicle.assign(w.chronicle.begin() + static_cast<std::ptrdiff_t>(start), w.chronicle.end());
     res.growth_gained = growth_since(growth_before, w.dragons[kPlayer]);
     res.healed = std::max(0.0, wounds_before - w.dragons[kPlayer].wounds);

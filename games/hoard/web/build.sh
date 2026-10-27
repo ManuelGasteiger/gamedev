@@ -8,7 +8,7 @@ CXX="$WASI_SDK/bin/clang++"
 SYSROOT="$WASI_SDK/share/wasi-sysroot"
 
 if [ "${1:-}" != "--html" ]; then
-  SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp sim/text/*.cpp | grep -v -e data_io.cpp -e bundle_io.cpp)
+  SOURCES=$(ls sim/core/*.cpp sim/ages/*.cpp sim/ages/rules/*.cpp sim/sift/*.cpp sim/text/*.cpp | grep -v -e data_io.cpp -e bundle_io.cpp)
   "$CXX" --target=wasm32-wasi --sysroot="$SYSROOT" -std=c++17 -O2 -ffp-contract=off -fno-fast-math -DHOARD_BUILD="\"$(git rev-parse --short HEAD 2>/dev/null || echo dev)\"" \
     -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor \
     -Isim \
@@ -34,6 +34,9 @@ data['text_bundles'] = {d.name: json.dumps({'lang': d.name, **{f.name[:-5]: json
 # the event cards, joined in file-name order into one JSON array as data_io.cpp does
 data['events'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/events').glob('*.json'))) + ']'
 data['genesis'] = (root / 'data/genesis.json').read_text()   # v0.4 world (S2)
+# item 14: the pattern bank joined as data_io.cpp does, and the dry-run base rates
+data['patterns'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/patterns').glob('*.json')) if p.name != 'base_rates.json') + ']'
+data['base_rates'] = (root / 'data/patterns/base_rates.json').read_text()
 print('web/ages.wasm', (root / 'web/ages.wasm').stat().st_size, 'bytes')
 for template, out in [('web/sandbox.template.html', 'web/ages-sandbox.html'), ('web/game.template.html', 'web/hoard-game.html')]:
     html = (root / template).read_text()
