@@ -1,21 +1,17 @@
 # 07 people moves: progress
 
-Branch `item/07-people-moves` from origin/main 7d8c372.
+Branch `item/07-people-moves` from origin/main 7d8c372, pushed.
 
 ## Done
 
-- state: `PersonTraits.list`, virtue, vice, `mem`, `permanent`, `rel`, `flips`; `World.secrets` (commits bfb118a, 8dc3fcf for serialise via `person_json.cpp`).
-- `data/moves.json` and loader `move_data.{h,cpp}`, plumbed through data_io, api.cpp, build.sh, build.ps1, smoke.mjs, data hash.
-- `person_record.{h,cpp}`: traits at birth (keyed rng "traits"), tracked cap, axes, acquire, witness memory from acts, inheritance at death.
-- `moves.{h,cpp}`: `resolve_move`, `read_release`, `release_terms`.
-- rules after rule_people: `person_memory.cpp`, `secrets.cpp`, `inquisition.cpp`.
-- cards: branch `boost`, effect `fall`; `hostage_came_home.json` extended; `data/events/intrigue.json` (inquisition, purge).
-- text: narrator en lines, importance rows, ui reasons en and de.
-- Baseline interest (main, played, 300 seeds): scratchpad `interest-before.txt`.
+- State, serialise, moves.json and loader, person record, moves, rules (person memory, secrets, inquisition), cards, text, tests `move_scores` and `princess_chain`, interest metrics.
+- Tuning: witness courts hear of acts (told), court threshold 3, trait flip importance 0.4 (not major).
+- Golden commit 0cef692 (rules 8): chronicles, chronicle hashes, sift_bank_v1, replays, save expectation.
+- Baseline interest (main, played, 300 seeds) in scratchpad `interest-before.txt`; branch run before tuning `i07-after.txt`.
 
 ## Next
 
-- Build, run fast tests, commit in steps.
-- Tests `move_scores`, `princess_chain`.
-- Runner `--move-census`, interest.py metric for persons with dragon memory.
-- 300-seed measurement, golden commit (rules 8), wasm and page, checks, report.
+- `state_hashes.txt` (300 seeds) in its own golden commit.
+- wasm build (`WASI_SDK=/root/wasi-sdk bash web/build.sh`, LFS gltf pulled), page golden commit.
+- Checks: ctest -L fast, smoke --golden 1-60, l10n-check pseudo,de, game-check.
+- Final 300-seed interest run, report `reports/07-people-moves.md`.
