@@ -321,11 +321,12 @@ struct Person {
     int flips = 0;
 };
 
-// item 07: a secret act on a person that the court may discover (inquisition)
+// item 07: a secret act on a person that the court may discover; once exposed it carries the purge faction's
+// discontent until the ultimatum (inquisition)
 struct Secret {
     std::string holder, about, kind;
-    int year = 0;
-    double discovery_per_decade = 0;
+    int year = 0, exposed = 0;
+    double discovery_per_decade = 0, discontent = 0;
 };
 
 struct DeadPerson {
