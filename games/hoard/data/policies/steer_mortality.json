@@ -1,0 +1,15 @@
+{
+  "note": "item 04: the pacing bots steering toward Mortality: awe through gifts and protection, no burning; the bot receives every visitor",
+  "acts": [
+    { "type": "defend", "target": "weakest_human", "against": "any_attacker", "magnitude": 1.0 },
+    { "type": "give",   "target": "each", "magnitude": 0.1 },
+    { "type": "take",   "target": "richest", "magnitude": 0.2, "payload_share": { "gold": 0.5, "food": 0.3, "books": 0.1, "artifacts": 0.05, "art": 0.05 } }
+  ],
+  "talents": ["thick_hide", "iron_scales", "old_bones", "awe", "tithe", "hotter_breath", "clinging_fire", "white_fire", "tower_breaker",
+              "spell_sense", "ward_craft", "dragon_sight", "sleepers_ward", "keen_eyes", "premonition", "patient_mind", "chronicler",
+              "kobold_servants", "gilded_throne", "brood_of_mortals"],
+  "sleep_cycle": ["short", "short", "long"],
+  "min_sleep": 10,
+  "answer_hooks": { "acts": ["take", "defend", "answer"], "choice": "receive", "magnitude": 0.3,
+                    "payload_share": { "gold": 0.5, "food": 0.3, "books": 0.1, "artifacts": 0.05, "art": 0.05 }, "wound_cap": 0.5, "max": 1 }
+}

@@ -1,0 +1,16 @@
+{
+  "note": "item 04: the pacing bots steering toward Ascension: awe and faith in every court through gifts, shows and protection, Dominion first",
+  "acts": [
+    { "type": "defend", "target": "weakest_human", "against": "any_attacker", "magnitude": 1.0 },
+    { "type": "give",   "target": "each", "magnitude": 0.1 },
+    { "type": "show",   "target": "each", "magnitude": 0.3 },
+    { "type": "take",   "target": "richest", "magnitude": 0.2, "payload_share": { "gold": 0.3, "food": 0.3, "books": 0.1, "artifacts": 0.1, "art": 0.2 } }
+  ],
+  "talents": ["awe", "tithe", "gilded_throne", "kobold_servants", "brood_of_mortals", "thick_hide", "iron_scales", "old_bones",
+              "spell_sense", "ward_craft", "dragon_sight", "sleepers_ward", "keen_eyes", "premonition", "patient_mind", "chronicler",
+              "hotter_breath", "clinging_fire", "white_fire", "tower_breaker"],
+  "sleep_cycle": ["short", "short", "long"],
+  "min_sleep": 10,
+  "answer_hooks": { "acts": ["take", "defend", "answer"], "choice": "receive", "magnitude": 0.3,
+                    "payload_share": { "gold": 0.3, "food": 0.3, "books": 0.1, "artifacts": 0.1, "art": 0.2 }, "wound_cap": 0.5, "max": 1 }
+}

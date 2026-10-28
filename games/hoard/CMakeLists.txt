@@ -116,6 +116,15 @@ add_library(ages STATIC
   sim/ages/genesis_json.cpp
   sim/ages/genesis_world.cpp
   sim/ages/legends.cpp
+  # item 04
+  sim/ages/endings_data.cpp
+  sim/ages/rules/endings.cpp
+  sim/ages/exit.cpp
+  sim/ages/endings_json.cpp
+  sim/ages/prophecy.cpp
+  sim/ages/profile.cpp
+  sim/ages/legend_weave.cpp
+  sim/ages/profile_notes.cpp
   sim/ages/rules/world.cpp
   sim/ages/rules/undying.cpp
   sim/ages/rules/extinction.cpp
@@ -145,7 +154,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)
@@ -185,6 +194,8 @@ ages_test(arrival_gating fast)
 ages_test(arrival_cooldown fast)
 ages_test(sift_acceptor fast)
 ages_test(sift_budget fast)
+ages_test(ending_continuity fast)
+ages_test(myth_legend_roundtrip fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)
