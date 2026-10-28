@@ -437,6 +437,35 @@ struct SiftState {
     SiftDiag diag;
 };
 
+// item 04: one condition of an ending, as the decade rule tracks it; -1 years mean never
+struct CondHold {
+    int held_since = -1, last_met = -1;
+    bool met = false, ever_met = false;
+    int best_years = 0;
+    double best_value = 0;   // the largest count a `count` condition reached
+};
+
+struct EndingState {
+    std::string id;
+    std::vector<CondHold> conds;
+    bool ready = false;
+    std::string court;   // the court the conditions bound (Mortality's voice), "" for none
+};
+
+struct ProphecyLine {
+    std::string key, cond;
+    std::map<std::string, std::string> slots;
+};
+
+// item 04: the hatching prophecy; book is the court whose library holds it, event the chronicle event that wrote it
+struct Prophecy {
+    std::string ending;
+    std::vector<ProphecyLine> lines;
+    std::vector<std::string> known_by;   // sorted
+    int year = 0, event = 0;
+    std::string book;
+};
+
 struct Recorder;
 
 constexpr size_t kPlayer = 0;
@@ -486,6 +515,9 @@ struct World {
     int story_quiet_wakings = 0;           // wakings in a row without a major event
     bool story_breather = false;           // the coming waking is a breather (the last one had a major event)
     SiftState sift;                        // item 14: saved and hashed only once the bank has run
+    std::vector<EndingState> endings;      // item 04: in registry order
+    Prophecy prophecy;                     // item 04: empty ending on the fixed start
+    std::string ended;                     // item 04: the exit kind once the run ended
     Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
 };
 
