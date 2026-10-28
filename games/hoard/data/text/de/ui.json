@@ -133,5 +133,9 @@
  "fly.note": "über eine Gegend fliegen, um zu handeln · noch {d.stamina} Ausdauer · L landet im Hort",
  "fly.keys": "WASD / Pfeile / Klick zum Fliegen · B halten zum Brennen · Mausrad zoomt · Rechtsziehen verschiebt · Esc schließt Fenster",
  "montage.resume": "Weiter",
- "hud.picks.n": "{p.n:plural(one=Talent bereit,other=# Talente bereit)}"
+ "hud.picks.n": "{p.n:plural(one=Talent bereit,other=# Talente bereit)}",
+ "reason.move_no_access": "sie sind nicht in deinem Hort und du bist nicht an ihrem Hof",
+ "reason.move_no_subject": "kein solches Fach ({r.subject})",
+ "reason.move_unknown": "kein solcher Zug ({r.move})",
+ "reason.move_no_person": "keine solche Person"
 }

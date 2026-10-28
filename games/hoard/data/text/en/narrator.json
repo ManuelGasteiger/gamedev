@@ -919,6 +919,106 @@
     "hook_horde": {
       "text": "You fell on the camp of {s} at {o} and took its plunder.",
       "brief": "your answer at {o} in {year}"
+    },
+    "move_teach_accepted": {
+      "text": "{S} took to your teaching gladly.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "move_teach_reluctant": {
+      "text": "{S} took your teaching, though without love for it.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "move_teach_refused": {
+      "text": "{S} would not learn from you.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "move_corrupt_accepted": {
+      "text": "{S} agreed to serve your ends.",
+      "brief": "the turning of {s} in {year}"
+    },
+    "move_corrupt_reluctant": {
+      "text": "{S} agreed to serve your ends, after a long silence.",
+      "brief": "the turning of {s} in {year}"
+    },
+    "move_corrupt_refused": {
+      "text": "{S} would not be turned.",
+      "brief": "the turning of {s} in {year}"
+    },
+    "move_bargain_accepted": {
+      "text": "{S} struck a bargain with you.",
+      "brief": "your bargain with {s} in {year}"
+    },
+    "move_bargain_reluctant": {
+      "text": "{S} struck a bargain with you, and did not like its terms.",
+      "brief": "your bargain with {s} in {year}"
+    },
+    "move_bargain_refused": {
+      "text": "{S} would not bargain with you.",
+      "brief": "your bargain with {s} in {year}"
+    },
+    "move_threaten_accepted": {
+      "text": "{S} gave way to your threat.",
+      "brief": "your threat to {s} in {year}"
+    },
+    "move_threaten_reluctant": {
+      "text": "{S} gave way to your threat, slowly.",
+      "brief": "your threat to {s} in {year}"
+    },
+    "move_threaten_refused": {
+      "text": "{S} defied your threat.",
+      "brief": "your threat to {s} in {year}"
+    },
+    "move_court_accepted": {
+      "text": "{S} was won by your courtship.",
+      "brief": "your courtship of {s} in {year}"
+    },
+    "move_court_reluctant": {
+      "text": "{S} was won by your courtship, and was afraid of it.",
+      "brief": "your courtship of {s} in {year}"
+    },
+    "move_court_refused": {
+      "text": "{S} turned your courtship away.",
+      "brief": "your courtship of {s} in {year}"
+    },
+    "person_move": {
+      "text": "{S} answered you.",
+      "brief": "your words with {s} in {year}"
+    },
+    "trait_flipped": {
+      "text": "{S}, once {o_word}, is {o_word} no more.",
+      "brief": "the change in {s} in {year}"
+    },
+    "secret_exposed": {
+      "text": "{S} found out what you did to {o}.",
+      "brief": "the secret of {o} found out in {year}"
+    },
+    "inquisition": {
+      "text": "The devout of {S} rose against {o}, whom you had turned; the mages of {S} put their work aside.",
+      "brief": "the inquisition in {s} in {year}"
+    },
+    "purge_ultimatum": {
+      "text": "The purge in {S} demanded the fall of {o}.",
+      "brief": "the ultimatum against {o} in {year}"
+    },
+    "purge_fall": {
+      "text": "The purge in {S} brought {o} down.",
+      "brief": "the fall of {o} in {year}"
+    },
+    "purge_civil_war": {
+      "text": "{S} split over {o}: the purge would not give way, and neither would the court.",
+      "brief": "the war over {o} in {year}"
+    },
+    "came_home_agent": {
+      "text": "{O} came home from your lair to {S} and kept your secrets there.",
+      "brief": "the homecoming of {o} in {year}"
+    },
+    "terms_sworn": {
+      "text": "{S} swore to the terms you sent home with {o}.",
+      "brief": "the terms sworn in {year}"
+    },
+    "terms_refused": {
+      "text": "{S} refused the terms you sent home with {o}.",
+      "brief": "the terms refused in {year}"
     }
   },
   "causes": {
@@ -1132,7 +1232,17 @@
     "dragon_raised_lineage.raised_in_lair": "",
     "dragon_raised_lineage_digested.royals_digested": "after {ref}",
     "open_home@remnant_formed_off_map": "out of the wastes beyond the valley",
-    "collapse_one.own_size": "when its rulers could no longer hold it together"
+    "collapse_one.own_size": "when its rulers could no longer hold it together",
+    "move_accepted": "",
+    "move_reluctant": "",
+    "move_refused": "",
+    "memory_of_dragon": "because of what you did",
+    "secret_found": "",
+    "purge_discontent": "once the purge had grown strong enough",
+    "threatened": "under your threat",
+    "released_with_terms": "",
+    "inquisition": "",
+    "purge": ""
   },
   "motives": {
     "survival": "they fear for their survival",
@@ -1301,7 +1411,20 @@
     "caravan": "the rich caravan",
     "herd": "the fat herd",
     "library": "the library",
-    "horde": "the horde's camp"
+    "horde": "the horde's camp",
+    "curious": "curious",
+    "proud": "proud",
+    "greedy": "greedy",
+    "ambitious": "ambitious",
+    "devout": "devout",
+    "honest": "honest",
+    "craven": "craven",
+    "vengeful": "vengeful",
+    "bold": "bold",
+    "pious": "pious",
+    "cunning": "cunning",
+    "loyal": "loyal",
+    "purged": "in the purge"
   },
   "misc": {
     "ledge_line": "{head}, because {because}.",

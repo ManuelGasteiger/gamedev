@@ -133,5 +133,9 @@
  "fly.note": "fly over a region to act · {d.stamina} stamina left · L to land at the lair",
  "fly.keys": "WASD / arrows / click to fly · hold B to burn · wheel zoom · right-drag pan · Esc closes panels",
  "montage.resume": "Resume",
- "hud.picks.n": "{p.n:plural(one=talent ready,other=# talents ready)}"
+ "hud.picks.n": "{p.n:plural(one=talent ready,other=# talents ready)}",
+ "reason.move_no_access": "they are not at your lair and you are not at their court",
+ "reason.move_no_subject": "no such subject ({r.subject})",
+ "reason.move_unknown": "no such move ({r.move})",
+ "reason.move_no_person": "no such person"
 }
