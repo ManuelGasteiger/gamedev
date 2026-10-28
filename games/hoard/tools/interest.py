@@ -757,6 +757,7 @@ def sift_seed(wakings_log, world):
         "lines": sum(body), "budget": sum(r["budget"] for r in rows),
         "completed": sorted({c["text_key"][4:] for c in (world.get("sift") or {}).get("compounds", [])}),
         "pairs": [r["pair"] for r in rows if r.get("pair")][:3],
+        "chronicle": {lv: [sum(r["chronicle"][lv][i] for r in rows if r.get("chronicle")) for i in range(3)] for lv in ("0", "1", "2")},
     }
 
 
@@ -797,6 +798,9 @@ def sift_summary(rows, bank_ids):
         "lines_per_budget": sum(r["lines"] for r in runs) / sum(r["budget"] for r in runs) if sum(r["budget"] for r in runs) else 0.0,
         "completion_share": {p: completion[p] / seeds for p in bank_ids},
         "pairs": [p for r in runs for p in r["pairs"]][:15],
+        # item 05: of the lines with a cause to tell, the share each chronicle level tells
+        "causes_shown_share": {lv: (lambda a, b: b / a if a else 0.0)(sum(r["chronicle"][lv][1] for r in runs), sum(r["chronicle"][lv][2] for r in runs))
+                               for lv in ("0", "1", "2")},
     }
 
 
@@ -824,6 +828,7 @@ def print_sift(s):
     print(f"[{s['policy']}] headline share: raw events {100 * s['raw_headline_share']:.0f}%, " +
           ", ".join(f"{p} {100 * v:.1f}%" for p, v in s["pattern_headline_share"].items()))
     print(f"[{s['policy']}] never headline: {', '.join(s['never_headline']) or 'none'}")
+    print(f"[{s['policy']}] causes shown by chronicle level: " + ", ".join(f"{lv} {100 * v:.0f}%" for lv, v in s["causes_shown_share"].items()) + " (0: 0, 2: >=80)")
     print(f"[{s['policy']}] completion (share of seeds; keep 10-60%): " + ", ".join(f"{p} {100 * v:.0f}%" for p, v in s["completion_share"].items()))
 
 

@@ -2,12 +2,14 @@
 #include "memory_tiers.h"
 #include "ages.h"
 #include "arrivals.h"
+#include "chron.h"
 #include "importance.h"
 #include "json.h"
 #include "names.h"
 #include "offers.h"
 #include "world_util.h"
 #include "../sift/line_text.h"
+#include "../text/render.h"
 #include "../sift/sift.h"
 #include "../sift/sift_util.h"
 
@@ -203,10 +205,10 @@ struct Narrator {
 
     // the cause clause goes where the template puts {why} (after a space), {,why} (after a comma) or {,why,} (between
     // commas, mid-sentence), else at the end
-    std::string sentence(const Event& e) const {
+    std::string sentence(const Event& e, bool with_cause = true) const {
         const TextTemplate* tt = tmpl(ages::template_key(e));
         std::string s = tt && !tt->text.empty() ? fill(tt->text, e) : cap(name(e.subject)) + ": " + e.kind + ".";
-        std::string why = cause_clause(e);
+        std::string why = with_cause ? cause_clause(e) : "";
         if (s.find("{why}") != std::string::npos || s.find("{,why") != std::string::npos) {
             replace_all(s, "{why}", why.empty() ? "" : " " + why);
             replace_all(s, "{,why,}", why.empty() ? "" : ", " + why + ",");
@@ -228,7 +230,7 @@ struct Narrator {
     }
 
     // a succession reads as one line: "X of Y died; Z took the throne"
-    bool merge_succession(const std::vector<Event>& evs, size_t i, std::string& out) const {
+    bool merge_succession(const std::vector<Event>& evs, size_t i, std::string& out, bool with_cause = true) const {
         if (evs[i].kind != "person_died" || !evs[i].tags.count("ruler") || i + 1 >= evs.size()) return false;
         const Event& c = evs[i + 1];
         if (c.kind != "person_crowned" || c.object != evs[i].object || c.year != evs[i].year) return false;
@@ -236,7 +238,7 @@ struct Narrator {
         if (!tt) return false;
         std::string s = fill(tt->text, c);
         replace_all(s, "{dead}", cap(name(evs[i].subject)));
-        std::string why = cause_clause(evs[i]);
+        std::string why = with_cause ? cause_clause(evs[i]) : "";
         if (!why.empty() && evs[i].cause.text_key != "old_age") { s.pop_back(); s += ", " + why + "."; }
         out = s;
         return true;
@@ -259,47 +261,122 @@ bool skip_in_briefing(const World& w, const Event& e) {
 
 }
 
+// item 05: chronicle.json strings, rendered in English like the sifter's lines; roles map a token to a world id
+static std::string chron_text(const World& w, const Params& p, const std::string& key, const std::map<std::string, std::string>& roles,
+                              const std::map<std::string, std::string>& vars = {}) {
+    if (!p.sift.texts) return "";
+    const text::Bundle* b = p.sift.texts->get("en");
+    const std::string* t = b ? text::find_string(*b, key) : nullptr;
+    if (!t) return "";
+    text::Ctx c;
+    for (auto& kv : roles) {
+        text::Entity e;
+        e.kind = find_person(w, kv.second) ? "person" : "faction";
+        e.name = display_name(w, kv.second);
+        c.roles[kv.first] = e;
+    }
+    c.vars = vars;
+    return text::render(*b, *t, c);
+}
+
+static std::string source_line(const World& w, const Params& p, const Source& s) {
+    std::string tail = s.blame.empty() ? "none" : (s.blame == "dragon" ? "dragon" : "court");
+    std::map<std::string, std::string> roles = {{"court", s.court}};
+    if (tail == "court") roles["blame"] = s.blame;
+    return chron_text(w, p, "chron.src." + s.archetype + "." + tail, roles);
+}
+
+// the sources the line may print: two that disagree, else the best (written before stone before tale)
+static std::vector<Source> shown_sources(const World& w, const Params& p, int match) {
+    std::vector<Source> all = sources_for(w, p, match);
+    auto rank = [](const Source& s) { return s.medium == "written" ? 0 : (s.medium == "monumental" ? 1 : 2); };
+    std::stable_sort(all.begin(), all.end(), [&](const Source& a, const Source& b) { return rank(a) < rank(b); });
+    for (size_t i = 0; i < all.size(); ++i)
+        for (size_t j = i + 1; j < all.size(); ++j)
+            if (sources_conflict(w, all[i], all[j])) return {all[i], all[j]};
+    if (all.size() > 1) all.resize(1);
+    return all;
+}
+
 // item 14: once the bank has run, the sifter's lines replace the headline and "while you slept"
 static void sift_block(const World& w, const Params& p, const Narrator& n, int since_year, json& out) {
     bool stored = w.sift.lines_year == w.year && w.sift.lines_since == since_year;
     std::vector<SiftLine> lines = stored ? w.sift.lines : briefing_lines(w, p, since_year);
     if (lines.empty()) return;
-    auto text_of = [&](const SiftLine& l) {
-        std::string s = sift_line_text(w, p, l);
-        const Event* e = sift_event(w, l.event);
-        if (s.empty() && e && e->id >= kCompoundBase && !e->cause.refs.empty()) e = sift_event(w, e->cause.refs.back());
-        if (s.empty() && e && e->id < kCompoundBase) s = n.sentence(*e);
-        return s;
-    };
     auto year_of = [&](const SiftLine& l) {
         if (const Event* e = sift_event(w, l.event)) return e->year;
         return l.params.count("from") ? std::atoi(l.params.at("from").c_str()) : since_year;
     };
+    // item 05: the line at its chronicle level; level 0 never names a cause, 1 a source's, 2 the true one
+    struct Told { std::string text; int level = 0; bool available = false, shown = false; std::vector<Source> sources; std::string because; };
+    auto tell = [&](const SiftLine& l) {
+        Told t;
+        t.level = line_level(w, p, year_of(l), l.thread);
+        t.text = sift_line_text(w, p, l);
+        const Event* e = sift_event(w, l.event);
+        if (t.text.empty() && e && e->id >= kCompoundBase && !e->cause.refs.empty()) e = sift_event(w, e->cause.refs.back());
+        if (t.text.empty() && e && e->id < kCompoundBase) {
+            t.available = !n.cause_clause(*e).empty();
+            t.text = n.sentence(*e, t.level >= 2);
+            t.shown = t.available && t.level >= 2;
+            return t;
+        }
+        std::vector<const Event*> refs;
+        for (int id : l.because) if (const Event* x = find_event(w, id)) if (refs.size() < 2) refs.push_back(x);
+        t.available = !refs.empty();
+        if (t.level == 1 && l.thread) {
+            t.sources = shown_sources(w, p, l.thread);
+            for (auto& s : t.sources) { std::string x = source_line(w, p, s); if (!x.empty()) t.text += " " + x; }
+            t.shown = !t.sources.empty();
+        } else if (t.level >= 2 && !refs.empty()) {
+            std::map<std::string, std::string> v = {{"ref", n.brief(*refs[0])}};
+            if (refs.size() > 1) v["ref2"] = n.brief(*refs[1]);
+            t.because = chron_text(w, p, refs.size() > 1 ? "chron.because2" : "chron.because", {}, v);
+            if (!t.because.empty()) t.text += " " + t.because;
+            t.shown = true;
+        }
+        return t;
+    };
+    auto text_of = [&](const SiftLine& l) { return tell(l).text; };
     json sources = json::array();
     std::vector<Source> made;
     auto line_json = [&](const SiftLine& l) {
-        json j = {{"text", text_of(l)}, {"year", year_of(l)}, {"event", l.event}, {"importance", l.tier / 5.0}, {"kind", l.kind},
-                  {"tier", l.tier}, {"score", l.score}, {"text_key", l.text_key}, {"params", l.params}, {"because_chain", l.because},
-                  {"sources", l.sources}};
+        Told t = tell(l);
+        json j = {{"text", t.text}, {"year", year_of(l)}, {"event", l.event}, {"importance", l.tier / 5.0}, {"kind", l.kind},
+                  {"tier", l.tier}, {"score", l.score}, {"text_key", l.text_key}, {"params", l.params},
+                  {"because_chain", t.level >= 2 ? l.because : std::vector<int>{}}, {"level", t.level}, {"cause_available", t.available},
+                  {"cause_shown", t.shown}};
+        if (!t.because.empty()) j["because"] = t.because;
         if (l.thread) j["sift_thread"] = l.thread;
         json kept = json::array();
-        for (auto& sid : l.sources) {
-            size_t a = sid.find(':'), b = sid.find(':', a + 1);
-            Source s = make_source(w, p, std::atoi(sid.substr(a + 1, b - a - 1).c_str()), sid.substr(b + 1));
-            if (s.medium.empty()) continue;   // the thread was cut and is gone: nobody tells it
+        for (auto& s : t.sources) {   // only what the hoard holds (or a captive knows) is shown
+            std::string sid = "src:" + std::to_string(s.match) + ":" + s.court;
             kept.push_back(sid);
-            bool disputed = false;
-            for (auto& m : made) if (m.match == s.match && sources_conflict(w, m, s)) disputed = true;
+            bool disputed = t.sources.size() > 1;
             made.push_back(s);
             sources.push_back({{"id", sid}, {"match", s.match}, {"court", s.court}, {"medium", s.medium}, {"start", s.start}, {"omit", s.omit},
                                {"printed", s.printed}, {"passive", s.passive}, {"blame", s.blame}, {"stated_cause", s.stated_cause},
-                               {"hedge", s.hedge}, {"archetype", s.archetype}, {"disputed", disputed}});
+                               {"hedge", s.hedge}, {"archetype", s.archetype}, {"disputed", disputed}, {"text", source_line(w, p, s)}});
         }
         j["sources"] = kept;
         return j;
     };
     json all = json::array();
     for (auto& l : lines) all.push_back(line_json(l));
+    // level 3: the headline gains the one counterfactual the last sleep was run for
+    const std::map<std::string, std::string>& cf = w.counterfactual;
+    if (cf.count("outcome") && w.year > w.sleep_started)
+        for (auto& j : all) {
+            if (j["kind"] != "headline" || j["level"].get<int>() < 3) continue;
+            const Event* act = find_event(w, std::atoi(cf.at("act").c_str()));
+            const Event* ev = find_event(w, std::atoi(cf.at("event").c_str()));
+            if (!act || !ev) break;
+            std::string x = chron_text(w, p, "chron.cf." + cf.at("outcome"), {}, {{"act", n.brief(*act)}, {"event", n.brief(*ev)}});
+            if (x.empty()) break;
+            j["counterfactual"] = x;
+            j["text"] = j["text"].get<std::string>() + " " + x;
+            break;
+        }
     if (stored && !w.sift.diag.pair.empty()) {   // the human check's pair, top-scored first
         json pair = json::array();
         for (auto& l : w.sift.diag.pair) pair.push_back({{"text", text_of(l)}, {"score", l.score}, {"text_key", l.text_key}});
@@ -332,6 +409,37 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
 
 std::string event_sentence(const World& w, const Params& p, const Event& e) { return Narrator(w, p).sentence(e); }
 
+// item 05: who keeps the record, what the hoard holds, and the voice of a relic
+static void chronicle_block(const World& w, const Params& p, int since_year, json& out) {
+    const ChronicleState& cs = w.dragons[kPlayer].chron;
+    const Person* h = historian_now(w);
+    json c = {{"level", h ? (lore_counterfactual(w, p) ? 3 : 2) : 0}, {"sources_held", cs.sources.size()}};
+    if (h) c["historian"] = {{"id", h->id}, {"name", h->name}, {"race", h->race}, {"role", h->role}, {"born", h->born}, {"dies", h->dies}};
+    for (auto& t : cs.historians) {
+        if (t.to < since_year || t.to < 0 || (h && h->id == t.person)) continue;
+        std::string name = t.person;
+        for (auto& d : w.dead_people) if (d.id == t.person) name = d.name;
+        if (const Person* x = find_person(w, t.person)) name = x->name;
+        c["ended"] = {{"person", t.person}, {"year", t.to}, {"text", chron_text(w, p, "chron.historian_died", {}, {{"name", name}, {"year", std::to_string(t.to)}})}};
+    }
+    out["chronicle"] = c;
+    std::map<std::string, std::string> v = voice_line(w, p);
+    if (v.empty()) return;
+    std::string relic = chron_text(w, p, "relic." + v["kind"], {});
+    std::string text = chron_text(w, p, v["key"], {{"court", v["court"]}}, {{"relic", relic}});
+    if (!text.empty() && text[0] >= 'a' && text[0] <= 'z') text[0] = static_cast<char>(text[0] - 32);
+    for (size_t at = 0; v.count("facts") && at < v["facts"].size();) {
+        size_t end = v["facts"].find(',', at);
+        std::string f = v["facts"].substr(at, end == std::string::npos ? std::string::npos : end - at);
+        size_t eq = f.find('=');
+        std::string x = chron_text(w, p, "voice.fact." + f.substr(0, eq) + "." + f.substr(eq + 1), {});
+        if (!x.empty()) text += " " + x;
+        if (end == std::string::npos) break;
+        at = end + 1;
+    }
+    out["voice"] = {{"text", text}, {"relic", v["relic"]}, {"agenda", v["agenda"]}, {"state", v["state"]}, {"key", v["key"]}, {"court", v["court"]}};
+}
+
 std::string briefing_json(const World& w, const Params& p, int since_year) {
     Narrator n(w, p);
     const Constants& c = p.c;
@@ -346,10 +454,12 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     out["since"] = since_year;
     out["year"] = w.year;
 
+    // item 05: the true cause only where a kept historian wrote it down
+    auto told = [&](const Event& e) { return historian_at(w, e.year); };
     // 1. headline
     const Event* top = nullptr;
     for (auto& e : slept) if (!skip_in_briefing(w, e) && (!top || n.weight(e) > n.weight(*top))) top = &e;
-    out["headline"] = top ? json{{"text", n.sentence(*top)}, {"event", top->id}, {"year", top->year}, {"kind", top->kind}, {"importance", n.importance(*top)}}
+    out["headline"] = top ? json{{"text", n.sentence(*top, told(*top))}, {"event", top->id}, {"year", top->year}, {"kind", top->kind}, {"importance", n.importance(*top)}}
                           : json{{"text", n.misc("headline_none")}};
 
     // 2. while you slept: chronological groups of briefing_group_years; a thread with 3+ lines in a group collapses to
@@ -376,14 +486,14 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
                 threads_done.insert(e.thread);
                 const Event* last = &e;
                 for (size_t j = i; j < evs.size(); ++j) if (evs[j].thread == e.thread) last = &evs[j];
-                std::string para = n.sentence(e);
+                std::string para = n.sentence(e, told(e));
                 if (thread_count[e.thread] == 3) {
-                    for (size_t j = i + 1; j < evs.size(); ++j) if (evs[j].thread == e.thread && &evs[j] != last) { para += " " + n.sentence(evs[j]); break; }
-                    para += " " + n.sentence(*last);
+                    for (size_t j = i + 1; j < evs.size(); ++j) if (evs[j].thread == e.thread && &evs[j] != last) { para += " " + n.sentence(evs[j], told(evs[j])); break; }
+                    para += " " + n.sentence(*last, told(*last));
                 } else {
                     std::string more = n.misc("thread_more");
                     Narrator::replace_all(more, "{n}", std::to_string(thread_count[e.thread] - 2));
-                    para += more + n.sentence(*last);
+                    para += more + n.sentence(*last, told(*last));
                 }
                 double top_imp = 0;
                 for (auto& x : evs) if (x.thread == e.thread) top_imp = std::max(top_imp, n.importance(x));
@@ -392,12 +502,12 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
             }
             if (n.told_by_fealty(evs, i)) continue;
             std::string merged;
-            if (n.merge_succession(evs, i, merged)) {
+            if (n.merge_succession(evs, i, merged, told(e))) {
                 lines.push_back({{"text", merged}, {"year", e.year}, {"event", evs[i + 1].id}, {"importance", std::max(n.importance(e), n.importance(evs[i + 1]))}});
                 i += 1;
                 continue;
             }
-            json line = {{"text", n.sentence(e)}, {"year", e.year}, {"event", e.id}, {"importance", n.importance(e)}};
+            json line = {{"text", n.sentence(e, told(e))}, {"year", e.year}, {"event", e.id}, {"importance", n.importance(e)}};
             if (!e.thread.empty()) line["thread"] = e.thread;
             lines.push_back(line);
         }
@@ -413,7 +523,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     for (auto& e : slept) {
         if (e.kind != "person_died" && e.kind != "person_crowned" && e.kind != "raised_in_lair" && e.kind != "hostage_taken" && e.kind != "hostage_released") continue;
         if (!find_known(w, e.subject)) continue;
-        people.push_back({{"text", n.sentence(e)}, {"person", e.subject}, {"year", e.year}, {"kind", e.kind}, {"importance", n.importance(e)}});
+        people.push_back({{"text", n.sentence(e, told(e))}, {"person", e.subject}, {"year", e.year}, {"kind", e.kind}, {"importance", n.importance(e)}});
         named.insert(e.subject);
     }
     for (auto& o : w.oaths) {
@@ -565,6 +675,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     Narrator::replace_all(ph, "{long}", std::to_string(long_sleep(w.dragons[kPlayer], c)));
     Narrator::replace_all(ph, "{ready}", std::string(ready_to_moult(w.dragons[kPlayer], c) ? n.misc("ready_to_moult") : "") + (has_tag(w.dragons[kPlayer].tags, "stiff") ? n.misc("stiff") : ""));
     out["phase"] = {{"text", ph}, {"phase", w.dragons[kPlayer].phase}, {"ready_to_moult", ready_to_moult(w.dragons[kPlayer], c)}};
+    chronicle_block(w, p, since_year, out);
     return out.dump();
 }
 

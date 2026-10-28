@@ -89,6 +89,31 @@ int towers(const World& w, const Params& p) {
     return n;
 }
 
+// item 05: the same waking told at levels 0, 1 and 2: per level the lines, those with a cause to tell, those that tell one
+json chronicle_shares(const World& w, const Params& p) {
+    json out = json::object();
+    for (int level = 0; level <= 2; ++level) {
+        World c = w;
+        c.wake_snapshot.reset();
+        ChronicleState& cs = c.dragons[kPlayer].chron;
+        cs = ChronicleState();
+        if (level == 0) c.dragons[kPlayer].hostages.clear();
+        if (level == 1)
+            for (auto& t : c.sift.threads)
+                for (auto& kv : t.cast) if (find_faction(c, kv.second)) cs.sources.push_back({"src:" + std::to_string(t.id) + ":" + kv.second, c.year, "taken"});
+        if (level == 2) cs.historians.push_back({"", -1000000, -1});
+        json b = json::parse(briefing_json(c, p, c.sleep_started), nullptr, false);
+        int lines = 0, available = 0, shown = 0;
+        for (auto& l : b.value("lines", json::array())) {
+            ++lines;
+            if (l.value("cause_available", false)) ++available;
+            if (l.value("cause_available", false) && l.value("cause_shown", false)) ++shown;
+        }
+        out[std::to_string(level)] = {lines, available, shown};
+    }
+    return out;
+}
+
 // item 14: the sifter's pick at this waking with its numbers, for interest.py
 json sift_waking(const World& w, const Params& p) {
     const SiftDiag& d = w.sift.diag;
@@ -101,7 +126,8 @@ json sift_waking(const World& w, const Params& p) {
             {"budget", d.budget}, {"tier5", d.tier5}, {"tier5_shown", d.tier5_shown}, {"mean_candidate", d.mean_candidate},
             {"mean_shown", d.mean_shown}, {"headline_pattern", d.headline_pattern}, {"headline_dragon", d.headline_dragon},
             {"headline_reversals", d.headline_reversals}, {"names_earlier", d.names_earlier}, {"lines", lines},
-            {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())}};
+            {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())},
+            {"chronicle", chronicle_shares(w, p)}};
 }
 
 int next_bucket(int years) {
