@@ -29,8 +29,22 @@ struct MemoryConstants {
     double research_base = 0.01, research_spend = 50, research_wealth_half = 100;
 };
 
+// constants.json "chronicle" (item 05): chronicle levels, sources in the hoard, relics with a voice
+struct RelicKind { std::string id, agenda; std::vector<std::string> races; };
+struct ChronicleConstants {
+    double lore_counterfactual = 25;   // Lore rank for level 3
+    int take_sources = 4;              // sources a full take of books carries off
+    double relic_chance = 0.25;        // per take of artifacts, times its magnitude
+    int relic_max = 3;
+    int quiet_wakings = 3;             // commune(refuse)
+    double honest_openness = 0.6;
+    double cf_min_importance = 0.5;    // the counterfactual names an event at least this important
+    std::vector<RelicKind> relics;
+};
+
 struct Constants {
     MemoryConstants mem;
+    ChronicleConstants chron;
     int step_years = 10;
     double land_wealth_scale = 100;
     double wealth_upkeep = 0.01;

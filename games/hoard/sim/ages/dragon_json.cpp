@@ -40,12 +40,32 @@ json defences_json(const World& w, const Params& p, const Region& r) {
 
 }
 
+static json chron_json(const ChronicleState& c) {
+    json h = json::array(), s = json::array(), r = json::array();
+    for (auto& t : c.historians) h.push_back({{"person", t.person}, {"from", t.from}, {"to", t.to}});
+    for (auto& x : c.sources) s.push_back({{"id", x.id}, {"year", x.year}, {"how", x.how}});
+    for (auto& x : c.relics)
+        r.push_back({{"id", x.id}, {"kind", x.kind}, {"agenda", x.agenda}, {"court", x.court}, {"year", x.year}, {"quiet_until", x.quiet_until},
+                     {"asked", x.asked}, {"answer", x.answer}});
+    return {{"historians", h}, {"sources", s}, {"relics", r}};
+}
+
+static void chron_from_json(const json& j, ChronicleState& c) {
+    c = ChronicleState();
+    for (auto& t : j.value("historians", json::array())) c.historians.push_back({t.value("person", ""), t.value("from", 0), t.value("to", -1)});
+    for (auto& x : j.value("sources", json::array())) c.sources.push_back({x.value("id", ""), x.value("year", 0), x.value("how", "")});
+    for (auto& x : j.value("relics", json::array()))
+        c.relics.push_back({x.value("id", ""), x.value("kind", ""), x.value("agenda", ""), x.value("court", ""), x.value("year", 0),
+                            x.value("quiet_until", -1), x.value("asked", -1), x.value("answer", "")});
+}
+
 void dragon_state_to_json(const Dragon& d, json& dragon) {
     dragon["growth"] = d.growth;
     dragon["talents"] = d.talents;
     dragon["wounds"] = d.wounds;
     dragon["adaptation"] = d.adaptation;
     dragon["hoard"]["embers"] = d.hoard.embers;
+    if (!d.chron.empty()) dragon["chronicle"] = chron_json(d.chron);   // item 05: absent until used, so older hashes hold
 }
 
 void dragon_state_from_json(const json& dragon, Dragon& d) {
@@ -54,6 +74,7 @@ void dragon_state_from_json(const json& dragon, Dragon& d) {
     if (dragon.contains("wounds") && dragon["wounds"].is_number()) d.wounds = dragon["wounds"].get<double>();
     if (dragon.contains("adaptation") && dragon["adaptation"].is_number()) d.adaptation = dragon["adaptation"].get<double>();
     if (dragon.contains("hoard") && dragon["hoard"].contains("embers")) d.hoard.embers = dragon["hoard"]["embers"].get<double>();
+    if (dragon.contains("chronicle")) chron_from_json(dragon["chronicle"], d.chron);
 }
 
 // talents-v2 section 4: the flight numbers every shell reads, from talents.json "flight" and the taken talents

@@ -25,8 +25,20 @@ static void get_tags(const json& j, const char* key, Tags& out) {
     for (auto& t : *it) out.insert(t.get<std::string>());
 }
 
+static void load_chronicle(const json& j, ChronicleConstants& c) {
+    get(j, "lore_counterfactual", c.lore_counterfactual);
+    get(j, "take_sources", c.take_sources);
+    get(j, "relic_chance", c.relic_chance);
+    get(j, "relic_max", c.relic_max);
+    get(j, "quiet_wakings", c.quiet_wakings);
+    get(j, "honest_openness", c.honest_openness);
+    get(j, "cf_min_importance", c.cf_min_importance);
+    for (auto& r : j.value("relics", json::array())) c.relics.push_back({r.value("id", ""), r.value("agenda", ""), r.value("races", std::vector<std::string>())});
+}
+
 static void load_constants(const json& j, Constants& c) {
     if (j.contains("memory")) memory_constants_from_json(j["memory"], c.mem);
+    if (j.contains("chronicle")) load_chronicle(j["chronicle"], c.chron);
     get(j, "step_years", c.step_years);
     get(j, "land_wealth_scale", c.land_wealth_scale);
     get(j, "wealth_upkeep", c.wealth_upkeep);

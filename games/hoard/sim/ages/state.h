@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <cstdint>
 #include <map>
 #include <set>
@@ -183,6 +184,17 @@ struct Known {
     Tags tags;                 // "liar", "hostage", "dead", ...
 };
 
+// item 05: what the dragon knows of the past and who tells it
+struct HeldSource { std::string id; int year = 0; std::string how; };   // id "src:<match>:<court>"; how: taken | given
+struct Tenure { std::string person; int from = 0, to = -1; };          // a kept historian; to -1 while kept
+struct Relic { std::string id, kind, agenda, court; int year = 0; int quiet_until = -1; int asked = -1; std::string answer; };
+struct ChronicleState {
+    std::vector<Tenure> historians;
+    std::vector<HeldSource> sources;
+    std::vector<Relic> relics;   // in the order taken; the last with an agenda speaks
+    bool empty() const { return historians.empty() && sources.empty() && relics.empty(); }
+};
+
 struct Dragon {
     double size = 0;
     double knowledge = 0;
@@ -203,6 +215,7 @@ struct Dragon {
     std::vector<std::string> talents;
     double wounds = 0;
     double adaptation = 0;
+    ChronicleState chron;
 };
 
 struct Remnant {
@@ -487,6 +500,9 @@ struct World {
     bool story_breather = false;           // the coming waking is a breather (the last one had a major event)
     SiftState sift;                        // item 14: saved and hashed only once the bank has run
     Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
+    // item 05, level 3: the world at the last wake, and what the last sleep would have been without one act; not saved, not hashed
+    std::shared_ptr<const World> wake_snapshot;
+    std::map<std::string, std::string> counterfactual;
 };
 
 }

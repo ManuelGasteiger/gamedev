@@ -1,4 +1,14 @@
 {
+  "chronicle": {
+    "lore_counterfactual": 25, "take_sources": 4, "relic_chance": 0.25, "relic_max": 3, "quiet_wakings": 3,
+    "honest_openness": 0.6, "cf_min_importance": 0.5,
+    "relics": [
+      {"id": "iron_crown", "agenda": "emperor", "races": ["human", "orc"]},
+      {"id": "grave_crown", "agenda": "lichdom", "races": ["undead", "human"]},
+      {"id": "sun_disc", "agenda": "sun_eater", "races": ["dwarf"]},
+      {"id": "star_harp", "agenda": "ascension", "races": ["elf"]}
+    ]
+  },
   "memory": {
     "oral_halflife": 60, "written_halflife": 250, "monumental_halflife": 1000, "oral_reference": 150,
     "written_deposit": 0.6, "monumental_deposit": 0.4, "rep_years": 30, "rep_floor": 0.25,
