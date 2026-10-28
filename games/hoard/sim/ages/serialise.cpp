@@ -11,6 +11,7 @@
 #include "step.h"
 #include "world_util.h"
 #include "../sift/sift_json.h"
+#include "endings_json.h"
 
 namespace ages {
 
@@ -547,6 +548,7 @@ static json world_json(const World& w) {
     j["card_fired"] = w.card_fired;
     genesis_fields_to_json(w, j);   // v0.4 world (S2)
     if (w.sift.on) j["sift"] = sift_state_json(w.sift);   // item 14
+    endings_fields_to_json(w, j);   // item 04
     return j;
 }
 
@@ -706,6 +708,10 @@ std::string world_view_json(const World& w, const Params& p) {
     j["wake_reason"] = w.wake_reason;
     dragon_view_to_json(w, p, j);   // v0.4 (S1)
     if (w.sift.on) j["sift_threads"] = sift_view_json(w, p);   // item 14: open and recently closed threads
+    j["endings_view"] = endings_view_json(w, p);   // item 04
+    j["prophecy_view"] = prophecy_view_json(w, p);
+    j["ending"] = ending_view_json(w, p);
+    j["myth"] = myth_view_json(w, p);
     return j.dump();
 }
 
@@ -928,6 +934,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
     hooks_state_from_json(j, w);   // v0.4 hooks (S3)
     genesis_fields_from_json(j, w);   // v0.4 world (S2)
     if (j.contains("sift")) sift_state_from_json(j["sift"], w.sift);   // item 14
+    endings_fields_from_json(j, w);   // item 04
     sort_by_id(w);
     return true;
 }

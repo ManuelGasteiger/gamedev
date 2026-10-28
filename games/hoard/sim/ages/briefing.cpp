@@ -2,6 +2,7 @@
 #include "memory_tiers.h"
 #include "ages.h"
 #include "arrivals.h"
+#include "endings_json.h"
 #include "importance.h"
 #include "json.h"
 #include "names.h"
@@ -556,6 +557,8 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     for (auto& a : w.arrivals)
         ledge.push_back({{"id", a.id}, {"kind", a.kind}, {"court", a.court}, {"person", a.person}, {"text", ledge_text(w, p, a)}, {"because", a.because}});
     out["ledge"] = ledge;
+    out["endings"] = endings_view_json(w, p);   // item 04
+    out["prophecy"] = prophecy_view_json(w, p);
 
     std::string ph = n.misc("phase_line");
     size_t pi = static_cast<size_t>(phase_index(w.dragons[kPlayer]));
