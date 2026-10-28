@@ -1,0 +1,127 @@
+{
+  "note": "Item 07. People: traits, memory of the dragon, the six social moves (docs/research-social-sim.md sections 1, 2, 4 and 6). A memory entry adds s x sev x ax to the person's dread, awe and debt (each clamped to -5..5), so ax here is the research's gain at s 1 divided by sev (taught: sev 2, awe +2, debt +1). Trait weights not listed are 0 (the research table has no row for bold, pious, cunning, loyal). Runner-set values, not from the docs: virtues and vices, trait_on, the act rows and sev thresholds, the flips table, the lore per subject, the court deposits, the inquisition numbers, the ledger deltas, extra (chance of a third trait) and the rel weights other than CK3's parent 60 and the research's hostage -20.",
+  "traits": {
+    "base": ["curious", "proud", "greedy", "ambitious", "devout", "honest", "craven", "vengeful", "bold", "pious", "cunning", "loyal"],
+    "virtues": ["curious", "honest", "loyal", "devout", "bold", "pious"],
+    "vices": ["proud", "greedy", "ambitious", "craven", "vengeful", "cunning"],
+    "max": 3,
+    "trait_on": 0.75,
+    "extra": 0.5
+  },
+  "acquired": { "list": ["dragon_touched", "lettered", "schooled:*", "corrupted:*", "scarred"], "max": 2 },
+  "memory": {
+    "src": { "witness": 1.0, "read": 0.8, "told": 0.6 },
+    "decay": { "oral": 0.5, "written": 0.9, "monumental": 0.9 },
+    "monumental_floor": 0.3,
+    "drop_below": 0.05,
+    "permanent_at": 2,
+    "flip_chance": 0.3,
+    "inherit_negative": 0.5,
+    "inherit_positive": 0.25,
+    "axis_cap": 5,
+    "sev2_at": 0.3,
+    "sev3_at": 0.6,
+    "touched_sev": 3,
+    "recent_max": 12
+  },
+  "acts": {
+    "burn":         { "dread": 1 },
+    "kill":         { "dread": 1 },
+    "take":         { "dread": 0.5 },
+    "take_hostage": { "dread": 1 },
+    "demand":       { "dread": 0.5 },
+    "show":         { "dread": 0.25, "awe": 0.25 },
+    "defend":       { "awe": 0.5, "debt": 0.5 },
+    "give":         { "awe": 0.25, "debt": 0.5 },
+    "bless":        { "awe": 0.5, "debt": 0.5 },
+    "miracle":      { "awe": 0.5 }
+  },
+  "flips": {
+    "dread": ["bold", "proud", "curious"],
+    "awe": ["craven", "vengeful"],
+    "debt": ["vengeful", "proud"]
+  },
+  "cap": { "ruler": 1, "heir": 1, "hero": 2, "sage": 2, "priest": 2 },
+  "rel": { "parent": 60, "hostage_of": -20, "mentor": 60 },
+  "terms_accept": 2,
+  "memory_terms": { "mercy": 2, "betrayal": -3, "same_move": 1, "clamp": 6 },
+  "moves": {
+    "teach": {
+      "ledger": 0.1,
+      "intent": "school the person in a subject",
+      "access": true,
+      "lore": { "letters": 3, "craft": 3, "war": 5, "intrigue": 8, "dragon_lore": 8, "magic": 8 },
+      "arcana": { "magic": 3 },
+      "weights": { "curious": 4, "proud": -2, "greedy": 0, "ambitious": 1, "devout": -2, "honest": 1, "craven": 1, "vengeful": 0 },
+      "threshold": 2,
+      "mods": { "awe": 4, "debt": 3 },
+      "accept": { "ev": "taught", "sev": 2, "ax": { "awe": 1, "debt": 0.5 } },
+      "acquire": { "letters": "lettered", "*": "schooled:$subject" },
+      "rel": "mentor"
+    },
+    "corrupt": {
+      "ledger": 0.1,
+      "intent": "turn the person toward the dragon's ends",
+      "access": true,
+      "arcana_min": 3,
+      "weights": { "curious": 1, "proud": -1, "greedy": 4, "ambitious": 3, "devout": -4, "honest": -3, "craven": 1, "vengeful": 1 },
+      "threshold": 3,
+      "mods": { "debt": 3 },
+      "accept": { "ev": "corrupted", "sev": 2, "ax": {} },
+      "acquire": { "*": "corrupted:$toward" },
+      "secret": true
+    },
+    "bargain": {
+      "ledger": 0.05,
+      "intent": "trade a favour for a favour",
+      "access": true,
+      "weights": { "curious": 1, "proud": -3, "greedy": 2, "ambitious": 1, "devout": -1, "honest": 1, "craven": 3, "vengeful": -1 },
+      "threshold": 2,
+      "mods": { "dread": 4, "debt": 3 },
+      "accept": { "ev": "bargained", "sev": 1, "ax": {} },
+      "witnessed": true,
+      "court": { "dread": 0, "awe": 0.05 }
+    },
+    "threaten": {
+      "ledger": -0.1,
+      "intent": "make the person comply",
+      "access": true,
+      "weights": { "curious": 0, "proud": -4, "greedy": 1, "ambitious": -1, "devout": -2, "honest": 0, "craven": 4, "vengeful": -3 },
+      "threshold": 1,
+      "mods": { "dread": 4, "debt": 3 },
+      "accept": { "ev": "threatened", "sev": 2, "ax": { "dread": 0.5 } },
+      "hostage": { "giver": { "ev": "taken_hostage", "sev": 3, "ax": { "dread": 0.5 } }, "taken": { "ev": "taken", "sev": 2, "ax": { "dread": 0.5 } } },
+      "humiliated": { "traits": ["proud", "vengeful"], "ev": "humiliated", "sev": 2, "ax": { "debt": -1 } },
+      "witnessed": true,
+      "court": { "dread": 0.1, "awe": 0 }
+    },
+    "court": {
+      "ledger": 0.2,
+      "intent": "win the person's love",
+      "access": true,
+      "lore_min": 8,
+      "guise_opens": true,
+      "weights": { "curious": 3, "proud": 1, "greedy": 1, "ambitious": 3, "devout": -3, "honest": 0, "craven": -2, "vengeful": -2 },
+      "threshold": 4,
+      "mods": { "awe": 4, "debt": 3 },
+      "accept": { "ev": "courted", "sev": 2, "ax": { "awe": 1 } }
+    }
+  },
+  "release": {
+    "default": "mercy",
+    "by_trait": { "proud": "insult", "vengeful": "weakness", "craven": "reprieve" },
+    "readings": {
+      "mercy":    { "sev": 1, "ax": { "debt": 2, "awe": 1 } },
+      "insult":   { "sev": 2, "ax": { "debt": -1 } },
+      "weakness": { "sev": 1, "ax": {} },
+      "reprieve": { "sev": 1, "ax": { "dread": 1 } }
+    }
+  },
+  "secret": { "base": 0.05, "per_sage": 0.02, "intrigue_mult": 0.5 },
+  "inquisition": {
+    "joiners": ["devout", "pious"],
+    "bonds": ["parent", "heir", "kin", "mentor", "consort_of"],
+    "per_decade": 0.25,
+    "strength_min": 0.8
+  }
+}

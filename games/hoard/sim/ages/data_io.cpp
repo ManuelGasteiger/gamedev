@@ -72,7 +72,7 @@ bool load_data_json(const std::string& dir, DataJson& d, std::string& err) {
            read_text(dir + "/text/en/narrator.json", d.text, err) && read_text(dir + "/importance.json", d.importance, err) &&
            text::bundles_dir_json(dir + "/text", d.text_bundles, err) && read_folder(dir, "events", d.events, err) &&
            read_dragon_files(dir, d) && read_optional(dir + "/hooks.json", d.hooks) && read_optional(dir + "/arrivals.json", d.arrivals) &&   // v0.4 hooks (S3), item 06
-           read_optional(dir + "/genesis.json", d.genesis) &&
+           read_optional(dir + "/genesis.json", d.genesis) && read_optional(dir + "/moves.json", d.moves) &&   // item 07
            read_folder(dir, "patterns", d.patterns, err, "base_rates.json") && read_optional(dir + "/patterns/base_rates.json", d.base_rates);   // item 14
 }
 
