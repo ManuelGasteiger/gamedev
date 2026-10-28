@@ -68,13 +68,22 @@ Source make_source(const World& w, const Params& p, int match, const std::string
             if (own) s.passive.push_back(id);
         }
     }
-    s.blame = f && dread_eff(*f) >= k.blame_dread ? "dragon" : top_grudge(w, court);
+    const Event* first = sift_event(w, s.start);
+    std::string truth = first ? agent(w, *first) : "";
+    if (truth == court) truth = "";
+    bool honest = f && f->culture.traits.openness > p.c.chron.honest_openness;   // item 05: an honest court names who did it
+    std::string grudge;
+    if (f) for (auto& t : f->tags) if (t.rfind("grudge:", 0) == 0 && t.size() > 7) { grudge = t.substr(7); break; }
+    if (honest) s.blame = truth;
+    else if (f && dread_eff(*f) >= k.blame_dread) s.blame = "dragon";
+    else if (!grudge.empty()) s.blame = grudge;
+    else s.blame = top_grudge(w, court);
     if (s.medium == "oral") {
         s.hedge = 1;
         const Event* last = sift_event(w, kernel.back());
         int gens = last ? (w.year - last->year) / std::max(1, k.generation_years) : 0;
         std::string enemy = enemy_now(w, court);
-        for (int g = 0; g < gens && !enemy.empty(); ++g) {
+        for (int g = 0; g < gens && !enemy.empty() && !honest; ++g) {
             Rng r = rng_for(w.seed, "source_blame", std::to_string(match) + ":" + court + ":" + std::to_string(g));
             if (r.chance(k.oral_reroll)) s.blame = enemy;
         }
@@ -88,7 +97,7 @@ Source make_source(const World& w, const Params& p, int match, const std::string
         s.printed = best ? std::vector<int>{best} : std::vector<int>{};
         s.passive.clear();
     }
-    s.stated_cause = s.blame.empty() ? "" : "grudge:" + s.blame;
+    s.stated_cause = s.blame.empty() ? "" : (honest ? "true" : "grudge:" + s.blame);
     s.archetype = s.medium == "oral" ? "teller" : (s.medium == "written" ? "annalist" : "inscription");
     return s;
 }

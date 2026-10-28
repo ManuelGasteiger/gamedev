@@ -29,6 +29,10 @@ add_library(ages STATIC
   sim/ages/recorded.cpp
   sim/ages/save.cpp
   sim/ages/ages.cpp
+  sim/ages/chron_level.cpp
+  sim/ages/chron_keep.cpp
+  sim/ages/chron_voice.cpp
+  sim/ages/chron_cf.cpp
   sim/ages/acts.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
@@ -185,6 +189,8 @@ ages_test(arrival_gating fast)
 ages_test(arrival_cooldown fast)
 ages_test(sift_acceptor fast)
 ages_test(sift_budget fast)
+ages_test(chronicle_levels fast)
+ages_test(sources_bias fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)

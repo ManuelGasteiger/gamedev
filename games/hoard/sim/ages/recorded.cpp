@@ -1,6 +1,7 @@
 #include "record.h"
 #include "unrecorded.h"
 #include "arrivals.h"
+#include "chron.h"
 
 namespace ages {
 
@@ -87,6 +88,20 @@ TerraformResult terraform(World& w, const Params& p, const std::string& region, 
     TerraformResult r = terraform_unrecorded(w, p, region, kind);
     if (r.done) rec.done("terraform", args_of({{"region", region}, {"kind", kind}}));
     return r;
+}
+
+bool keep_person(World& w, const Params& p, const std::string& id, const std::string& role, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = keep_person_unrecorded(w, p, id, role, reason);
+    if (ok) rec.done("keep_person", args_of({{"id", id}, {"role", role}}));
+    return ok;
+}
+
+bool commune(World& w, const Params& p, const std::string& relic, const std::string& answer, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = commune_unrecorded(w, p, relic, answer, reason);
+    if (ok) rec.done("commune", args_of({{"relic", relic}, {"answer", answer}}));
+    return ok;
 }
 
 }

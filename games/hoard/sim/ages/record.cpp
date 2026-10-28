@@ -1,4 +1,5 @@
 #include "record.h"
+#include "chron.h"
 #include "ages.h"
 #include "arrivals.h"
 #include "json.h"
@@ -94,6 +95,8 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "kill_person") return kill_person(w, p, str(a, "id"), err);
     if (verb == "receive") return receive(w, p, str(a, "id"), str(a, "outcome"), err);
     if (verb == "hunt") return hunt(w, p, str(a, "region"), err);
+    if (verb == "keep_person") return keep_person(w, p, str(a, "id"), str(a, "role"), err);
+    if (verb == "commune") return commune(w, p, str(a, "relic"), str(a, "answer"), err);
     if (verb == "cast") return cast_spell(w, p, str(a, "spell"), str(a, "target"), str(a, "region"), str(a, "against")).cast;
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }
