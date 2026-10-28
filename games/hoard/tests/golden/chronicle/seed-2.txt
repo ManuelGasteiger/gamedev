@@ -527,6 +527,7 @@
 510 person_rose human62 torsary 0 new_reign
 510 person_died human45 tordale 0 old_age
 510 person_crowned human58 tordale 0 succession
+510 trait_flipped human54 craven 1 memory_of_dragon
 510 wake dragon planned 10 -
 510 talent_taken dragon thick_hide 3 growth
 510 act_defend bersary - 1 -
@@ -568,6 +569,7 @@
 520 person_rose orc88 ghazgash 0 line_continues
 520 person_rose human69 tordale 0 line_continues
 520 person_rose human70 vesford 0 line_continues
+520 trait_flipped human60 curious 1 memory_of_dragon
 520 wake dragon planned 10 -
 520 talent_taken dragon great_wings 8 growth
 520 act_defend bersary - 1 -
@@ -607,6 +609,8 @@
 530 person_rose human74 galmere 0 piety
 530 reign_named human59 bersary 0 tyrant
 530 reign_named orc87 zagoth 0 tyrant
+530 trait_flipped human65 curious 1 memory_of_dragon
+530 trait_flipped human67 curious 1 memory_of_dragon
 530 wake dragon planned 10 -
 530 talent_taken dragon iron_scales 15 growth
 530 act_defend bersary - 1 -
@@ -639,6 +643,7 @@
 540 person_rose human76 aldmarch 0 line_continues
 540 person_rose orc90 bruuk 0 line_continues
 540 person_rose orc91 ghazgash 0 line_continues
+540 trait_flipped human71 bold 1 memory_of_dragon
 540 dragon_moulted dragon - 2 moult
 540 wake dragon planned 10 -
 540 talent_taken dragon old_bones 25 growth
@@ -667,6 +672,7 @@
 550 person_rose human77 bersary 0 new_reign
 550 person_rose orc92 krulzag 0 line_continues
 550 person_rose human78 tordale 0 line_continues
+550 trait_flipped human73 craven 1 memory_of_dragon
 550 wake dragon planned 10 -
 550 talent_taken dragon keen_eyes 3 growth
 550 war_ended galford bersary 0 dragon_defended
@@ -701,6 +707,8 @@
 560 person_rose human81 aldmarch 0 piety
 560 person_rose human82 galford 0 keeper_again
 560 person_rose human83 galmere 0 line_continues
+560 trait_flipped human77 craven 1 memory_of_dragon
+560 trait_flipped human78 curious 1 memory_of_dragon
 570 war_started galford torsary 0 weak_neighbour
 570 arrival torsary envoy 0 arrival
 570 anti_dragon_progress aldmarch slayer_band 0.25 research
@@ -957,6 +965,10 @@
 680 person_crowned human109 vesford 0 succession
 680 person_rose human123 vesford 0 new_reign
 680 person_rose orc115 ghazzag 0 line_continues
+680 trait_flipped human105 curious 1 memory_of_dragon
+680 trait_flipped human112 craven 1 memory_of_dragon
+680 trait_flipped human118 proud 1 memory_of_dragon
+680 trait_flipped human120 vengeful 1 memory_of_dragon
 690 collapse mogak - 1 own_size
 690 successor_founded bruzag hill_hold 0 collapse
 690 arrival bersary pilgrim 0 arrival
@@ -1170,6 +1182,10 @@
 780 person_rose human160 galford 0 keeper_again
 780 person_rose human161 tordale 0 line_continues
 780 person_rose human162 vesford 0 line_continues
+780 trait_flipped human147 craven 1 memory_of_dragon
+780 trait_flipped human147 curious 1 memory_of_dragon
+780 trait_flipped human150 bold 1 memory_of_dragon
+780 trait_flipped human154 bold 1 memory_of_dragon
 780 wake dragon planned 10 -
 780 talent_taken dragon clinging_fire 8 growth
 780 act_defend tordale - 1 -
@@ -1210,6 +1226,8 @@
 790 person_rose orc132 bruoth 0 line_continues
 790 person_rose human166 galford 0 line_continues
 790 person_rose human167 torsary 0 line_continues
+790 trait_flipped human153 curious 1 memory_of_dragon
+790 trait_flipped human156 curious 1 memory_of_dragon
 790 wake dragon planned 10 -
 790 act_defend tordale - 1 -
 790 act_give tordale - 0.1 -
@@ -1233,6 +1251,8 @@
 800 person_crowned human163 aldmarch 0 succession
 800 person_died human152 torsary 0 old_age
 800 person_rose orc133 uzgmok 0 line_continues
+800 trait_flipped human151 proud 1 memory_of_dragon
+800 trait_flipped human165 proud 1 memory_of_dragon
 810 person_died human156 torsary 0 old_age
 810 person_crowned human167 torsary 0 succession
 810 person_died human145 torfell 0 old_age
@@ -1431,6 +1451,8 @@
 900 person_rose human202 galmere 0 keeper_again
 900 person_rose orc149 kruluk 0 line_continues
 900 person_rose human203 torfell 0 line_continues
+900 trait_flipped human190 bold 1 memory_of_dragon
+900 trait_flipped human194 bold 1 memory_of_dragon
 900 wake dragon planned 10 -
 900 war_ended galford aldmarch 0 dragon_defended
 900 act_defend aldmarch - 1 -
@@ -1465,6 +1487,7 @@
 910 person_died human195 galford 0 old_age
 910 person_rose human206 galford 0 keeper_again
 910 person_rose human207 galmere 0 keeper_again
+910 trait_flipped human190 vengeful 1 memory_of_dragon
 910 wake dragon planned 10 -
 910 talent_taken dragon patient_mind 15 growth
 910 talent_taken dragon tithe 3 growth
@@ -1501,6 +1524,9 @@
 920 person_rose human208 galford 0 line_continues
 920 person_rose orc152 ghazoth 0 line_continues
 920 person_rose human209 tordale 0 line_continues
+920 trait_flipped human196 curious 1 memory_of_dragon
+920 trait_flipped human197 proud 1 memory_of_dragon
+920 trait_flipped human201 proud 1 memory_of_dragon
 930 warlord_died gorzag - 0 warlord_death
 930 war_started ghazoth aldmarch 0 orc_raid
 930 war_started ghazoth galford 0 orc_raid
@@ -1714,6 +1740,7 @@
 1020 person_rose orc178 bruul 0 line_continues
 1020 person_rose orc179 kruloth 0 line_continues
 1020 person_rose human230 tordale 0 line_continues
+1020 trait_flipped human227 proud 1 memory_of_dragon
 1030 warlord_died kruloth - 0 warlord_death
 1030 orcs_spawned brugash east_vale 0 empty_ruin
 1030 golden_age kruloth - 40 great_ruler
@@ -1762,6 +1789,7 @@
 1040 person_rose orc186 brugash 0 line_continues
 1040 person_rose human234 galmere 0 line_continues
 1040 person_rose human235 torfell 0 line_continues
+1040 trait_flipped orc170 bold 1 memory_of_dragon
 1050 warlord_died bruul - 0 warlord_death
 1050 region_taken krulak east_marches 0 war
 1050 war_ended bruak krulak 0 no_land_left
@@ -1824,6 +1852,10 @@
 1060 person_died orc179 kruloth 0 old_age
 1060 person_crowned orc181 kruloth 0 succession
 1060 person_rose orc192 kruloth 0 new_reign
+1060 trait_flipped human229 proud 1 memory_of_dragon
+1060 trait_flipped human232 vengeful 1 memory_of_dragon
+1060 trait_flipped human233 craven 1 memory_of_dragon
+1060 trait_flipped orc186 proud 1 memory_of_dragon
 1070 warlord_died kruloth - 0 warlord_death
 1070 collapse krulak - 2 weakened
 1070 successor_founded gorak east_marches 0 collapse
@@ -2248,6 +2280,8 @@
 1230 person_rose human281 torfell 0 keeper
 1230 person_rose human282 torfell 0 keeper
 1230 reign_named human268 galmere 0 golden
+1230 trait_flipped human271 curious 1 memory_of_dragon
+1230 trait_flipped human278 proud 1 memory_of_dragon
 1230 dragon_starving dragon - 0.943096 hoard_empty
 1230 dragon_atrophied dragon - 0.01 hunger
 1230 wake dragon hunger 10 -
@@ -2289,6 +2323,7 @@
 1240 person_rose orc262 gorakuk 0 line_continues
 1240 person_rose orc263 gorukul 0 line_continues
 1240 person_rose orc264 gorulzag 0 line_continues
+1240 trait_flipped human274 bold 1 memory_of_dragon
 1240 dragon_starving dragon - 0.931535 hoard_empty
 1240 dragon_atrophied dragon - 0.01 hunger
 1240 wake dragon hunger 10 -
@@ -2331,6 +2366,8 @@
 1250 reign_named human278 vesford 0 golden
 1250 person_rose human286 tordale 0 line_continues
 1250 person_rose human287 vesford 0 line_continues
+1250 trait_flipped human280 proud 1 memory_of_dragon
+1250 trait_flipped human282 proud 1 memory_of_dragon
 1260 coalition_formed gorakuk vesford 0 against_hegemon
 1260 vassal_revolt gorukul vesford 0 against_hegemon
 1260 joined_war gorukul gorakuk 0 against_hegemon
@@ -2768,6 +2805,8 @@
 1430 person_rose human341 galmere 0 keeper_again
 1430 person_rose orc332 gorothoth 0 line_continues
 1430 person_rose orc333 gorzagul 0 line_continues
+1430 trait_flipped human327 curious 1 memory_of_dragon
+1430 trait_flipped human331 curious 1 memory_of_dragon
 1440 warlord_died gorgashoth - 0 warlord_death
 1440 warlord_died gorratzag - 0 warlord_death
 1440 arrival galmere prophet 0 arrival
@@ -2834,6 +2873,7 @@
 1450 person_rose human346 galmere 0 keeper_again
 1450 person_rose orc339 gorzagul 0 line_continues
 1450 person_rose human347 vesford 0 line_continues
+1450 trait_flipped human330 curious 1 memory_of_dragon
 1450 dragon_starving dragon - 0.903718 hoard_empty
 1450 dragon_atrophied dragon - 0.01 hunger
 1450 rank_gained dragon flame 1 growth
@@ -2874,6 +2914,11 @@
 1460 person_rose human350 vesford 0 keeper_again
 1460 person_rose orc341 gormokrat 0 line_continues
 1460 person_rose orc342 gorothmok 0 line_continues
+1460 trait_flipped human334 curious 1 memory_of_dragon
+1460 trait_flipped human338 vengeful 1 memory_of_dragon
+1460 trait_flipped human341 vengeful 1 memory_of_dragon
+1460 trait_flipped human343 proud 1 memory_of_dragon
+1460 trait_flipped human346 vengeful 1 memory_of_dragon
 1470 warlord_died gorothoth - 0 warlord_death
 1470 warlord_died gorzagul - 0 warlord_death
 1470 person_died orc332 gorothoth 0 warlord_death
@@ -3479,6 +3524,7 @@
 1720 person_rose human430 marmarch 0 keeper_again
 1720 person_rose human431 vesford 0 keeper_again
 1720 person_rose orc427 uzgakzag 0 line_continues
+1720 trait_flipped human422 proud 1 memory_of_dragon
 1730 warlord_died uzgakgash - 0 warlord_death
 1730 warlord_died uzgakuk - 0 warlord_death
 1730 arrival galmere prophet 0 arrival
@@ -3547,6 +3593,7 @@
 1740 person_rose orc435 uzgakrat 0 new_reign
 1740 person_rose human437 galmere 0 keeper_again
 1740 person_rose orc436 uzgakzag 0 line_continues
+1740 trait_flipped human426 curious 1 memory_of_dragon
 1750 warlord_died uzgakrat - 0 warlord_death
 1750 warlord_died uzgakzag - 0 warlord_death
 1750 collapse uzgakmok - 1 own_size
@@ -3613,6 +3660,9 @@
 1760 person_died orc431 uzgulak 0 old_age
 1760 reign_named orc442 uzgulmok 0 golden
 1760 person_rose orc443 uzguloth 0 line_continues
+1760 trait_flipped human434 bold 1 memory_of_dragon
+1760 trait_flipped human439 proud 1 memory_of_dragon
+1760 trait_flipped orc437 bold 1 memory_of_dragon
 1770 collapse uzgulak - 1 own_size
 1770 successor_founded uzguluk east_marches 0 collapse
 1770 person_died orc438 uzgulak 0 collapse
@@ -4380,6 +4430,8 @@
 2080 person_rose human538 torsary 0 keeper_again
 2080 person_rose orc554 uzgukuk 0 line_continues
 2080 person_rose human539 vesholm 0 line_continues
+2080 trait_flipped human519 craven 1 memory_of_dragon
+2080 trait_flipped orc540 bold 1 memory_of_dragon
 2090 warlord_died uzgukul - 0 warlord_death
 2090 war_started torsary uzgukak 0 weak_neighbour
 2090 collapse uzgukoth - 1 weakened
@@ -4455,6 +4507,12 @@
 2100 person_rose human544 berdale 0 keeper
 2100 person_rose human545 vesholm 0 keeper_again
 2100 person_rose orc562 uzgukrat 0 line_continues
+2100 trait_flipped human527 curious 1 memory_of_dragon
+2100 trait_flipped human528 bold 1 memory_of_dragon
+2100 trait_flipped human532 proud 1 memory_of_dragon
+2100 trait_flipped human535 bold 1 memory_of_dragon
+2100 trait_flipped human537 craven 1 memory_of_dragon
+2100 trait_flipped human537 bold 1 memory_of_dragon
 2110 warlord_died uzgukak - 0 warlord_death
 2110 warlord_died uzgukuk - 0 warlord_death
 2110 collapse uzgukgash - 1 weakened
@@ -5241,6 +5299,8 @@
 2440 person_rose orc681 mogothgash 0 line_continues
 2440 person_rose orc682 mogothoth 0 line_continues
 2440 person_rose human650 vesholm 0 line_continues
+2440 trait_flipped human634 curious 1 memory_of_dragon
+2440 trait_flipped human638 bold 1 memory_of_dragon
 2450 collapse mogulgash - 1 own_size
 2450 successor_founded mogothuk hill_hold 0 collapse
 2450 person_died orc674 mogulgash 0 collapse
@@ -5944,6 +6004,8 @@
 2740 person_rose human749 torwick 0 keeper_again
 2740 person_rose human750 corwick 0 line_continues
 2740 person_rose orc784 mogratoth 0 line_continues
+2740 trait_flipped human730 proud 1 memory_of_dragon
+2740 trait_flipped human741 proud 1 memory_of_dragon
 2750 collapse mogukrat - 1 own_size
 2750 successor_founded mogratgash east_vale 0 collapse
 2750 collapse mogukuk - 1 own_size
@@ -6101,6 +6163,8 @@
 2800 person_rose human771 vesholm 0 keeper_again
 2800 reign_named orc798 mogratmok 0 golden
 2800 reign_named orc786 mogratuk 0 golden
+2800 trait_flipped human759 proud 1 memory_of_dragon
+2800 trait_flipped human768 bold 1 memory_of_dragon
 2800 dragon_starving dragon - 0.976862 hoard_empty
 2800 dragon_atrophied dragon - 0.01 hunger
 2800 wake dragon hunger 10 -
@@ -6138,6 +6202,10 @@
 2810 person_rose human772 vesholm 0 keeper_again
 2810 person_rose orc805 mogratmok 0 line_continues
 2810 person_rose orc806 mogzagul 0 line_continues
+2810 trait_flipped human751 vengeful 1 memory_of_dragon
+2810 trait_flipped human751 proud 1 memory_of_dragon
+2810 trait_flipped human765 bold 1 memory_of_dragon
+2810 trait_flipped human770 proud 1 memory_of_dragon
 2820 warlord_died mogratrat - 0 warlord_death
 2820 warlord_died mogratzag - 0 warlord_death
 2820 warlord_died mogzagak - 0 warlord_death
@@ -6282,6 +6350,12 @@
 2860 person_rose orc822 mogzaggash 0 line_continues
 2860 person_rose orc823 mogzagrat 0 line_continues
 2860 person_rose orc824 mogzagzag 0 line_continues
+2860 trait_flipped human773 craven 1 memory_of_dragon
+2860 trait_flipped human780 curious 1 memory_of_dragon
+2860 trait_flipped human784 proud 1 memory_of_dragon
+2860 trait_flipped human787 bold 1 memory_of_dragon
+2860 trait_flipped human788 curious 1 memory_of_dragon
+2860 trait_flipped human789 bold 1 memory_of_dragon
 2860 dragon_starving dragon - 0.980207 hoard_empty
 2860 dragon_atrophied dragon - 0.01 hunger
 2860 wake dragon hunger 10 -
@@ -6321,6 +6395,8 @@
 2870 person_crowned human785 corstead 0 succession
 2870 person_rose human792 corstead 0 new_reign
 2870 person_rose orc827 krulakak 0 line_continues
+2870 trait_flipped human785 curious 1 memory_of_dragon
+2870 trait_flipped orc820 bold 1 memory_of_dragon
 2880 collapse mogzaggash - 1 own_size
 2880 successor_founded krulakul hill_hold 0 collapse
 2880 collapse mogzagmok - 1 own_size
@@ -6572,6 +6648,8 @@
 2970 person_rose orc866 krululoth 0 new_reign
 2970 person_rose human817 corstead 0 keeper_again
 2970 person_rose orc867 krululmok 0 line_continues
+2970 trait_flipped human814 bold 1 memory_of_dragon
+2970 trait_flipped human816 bold 1 memory_of_dragon
 2980 warlord_died krululoth - 0 warlord_death
 2980 warlord_died krululul - 0 warlord_death
 2980 collapse krululak - 1 own_size
