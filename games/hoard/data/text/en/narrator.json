@@ -1,5 +1,7 @@
 {
   "events": {
+    "historian_kept": {"text": "{S} keeps your chronicle now.", "brief": "the day {s} began your chronicle in {year}"},
+    "act_commune": {"text": "In the dark of the lair you spoke with a thing of your hoard.", "brief": "your talk with a thing of your hoard in {year}"},
     "world_began": {
       "text": "In the first years {m_word} courts shared the valley.",
       "brief": "the first years"

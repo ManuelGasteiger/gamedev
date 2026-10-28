@@ -1,3 +1,4 @@
+#include "chron.h"
 #include "ages.h"
 #include "unrecorded.h"
 #include "chronicle.h"
@@ -49,6 +50,8 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     if (run_ended(w)) { res.wake_reason = "run_ended"; return res; }   // item 04
     if (years < 1) years = 1;
     size_t start = w.chronicle.size();
+    size_t acts_at_sleep = w.acts.size();
+    age_in_hoard(w, years);   // item 05
     std::map<std::string, double> growth_before = w.dragons[kPlayer].growth;
     std::map<std::string, int> ranks_before = all_ranks(w.dragons[kPlayer], p.talents);
     double wounds_before = w.dragons[kPlayer].wounds;
@@ -92,6 +95,9 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     if (!has_tag(w.tags, "dragon_slain")) { arrivals_at_wake(w, p); rule_arrivals(w, p); generate_offers(w, p); }
     if (!has_tag(w.tags, "dragon_slain")) res.hooks = generate_hooks(w, p);   // v0.4 hooks (S3): after everything the sleep brought
     sift_wake(w, p, w.sleep_started);   // item 14: the briefing's lines, recorded as shown
+    close_tenures(w);                   // item 05
+    counterfactual_after_sleep(w, p, years, acts_at_sleep);
+    snapshot_at_wake(w, p);
     res.chronicle.assign(w.chronicle.begin() + static_cast<std::ptrdiff_t>(start), w.chronicle.end());
     res.growth_gained = growth_since(growth_before, w.dragons[kPlayer]);
     res.healed = std::max(0.0, wounds_before - w.dragons[kPlayer].wounds);

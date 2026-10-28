@@ -2,6 +2,7 @@
 #include <string>
 #include "ages/ages.h"
 #include "ages/arrivals.h"
+#include "ages/chron.h"
 #include "ages/dragon_json.h"
 #include "ages/hook_json.h"
 #include "ages/genesis.h"
@@ -256,7 +257,7 @@ json cmd_load_world(const json& in) {
 // ---- v0.4 (S1): wounds in apply_acts, a slain dragon refuses its verbs, talents -----------------------------------
 
 const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_remnant", "cast", "terraform", "demand",
-                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt"};
+                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt", "keep_person", "commune"};
 
 json cmd_apply_acts_wounded(const json& in) {
     double before = g.world.dragons[kPlayer].wounds;
@@ -339,7 +340,23 @@ json cmd_hunt(const json& in) {
     return {{"ok", true}, {"events", events_since(first_event)}};
 }
 
+json cmd_keep_person(const json& in) {
+    std::string reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!keep_person(g.world, g.params, in.value("id", ""), in.value("role", "historian"), reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
+json cmd_commune(const json& in) {
+    std::string reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!commune(g.world, g.params, in.value("relic", ""), in.value("answer", ""), reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
 bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
+    if (cmd == "keep_person") { out = cmd_keep_person(in); return true; }
+    if (cmd == "commune") { out = cmd_commune(in); return true; }
     if (cmd == "receive") { out = cmd_receive(in); return true; }
     if (cmd == "hunt") { out = cmd_hunt(in); return true; }
     if (cmd == "apply_acts") out = cmd_apply_acts_hooked(in);

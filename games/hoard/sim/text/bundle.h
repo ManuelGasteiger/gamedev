@@ -13,7 +13,7 @@ struct Bundle {
 };
 
 // the flat string tables a key is looked up in
-extern const char* const kStringParts[4];   // ui, scenarios, patterns, endings
+extern const char* const kStringParts[5];   // ui, scenarios, patterns, endings, chronicle
 
 const std::string* find_string(const Bundle& b, const std::string& key);
 const nlohmann::json& part(const Bundle& b, const char* name);

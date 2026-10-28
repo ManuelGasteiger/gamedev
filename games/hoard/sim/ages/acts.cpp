@@ -1,3 +1,4 @@
+#include "chron.h"
 #include "ages.h"
 #include "unrecorded.h"
 #include "dragon_acts.h"
@@ -117,6 +118,9 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
             else if (kv.first == "food") w.dragons[kPlayer].hoard.food += amt;
         }
         if (a.payload.empty()) w.dragons[kPlayer].hoard.gold += taken * molten;
+        auto has = [&](const char* k) { auto it = a.payload.find(k); return it != a.payload.end() && it->second > 0; };
+        if (has("books")) take_sources(w, p, f, m);   // item 05
+        if (has("artifacts")) find_relic(w, p, f, m);
     } else if (a.type == "take_hostage") {   // 17.2: the heir (else the ruler) becomes a person in the lair
         f.tags.insert("hostage_taken");
         w.dragons[kPlayer].lineages.push_back(f.id);
@@ -147,6 +151,7 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
             }
         }
     } else if (a.type == "give") {
+        if (a.payload.count("books")) give_sources(w, m);   // item 05
         auto era = a.payload.find("era");
         auto gold = a.payload.find("gold");
         if (era != a.payload.end()) f.era_progress += m * c.era_threshold[static_cast<size_t>(std::min<int>(f.era, 3))] * c.act_give_era_share;
@@ -310,6 +315,7 @@ std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const
     }
     if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");
     w.dragons[kPlayer].tags.erase("rage");
+    close_tenures(w);   // item 05: a released or slain historian's book ends
     score_events(w, p);
     return reaction_lines(w, p, notes, first_event);
 }

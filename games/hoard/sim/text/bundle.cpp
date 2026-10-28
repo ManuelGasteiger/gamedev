@@ -6,7 +6,7 @@ namespace text {
 
 using nlohmann::json;
 
-const char* const kStringParts[4] = {"ui", "scenarios", "patterns", "endings"};
+const char* const kStringParts[5] = {"ui", "scenarios", "patterns", "endings", "chronicle"};
 
 const json& part(const Bundle& b, const char* name) {
     static const json empty = json::object();

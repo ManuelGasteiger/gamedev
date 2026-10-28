@@ -19,6 +19,7 @@
 #include "ages/profile.h"
 #include "bot.h"
 #include "text_cmd.h"
+#include "chron_demo.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -52,6 +53,7 @@ struct Options {
     std::string render_batch, text_bundle;     // item 19, text_cmd.h
     std::string profile;    // item 04: the profile folder (read before genesis, written at the end)
     std::string bot;        // item 04: amnesiac | carry | oracle:<ending>
+    uint64_t chron_demo = 0;                   // item 05, chron_demo.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -74,6 +76,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--state-hash") o.state_hash = true;
         else if (k == "--render-batch") { if (!need(o.render_batch)) return false; }
         else if (k == "--text-bundle") { if (!need(o.text_bundle)) return false; }
+        else if (k == "--chronicle-demo") { std::string v; if (!need(v)) return false; o.chron_demo = std::strtoull(v.c_str(), nullptr, 10); }
         else if (k == "--record") { if (!need(o.record)) return false; }
         else if (k == "--replay") { if (!need(o.replay)) return false; }
         else if (k == "--save") { if (!need(o.save)) return false; }
@@ -346,6 +349,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (o.golden_to) return golden(o);
+    if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);
