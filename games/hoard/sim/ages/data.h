@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "cards.h"
+#include "endings_def.h"
 #include "genesis_data.h"
 #include "../sift/bank.h"
 #include "state.h"
@@ -129,8 +130,6 @@ struct Constants {
 
     double offer_faith = 0.7;
     double offer_rival_cohesion = 0.5;
-    int offer_exit_era = 4;
-    double offer_exit_faith = 0.8;
     int offer_expiry_years = 500;
     double offer_tribute_defence = 0.1;
     double offer_tribute_worship = 0.05;
@@ -562,6 +561,7 @@ struct Params {
     ArrivalBook arrivals;         // item 06
     GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
     SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
+    EndingsDef endings;           // item 04: data/endings.json
 };
 
 struct PolicyAct {
@@ -601,6 +601,7 @@ struct DataJson {
     std::string importance;            // data/importance.json
     std::string arrivals;              // item 06: data/arrivals.json
     std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
+    std::string endings;               // item 04: data/endings.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 

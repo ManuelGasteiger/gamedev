@@ -120,8 +120,6 @@
   "forgotten_show_as_burn": 0.3,
   "offer_faith": 0.7,
   "offer_rival_cohesion": 0.5,
-  "offer_exit_era": 4,
-  "offer_exit_faith": 0.8,
   "offer_expiry_years": 500,
   "offer_tribute_defence": 0.1,
   "offer_tribute_worship": 0.05,
