@@ -62,14 +62,23 @@ const CardBranch* pick_branch(World& w, const Params& p, const CardDef& card, Ca
         CardCtx probe = ctx;
         if (card_holds(w, p, b.when, probe)) { ctx = probe; return &b; }
     }
+    std::vector<double> weight;
     double total = 0;
-    for (auto& b : card.branches) if (b.when.empty()) total += b.weight;
+    for (auto& b : card.branches) {
+        double wt = b.weight;
+        for (auto& bo : b.boost) {
+            CardCtx probe = ctx;
+            if (card_holds(w, p, bo.when, probe)) wt = (wt + bo.add) * bo.mult;
+        }
+        weight.push_back(b.when.empty() ? wt : 0);
+        total += weight.back();
+    }
     if (total <= 0) return nullptr;
     double roll = w.rng.uniform() * total;
-    for (auto& b : card.branches) {
-        if (!b.when.empty()) continue;
-        if (roll < b.weight) return &b;
-        roll -= b.weight;
+    for (size_t i = 0; i < card.branches.size(); ++i) {
+        if (!card.branches[i].when.empty() || weight[i] <= 0) continue;
+        if (roll < weight[i]) return &card.branches[i];
+        roll -= weight[i];
     }
     return nullptr;
 }
