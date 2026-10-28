@@ -7,6 +7,7 @@
 #include "memory_tiers.h"
 #include "core/detmath.h"
 #include "oaths.h"
+#include "prophecy.h"
 #include "offers.h"
 #include "reaction_lines.h"
 #include "rules/coalitions.h"
@@ -302,6 +303,7 @@ std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const
         note_lair_sight(w, p, act);   // item 06
         emit(w, "act_" + act.type, act.target, act.region, m, act_tags(act));
         note_act(w, p, act, m);
+        prophecy_after_act(w, p, act);   // item 04
         resolve_hooks(w, p, act);   // v0.4 hooks (S3)
     }
     if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");

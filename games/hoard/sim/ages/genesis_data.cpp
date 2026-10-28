@@ -139,6 +139,7 @@ bool genesis_from_json(const std::string& text, GenesisDef& g, std::string& err)
         get(j["legends"], "per_kind", g.legends.per_kind);
         get(j["legends"], "per_century", g.legends.per_century);
         get(j["legends"], "skip", g.legends.skip);
+        get(j["legends"], "always", g.legends.always);
     }
     if (j.contains("templates"))
         for (auto& v : j["templates"]) { StartTemplate t; start_template(v, t); g.templates.push_back(t); }

@@ -919,6 +919,66 @@
     "hook_horde": {
       "text": "You fell on the camp of {s} at {o} and took its plunder.",
       "brief": "your answer at {o} in {year}"
+    },
+    "prophecy_written": {
+      "text": "The scribes of {S} wrote down a prophecy of the dragon in the mountain, and kept the book in their library.",
+      "brief": "the prophecy written in {s} in {year}"
+    },
+    "prophecy_spread": {
+      "text": "{S} learned the prophecy of the dragon from {O}.",
+      "brief": "the prophecy reaching {s} in {year}"
+    },
+    "prophecy_cult": {
+      "text": "In {S} a cult rose to make the prophecy come true, and began a shrine to you.",
+      "brief": "the prophecy cult of {s} in {year}"
+    },
+    "prophecy_slayers": {
+      "text": "{S} read the prophecy as a warning and armed against it.",
+      "brief": "the prophecy's slayers in {s} in {year}"
+    },
+    "prophecy_schism_order": {
+      "text": "The cult of {S} split over the prophecy: the Order holds that you are the prophecy, and holds the capital.",
+      "brief": "the schism of {s} in {year}"
+    },
+    "prophecy_schism_reformed": {
+      "text": "The cult of {S} split over the prophecy: the Reformed hold that you are its heresy, and hold the capital.",
+      "brief": "the schism of {s} in {year}"
+    },
+    "legend_worship": {
+      "text": "In {S} they kept the worship of an old dragon that had died before this valley's memory.",
+      "brief": "the old dragon's worship in {s}"
+    },
+    "legend_fear": {
+      "text": "In {S} they still feared an old dragon that had died before this valley's memory.",
+      "brief": "the old dragon's fear in {s}"
+    },
+    "legend_order": {
+      "text": "An order of {S} traced its founding to the death of an old dragon.",
+      "brief": "the order of the old dragon in {s}"
+    },
+    "legend_monument": {
+      "text": "In {S} stood a monument to an old dragon nobody had seen.",
+      "brief": "the old dragon's monument in {s}"
+    },
+    "legend_gap": {
+      "text": "The library of {S} had a gap where an old dragon's story had been.",
+      "brief": "the gap in {s}'s library"
+    },
+    "ending_ready": {
+      "text": "An ending came within your reach.",
+      "brief": "an ending within reach in {year}"
+    },
+    "ending_lapsed": {
+      "text": "An ending slipped out of your reach.",
+      "brief": "an ending lost in {year}"
+    },
+    "ending": {
+      "text": "Your reign ended.",
+      "brief": "the end of your reign in {year}"
+    },
+    "epilogue_over": {
+      "text": "The valley went on without you.",
+      "brief": "the valley without you"
     }
   },
   "causes": {
@@ -1132,7 +1192,10 @@
     "dragon_raised_lineage.raised_in_lair": "",
     "dragon_raised_lineage_digested.royals_digested": "after {ref}",
     "open_home@remnant_formed_off_map": "out of the wastes beyond the valley",
-    "collapse_one.own_size": "when its rulers could no longer hold it together"
+    "collapse_one.own_size": "when its rulers could no longer hold it together",
+    "prophecy_cult": "remembering {ref}",
+    "prophecy_slayers": "remembering {ref}",
+    "prophecy_schism": "remembering {ref}"
   },
   "motives": {
     "survival": "they fear for their survival",
@@ -1175,7 +1238,7 @@
     "ward": "that you ward {target}",
     "tribute": "tribute of {price0} gold for your word to do them no harm",
     "elope": "to be taken into your lair and away from the marriage",
-    "rite": "to perform the rite that opens your way out of the valley (not in this build)"
+    "exit": "to end your reign as a dragon"
   },
   "roles": {
     "ruler": "ruler",

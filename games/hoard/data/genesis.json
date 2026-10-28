@@ -22,7 +22,7 @@
   "courts": [3, 6],
   "fallback_court": {"id": "settlers", "race": {"human": 2, "dwarf": 1, "elf": 1}, "regions": 1, "wealth": [20, 35], "cohesion": [0.75, 0.9]},
   "prehistory": [300, 900],
-  "legends": {"max": 10, "per_kind": 2, "per_century": 2, "skip": ["court_founded", "person_rose", "person_died", "person_crowned", "reign_named", "successor_founded", "remnant_formed"]},
+  "legends": {"max": 10, "per_kind": 2, "per_century": 2, "skip": ["court_founded", "person_rose", "person_died", "person_crowned", "reign_named", "successor_founded", "remnant_formed"], "always": ["prophecy_written", "legend_worship", "legend_fear", "legend_order", "legend_monument", "legend_gap"]},
   "templates": [
     {
       "id": "rival_kingdoms",
