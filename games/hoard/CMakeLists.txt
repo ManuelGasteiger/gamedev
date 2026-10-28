@@ -58,6 +58,7 @@ add_library(ages STATIC
   sim/ages/policy_json.cpp
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
+  sim/ages/person_json.cpp
   sim/ages/sleep.cpp
   sim/ages/spells.cpp
   sim/ages/step.cpp

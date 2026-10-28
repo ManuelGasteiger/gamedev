@@ -11,6 +11,7 @@
 #include "step.h"
 #include "world_util.h"
 #include "../sift/sift_json.h"
+#include "person_json.h"
 
 namespace ages {
 
@@ -411,6 +412,7 @@ static json person_json(const Person& x) {
               {"dies", x.dies}, {"traits", {{"bold", x.traits.bold}, {"pious", x.traits.pious}, {"greedy", x.traits.greedy}, {"cunning", x.traits.cunning}}},
               {"tags", tags_json(x.tags)}, {"memory_of_dragon", x.memory_of_dragon}, {"hostage_since", x.hostage_since}};
     if (!x.sex.empty()) j["sex"] = x.sex;   // absent in rules-1 saves, so their stored hash still checks
+    person_record_json(x, j);   // item 07
     return j;
 }
 
@@ -433,6 +435,7 @@ static Person person_from(const json& j) {
     x.tags = tags_from(j, "tags");
     get(j, "memory_of_dragon", x.memory_of_dragon);
     get(j, "hostage_since", x.hostage_since);
+    person_record_from(j, x);   // item 07
     return x;
 }
 
@@ -525,6 +528,7 @@ static json world_json(const World& w) {
         j["dead_people"].push_back(d);
     }
     j["person_counters"] = w.person_counters;
+    secrets_json(w, j);   // item 07
     j["offers_pending"] = json::array();
     for (auto& of : w.offers) {
         json o = {{"id", of.id}, {"text_key", of.text_key}, {"kind", of.kind}, {"from_faction", of.from_faction}, {"envoy", of.envoy}, {"target", of.target},
@@ -890,6 +894,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
             w.dead_people.push_back(x);
         }
     get(j, "person_counters", w.person_counters);
+    secrets_from(j, w);   // item 07
     if (j.contains("offers_pending")) for (auto& v : j["offers_pending"]) w.offers.push_back(offer_from(v));
     if (j.contains("arrivals"))
         for (auto& v : j["arrivals"]) {
