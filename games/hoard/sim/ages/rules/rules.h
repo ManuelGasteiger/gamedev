@@ -51,5 +51,13 @@ void crown_person(World& w, const Params& p, Faction& f, const std::string& id, 
 Person* pick_hostage(World& w, const std::string& faction);   // the heir, else the ruler
 void take_hostage_person(World& w, const Params& p, Person& person, bool consent, const Cause& cause);
 void release_hostage_person(World& w, const Params& p, const std::string& faction, const Cause& cause);
+void fall_person(World& w, const Params& p, const std::string& id, const std::string& reason, const Cause& cause);   // item 07
+
+// item 07: person memory, secrets, the inquisition (after rule_people)
+void rule_person_memory(World&, const Params&);
+void rule_secrets(World&, const Params&);
+void rule_inquisition(World&, const Params&);
+double secret_rate(const World& w, const Params& p, const Secret& s);       // discovery chance per decade
+double purge_strength(const World& w, const Params& p, const Secret& s);    // share of the court in the purge faction
 
 }

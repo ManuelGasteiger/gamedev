@@ -65,9 +65,16 @@ struct CardEffect {
     std::map<std::string, double> table;   // v0.4: an object-valued option ("races": {"human": 3, "orc": 2})
 };
 
+// item 07: "boost" on a branch: while `if` holds its weight becomes (weight + add) x mult
+struct WeightBoost {
+    std::vector<CardPred> when;
+    double add = 0, mult = 1;
+};
+
 struct CardBranch {
     double weight = 1;
     std::vector<CardPred> when;       // "if": the first branch whose conditions hold is taken; else a weighted roll
+    std::vector<WeightBoost> boost;
     std::vector<CardEffect> effects;
     std::string text_key;
     std::string tag;

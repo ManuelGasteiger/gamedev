@@ -6,7 +6,8 @@
 #include "../world_util.h"
 
 // card effects ("do" in data/events): tag, untag, field, modifier, memory, war, spawn_person, crown, split,
-// spawn_faction, refugees, wealth_transfer, ledger (the dragon's relationship to a person), offer. "on" names a variable, or all | neighbours | allies (of "of",
+// spawn_faction, refugees, wealth_transfer, ledger (the dragon's relationship to a person), offer, fall (a person
+// brought down, item 07). "on" names a variable, or all | neighbours | allies (of "of",
 // default self, optionally only of "race"). Spawned entities bind the variable named by "bind".
 
 namespace ages {
@@ -303,6 +304,7 @@ void apply_card_effect(World& w, const Params& p, const CardEffect& e, CardCtx& 
         } else if (t == "war") war(w, e, ctx, id);
         else if (t == "spawn_person") spawn_person(w, p, e, ctx, id);
         else if (t == "crown") crown(w, p, e, ctx, id);
+        else if (t == "fall") fall_person(w, p, var_of(ctx, str(e, "person", "person")), str(e, "reason", ctx.card->id), card_cause(ctx));   // item 07
         else if (t == "split") split(w, p, e, ctx, id);
         else if (t == "refugees") refugees_to(w, p, e, ctx, id);
         else if (t == "ledger") meet(w, id, str(e, "how", ctx.card->id), num(e, "delta"));

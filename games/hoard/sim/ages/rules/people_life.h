@@ -10,7 +10,7 @@ bool immortal(const Faction& f);
 Person* ruler_of(World& w, const std::string& faction);
 Person* heir_of(World& w, const std::string& faction);
 void grown(World& w, const Params& p, Person& x);   // born accession_age (with jitter) ago, death of age set
-int retire(World& w, Person person, const std::string& reason, const Cause& cause);   // person_died; returns its id
+int retire(World& w, const Params& p, Person person, const std::string& reason, const Cause& cause);   // person_died; returns its id
 void crown(World& w, const Params& p, Faction& f, Person& person, const std::string& how, const Cause& cause);
 void crown_new(World& w, const Params& p, Faction& f, const std::string& how, const Cause& cause);
 

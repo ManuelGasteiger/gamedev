@@ -1,0 +1,31 @@
+[
+  {
+    "id": "inquisition",
+    "needs_dragon": true,
+    "trigger": [
+      {"event": "secret_exposed", "self_as": "subject", "person_from": "object", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "$person",
+    "effects": [
+      {"do": "tag", "tag": "inquisition:$person", "decades": 10},
+      {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 0, "decades": 2}
+    ]
+  },
+  {
+    "id": "purge",
+    "needs_dragon": true,
+    "trigger": [
+      {"event": "purge_ultimatum", "self_as": "subject", "person_from": "object", "within_years": 10}
+    ],
+    "chance": 1,
+    "cooldown_decades": 1,
+    "object": "$person",
+    "branches": [
+      {"if": [{"field": "regions", "lt": 2}], "text_key": "purge_fall", "effects": [{"do": "fall", "person": "person", "reason": "purged"}, {"do": "untag", "tag": "inquisition:$person"}]},
+      {"weight": 0.5, "text_key": "purge_civil_war", "effects": [{"do": "split", "war": 1, "bind": "new"}, {"do": "untag", "tag": "inquisition:$person"}]},
+      {"weight": 0.5, "text_key": "purge_fall", "effects": [{"do": "fall", "person": "person", "reason": "purged"}, {"do": "untag", "tag": "inquisition:$person"}]}
+    ]
+  }
+]

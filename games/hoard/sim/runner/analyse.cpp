@@ -6,6 +6,8 @@
 #include "ages/growth.h"
 #include "ages/json.h"
 #include "ages/memory_tiers.h"
+#include "ages/moves.h"
+#include "ages/person_record.h"
 #include "ages/rng.h"
 #include "ages/rules/slayers.h"
 #include "ages/world_util.h"
@@ -104,6 +106,24 @@ json sift_waking(const World& w, const Params& p) {
             {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())}};
 }
 
+// item 07: tracked people with a memory of the dragon per court, and each move scored on every tracked person (the
+// census ignores access and skill: it measures the weight table against the people the run made)
+json people_waking(const World& w, const Params& p) {
+    int tracked_n = 0, with_mem = 0;
+    json moves = json::object();
+    for (auto& m : p.moves.moves) moves[m.first] = {0, 0};
+    for (auto& x : w.people) {
+        if (x.faction.empty() || !tracked(w, p, x)) continue;
+        ++tracked_n;
+        if (!x.mem.empty() || !x.permanent.empty()) ++with_mem;
+        for (auto& m : p.moves.moves) {
+            moves[m.first][0] = moves[m.first][0].get<int>() + 1;
+            if (move_score(w, p, x, m.second) >= m.second.threshold) moves[m.first][1] = moves[m.first][1].get<int>() + 1;
+        }
+    }
+    return {{"courts", w.factions.size()}, {"tracked", tracked_n}, {"with_memory", with_mem}, {"moves", moves}};
+}
+
 int next_bucket(int years) {
     for (int b : kBuckets) if (b > years) return b;
     return years;
@@ -132,6 +152,7 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
         if (w.sift.on && w.sift.lines_year == w.year) (*pending)["sift"] = sift_waking(w, p);
+        if (!p.moves.moves.empty()) (*pending)["people"] = people_waking(w, p);   // item 07
     };
     if (o.perturb == "sleep")
         s.adjust_sleep = [](int years, int index) { return index == 0 ? next_bucket(years) : years; };

@@ -130,6 +130,14 @@ bool card_from(const json& j, CardDef& c, std::string& err) {
             get(v, "text_key", b.text_key);
             get(v, "tag", b.tag);
             if (v.contains("if") && !preds_from(v["if"], b.when, err)) return false;
+            if (v.contains("boost"))
+                for (auto& bv : v["boost"]) {
+                    WeightBoost wb;
+                    get(bv, "add", wb.add);
+                    get(bv, "mult", wb.mult);
+                    if (bv.contains("if") && !preds_from(bv["if"], wb.when, err)) return false;
+                    b.boost.push_back(wb);
+                }
             if (v.contains("effects") && !effects_from(v["effects"], b.effects, err)) return false;
             c.branches.push_back(b);
         }

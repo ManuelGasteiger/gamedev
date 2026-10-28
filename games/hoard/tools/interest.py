@@ -370,6 +370,7 @@ def seed_metrics(events, world, stats, idle_events, numbers=None):
         "arrivals": arrivals_count(stats.get("wakings_log", [])),
         "agency_chain": agency_chain(events, stats.get("wakings_log", []), (world.get("genesis") or {}).get("hatched_year", 0)),
         "sift": sift_seed(stats.get("wakings_log", []), world),   # item 14
+        "people": people_count(stats.get("wakings_log", []), events),   # item 07
     }
     if numbers:
         out["world"] = world_metrics(events, world, numbers)
@@ -632,6 +633,7 @@ def summarise_policy(policy, per_seed):
         "hooks": hooks_summary([per_seed[s].get("hooks") for s in seeds], [per_seed[s].get("growth") for s in seeds]),   # v0.4 hooks (S3)
         "arrivals": arrivals_summary([per_seed[s].get("arrivals") for s in seeds]),
         "sift": sift_summary([per_seed[s].get("sift") for s in seeds], BANK_IDS),   # item 14
+        "people": people_summary([per_seed[s].get("people") for s in seeds]),   # item 07
         "flatness_flags": flags,
         "most_interesting": [headline(s, per_seed[s]) for s in ranked[::-1][:5]],
         "least_interesting": [headline(s, per_seed[s]) for s in ranked[:5]],
@@ -722,6 +724,45 @@ def arrivals_summary(runs):
     return {"wakings": wakings, "total": total, "per_waking": total / wakings if wakings else 0.0,
             "by_kind": {k: v / wakings if wakings else 0.0 for k, v in sorted(kinds.items())},
             "top_because": because.most_common(10), "runs_with_none": sum(1 for r in runs if not r["kinds"])}
+
+
+def people_count(wakings_log, events, after=300):
+    """item 07: tracked people with a dragon memory per court from `after` years past the hatching, the move census
+    (each move scored on every tracked person at every waking) and trait flips against finished lives."""
+    courts = with_mem = wakings = 0
+    moves = Counter(), Counter()
+    for w in wakings_log:
+        pw = w.get("people")
+        if not pw:
+            continue
+        for m, (tried, ok) in pw["moves"].items():
+            moves[0][m] += tried
+            moves[1][m] += ok
+        if w.get("since_hatch", 0) < after:
+            continue
+        wakings += 1
+        courts += pw["courts"]
+        with_mem += pw["with_memory"]
+    flips = sum(e.get("count", 1) for e in events if e["kind"] == "trait_flipped")
+    deaths = sum(e.get("count", 1) for e in events if e["kind"] == "person_died")
+    return {"wakings": wakings, "courts": courts, "with_memory": with_mem, "tried": dict(moves[0]), "accepted": dict(moves[1]),
+            "flips": flips, "deaths": deaths}
+
+
+def people_summary(runs):
+    runs = [r for r in runs if r]
+    if not runs:
+        return None
+    tried, accepted = Counter(), Counter()
+    for r in runs:
+        tried.update(r["tried"])
+        accepted.update(r["accepted"])
+    courts = sum(r["courts"] for r in runs)
+    deaths = sum(r["deaths"] for r in runs)
+    return {"memory_per_court": sum(r["with_memory"] for r in runs) / courts if courts else 0.0,
+            "acceptance": {m: accepted[m] / tried[m] if tried[m] else 0.0 for m in sorted(tried)},
+            "flips": sum(r["flips"] for r in runs), "deaths": deaths,
+            "flips_per_life": sum(r["flips"] for r in runs) / deaths if deaths else 0.0}
 
 
 # ---------------------------------------------------------------- item 14: the sifter's briefings (research-story-sifting.md s7)
@@ -925,6 +966,11 @@ def print_table(summaries):
             print(f"[{s['policy']}] arrivals per waking by kind: " + ", ".join(f"{k} {v:.3f}" for k, v in ar["by_kind"].items()))
             for text, n in ar["top_because"]:
                 print(f"[{s['policy']}]   because {n:6d}  {text}")
+        pe = s.get("people")
+        if pe:   # item 07
+            print(f"[{s['policy']}] people: {pe['memory_per_court']:.2f} tracked people with a dragon memory per court after year 300; "
+                  f"trait flips {pe['flips']} over {pe['deaths']} finished lives ({pe['flips_per_life']:.3f} per life)")
+            print(f"[{s['policy']}] move census (accepted share): " + ", ".join(f"{k} {100 * v:.0f}%" for k, v in pe["acceptance"].items()))
         for label, key in (("most", "most_interesting"), ("least", "least_interesting")):
             print(f"[{s['policy']}] {label} interesting seeds:")
             for h in s[key]:

@@ -280,8 +280,24 @@ struct Event {
     double importance = -1;   // 0..1, scored when the step ends (importance.cpp); -1 until then; not hashed
 };
 
+// item 07: list holds up to 3 of the 12 base traits (data/moves.json), strongest first; the four numbers stay as before
 struct PersonTraits {
     double bold = 0.5, pious = 0.5, greedy = 0.5, cunning = 0.5;
+    std::vector<std::string> list;
+};
+
+// item 07: what one person remembers of the dragon; src witness | read | told, tier oral | written | monumental,
+// s strength 0..1, sev 1..3; the person's dread, awe and debt are the sums of s x sev x axis
+struct PersonMemory {
+    std::string ev, src = "witness", tier = "oral";
+    int year = 0, sev = 1, act = -1;
+    double s = 1, dread = 0, awe = 0, debt = 0;
+    bool hidden = false;
+};
+
+struct PersonRel {
+    std::string to, kind;   // kind: parent | heir | rival | mentor | kin | hostage_of | consort_of; "dragon" for the dragon
+    int w = 0;              // -100..100
 };
 
 // 17.2: a named mortal; role in ruler | heir | hero | sage | priest; dies 0 means immortal
@@ -298,6 +314,19 @@ struct Person {
     Tags tags;
     double memory_of_dragon = 0;
     int hostage_since = 0;
+    std::string virtue, vice;      // item 07; the vice stays hidden until a source, the historian or Lore reveals it
+    bool vice_hidden = true;
+    std::vector<PersonMemory> mem, permanent;
+    std::vector<PersonRel> rel;
+    int flips = 0;
+};
+
+// item 07: a secret act on a person that the court may discover; once exposed it carries the purge faction's
+// discontent until the ultimatum (inquisition)
+struct Secret {
+    std::string holder, about, kind;
+    int year = 0, exposed = 0;
+    double discovery_per_decade = 0, discontent = 0;
 };
 
 struct DeadPerson {
@@ -495,6 +524,7 @@ struct World {
     std::vector<Person> people;            // sorted by id
     std::vector<DeadPerson> dead_people;   // the ones the briefing may still have to name
     std::map<std::string, int> person_counters;   // race -> next number for `<race><n>` ids
+    std::vector<Secret> secrets;           // item 07, in the order made
     std::vector<Arrival> arrivals;         // item 06: visitors at the lair in the order they came; the dragon's sleep sends them home
     std::map<std::string, int> arrival_fired;   // "<court>|<kind>|<cause>" and "<court>" -> year of the last arrival
     std::vector<Offer> offers;             // current offers, generated at wake

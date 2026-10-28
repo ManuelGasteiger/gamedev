@@ -34,6 +34,9 @@ void step(World& w, const Params& p, int dt) {
     rule_world(w, p);   // v0.4 world (S2)
     anti_dragon_marks(w, p);
     rule_people(w, p);
+    rule_person_memory(w, p);   // item 07
+    rule_secrets(w, p);
+    rule_inquisition(w, p);
     rule_threads(w, p);
     rule_chronicle(w, p);
 }
