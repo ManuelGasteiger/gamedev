@@ -257,3 +257,29 @@ sim/ages/arrivals.cpp           arrival bookkeeping, ledge text
 sim/ages/arrival_acts.cpp       receive and hunt
 sim/ages/rules/arrivals.cpp     the rule
 ```
+
+## Item 04: endings, prophecy, legends across runs
+
+Endings are condition sets in the card trigger language, evaluated every decade after the cards (`rules/endings.cpp`). Each condition holds a timer: a gap longer than its `lapse_years` resets it, and an ending is ready when every condition has held for its `hold_years` (world tag `ending_ready:<id>`). Three are enabled: Mortality, The Myth (a death that qualifies, not an exit) and Ascension; the other eight are sketches with `enabled: false`. A ready ending with an exit kind comes as an `exit` offer row at the waking; the `exit` verb (recorded) ends the run, emits `ending` and runs `epilogue_decades` idle decades. The hatching prophecy is written into the most lettered court's library during the pre-history from the Ascension templates; three cards in `data/events/prophecy.json` react to it. Knowledge carries between runs in a profile of five files (`--profile dir`, wasm `profile` on `load`/`reset` and the `profile` command); genesis weaves legends of earlier Myth deaths into the pre-history as tags and events, never as stats.
+
+```
+data/endings.json               the registry (11 entries, 3 enabled), prophecy templates, legend weaving, myth deeds
+data/modifiers.json             the difficulty ladder, data only
+data/text/<lang>/endings.json   ending, condition, prophecy and myth lines
+data/policies/steer_*.json      the pacing bots' steering policies
+sim/ages/endings_def.h          registry structs; endings_data.cpp its loader
+sim/ages/endings.h              hold timers, conditions, the exit act
+sim/ages/rules/endings.cpp      the decade rule
+sim/ages/exit.cpp               exit, epilogue, exit offer rows
+sim/ages/endings_json.h/.cpp    save fields, world view, the briefing's Endings block, the prophecy and myth views
+sim/ages/prophecy.h/.cpp        writing and spreading the hatching prophecy
+sim/ages/profile.h/.cpp         the five profile files as JSON
+sim/ages/legend_weave.cpp       legends woven into a new pre-history
+sim/ages/profile_notes.cpp      atoms, bestiary, glossary, the Myth's legend entry
+sim/runner/bot.h/.cpp           amnesiac, carry and oracle bots (`--bot`)
+web/game/profile.js             the page keeps the profile in localStorage
+tools/endings_rates.py          ready and condition shares, prophecy card rates over many runs
+tools/endings_runs.py           P(ending by run N) per bot, knowledge leverage
+```
+
+The trigger language gains `count` (courts where a sub-condition holds, with `races_gte` and a `mean` bound) and `within_wakings` on events; new fields `temples`, `temple_years`, `monumental` (court) and `reign`, `legends`, `growth:<axis>`, `acts:<a|b>` (dragon). A card with `keyed: true` rolls its chance on `rng_for(seed, id, self@year)`.

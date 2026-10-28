@@ -1844,6 +1844,7 @@ function sleep(years) {
   years = Math.max(1, Math.round(years) || 1);
   const before = { year: model.year, dragon: { ...model.dragon }, factions: snapshot(), view: world };
   const res = sim({ cmd: 'sleep', years });
+  profileStore();   // item 04: what the waking showed is now known
   if (!res.ok && res.error) return null;
   for (const e of effects.splice(0)) e.end();   // a breath or flash still running when the dragon lies down ends with the age
   play.ages.push({ age: play.age, from: before.year, to: res.year, wake_reason: res.wake_reason, years_slept: res.years_slept, acts: play.ageEvents, chronicle: res.chronicle });
@@ -2138,7 +2139,7 @@ function loadAutosave() {
 // a new world; `genesis` deals a generated valley with its pre-history (v0.4), told on the legends page before the first flight
 function newGame(seed, opts = {}) {
   play.seed = seed;
-  sim({ cmd: 'reset', seed, genesis: !!opts.genesis });
+  sim({ cmd: 'reset', seed, genesis: !!opts.genesis, profile: profileLoad() });
   play.age = 1; play.ages = []; play.ageEvents = []; play.landed = false; play.lastWake = null; play.hits = [];
   closeDeath(); closeGrowth();
   $('system').classList.add('hidden'); $('lair').classList.add('hidden'); $('wake').classList.add('hidden');
@@ -2242,7 +2243,7 @@ async function main() {
   if (!r.ok) return;
   loadUi();
   const restored = loadAutosave();
-  if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true });   // a fresh start: a generated valley, its legends first
+  if (!restored) sim({ cmd: 'reset', seed: 1, genesis: true, profile: profileLoad() });   // a fresh start: a generated valley, its legends first
   world = sim({ cmd: 'world' });
   indexNames(world);
   model = buildModel(world);
@@ -2330,6 +2331,7 @@ window.game = {
 <script src="game/arms.js"></script>
 <script src="game/hooks.js"></script>
 <script src="game/legends.js"></script>
+<script src="game/profile.js"></script>
 <script src="game/death.js"></script>
 <script src="game/report.js"></script>
 <script>main().catch((e) => { setStatus('failed: ' + e.message); console.error(e); });</script>

@@ -34,6 +34,7 @@ data['text_bundles'] = {d.name: json.dumps({'lang': d.name, **{f.name[:-5]: json
 # the event cards, joined in file-name order into one JSON array as data_io.cpp does
 data['events'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/events').glob('*.json'))) + ']'
 data['genesis'] = (root / 'data/genesis.json').read_text()   # v0.4 world (S2)
+data["endings"] = (root / "data/endings.json").read_text()   # item 04
 # item 14: the pattern bank joined as data_io.cpp does, and the dry-run base rates
 data['patterns'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/patterns').glob('*.json')) if p.name != 'base_rates.json') + ']'
 data['base_rates'] = (root / 'data/patterns/base_rates.json').read_text()

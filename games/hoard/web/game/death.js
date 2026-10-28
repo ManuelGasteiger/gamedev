@@ -46,6 +46,7 @@ function lifeHighlights() {
 function showDeath(info) {
   play.dead = true;
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage unavailable */ }
+  profileStore();   // item 04: the death report's rumors and a Myth's legend
   if (typeof closeGrowth === 'function') closeGrowth();
   $('lair').classList.add('hidden');
   $('wake').classList.add('hidden');
@@ -55,11 +56,13 @@ function showDeath(info) {
   const life = g ? Object.entries(g).filter(([, v]) => v >= 0.5).map(([k, v]) => `${capFirst(k)} ${Math.floor(v)}`).join(', ') : `size ${fmt(d.size, 2)}`;
   const talents = (d.talents ?? []).map((id) => (typeof talentById === 'function' ? talentById(id)?.name : '') || id.replace(/_/g, ' '));
   const born = world.genesis?.hatched_year || play.ages[0]?.from || 0;
+  const myth = sim({ cmd: 'world' }).myth;   // item 04: whether this death enters the next world's pre-history
   if (!DEATH.el) { DEATH.el = document.createElement('div'); DEATH.el.id = 'death'; DEATH.el.className = 'overlay hidden'; document.body.appendChild(DEATH.el); }
   DEATH.el.innerHTML = `<article class="tomb">
     <div class="kicker">year ${info.year} · age ${play.age} · ${Math.max(0, info.year - born)} years under the mountain</div>
     <h2>The line of the dragon ends</h2>
     <p class="how">${escapeHtml(deathLine(info))}</p>
+    ${myth?.text ? `<p class="myth${myth.qualifies ? ' yes' : ''}">${escapeHtml(myth.text)}</p>` : ''}
     <p class="life">You grew to ${escapeHtml(life || 'nothing much')}${talents.length ? `; you had ${escapeHtml(talents.join(', '))}` : ''}.</p>
     ${biggestHits().length ? `<h3>The worst of it</h3><ol class="hl hits">${biggestHits().map((h) => `<li><span class="y">${h.year}</span>${escapeHtml(hitText(h))}</li>`).join('')}</ol>` : ''}
     <h3>Your life</h3><ol class="hl">${lifeHighlights().map((h) => `<li><span class="y">${h.year}</span>${escapeHtml(h.text)}</li>`).join('')}</ol>
@@ -83,6 +86,8 @@ addStyle(`
   #death p { font-size: 17px; line-height: 1.6; margin: 0 auto 14px; max-width: 34em; }
   #death p.how { color: #f4eee0; }
   #death p.life { color: #c9bfae; font-size: 15.5px; }
+  #death p.myth { color: #9c8f7a; font-size: 15px; font-style: italic; }
+  #death p.myth.yes { color: #e8c98a; }
   #death ol.hl { list-style: none; padding: 12px 0; margin: 10px auto 16px; max-width: 34em; text-align: left; border-top: 1px solid #3a2a26; border-bottom: 1px solid #3a2a26; font-size: 14.5px; line-height: 1.5; color: #b8ad9a; }
   #death ol.hl li { display: grid; grid-template-columns: 52px minmax(0, 1fr); margin-bottom: 4px; }
   #death ol.hl .y { color: #8a6a5e; font: 12px/1.9 ui-monospace, monospace; }
