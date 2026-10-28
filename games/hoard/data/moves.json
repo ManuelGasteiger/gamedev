@@ -102,7 +102,7 @@
       "lore_min": 8,
       "guise_opens": true,
       "weights": { "curious": 3, "proud": 1, "greedy": 1, "ambitious": 3, "devout": -3, "honest": 0, "craven": -2, "vengeful": -2 },
-      "threshold": 4,
+      "threshold": 3,
       "mods": { "awe": 4, "debt": 3 },
       "accept": { "ev": "courted", "sev": 2, "ax": { "awe": 1 } }
     }

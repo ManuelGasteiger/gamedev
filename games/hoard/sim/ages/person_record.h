@@ -25,7 +25,7 @@ PersonMemory memory_entry(const World& w, const Params& p, const Person& x, cons
 void remember_dragon(const Params& p, Person& x, const PersonMemory& m);
 void add_rel(Person& x, const std::string& to, const std::string& kind, int weight);
 
-// a dragon act on a court: its tracked people who saw it remember it (witness)
+// a dragon act on a court: its tracked people saw it (witness), the tracked people of the witness courts heard of it (told)
 void witness_act(World& w, const Params& p, const Faction& f, const Act& a, double m, int act_index);
 // the dead's memory of the dragon passes to the children: 50 % of negative, 25 % of positive strength
 void inherit_memory(World& w, const Params& p, const Person& dead);

@@ -143,8 +143,9 @@ void witness_act(World& w, const Params& p, const Faction& f, const Act& a, doub
     MemoryRow r = row->second;
     r.sev = 1 + (m >= p.moves.sev2_at ? 1 : 0) + (m >= p.moves.sev3_at ? 1 : 0);
     for (auto& x : w.people) {
-        if (x.faction != f.id || has_tag(x.tags, "hostage") || !tracked(w, p, x)) continue;
-        remember_dragon(p, x, memory_entry(w, p, x, r, "witness", act_index));
+        bool owner = x.faction == f.id;
+        if ((!owner && !contains(a.witnesses, x.faction)) || has_tag(x.tags, "hostage") || !tracked(w, p, x)) continue;
+        remember_dragon(p, x, memory_entry(w, p, x, r, owner ? "witness" : "told", act_index));
     }
 }
 
