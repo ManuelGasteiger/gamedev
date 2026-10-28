@@ -1,0 +1,15 @@
+{
+  "note": "Item 04: the difficulty ladder (research-meta-progression.md section 4), data only. Each modifier changes a sim parameter, never the dragon. Not read by the sim yet; `param` names the constant or rule each rank would change.",
+  "ladder": ["short_memory", "quick_study", "no_premonition", "hungry_hoard", "early_orders", "few_wakings", "sparse_dreams", "blind_prophecy", "blank_page"],
+  "modifiers": [
+    { "id": "short_memory",   "ranks": 3, "param": "mem.oral_halflife",            "op": "mul", "values": [0.667, 0.5, 0.333], "extra": "burning a library demotes all tiers" },
+    { "id": "quick_study",    "ranks": 3, "param": "mem.research",                 "op": "mul", "values": [1.25, 1.5, 1.75] },
+    { "id": "no_premonition", "ranks": 1, "param": "briefing.telegraphs",          "op": "set", "values": [0], "extra": "the briefing shows aftermath only" },
+    { "id": "hungry_hoard",   "ranks": 2, "param": "dragon.digest_share",          "op": "mul", "values": [1.25, 1.5] },
+    { "id": "early_orders",   "ranks": 2, "param": "mem.slayer_dread",             "op": "add", "values": [-0.1, -0.2], "extra": "slayer orders form one stage earlier" },
+    { "id": "few_wakings",    "ranks": 2, "param": "run.wake_cap",                 "op": "set", "values": [40, 30], "extra": "from 50" },
+    { "id": "sparse_dreams",  "ranks": 1, "param": "chronicle.level_cap",          "op": "set", "values": [0], "extra": "no kept historian" },
+    { "id": "blind_prophecy", "ranks": 1, "param": "prophecy.ending_noun",         "op": "set", "values": [0] },
+    { "id": "blank_page",     "ranks": 1, "param": "start_page.what_the_world_remembers", "op": "set", "values": [0] }
+  ]
+}

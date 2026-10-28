@@ -25,6 +25,7 @@ void rule_land(World&, const Params&);
 void rule_oaths(World&, const Params&);
 void rule_shocks(World&, const Params&);
 void rule_cards(World&, const Params&);      // event cards of data/events (doc section 10, catalogue rule 14)
+void rule_endings(World&, const Params&);    // item 04: data/endings.json, after the cards
 void rule_people(World&, const Params&);     // 17.2
 void rule_threads(World&, const Params&);    // 17.8: closes threads whose arc ended this step
 void rule_chronicle(World&, const Params&);

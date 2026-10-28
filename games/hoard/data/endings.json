@@ -1,0 +1,117 @@
+{
+  "note": "Item 04. Endings are condition sets in the card trigger language (sim/ages/cards.h) plus `count` and `within_wakings` (item 04). A condition is met when its `when` holds; with `with_previous` it is matched together with the conditions before it, so they bind the same court. It must hold for hold_years; a gap longer than lapse_years resets it. `todo` marks placeholders that item 12 replaces. Rumor routes: death_report (closest conditions at a death), prophecy (a line of the hatching prophecy encodes it), legend (a woven legend ended this way), event (a briefing told one of these event kinds).",
+  "epilogue_decades": 50,
+  "myth": { "deeds": 5, "verdict_courts": "all" },
+  "legends": {
+    "weave_chance": 0.5,
+    "max_active": 3,
+    "years": [-900, -200],
+    "events": [1, 3],
+    "tier_decades": { "oral": 30, "written": 100, "monumental": 0 },
+    "weaves": [
+      { "kind": "legend_worship",  "verdict": "awe",   "on": "court",  "tag": "worships_old_dragon" },
+      { "kind": "legend_fear",     "verdict": "dread", "on": "court",  "tag": "fears_old_dragon" },
+      { "kind": "legend_order",    "verdict": "slain", "on": "court",  "tag": "order_of_old_dragon" },
+      { "kind": "legend_monument", "verdict": "any",   "on": "region", "tag": "old_dragon_monument" },
+      { "kind": "legend_gap",      "verdict": "any",   "on": "court",  "tag": "library_gap" }
+    ]
+  },
+  "prophecy": {
+    "ending": "ascension",
+    "known_tag": "prophecy_known",
+    "book_tag": "prophecy_book",
+    "years_before_hatching": [100, 300],
+    "lines": [
+      { "key": "prophecy.loved_by_peoples", "cond": "peoples", "variants": 2, "slots": { "n": "4", "races": "3" } },
+      { "key": "prophecy.house_of_stone",   "cond": "temples", "variants": 2, "slots": { "n": "4", "years": "100" } },
+      { "key": "prophecy.old_craft",        "cond": "craft",   "variants": 2, "slots": {} },
+      { "key": "prophecy.one_voice",        "cond": "voice",   "variants": 2, "slots": { "races": "3" } }
+    ]
+  },
+  "endings": [
+    {
+      "id": "mortality", "enabled": true, "exit_kind": "mortality",
+      "offer_text_key": "endings.mortality.offer", "epilogue_text_key": "endings.mortality.epilogue",
+      "conditions": [
+        { "id": "voice", "hold_years": 10, "lapse_years": 0,
+          "todo": "No witch or god_voice tag exists; a living sage or priest of the court stands in.",
+          "when": [ { "find": "faction", "bind": "court" }, { "field": "awe", "on": "court", "gte": 0.4 },
+                    { "any": [ { "person": "sage", "on": "court" }, { "person": "priest", "on": "court" } ] } ],
+          "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["person_rose"] }, { "via": "event", "kinds": ["arrival"] } ] },
+        { "id": "audience", "hold_years": 10, "lapse_years": 0, "with_previous": true,
+          "when": [ { "event": ["act_receive", "act_broker"], "on": "court", "self_as": "subject", "within_wakings": 2 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["arrival_answered"] }, { "via": "event", "kinds": ["hook_resolved"] } ] }
+      ]
+    },
+    {
+      "id": "myth", "enabled": true, "exit_kind": "",
+      "offer_text_key": "", "epilogue_text_key": "endings.myth.epilogue",
+      "conditions": [
+        { "id": "reign", "hold_years": 0, "lapse_years": 0,
+          "when": [ { "field": "reign", "on": "dragon", "gte": 500 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "legend" }, { "via": "event", "kinds": ["dragon_moulted"] } ] },
+        { "id": "monumental", "hold_years": 0, "lapse_years": 0,
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "monumental", "on": "court", "eq": 1 } ], "gte": 2 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "legend" }, { "via": "event", "kinds": ["dragon_temple_raised", "fire_memorial", "slayer_memorial"] } ] },
+        { "id": "legends", "hold_years": 0, "lapse_years": 0,
+          "when": [ { "field": "legends", "on": "dragon", "gte": 3 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "legend" }, { "via": "event", "kinds": ["prophecy", "prophecy_fulfilled"] } ] }
+      ]
+    },
+    {
+      "id": "ascension", "enabled": true, "exit_kind": "ascension",
+      "offer_text_key": "endings.ascension.offer", "epilogue_text_key": "endings.ascension.epilogue",
+      "conditions": [
+        { "id": "peoples", "hold_years": 150, "lapse_years": 30,
+          "todo": "TODO(item12): dragon-cult share >= 0.4 (>= 0.5 in two) and cult fervor >= 0.5 replace faith >= 0.4 and faith >= 0.5.",
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 } ], "gte": 4, "races_gte": 3 },
+                    { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.5 } ], "gte": 2 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "prophecy" }, { "via": "event", "kinds": ["prophecy_cult", "prophecy_schism"] } ] },
+        { "id": "temples", "hold_years": 150, "lapse_years": 30,
+          "todo": "TODO(item12): a consecrated dragon_temple; until then a dragon_temple monument.",
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 }, { "field": "temples", "on": "court", "gte": 1 } ], "gte": 4 },
+                    { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 }, { "field": "temple_years", "on": "court", "gte": 100 } ], "gte": 3 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "prophecy" }, { "via": "event", "kinds": ["dragon_temple_raised", "prophecy_cult"] } ] },
+        { "id": "craft", "hold_years": 150, "lapse_years": 30,
+          "when": [ { "any": [ { "field": "magic", "on": "world", "gte": 0.6 },
+                               { "count": "faction", "bind": "court", "where": [ { "field": "era", "on": "court", "gte": 4 } ], "gte": 1 } ] } ],
+          "rumors": [ { "via": "death_report" }, { "via": "prophecy" }, { "via": "event", "kinds": ["age_of_magic", "colleges_of_magic", "wild_surge"] } ] },
+        { "id": "voice", "hold_years": 150, "lapse_years": 30,
+          "todo": "TODO(item12): a high priest of the cult recognised by courts covering 3 races, the office outliving one incumbent; until then a living priest in a cult court that has buried a priest before.",
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 }, { "person": "priest", "on": "court" },
+                                                                     { "event": "person_died", "on": "court", "self_as": "object", "event_tag": "priest", "within_years": 3000 } ], "gte": 1 },
+                    { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 } ], "gte": 1, "races_gte": 3 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "prophecy" }, { "via": "event", "kinds": ["prophecy_cult"] } ] },
+        { "id": "mild", "hold_years": 150, "lapse_years": 30,
+          "todo": "TODO(item12): none of them persecuting the cult.",
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 } ], "gte": 4, "mean": "dread", "mean_lte": 0.5 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["prophecy_slayers"] }, { "via": "event", "kinds": ["prophecy_schism"] } ] },
+        { "id": "strong", "hold_years": 150, "lapse_years": 30,
+          "when": [ { "count": "faction", "bind": "court", "where": [ { "field": "awe", "on": "court", "gte": 0.6 }, { "field": "faith", "on": "court", "gte": 0.4 }, { "field": "era", "on": "court", "gte": 2 } ], "gte": 3 },
+                    { "any": [ { "count": "faction", "bind": "court", "where": [ { "tag": "slayers_ready", "on": "court" } ], "gte": 1 },
+                               { "count": "faction", "bind": "court", "where": [ { "field": "era", "on": "court", "gte": 2 }, { "field": "anti_dragon", "on": "court", "gte": 4 } ], "gte": 1 } ] } ],
+          "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["slayers_ready", "slayers_founded"] }, { "via": "event", "kinds": ["prophecy_slayers"] } ] },
+        { "id": "dominion", "hold_years": 150, "lapse_years": 30,
+          "todo": "TODO(item12): 4 consecrate acts; the act does not exist yet, so give and miracle stand in.",
+          "when": [ { "field": "growth:dominion", "on": "dragon", "gte": 30 }, { "field": "acts:give|miracle|consecrate", "on": "dragon", "gte": 4 } ],
+          "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["rank_gained"] }, { "via": "event", "kinds": ["prophecy_fulfilled"] } ] }
+      ]
+    },
+    { "id": "lichdom", "enabled": false, "exit_kind": "lichdom", "sketch": "an undead court offers unlife",
+      "conditions": [ { "id": "undead_court", "hold_years": 0, "lapse_years": 0, "when": [ { "find": "faction", "tag": "undead", "bind": "court" } ] } ] },
+    { "id": "portal", "enabled": false, "exit_kind": "portal", "sketch": "a leaving people with an oath held for ages",
+      "conditions": [ { "id": "leaving", "hold_years": 300, "lapse_years": 0, "when": [ { "find": "faction", "race": "elf", "bind": "court" }, { "tag": "fading", "on": "court" } ] } ] },
+    { "id": "mountain", "enabled": false, "exit_kind": "mountain", "sketch": "size past a threshold and a thousand-year sleep",
+      "conditions": [ { "id": "sleeper", "hold_years": 0, "lapse_years": 0, "when": [ { "field": "asleep_years", "on": "dragon", "gte": 1000 }, { "field": "size", "on": "dragon", "gte": 5 } ] } ] },
+    { "id": "brood", "enabled": false, "exit_kind": "brood", "sketch": "an egg found or made",
+      "conditions": [ { "id": "egg", "hold_years": 0, "lapse_years": 0, "when": [ { "tag": "egg_found", "on": "dragon" } ] } ] },
+    { "id": "emperor", "enabled": false, "exit_kind": "emperor", "sketch": "every court sworn for ages",
+      "conditions": [ { "id": "sworn", "hold_years": 200, "lapse_years": 0, "when": [ { "find": "faction", "tag": "dragon_raised", "bind": "court" } ] } ] },
+    { "id": "last_flame", "enabled": false, "exit_kind": "last_flame", "sketch": "every race gone",
+      "conditions": [ { "id": "empty", "hold_years": 0, "lapse_years": 0, "when": [ { "field": "factions", "on": "world", "eq": 0 } ] } ] },
+    { "id": "scholar", "enabled": false, "exit_kind": "scholar", "sketch": "Arcana and Lore reveal where the others went",
+      "conditions": [ { "id": "lore", "hold_years": 0, "lapse_years": 0, "when": [ { "field": "growth:lore", "on": "dragon", "gte": 100 }, { "field": "growth:arcana", "on": "dragon", "gte": 100 } ] } ] },
+    { "id": "sun_eater", "enabled": false, "exit_kind": "sun_eater", "sketch": "cult, artifact, comet",
+      "conditions": [ { "id": "comet", "hold_years": 0, "lapse_years": 0, "when": [ { "tag": "comet", "on": "world" } ] } ] }
+  ]
+}

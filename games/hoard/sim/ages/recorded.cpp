@@ -1,6 +1,7 @@
 #include "record.h"
 #include "unrecorded.h"
 #include "arrivals.h"
+#include "endings.h"
 
 namespace ages {
 
@@ -71,6 +72,13 @@ bool hunt(World& w, const Params& p, const std::string& region, std::string& rea
     RecordScope rec(w);
     bool ok = hunt_unrecorded(w, p, region, reason);
     if (ok) rec.done("hunt", args_of({{"region", region}}));
+    return ok;
+}
+
+bool exit_run(World& w, const Params& p, const std::string& kind, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = exit_unrecorded(w, p, kind, reason);
+    if (ok) rec.done("exit", args_of({{"kind", kind}}));
     return ok;
 }
 

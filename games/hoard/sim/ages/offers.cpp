@@ -4,6 +4,7 @@
 #include "unrecorded.h"
 #include "ages.h"
 #include "arrivals.h"
+#include "endings.h"
 #include "oaths.h"
 #include "rules/rules.h"
 #include "world_util.h"
@@ -177,7 +178,6 @@ std::vector<EnvoyDraft> envoy_drafts(const World& w, const Params& p, const Fact
         const Faction* g = match.empty() ? nullptr : find_faction(w, match);
         if (g && affinity(p, f, *g) < c.offer_elope_affinity) { propose("elope", x.id, "escape_marriage"); break; }
     }
-    if (f.era >= c.offer_exit_era && f.faith > c.offer_exit_faith) propose("rite", "", "exit");
     return out;
 }
 
@@ -188,6 +188,7 @@ void generate_offers(World& w, const Params& p) {
         if (a.kind != "envoy") continue;
         if (const Faction* f = find_faction(w, a.court)) add(w, p, *f, a);
     }
+    exit_offers(w, p);   // item 04
 }
 
 // ---- fulfilment and the ledger -------------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 #include "unrecorded.h"
 #include "chronicle.h"
 #include "arrivals.h"
+#include "endings.h"
 #include "hooks.h"
 #include "importance.h"
 #include "offers.h"
@@ -45,6 +46,7 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     const Constants& c = p.c;
     SleepResult res;
     if (dragon_dead(w)) { res.wake_reason = "dragon_slain"; return res; }
+    if (run_ended(w)) { res.wake_reason = "run_ended"; return res; }   // item 04
     if (years < 1) years = 1;
     size_t start = w.chronicle.size();
     std::map<std::string, double> growth_before = w.dragons[kPlayer].growth;
