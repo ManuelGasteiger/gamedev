@@ -1,8 +1,9 @@
 #include <algorithm>
 #include <cmath>
+#include <set>
 #include "chron.h"
+#include "../sift/sift_util.h"
 #include "memory_tiers.h"
-#include "talents.h"
 #include "world_util.h"
 
 namespace ages {
@@ -18,11 +19,6 @@ int died_year(const World& w, const std::string& person) {
 std::string court_in(const std::string& source_id) {
     size_t a = source_id.find(':'), b = source_id.find(':', a + 1);
     return b == std::string::npos ? "" : source_id.substr(b + 1);
-}
-
-int match_in(const std::string& source_id) {
-    size_t a = source_id.find(':');
-    return a == std::string::npos ? 0 : std::atoi(source_id.c_str() + a + 1);
 }
 
 bool held(const World& w, const std::string& id) {
@@ -64,38 +60,41 @@ const Person* historian_now(const World& w) {
 }
 
 bool lore_counterfactual(const World& w, const Params& p) {
-    return historian_now(w) && ranks_of(w.dragons[kPlayer], p.talents, "lore") >= p.c.chron.lore_counterfactual;
+    auto it = w.dragons[kPlayer].growth.find("lore");
+    return historian_now(w) && it != w.dragons[kPlayer].growth.end() && it->second >= p.c.chron.lore_counterfactual;
 }
 
-std::vector<Source> sources_for(const World& w, const Params& p, int match) {
+// brief 05 scope 1: a line about court X is at level 1 when the hoard holds a source about X (its books, or a captive of it)
+std::vector<Source> sources_for(const World& w, const Params& p, int match, int event) {
     std::vector<Source> out;
-    if (!match) return out;
-    for (auto& h : w.dragons[kPlayer].chron.sources) {
-        if (match_in(h.id) != match) continue;
-        Source s = make_source(w, p, match, court_in(h.id));
-        if (!s.medium.empty()) out.push_back(s);
-    }
-    const SiftThread* t = thread_of(w, match);
-    for (auto& id : w.dragons[kPlayer].hostages) {
-        const Person* x = find_person(w, id);
-        if (!x || !t || !in_cast(*t, x->faction)) continue;
-        bool have = false;
-        for (auto& s : out) if (s.court == x->faction) have = true;
-        if (have) continue;
-        Source s = make_source(w, p, match, x->faction);
-        if (!s.medium.empty()) { s.medium = "oral"; s.archetype = "captive"; out.push_back(s); }
+    std::vector<std::string> courts;
+    if (const SiftThread* t = match ? thread_of(w, match) : nullptr) for (auto& kv : t->cast) courts.push_back(kv.second);
+    else if (const Event* e = event > 0 && event < kCompoundBase ? find_event(w, event) : nullptr) courts = {court_of(w, e->subject), court_of(w, e->object)};
+    const Dragon& d = w.dragons[kPlayer];
+    std::set<std::string> seen;
+    for (const std::string& court : courts) {
+        if (!find_faction(w, court) || !seen.insert(court).second) continue;
+        bool book = false, captive = false;
+        for (auto& h : d.chron.sources) if (court_in(h.id) == court) book = true;
+        for (auto& id : d.hostages) if (const Person* x = find_person(w, id)) if (x->faction == court) captive = true;
+        if (!book && !captive) continue;
+        Source s = match ? make_source(w, p, match, court) : make_event_source(w, p, event, court);
+        if (s.medium.empty()) continue;
+        if (book) { s.medium = "written"; s.archetype = "annalist"; s.hedge = 0; }
+        else { s.medium = "oral"; s.archetype = "captive"; }
+        out.push_back(s);
     }
     return out;
 }
 
-int line_level(const World& w, const Params& p, int year, int match) {
+int line_level(const World& w, const Params& p, int year, int match, int event) {
     if (historian_at(w, year)) return lore_counterfactual(w, p) ? 3 : 2;
-    return sources_for(w, p, match).empty() ? 0 : 1;
+    return sources_for(w, p, match, event).empty() ? 0 : 1;
 }
 
 // a take of books carries off the court's written tellings of the threads it was cast in, newest first
 void take_sources(World& w, const Params& p, const Faction& f, double m) {
-    if (memory_tier(f, p.c.mem) != "written" && memory_tier(f, p.c.mem) != "monumental") return;
+    if (!keeps_records(w, f)) return;
     int burned = library_burned(w, f.id);
     std::vector<const SiftThread*> pool;
     for (auto& t : w.sift.threads) {

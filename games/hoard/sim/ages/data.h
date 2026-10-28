@@ -32,7 +32,7 @@ struct MemoryConstants {
 // constants.json "chronicle" (item 05): chronicle levels, sources in the hoard, relics with a voice
 struct RelicKind { std::string id, agenda; std::vector<std::string> races; };
 struct ChronicleConstants {
-    double lore_counterfactual = 25;   // Lore rank for level 3
+    double lore_counterfactual = 25;   // Lore growth points for level 3
     int take_sources = 4;              // sources a full take of books carries off
     double relic_chance = 0.25;        // per take of artifacts, times its magnitude
     int relic_max = 3;

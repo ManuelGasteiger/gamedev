@@ -287,8 +287,8 @@ static std::string source_line(const World& w, const Params& p, const Source& s)
 }
 
 // the sources the line may print: two that disagree, else the best (written before stone before tale)
-static std::vector<Source> shown_sources(const World& w, const Params& p, int match) {
-    std::vector<Source> all = sources_for(w, p, match);
+static std::vector<Source> shown_sources(const World& w, const Params& p, int match, int event) {
+    std::vector<Source> all = sources_for(w, p, match, event);
     auto rank = [](const Source& s) { return s.medium == "written" ? 0 : (s.medium == "monumental" ? 1 : 2); };
     std::stable_sort(all.begin(), all.end(), [&](const Source& a, const Source& b) { return rank(a) < rank(b); });
     for (size_t i = 0; i < all.size(); ++i)
@@ -311,24 +311,31 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
     struct Told { std::string text; int level = 0; bool available = false, shown = false; std::vector<Source> sources; std::string because; };
     auto tell = [&](const SiftLine& l) {
         Told t;
-        t.level = line_level(w, p, year_of(l), l.thread);
+        t.level = line_level(w, p, year_of(l), l.thread, l.event);
         t.text = sift_line_text(w, p, l);
         const Event* e = sift_event(w, l.event);
         if (t.text.empty() && e && e->id >= kCompoundBase && !e->cause.refs.empty()) e = sift_event(w, e->cause.refs.back());
+        auto tell_sources = [&](int match, int event) {
+            t.sources = shown_sources(w, p, match, event);
+            for (auto& s : t.sources) { std::string x = source_line(w, p, s); if (!x.empty()) t.text += " " + x; }
+            t.shown = !t.sources.empty();
+        };
         if (t.text.empty() && e && e->id < kCompoundBase) {
+            if (!l.thread) t.level = line_level(w, p, year_of(l), 0, e->id);
             t.available = !n.cause_clause(*e).empty();
             t.text = n.sentence(*e, t.level >= 2);
-            t.shown = t.available && t.level >= 2;
+            if (t.level == 1) tell_sources(l.thread, e->id);
+            else t.shown = t.available && t.level >= 2;
             return t;
         }
         std::vector<const Event*> refs;
-        for (int id : l.because) if (const Event* x = find_event(w, id)) if (refs.size() < 2) refs.push_back(x);
+        std::set<std::string> told_in_line;   // a cause the line already names is not told twice
+        for (auto& kv : l.params) if (kv.first.rfind("ev:", 0) == 0) told_in_line.insert(kv.second);
+        for (int id : l.because)
+            if (const Event* x = find_event(w, id)) if (refs.size() < 2 && !told_in_line.count(std::to_string(id))) refs.push_back(x);
         t.available = !refs.empty();
-        if (t.level == 1 && l.thread) {
-            t.sources = shown_sources(w, p, l.thread);
-            for (auto& s : t.sources) { std::string x = source_line(w, p, s); if (!x.empty()) t.text += " " + x; }
-            t.shown = !t.sources.empty();
-        } else if (t.level >= 2 && !refs.empty()) {
+        if (t.level == 1) tell_sources(l.thread, l.event);
+        else if (t.level >= 2 && !refs.empty()) {
             std::map<std::string, std::string> v = {{"ref", n.brief(*refs[0])}};
             if (refs.size() > 1) v["ref2"] = n.brief(*refs[1]);
             t.because = chron_text(w, p, refs.size() > 1 ? "chron.because2" : "chron.because", {}, v);
@@ -350,7 +357,7 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
         if (l.thread) j["sift_thread"] = l.thread;
         json kept = json::array();
         for (auto& s : t.sources) {   // only what the hoard holds (or a captive knows) is shown
-            std::string sid = "src:" + std::to_string(s.match) + ":" + s.court;
+            std::string sid = "src:" + std::to_string(s.match) + ":" + s.court;   // a minus match is one event
             kept.push_back(sid);
             bool disputed = t.sources.size() > 1;
             made.push_back(s);

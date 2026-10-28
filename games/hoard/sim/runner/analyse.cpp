@@ -98,9 +98,7 @@ json chronicle_shares(const World& w, const Params& p) {
         ChronicleState& cs = c.dragons[kPlayer].chron;
         cs = ChronicleState();
         if (level == 0) c.dragons[kPlayer].hostages.clear();
-        if (level == 1)
-            for (auto& t : c.sift.threads)
-                for (auto& kv : t.cast) if (find_faction(c, kv.second)) cs.sources.push_back({"src:" + std::to_string(t.id) + ":" + kv.second, c.year, "taken"});
+        if (level == 1) for (auto& f : c.factions) cs.sources.push_back({"src:0:" + f.id, c.year, "taken"});
         if (level == 2) cs.historians.push_back({"", -1000000, -1});
         json b = json::parse(briefing_json(c, p, c.sleep_started), nullptr, false);
         int lines = 0, available = 0, shown = 0;

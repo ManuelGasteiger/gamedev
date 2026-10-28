@@ -13,8 +13,8 @@ namespace ages {
 bool historian_at(const World& w, int year);
 const Person* historian_now(const World& w);
 bool lore_counterfactual(const World& w, const Params& p);
-std::vector<Source> sources_for(const World& w, const Params& p, int match);   // held, plus what the captives of a court know of it
-int line_level(const World& w, const Params& p, int year, int match);
+std::vector<Source> sources_for(const World& w, const Params& p, int match, int event);   // the tellings of courts the hoard holds books of or a captive from
+int line_level(const World& w, const Params& p, int year, int match, int event);
 
 // sources
 void take_sources(World& w, const Params& p, const Faction& f, double m);

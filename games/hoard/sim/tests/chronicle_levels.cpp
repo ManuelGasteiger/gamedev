@@ -33,7 +33,8 @@ int main() {
     w.sift = SiftState();
     w.year = 90;
     emit(w, "sleep_begin", "dragon", "", 60, {}, {}, "", false);
-    int a = at(w, p, 100, "act_burn", "aldmere", "east_vale", 0.5);
+    int war = at(w, p, 95, "war_started", "aldmere", "vessary");
+    int a = at(w, p, 100, "act_burn", "aldmere", "east_vale", 0.5, {war});
     int b = at(w, p, 120, "slayers_founded", "aldmere", "", 0, {a});
     at(w, p, 150, "slay_attempt_failed", "aldmere", "", 0.1, {b});
     CHECK(!w.sift.threads.empty(), "the story was matched");
