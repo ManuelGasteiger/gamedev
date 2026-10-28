@@ -8,6 +8,7 @@
 #include "core/detmath.h"
 #include "oaths.h"
 #include "offers.h"
+#include "person_record.h"
 #include "reaction_lines.h"
 #include "rules/coalitions.h"
 #include "rules/rules.h"
@@ -299,6 +300,7 @@ std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const
             notes.push_back(n);
         } else notes.push_back(react_to(w, p, *f, act, m, act_index));
         witnesses(w, p, act, *f, m, act_index, notes);
+        witness_act(w, p, *f, act, m, act_index);   // item 07
         note_lair_sight(w, p, act);   // item 06
         emit(w, "act_" + act.type, act.target, act.region, m, act_tags(act));
         note_act(w, p, act, m);

@@ -69,13 +69,15 @@ void secrets_json(const World& w, json& j) {
     if (w.secrets.empty()) return;
     j["secrets"] = json::array();
     for (auto& s : w.secrets)
-        j["secrets"].push_back({{"holder", s.holder}, {"about", s.about}, {"kind", s.kind}, {"year", s.year}, {"discovery_per_decade", s.discovery_per_decade}});
+        j["secrets"].push_back({{"holder", s.holder}, {"about", s.about}, {"kind", s.kind}, {"year", s.year}, {"exposed", s.exposed},
+                                {"discovery_per_decade", s.discovery_per_decade}, {"discontent", s.discontent}});
 }
 
 void secrets_from(const json& j, World& w) {
     if (!j.contains("secrets")) return;
     for (auto& v : j["secrets"])
-        w.secrets.push_back({v.value("holder", ""), v.value("about", ""), v.value("kind", ""), v.value("year", 0), v.value("discovery_per_decade", 0.0)});
+        w.secrets.push_back({v.value("holder", ""), v.value("about", ""), v.value("kind", ""), v.value("year", 0), v.value("exposed", 0),
+                             v.value("discovery_per_decade", 0.0), v.value("discontent", 0.0)});
 }
 
 }

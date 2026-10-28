@@ -1,6 +1,7 @@
 #include "names.h"
 #include <cctype>
 #include <cstdio>
+#include "person_record.h"
 #include "world_util.h"
 
 namespace ages {
@@ -83,6 +84,7 @@ Person new_person(World& w, const Params& p, const std::string& race, const std:
     person.traits.cunning = w.rng.uniform();
     std::string ep = epithet_for(p, person);
     if (!ep.empty()) person.name += " " + ep;
+    assign_traits(w, p, person);   // item 07
     return person;
 }
 

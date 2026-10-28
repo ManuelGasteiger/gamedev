@@ -59,6 +59,9 @@ add_library(ages STATIC
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
   sim/ages/person_json.cpp
+  sim/ages/move_data.cpp
+  sim/ages/moves.cpp
+  sim/ages/person_record.cpp
   sim/ages/sleep.cpp
   sim/ages/spells.cpp
   sim/ages/step.cpp
@@ -86,6 +89,9 @@ add_library(ages STATIC
   sim/ages/rules/people.cpp
   sim/ages/rules/people_rise.cpp
   sim/ages/rules/hostages.cpp
+  sim/ages/rules/person_memory.cpp
+  sim/ages/rules/secrets.cpp
+  sim/ages/rules/inquisition.cpp
   sim/ages/rules/threads.cpp
   sim/ages/rules/chronicle.cpp
   # v0.4 (S1)
@@ -186,6 +192,8 @@ ages_test(arrival_gating fast)
 ages_test(arrival_cooldown fast)
 ages_test(sift_acceptor fast)
 ages_test(sift_budget fast)
+ages_test(move_scores fast)
+ages_test(princess_chain fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)

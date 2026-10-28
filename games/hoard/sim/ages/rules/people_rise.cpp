@@ -110,7 +110,7 @@ void heroes(World& w, const Params& p) {
     for (const Event& ev : events_this_step(w)) {
         if (ev.kind != "slay_attempt_failed" || ev.object.empty()) continue;
         Person* lead = find_person(w, ev.object);
-        if (lead) retire(w, *lead, "slain_by_dragon", because("slay_attempt_failed", {ev.id}));
+        if (lead) retire(w, p, *lead, "slain_by_dragon", because("slay_attempt_failed", {ev.id}));
     }
     // usurpation: a bold hero takes a weak throne and the realm rallies to the new line
     for (auto& f : w.factions) {
@@ -120,7 +120,7 @@ void heroes(World& w, const Params& p) {
         if (!hero || !w.rng.chance(c.hero_usurp_chance * dts(w, c))) continue;
         std::string hid = hero->id;
         int deposed = 0;
-        if (Person* old = ruler_of(w, f.id)) deposed = retire(w, *old, "deposed", because("usurped", {}, {{"cohesion", f.cohesion}}));
+        if (Person* old = ruler_of(w, f.id)) deposed = retire(w, p, *old, "deposed", because("usurped", {}, {{"cohesion", f.cohesion}}));
         Person* h = find_person(w, hid);
         h->tags.insert("usurper");
         f.ruler.reigned = 0;

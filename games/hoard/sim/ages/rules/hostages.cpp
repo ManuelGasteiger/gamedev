@@ -1,4 +1,6 @@
 #include "people_life.h"
+#include "../moves.h"
+#include "../person_record.h"
 #include "../world_util.h"
 
 // 17.2: hostages are people in the lair. The heir (else the ruler) is taken; a ruler taken leaves the throne to the
@@ -39,6 +41,7 @@ Person* pick_hostage(World& w, const std::string& faction) {
 void take_hostage_person(World& w, const Params& p, Person& person, bool consent, const Cause& cause) {
     person.tags.insert("hostage");
     person.hostage_since = w.year;
+    if (p.moves.rel.count("hostage_of")) add_rel(person, "dragon", "hostage_of", p.moves.rel.at("hostage_of"));   // item 07
     if (!contains(w.dragons[kPlayer].hostages, person.id)) {
         w.dragons[kPlayer].hostages.push_back(person.id);
         std::sort(w.dragons[kPlayer].hostages.begin(), w.dragons[kPlayer].hostages.end());
@@ -68,6 +71,7 @@ void release_hostage_person(World& w, const Params& p, const std::string& factio
         if (x->role == "heir" && heir_of(w, faction) && heir_of(w, faction)->id != id) { x->role = "hero"; x->tags.insert("claimant"); }
         meet(w, id, "released", p.c.known_release);
         emit(w, "hostage_released", id, faction, static_cast<double>(w.year - x->hostage_since), {x->role}, cause);
+        read_release(w, p, id);   // item 07
         return;
     }
 }

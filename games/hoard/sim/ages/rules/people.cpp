@@ -1,5 +1,6 @@
 #include "people_life.h"
 #include "../names.h"
+#include "../person_record.h"
 #include "../world_util.h"
 
 // 17.2: named mortals with race lifespans (races.json "person"). A ruler dies of age or when the reign counter of the
@@ -46,7 +47,7 @@ static bool old(const Params& p, const Person& x, int year) {
 Person* ruler_of(World& w, const std::string& faction) { return find_person_role(w, faction, "ruler"); }
 Person* heir_of(World& w, const std::string& faction) { return find_person_role(w, faction, "heir"); }
 
-static void bury(World& w, const Person& person) {
+static void bury(World& w, const Params& p, const Person& person) {
     DeadPerson d;
     d.id = person.id;
     d.name = person.name;
@@ -58,14 +59,15 @@ static void bury(World& w, const Person& person) {
     d.died = w.year;
     w.dead_people.push_back(d);
     if (Known* k = find_known(w, person.id)) k->tags.insert("dead");
+    inherit_memory(w, p, person);   // item 07
     erase_value(w.dragons[kPlayer].hostages, person.id);
     std::string id = person.id;
     w.people.erase(std::remove_if(w.people.begin(), w.people.end(), [&](const Person& x) { return x.id == id; }), w.people.end());
 }
 
-int retire(World& w, Person person, const std::string& reason, const Cause& cause) {
+int retire(World& w, const Params& p, Person person, const std::string& reason, const Cause& cause) {
     int ev = emit(w, "person_died", person.id, person.faction, 0, {reason, person.role}, cause);
-    bury(w, person);
+    bury(w, p, person);
     return ev;
 }
 
@@ -90,6 +92,7 @@ static void make_heir(World& w, const Params& p, Faction& f, const Cause& cause)
     heir.born = std::min(w.year, std::max(born, w.year - static_cast<int>(life_of(p, heir.race).generation)));
     heir.dies = natural_death(w, p, heir);
     betroth(w, p, f, heir);
+    if (!p.moves.rel.empty()) add_rel(heir, ruler->id, "parent", p.moves.rel.count("parent") ? p.moves.rel.at("parent") : 0);   // item 07
     add_person(w, heir);
     emit(w, "person_rose", heir.id, f.id, 0, {"heir"}, cause);
 }
@@ -134,7 +137,7 @@ static void successions(World& w, const Params& p) {
         bool warlord = f.ruler.cls == "warlord";
         if (!warlord && !old(p, *ruler, w.year)) continue;
         Person gone = *ruler;
-        int death = retire(w, gone, warlord ? "warlord" : "old_age", because(warlord ? "warlord_death" : "old_age", {}, {{"age", static_cast<double>(w.year - gone.born)}}));
+        int death = retire(w, p, gone, warlord ? "warlord" : "old_age", because(warlord ? "warlord_death" : "old_age", {}, {{"age", static_cast<double>(w.year - gone.born)}}));
         succeed(w, p, f, death);
     }
 }
@@ -159,8 +162,8 @@ static void orphans(World& w, const Params& p) {
             Person* x = find_person(w, id);
             if (!x) continue;
             if (has_tag(x->tags, "hostage")) { x->faction = target; continue; }
-            if (target.empty()) { retire(w, *x, "realm_fell", because("faction_destroyed", {cause_id})); continue; }
-            if (x->role == "ruler") { retire(w, *x, "deposed", because("collapse", {cause_id})); continue; }
+            if (target.empty()) { retire(w, p, *x, "realm_fell", because("faction_destroyed", {cause_id})); continue; }
+            if (x->role == "ruler") { retire(w, p, *x, "deposed", because("collapse", {cause_id})); continue; }
             x->faction = target;
             if (x->role == "heir") {
                 Faction* t = find_faction(w, target);
@@ -180,7 +183,7 @@ static void lifespans(World& w, const Params& p) {
         Person* x = find_person(w, id);
         if (!x) continue;
         Person gone = *x;
-        int death = retire(w, gone, "old_age", because("old_age", {}, {{"age", static_cast<double>(w.year - gone.born)}}));
+        int death = retire(w, p, gone, "old_age", because("old_age", {}, {{"age", static_cast<double>(w.year - gone.born)}}));
         Faction* f = gone.role == "ruler" ? find_faction(w, gone.faction) : nullptr;
         if (f) succeed(w, p, *f, death);
     }
@@ -205,8 +208,17 @@ static void witness(World& w) {
 using namespace lives;
 
 void kill_person_now(World& w, const Params& p, const std::string& id, const std::string& reason, const Cause& cause) {
-    (void)p;
-    if (Person* person = find_person(w, id)) retire(w, *person, reason, cause);
+    if (Person* person = find_person(w, id)) retire(w, p, *person, reason, cause);
+}
+
+// item 07: a person brought down by their court (the inquisition's purge); a ruler is succeeded at once
+void fall_person(World& w, const Params& p, const std::string& id, const std::string& reason, const Cause& cause) {
+    Person* x = find_person(w, id);
+    if (!x) return;
+    Person gone = *x;
+    int death = retire(w, p, gone, reason, cause);
+    if (gone.role != "ruler") return;
+    if (Faction* f = find_faction(w, gone.faction)) succeed(w, p, *f, death);
 }
 
 void rule_people(World& w, const Params& p) {
@@ -241,7 +253,7 @@ Person new_adult(World& w, const Params& p, const std::string& race, const std::
 void crown_person(World& w, const Params& p, Faction& f, const std::string& id, const std::string& how, const Cause& cause) {
     Person* x = find_person(w, id);
     if (!x) return;
-    if (Person* old = ruler_of(w, f.id)) if (old->id != id) retire(w, *old, "deposed", cause);
+    if (Person* old = ruler_of(w, f.id)) if (old->id != id) retire(w, p, *old, "deposed", cause);
     x = find_person(w, id);
     if (!x) return;
     x->faction = f.id;
