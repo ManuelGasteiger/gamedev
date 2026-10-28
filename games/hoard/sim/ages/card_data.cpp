@@ -23,7 +23,7 @@ std::vector<std::string> strings(const json& v) {
 }
 
 // checked in this order: a let, find or person condition also carries "field" or "tag" keys
-const char* const kPredTypes[] = {"any", "let", "find", "person", "event", "var", "adjacent", "at_war", "lineage", "field", "tag"};
+const char* const kPredTypes[] = {"count", "any", "let", "find", "person", "event", "var", "adjacent", "at_war", "lineage", "field", "tag"};
 
 bool pred_from(const json& j, CardPred& p, std::string& err);
 
@@ -41,6 +41,7 @@ bool pred_from(const json& j, CardPred& p, std::string& err) {
     for (const char* t : kPredTypes) if (j.contains(t)) { p.type = t; break; }
     if (p.type.empty()) { err = "card condition without a type: " + j.dump(); return false; }
     if (p.type == "any") return preds_from(j["any"], p.any, err);
+    if (p.type == "count" && j.contains("where") && !preds_from(j["where"], p.where, err)) return false;   // item 04
     if (p.type == "event") p.kinds = strings(j["event"]);
     else if (j[p.type].is_string()) p.name = j[p.type].get<std::string>();
     get(j, "on", p.on);
@@ -67,6 +68,10 @@ bool pred_from(const json& j, CardPred& p, std::string& err) {
     get(j, "race", p.race);
     if (p.type == "let") get(j, "field", p.str);
     get(j, "this_sleep", p.this_sleep);   // v0.4 hooks (S3)
+    get(j, "within_wakings", p.within_wakings);   // item 04
+    get(j, "races_gte", p.races_min);
+    get(j, "mean", p.mean);
+    get(j, "mean_lte", p.mean_max);
     for (const char* op : {"lt", "lte", "gt", "gte", "eq", "ne"})
         if (j.contains(op)) {
             p.op = op;
@@ -139,6 +144,7 @@ bool card_from(const json& j, CardDef& c, std::string& err) {
     get(j, "subject", c.subject);
     get(j, "major", c.major);
     get(j, "needs_dragon", c.needs_dragon);
+    get(j, "keyed", c.keyed);   // item 04
     return true;
 }
 

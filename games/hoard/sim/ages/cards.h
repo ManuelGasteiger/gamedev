@@ -20,6 +20,9 @@ namespace ages {
 //   var       {"var": "other", "eq": "dragon"}   (an unbound variable reads as "")
 //   let       {"let": "arg", "field": "race", "on": "self"}
 //   any       {"any": [ ... ]}
+//   count     {"count": "faction", "bind": "court", "where": [ ... ], "gte": 4, "races_gte": 3, "mean": "dread", "mean_lte": 0.5}
+//             (item 04: the courts where `where` holds with $court bound; their number, races and the mean of a field)
+// item 04: an event condition with "within_wakings": 2 reads the events since the second-newest waking.
 // "absent": true negates tag, event, person, adjacent, at_war, find and lineage conditions. Strings substitute
 // variables: $self, $other, $region, $owner, $person, $year and whatever a condition or effect binds.
 struct CardPred {
@@ -44,6 +47,12 @@ struct CardPred {
     std::string tag, adjacent_to, race;
     std::vector<CardPred> any;
     bool this_sleep = false;          // v0.4 hooks (S3): event conditions read only the events of the current sleep
+    // item 04
+    int within_wakings = 0;
+    std::vector<CardPred> where;
+    int races_min = 0;
+    std::string mean;
+    double mean_max = 1e9;
 };
 
 // one effect; `type` from "do", string options in `s`, numbers in `n` (see card_effects.cpp for the list)
@@ -88,6 +97,7 @@ struct CardDef {
     std::string subject = "$self";    // read after the effects ran, so it may name what they bound ("$new")
     bool major = false;               // the storyteller raises its chance the longer the valley has been quiet
     bool needs_dragon = false;        // skipped while the egg has not hatched (world tag egg)
+    bool keyed = false;               // item 04: the chance rolls on rng_for(seed, id, self@year), not the world stream
 };
 
 // data/events/*.json joined into one JSON array (data_io.cpp, or the shell's "events" entry)
