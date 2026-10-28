@@ -11,8 +11,7 @@ Branch `item/04-endings-prophecy` from origin/main 7d8c372.
 
 ## Next
 
-- `node web/game-check.cjs` (running).
-- Interest tool after (300 seeds, idle,raze_all,played, --genesis) into report section 2b; baseline is in the session scratchpad (`main/interest_before.txt`), its played line is copied into the report.
+- nothing; item done, report final.
 
 ## Blocked
 

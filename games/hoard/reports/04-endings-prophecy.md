@@ -64,7 +64,18 @@ Inter-run pacing (`tools/endings_runs.py`, 15 chains of 12 runs per bot; every b
 
 Ascension is reached by no bot; carry and oracle reach the Myth never (they leave by Mortality first). Knowledge leverage at N = 1: Mortality 3.50 (target ≤ 1.2, missed), Ascension n/a (0 / 0, target ≥ 3). Carry steers toward Ascension from run 1, because the hatching prophecy already gives it four Ascension rumors, so carry equals oracle:ascension here. Against the proposed targets: a first real ending by run 2 holds for every bot at about 0.5 or better; a second kind by run 4 only for amnesiac (Myth 0.20); Ascension by run 8 to 10 not reached.
 
-Interest tool before (main) and after (branch), 300 seeds, generated worlds: see the table in section 2b.
+Interest tool, 300 seeds × 3000 years, generated worlds, `--jobs 2`, main (7d8c372) before and this branch after:
+
+| policy | outcomeH | distinct | rev/1000y | causal | persist | slain | hooks/wake | answered | extinct | undead |
+|---|---|---|---|---|---|---|---|---|---|---|
+| idle before | 4.88 | 66 | 13.34 | 0.079 | 0.327 | 0 | 2.05 | 0.00 | 0.15 | 0.20 |
+| idle after | 4.88 | 66 | 13.35 | 0.096 | 0.327 | 0 | 2.05 | 0.00 | 0.15 | 0.20 |
+| raze_all before | 5.05 | 69 | 7.46 | 0.020 | 0.261 | 243 | 1.88 | 0.58 | 0.12 | 0.25 |
+| raze_all after | 5.12 | 70 | 7.50 | 0.021 | 0.261 | 240 | 1.89 | 0.58 | 0.11 | 0.25 |
+| played before | 3.96 | 44 | 7.71 | 0.080 | 0.387 | 42 | 1.77 | 0.61 | 0.35 | 0.47 |
+| played after | 3.81 | 37 | 7.78 | 0.086 | 0.380 | 44 | 1.80 | 0.60 | 0.27 | 0.51 |
+
+Played, other lines after (before): deaths 6 by wounds and 38 by slaying, none unwarned (3 and 39), median year 2220 (2260); arrivals 1.97 per waking after year 200 (1.89); headlines with D ≥ 0.6 56 % (58 %). Played outcome entropy fell from 3.96 to 3.81 bits and distinct outcomes from 44 to 37; the v0.4 band for it already failed on main. Idle's causal depth rose (0.079 to 0.096): the prophecy cards name the prophecy event as their cause.
 
 ## 3. Decisions taken
 
@@ -93,6 +104,8 @@ Interest tool before (main) and after (branch), 300 seeds, generated worlds: see
 ## 5. Goldens
 
 Rules 7 to 8. Commits: chronicles, chronicle hashes, replays and save; the 300 state hashes; the page. The fixed-start goldens (`ages_v0_1_raze`) move because the endings rule emits `ending_ready` and `ending_lapsed` and the `rite` proposal is gone from the envoys; `ages_v0` did not move. Generated worlds: the first difference is the `prophecy_written` event in the pre-history (seed 1 at 380, seed 2 at 370, seed 3 at 300); after it the courts' new sages and priests take up the prophecy as the court's oldest mark (keepers), and after the hatching the three cards fire (seed 1: cult 680, slayers 740 and 770, Mortality ready 830, schism 840). Over the run seed 1 has 235 fewer burns and seed 2 359 more (counts from the first golden run, before the importance change; the shape of the diff was the same after it).
+
+Checks: `ctest -L fast` 20/20; `node web/smoke.mjs --golden 1-60` wasm equals native on seeds 1 to 60 and on both chronicle hashes; `node web/l10n-check.cjs --lang pseudo,de` passed; `node web/game-check.cjs` 90/90, no console errors. Replays `played-1..3` verify (80, 33, 45 checkpoints).
 
 ## 6. Open questions
 
