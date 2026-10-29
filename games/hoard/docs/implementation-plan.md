@@ -116,6 +116,8 @@ Gate: item 03's targets and the bucket wins; item 14's headline metrics; Manu ag
 Decisions first: D6, D7.
 Gate: endings reachable in the dry run by the three bots; the paper playtest's three wakings render from seed 42.
 
+Status 2026-10-29: merged together in pull request 15 (rules version 8; reports `04-endings-prophecy.md`, `05-chronicle.md`, `07-people-moves.md`). D6 taken (Mortality, Myth, Ascension), D7 no (the voice only once a relic is found). 04: Mortality ready in 26 % of played runs, the Myth 75 %, Ascension 0 % (never more than one court with awe 0.6 and faith 0.4; waits for item 12's cults); a prophecy card fires in 89 % of runs. 05: causes shown at level 0 0 %, at level 2 100 %; the seed 42 screens render with `hoard-sim --chronicle-demo 42`. 07: move acceptance 30 to 67 %, trait flips 0.06 per life. Open for Manu: Ascension route, Mortality difficulty, which exits to offer, the Court threshold (3), the people-with-memory target, pattern lines with their own "because" at level 0. Follow-ups queued: fold repeated tier-4 lines (14), rarer visitors and slower lair knowledge (06).
+
 ### Iteration 6: acts, slayers, scenarios, raid boundary (08 and 09, then 10 and 15)
 
 - 08 (Sonnet) and 09 (Opus) in parallel; 09 also turns `sleep`, `pick_talent`, hook and offer answers into logged acts, and writes the world-aging fields.
