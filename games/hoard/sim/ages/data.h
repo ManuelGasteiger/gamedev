@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 #include "cards.h"
+#include "endings_def.h"
 #include "genesis_data.h"
+#include "move_data.h"
 #include "../sift/bank.h"
 #include "state.h"
 
@@ -29,8 +31,22 @@ struct MemoryConstants {
     double research_base = 0.01, research_spend = 50, research_wealth_half = 100;
 };
 
+// constants.json "chronicle" (item 05): chronicle levels, sources in the hoard, relics with a voice
+struct RelicKind { std::string id, agenda; std::vector<std::string> races; };
+struct ChronicleConstants {
+    double lore_counterfactual = 25;   // Lore growth points for level 3
+    int take_sources = 4;              // sources a full take of books carries off
+    double relic_chance = 0.25;        // per take of artifacts, times its magnitude
+    int relic_max = 3;
+    int quiet_wakings = 3;             // commune(refuse)
+    double honest_openness = 0.6;
+    double cf_min_importance = 0.5;    // the counterfactual names an event at least this important
+    std::vector<RelicKind> relics;
+};
+
 struct Constants {
     MemoryConstants mem;
+    ChronicleConstants chron;
     int step_years = 10;
     double land_wealth_scale = 100;
     double wealth_upkeep = 0.01;
@@ -129,8 +145,6 @@ struct Constants {
 
     double offer_faith = 0.7;
     double offer_rival_cohesion = 0.5;
-    int offer_exit_era = 4;
-    double offer_exit_faith = 0.8;
     int offer_expiry_years = 500;
     double offer_tribute_defence = 0.1;
     double offer_tribute_worship = 0.05;
@@ -560,8 +574,10 @@ struct Params {
     DefenceBook defences;         // v0.4 (S1)
     HookBook hooks;               // v0.4 hooks (S3)
     ArrivalBook arrivals;         // item 06
+    MoveBook moves;               // item 07
     GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
     SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
+    EndingsDef endings;           // item 04: data/endings.json
 };
 
 struct PolicyAct {
@@ -600,7 +616,9 @@ struct DataJson {
     std::string genesis;               // v0.4 world (S2): data/genesis.json; optional
     std::string importance;            // data/importance.json
     std::string arrivals;              // item 06: data/arrivals.json
+    std::string moves;                 // item 07: data/moves.json
     std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
+    std::string endings;               // item 04: data/endings.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
@@ -609,6 +627,7 @@ bool world_from_data_json(const DataJson& d, const Params& p, World& out, std::s
 bool dragon_data_from_json(const DataJson& d, Params& out, std::string& err);   // v0.4 (S1), dragon_data.cpp
 bool hooks_from_json(const DataJson& d, Params& out, std::string& err);         // v0.4 hooks (S3), hook_data.cpp
 bool arrivals_from_json(const DataJson& d, Params& out, std::string& err);      // item 06, arrival_data.cpp
+bool moves_from_json(const DataJson& d, Params& out, std::string& err);         // item 07, move_data.cpp
 bool sift_bank_from_json(const DataJson& d, SiftBank& out, std::string& err);   // item 14, sim/sift/bank_data.cpp
 
 // file IO, data_io.cpp (not part of the wasm build)

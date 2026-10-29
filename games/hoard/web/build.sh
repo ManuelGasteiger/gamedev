@@ -26,6 +26,7 @@ data = {k: (root / f'data/{k}.json').read_text() for k in ['constants', 'races',
 data.update({k: (root / f'data/{k}.json').read_text() for k in ['talents', 'defences']})   # v0.4 (S1)
 data['hooks'] = (root / 'data/hooks.json').read_text()   # v0.4 hooks (S3)
 data['arrivals'] = (root / 'data/arrivals.json').read_text()   # item 06
+data['moves'] = (root / 'data/moves.json').read_text()   # item 07
 data['text'] = (root / 'data/text/en/narrator.json').read_text()
 data['importance'] = (root / 'data/importance.json').read_text()
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it
@@ -34,6 +35,7 @@ data['text_bundles'] = {d.name: json.dumps({'lang': d.name, **{f.name[:-5]: json
 # the event cards, joined in file-name order into one JSON array as data_io.cpp does
 data['events'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/events').glob('*.json'))) + ']'
 data['genesis'] = (root / 'data/genesis.json').read_text()   # v0.4 world (S2)
+data["endings"] = (root / "data/endings.json").read_text()   # item 04
 # item 14: the pattern bank joined as data_io.cpp does, and the dry-run base rates
 data['patterns'] = '[' + ',\n'.join(p.read_text() for p in sorted((root / 'data/patterns').glob('*.json')) if p.name != 'base_rates.json') + ']'
 data['base_rates'] = (root / 'data/patterns/base_rates.json').read_text()

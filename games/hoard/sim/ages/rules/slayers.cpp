@@ -158,6 +158,7 @@ std::string slayer_stage(const World& w, const std::string& faction) {
 // the sleep after it was ready; it disperses when the order goes or dread falls under slay_lapse_dread
 void slayer_clock(World& w, const Params& p) {
     const Constants& c = p.c;
+    if (!w.ended.empty()) return;   // item 04: the epilogue has no dragon to slay
     double k = dts(w, c);
     for (auto& f : w.factions) {
         bool order = has_tag(f.tags, "slayers");

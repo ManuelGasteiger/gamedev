@@ -1,6 +1,8 @@
 #include "record.h"
 #include "unrecorded.h"
 #include "arrivals.h"
+#include "endings.h"
+#include "chron.h"
 
 namespace ages {
 
@@ -74,6 +76,13 @@ bool hunt(World& w, const Params& p, const std::string& region, std::string& rea
     return ok;
 }
 
+bool exit_run(World& w, const Params& p, const std::string& kind, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = exit_unrecorded(w, p, kind, reason);
+    if (ok) rec.done("exit", args_of({{"kind", kind}}));
+    return ok;
+}
+
 CastResult cast_spell(World& w, const Params& p, const std::string& spell, const std::string& target,
                       const std::string& region, const std::string& against) {
     RecordScope rec(w);
@@ -87,6 +96,20 @@ TerraformResult terraform(World& w, const Params& p, const std::string& region, 
     TerraformResult r = terraform_unrecorded(w, p, region, kind);
     if (r.done) rec.done("terraform", args_of({{"region", region}, {"kind", kind}}));
     return r;
+}
+
+bool keep_person(World& w, const Params& p, const std::string& id, const std::string& role, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = keep_person_unrecorded(w, p, id, role, reason);
+    if (ok) rec.done("keep_person", args_of({{"id", id}, {"role", role}}));
+    return ok;
+}
+
+bool commune(World& w, const Params& p, const std::string& relic, const std::string& answer, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = commune_unrecorded(w, p, relic, answer, reason);
+    if (ok) rec.done("commune", args_of({{"relic", relic}, {"answer", answer}}));
+    return ok;
 }
 
 }

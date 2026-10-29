@@ -71,6 +71,7 @@ struct StartTemplate {
 struct LegendsDef {
     int max = 10, per_kind = 2, per_century = 2;
     std::vector<std::string> skip;   // kinds never told as legends
+    std::vector<std::string> always; // item 04: kinds always told (the prophecy, woven legends), outside max
 };
 
 struct ExtinctionDef {

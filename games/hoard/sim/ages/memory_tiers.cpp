@@ -64,7 +64,8 @@ std::string memory_tier(const Faction& f, const MemoryConstants& m) {
 }
 
 bool keeps_records(const World& w, const Faction& f) {
-    for (auto& x : w.people) if (x.faction == f.id && (x.role == "sage" || x.role == "historian")) return true;
+    for (auto& x : w.people)
+        if (x.faction == f.id && (x.role == "sage" || x.role == "historian" || (x.role == "ruler" && has_tag(x.tags, "lettered")))) return true;   // item 07: a lettered ruler
     for (auto& rid : f.regions)
         if (const Region* r = find_region(w, rid)) if (has_tag(r->tags, "library")) return true;
     return false;

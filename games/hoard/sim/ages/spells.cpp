@@ -3,6 +3,7 @@
 #include "unrecorded.h"
 #include <cstdio>
 #include "ages.h"
+#include "prophecy.h"
 #include "rules/rules.h"
 #include "talents.h"
 #include "world_util.h"
@@ -166,6 +167,7 @@ CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& s
     r = cast_modifier(w, s, r);
     if (r.cast && spell == "curse" && effect(w, p, "hex") > 0)
         if (Faction* f = find_faction(w, r.target)) f->anti_dragon *= p.c.hex_anti_dragon_mult;
+    if (r.cast && spell == "teach") prophecy_after_teach(w, p, r.target);   // item 04
     return r;
 }
 

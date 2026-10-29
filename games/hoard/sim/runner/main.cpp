@@ -15,7 +15,11 @@
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
+#include "ages/endings.h"
+#include "ages/profile.h"
+#include "bot.h"
 #include "text_cmd.h"
+#include "chron_demo.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -47,6 +51,9 @@ struct Options {
     bool state_hash = false;
     uint64_t golden_from = 0, golden_to = 0;   // --golden A-B: played, generated world, print `seed hash` per seed
     std::string render_batch, text_bundle;     // item 19, text_cmd.h
+    std::string profile;    // item 04: the profile folder (read before genesis, written at the end)
+    std::string bot;        // item 04: amnesiac | carry | oracle:<ending>
+    uint64_t chron_demo = 0;                   // item 05, chron_demo.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -69,6 +76,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--state-hash") o.state_hash = true;
         else if (k == "--render-batch") { if (!need(o.render_batch)) return false; }
         else if (k == "--text-bundle") { if (!need(o.text_bundle)) return false; }
+        else if (k == "--chronicle-demo") { std::string v; if (!need(v)) return false; o.chron_demo = std::strtoull(v.c_str(), nullptr, 10); }
         else if (k == "--record") { if (!need(o.record)) return false; }
         else if (k == "--replay") { if (!need(o.replay)) return false; }
         else if (k == "--save") { if (!need(o.save)) return false; }
@@ -78,6 +86,8 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--buckets") o.buckets = true;
         else if (k == "--bucket-samples") { if (!need(v)) return false; o.bucket_samples = std::max(1, std::atoi(v.c_str())); }
         else if (k == "--perturb") { if (!need(o.perturb)) return false; }
+        else if (k == "--profile") { if (!need(o.profile)) return false; }
+        else if (k == "--bot") { if (!need(o.bot)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -173,6 +183,29 @@ json hooks_json(const World& w, const Params& p) {
             {"health_max", health_max(w, p)}};
 }
 
+// item 04: per ending its conditions (ever met, longest hold, best count) and whether it was ever ready; the prophecy
+// cards that fired (first year after the hatching); the Myth at a death; the exit taken
+json endings_stats_json(const World& w, const Params& p) {
+    json endings = json::object();
+    for (auto& e : p.endings.endings) {
+        if (!e.enabled) continue;
+        const EndingState* s = ending_state(w, e.id);
+        json conds = json::object();
+        for (size_t i = 0; i < e.conds.size(); ++i) {
+            CondHold h = s && i < s->conds.size() ? s->conds[i] : CondHold();
+            conds[e.conds[i].id] = {{"ever_met", h.ever_met}, {"best_years", h.best_years}, {"best_value", h.best_value}};
+        }
+        int first_ready = -1;
+        for (auto& ev : w.chronicle) if (ev.kind == "ending_ready" && ev.subject == e.id) { first_ready = ev.year; break; }
+        endings[e.id] = {{"ever_ready", first_ready >= 0}, {"first_ready", first_ready}, {"conditions", conds}};
+    }
+    json cards = json::object();
+    for (auto& ev : w.chronicle)
+        if (ev.kind.rfind("prophecy_", 0) == 0 && ev.kind != "prophecy_fulfilled" && !cards.contains(ev.kind)) cards[ev.kind] = ev.year - w.genesis.hatched_year;
+    return {{"endings", endings}, {"prophecy_cards", cards}, {"prophecy_known_by", w.prophecy.known_by.size()}, {"myth", myth_qualifies(w, p)},
+            {"ended", w.ended}, {"closest", dragon_dead(w) ? json(closest_conditions(w, p)) : json::array()}};
+}
+
 json stats_json(const World& w, const Params& p) {
     json factions = json::array();
     std::vector<FactionRecord> all = w.graveyard;
@@ -238,6 +271,7 @@ json stats_json(const World& w, const Params& p) {
     j["dragon_growth"] = {{"phase", w.dragons[kPlayer].phase}, {"points", w.dragons[kPlayer].growth}, {"talents", w.dragons[kPlayer].talents}, {"wounds", w.dragons[kPlayer].wounds}};
     j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
     j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)
+    j["endings"] = endings_stats_json(w, p);   // item 04
     return j;
 }
 
@@ -293,7 +327,9 @@ int replay(const Options& o) {
     if (!loaded.ok) { std::fprintf(stderr, "load failed: %s\n", loaded.error.c_str()); return 1; }
     if (hash_hex(loaded.params.data_hash) != h.value("data", "")) std::fprintf(stderr, "warning: data differs from the recording (%s, recorded %s)\n", hash_hex(loaded.params.data_hash).c_str(), h.value("data", "").c_str());
     std::string err;
-    if (h.value("genesis", false) && !make_genesis(loaded.world, loaded.params, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
+    Profile woven;   // item 04: the legends genesis wove when it was recorded
+    if (h.contains("legends")) woven.legends = legends_from_json(h["legends"]);
+    if (h.value("genesis", false) && !make_genesis(loaded.world, loaded.params, woven, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
     if (hash_hex(state_hash(loaded.world).root) != h.value("start", "")) { std::printf("start state differs from the recording\n"); return 3; }
     std::vector<std::string> body(lines.begin() + 1, lines.end());
     ReplayResult r = replay_lines(loaded.world, loaded.params, body);
@@ -313,6 +349,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     if (o.golden_to) return golden(o);
+    if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);
@@ -322,8 +359,11 @@ int main(int argc, char** argv) {
     World& w = loaded.world;
     const Params& p = loaded.params;
     std::string gerr, legends;
-    if (o.genesis && !make_genesis(w, p, gerr)) { std::fprintf(stderr, "genesis failed: %s\n", gerr.c_str()); return 1; }   // v0.4 world (S2)
+    Profile profile;   // item 04
+    if (!o.profile.empty() && !load_profile(o.profile, profile, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
+    if (o.genesis && !make_genesis(w, p, profile, gerr)) { std::fprintf(stderr, "genesis failed: %s\n", gerr.c_str()); return 1; }   // v0.4 world (S2)
     if (o.genesis) legends = legends_json(w, p);
+    note_hatching(profile, w, p);
     if (!o.load_save.empty()) {
         std::ifstream in(o.load_save, std::ios::binary);
         std::stringstream ss;
@@ -370,10 +410,18 @@ int main(int argc, char** argv) {
     ao.bucket_samples = o.bucket_samples;
     ao.perturb = o.perturb;
     if (ao.snapshots || ao.wakings || !ao.perturb.empty()) attach_analysis(s, p, ao);
+    if (!o.bot.empty()) {   // item 04
+        Bot bot;
+        if (!parse_bot(o.bot, bot)) { std::fprintf(stderr, "unknown bot %s\n", o.bot.c_str()); return 2; }
+        attach_bot(s, p, bot_target(bot, profile, p));
+    }
+    auto traced = s.after_sleep;
+    s.after_sleep = [&](const World& x) { if (traced) traced(x); note_waking(profile, x, p); };
     Recorder recorder;
     std::string header;
     if (!o.record.empty()) {
         header = replay_header(w, p, o.genesis);
+        if (!profile.legends.empty()) { json hj = json::parse(header); hj["legends"] = legends_to_json(profile.legends); header = hj.dump(); }   // item 04: genesis wove them
         recorder.world = &w;
         w.recorder = &recorder;
     }
@@ -386,6 +434,9 @@ int main(int argc, char** argv) {
         for (auto& l : recorder.lines) rec << l << "\n";
         rec << json({{"end", 1}, {"year", w.year}, {"h", hash_hex(state_hash(w).root)}}).dump() << "\n";
     }
+    note_death(profile, w, p);   // item 04
+    note_exit(profile, w, p);
+    if (!o.profile.empty() && !save_profile(o.profile, profile, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
     if (!o.save.empty() && !write_save(o.save, save_json(w, p))) { std::fprintf(stderr, "cannot write %s\n", o.save.c_str()); return 1; }
     if (o.state_hash) std::printf("%s\n", hash_hex(state_hash(w).root).c_str());
 

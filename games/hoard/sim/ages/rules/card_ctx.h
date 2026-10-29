@@ -32,6 +32,9 @@ int newest_event(const World& w, const std::string& kind, const std::string& sub
 // card_match.cpp: true when every condition holds; binds variables and appends refs to ctx
 bool card_holds(const World& w, const Params& p, const std::vector<CardPred>& preds, CardCtx& ctx);
 
+// item 04: the number of courts a `count` condition finds
+int card_count(const World& w, const Params& p, const CardPred& q, const CardCtx& ctx);
+
 // v0.4 hooks (S3): a numeric field of any entity, as the trigger language reads it ("wealth" of a court, "bold" of a person)
 bool card_num_field(const World& w, const Params& p, const CardCtx& ctx, const std::string& id, const std::string& key, double& v);
 

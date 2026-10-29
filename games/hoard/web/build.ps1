@@ -25,6 +25,7 @@ foreach ($k in 'constants', 'races', 'reactions', 'regions', 'factions', 'shocks
 foreach ($k in 'talents', 'defences') { $Data[$k] = Get-Content -Raw "data\$k.json" }   # v0.4 (S1)
 $Data['hooks'] = Get-Content -Raw 'data\hooks.json'   # v0.4 hooks (S3)
 $Data['arrivals'] = Get-Content -Raw 'data\arrivals.json'   # item 06
+$Data['moves'] = Get-Content -Raw 'data\moves.json'   # item 07
 $Data['text'] = Get-Content -Raw 'data\text\en\narrator.json'
 $Data['importance'] = Get-Content -Raw 'data\importance.json'
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it

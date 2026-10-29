@@ -8,6 +8,7 @@
 #include "offers.h"
 #include "rules/rules.h"
 #include "arrivals.h"
+#include "endings.h"
 #include "talents.h"
 #include "world_util.h"
 
@@ -37,6 +38,7 @@ LoadResult load_data_from_json(const DataJson& d, uint64_t seed) {
 bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
     if (index >= w.offers.size()) return false;
     Offer of = w.offers[index];
+    if (of.kind == "exit") { std::string reason; return exit_unrecorded(w, p, of.motive, reason); }   // item 04
     Oath o = of.draft;
     o.status = "active";
     w.oaths.push_back(o);

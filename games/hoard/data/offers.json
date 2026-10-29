@@ -21,6 +21,6 @@
     "pred": "", "clauses": ["tribute", "no_harm"], "gives": "tribute", "price_rate": 0.05, "envoy": "priest", "expires_years": 500 },
   { "kind": "elope",          "motive": "escape_marriage", "pretexts": ["rather_burn"], "can_lie": false,
     "pred": "take_hostage", "clauses": [], "gives": "none", "price_rate": 0, "envoy": "self", "expires_years": 50 },
-  { "kind": "rite",           "motive": "exit",            "pretexts": [], "can_lie": false,
-    "pred": "", "clauses": [], "gives": "none", "price_rate": 0, "envoy": "sage", "expires_years": 500, "tags": ["exit_not_implemented"] }
+  { "kind": "exit",           "motive": "exit",            "pretexts": [], "can_lie": false,
+    "pred": "", "clauses": [], "gives": "none", "price_rate": 0, "envoy": "sage", "expires_years": 0, "tags": ["exit"] }
 ]

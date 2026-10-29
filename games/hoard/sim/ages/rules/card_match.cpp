@@ -93,6 +93,34 @@ double rim_open(const World& w, const Params& p, double weak) {
     return n;
 }
 
+// item 04: dragon temples of a court, or the age of its oldest
+double temples(const Faction& f, int year, bool oldest_age) {
+    double n = 0, age = 0;
+    for (auto& m : f.monuments) {
+        if (m.bias != "dragon_temple") continue;
+        n += 1;
+        age = std::max(age, static_cast<double>(year - m.built));
+    }
+    return oldest_age ? age : n;
+}
+
+// item 04: the dragon's acts some court keeps in writing or in stone (its "legends")
+double kept_acts(const World& w) {
+    std::set<int> acts;
+    for (auto& f : w.factions)
+        for (auto& m : f.memory)
+            if (m.act >= 0 && (m.axis == "dread" || m.axis == "awe") && (m.tier == "written" || m.tier == "monumental")) acts.insert(m.act);
+    return static_cast<double>(acts.size());
+}
+
+// item 04: "give|miracle" counts the dragon's acts of those types
+double acts_of(const World& w, const std::string& types) {
+    double n = 0;
+    std::string list = "|" + types + "|";
+    for (auto& a : w.acts) if (list.find("|" + a.type + "|") != std::string::npos) n += 1;
+    return n;
+}
+
 double capital_land(const World& w, const Faction& f) {
     double top = 0;
     for (auto& rid : f.regions) if (const Region* r = find_region(w, rid)) top = std::max(top, r->land);
@@ -127,6 +155,9 @@ bool faction_num(const World& w, const Params& p, const CardCtx& ctx, const Fact
     else if (k == "wars") v = static_cast<double>(f.at_war_with.size());
     else if (k == "burn_memory") v = burn_memory(f);
     else if (k == "capital_land") v = capital_land(w, f);
+    else if (k == "temples") v = temples(f, w.year, false);   // item 04
+    else if (k == "temple_years") v = temples(f, w.year, true);
+    else if (k == "monumental") v = memory_tier(f, c.mem) == "monumental" ? 1 : 0;
     else if (k == "quiet_years") {
         int last = std::max(f.born, w.genesis.hatched_year);
         if (ctx.last_act) {
@@ -153,6 +184,10 @@ bool num_field(const World& w, const Params& p, const CardCtx& ctx, const std::s
         else if (k == "asleep_years") v = w.year - w.sleep_started;
         else if (k == "hostages") v = static_cast<double>(d.hostages.size());
         else if (k.rfind("effect:", 0) == 0) v = effect(w, p, k.substr(7));   // v0.4: a talent effect, e.g. effect:thief_guard
+        else if (k == "reign") v = w.year - w.genesis.hatched_year;   // item 04
+        else if (k == "legends") v = kept_acts(w);
+        else if (k.rfind("growth:", 0) == 0) v = growth_of(d, k.substr(7));
+        else if (k.rfind("acts:", 0) == 0) v = acts_of(w, k.substr(5));
         else return false;
         return true;
     }
@@ -306,6 +341,13 @@ bool self_in(const Event& e, const std::string& as, const std::string& self) {
     return false;
 }
 
+// item 04: the year of the n-th newest waking (the hatching when there were fewer)
+int waking_horizon(const World& w, int n) {
+    for (size_t i = w.chronicle.size(); i > 0; --i)
+        if (w.chronicle[i - 1].kind == "wake" && --n == 0) return w.chronicle[i - 1].year;
+    return w.genesis.hatched_year;
+}
+
 // one binding per distinct (other, region, person), the newest event first; min_count counts events per binding
 Ctxs event_matches(const World& w, const CardPred& q, const CardCtx& ctx) {
     Ctxs out;
@@ -314,6 +356,7 @@ Ctxs event_matches(const World& w, const CardPred& q, const CardCtx& ctx) {
     std::map<std::string, size_t> seen;
     std::vector<int> count;
     int horizon = q.this_sleep ? w.sleep_started + 1 : w.year - q.within;   // v0.4 hooks (S3): this sleep's events only
+    if (q.within_wakings > 0) horizon = waking_horizon(w, q.within_wakings);   // item 04
     for (size_t i = w.chronicle.size(); i > 0; --i) {
         const Event& e = w.chronicle[i - 1];
         if (e.year < horizon) break;
@@ -405,7 +448,37 @@ Ctxs negate_or_pass(const CardPred& q, const CardCtx& ctx, Ctxs found) {
     return found;
 }
 
+bool match_from(const World& w, const Params& p, const std::vector<CardPred>& preds, size_t i, CardCtx& ctx);
+
+// item 04: the courts where `where` holds, with the races among them and the sum of the `mean` field
+struct Count {
+    int n = 0;
+    std::set<std::string> races;
+    double sum = 0;
+};
+
+Count count_courts(const World& w, const Params& p, const CardPred& q, const CardCtx& ctx) {
+    Count out;
+    std::string bind = q.bind.empty() ? "court" : q.bind;
+    for (auto& f : w.factions) {
+        CardCtx c = ctx;
+        c.vars[bind] = f.id;
+        if (!match_from(w, p, q.where, 0, c)) continue;
+        out.n += 1;
+        out.races.insert(dominant_race(f));
+        double v = 0;
+        if (!q.mean.empty() && faction_num(w, p, c, f, q.mean, v)) out.sum += v;
+    }
+    return out;
+}
+
+bool count_holds(const Count& k, const CardPred& q) {
+    if (!compare_num(q.op, k.n, q.value) || static_cast<int>(k.races.size()) < q.races_min) return false;
+    return q.mean.empty() || (k.n > 0 && k.sum / k.n <= q.mean_max);
+}
+
 Ctxs candidates(const World& w, const Params& p, const CardPred& q, const CardCtx& ctx) {
+    if (q.type == "count") return pass(ctx, count_holds(count_courts(w, p, q, ctx), q) != q.absent);
     if (q.type == "any") {
         Ctxs out;
         for (auto& a : q.any) for (auto& c : candidates(w, p, a, ctx)) out.push_back(c);
@@ -458,6 +531,11 @@ bool match_from(const World& w, const Params& p, const std::vector<CardPred>& pr
 
 bool card_holds(const World& w, const Params& p, const std::vector<CardPred>& preds, CardCtx& ctx) {
     return match_from(w, p, preds, 0, ctx);
+}
+
+// item 04: the number of courts a count condition finds (0 for any other condition)
+int card_count(const World& w, const Params& p, const CardPred& q, const CardCtx& ctx) {
+    return q.type == "count" ? count_courts(w, p, q, ctx).n : 0;
 }
 
 // v0.4 hooks (S3)

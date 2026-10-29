@@ -11,6 +11,8 @@
 #include "step.h"
 #include "world_util.h"
 #include "../sift/sift_json.h"
+#include "endings_json.h"
+#include "person_json.h"
 
 namespace ages {
 
@@ -411,6 +413,7 @@ static json person_json(const Person& x) {
               {"dies", x.dies}, {"traits", {{"bold", x.traits.bold}, {"pious", x.traits.pious}, {"greedy", x.traits.greedy}, {"cunning", x.traits.cunning}}},
               {"tags", tags_json(x.tags)}, {"memory_of_dragon", x.memory_of_dragon}, {"hostage_since", x.hostage_since}};
     if (!x.sex.empty()) j["sex"] = x.sex;   // absent in rules-1 saves, so their stored hash still checks
+    person_record_json(x, j);   // item 07
     return j;
 }
 
@@ -433,6 +436,7 @@ static Person person_from(const json& j) {
     x.tags = tags_from(j, "tags");
     get(j, "memory_of_dragon", x.memory_of_dragon);
     get(j, "hostage_since", x.hostage_since);
+    person_record_from(j, x);   // item 07
     return x;
 }
 
@@ -525,6 +529,7 @@ static json world_json(const World& w) {
         j["dead_people"].push_back(d);
     }
     j["person_counters"] = w.person_counters;
+    secrets_json(w, j);   // item 07
     j["offers_pending"] = json::array();
     for (auto& of : w.offers) {
         json o = {{"id", of.id}, {"text_key", of.text_key}, {"kind", of.kind}, {"from_faction", of.from_faction}, {"envoy", of.envoy}, {"target", of.target},
@@ -547,6 +552,7 @@ static json world_json(const World& w) {
     j["card_fired"] = w.card_fired;
     genesis_fields_to_json(w, j);   // v0.4 world (S2)
     if (w.sift.on) j["sift"] = sift_state_json(w.sift);   // item 14
+    endings_fields_to_json(w, j);   // item 04
     return j;
 }
 
@@ -706,6 +712,10 @@ std::string world_view_json(const World& w, const Params& p) {
     j["wake_reason"] = w.wake_reason;
     dragon_view_to_json(w, p, j);   // v0.4 (S1)
     if (w.sift.on) j["sift_threads"] = sift_view_json(w, p);   // item 14: open and recently closed threads
+    j["endings_view"] = endings_view_json(w, p);   // item 04
+    j["prophecy_view"] = prophecy_view_json(w, p);
+    j["ending"] = ending_view_json(w, p);
+    j["myth"] = myth_view_json(w, p);
     return j.dump();
 }
 
@@ -890,6 +900,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
             w.dead_people.push_back(x);
         }
     get(j, "person_counters", w.person_counters);
+    secrets_from(j, w);   // item 07
     if (j.contains("offers_pending")) for (auto& v : j["offers_pending"]) w.offers.push_back(offer_from(v));
     if (j.contains("arrivals"))
         for (auto& v : j["arrivals"]) {
@@ -928,6 +939,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
     hooks_state_from_json(j, w);   // v0.4 hooks (S3)
     genesis_fields_from_json(j, w);   // v0.4 world (S2)
     if (j.contains("sift")) sift_state_from_json(j["sift"], w.sift);   // item 14
+    endings_fields_from_json(j, w);   // item 04
     sort_by_id(w);
     return true;
 }

@@ -4,15 +4,19 @@
     "needs_dragon": true,
     "trigger": [
       {"event": "hostage_released", "self_as": "object", "person_from": "subject", "within_years": 10},
-      {"tag": "dragon_raised", "on": "person"}
+      {"any": [{"tag": "dragon_raised", "on": "person"}, {"tag": "lettered", "on": "person"}, {"tag": "schooled:*", "on": "person"}, {"tag": "corrupted:*", "on": "person"}]}
     ],
     "chance": 1,
     "cooldown_decades": 1,
     "object": "$person",
     "branches": [
-      {"weight": 0.5, "text_key": "came_home_rules", "effects": [{"do": "crown", "person": "person", "how": "returned"}, {"do": "field", "field": "faith", "set": 0.7}, {"do": "tag", "tag": "dragon_blood", "decades": 100, "inherit": true}]},
+      {"weight": 0.5, "text_key": "came_home_rules", "boost": [{"if": [{"tag": "lettered", "on": "person"}], "mult": 2}],
+       "effects": [{"do": "crown", "person": "person", "how": "returned"}, {"do": "field", "field": "faith", "set": 0.7}, {"do": "tag", "tag": "dragon_blood", "decades": 100, "inherit": true}]},
       {"weight": 0.3, "text_key": "came_home_rejected", "effects": [{"do": "split", "war": 1, "bind": "new", "if": [{"field": "regions", "gte": 2}]}, {"do": "crown", "on": "new", "person": "person", "how": "returned", "if": [{"var": "new", "ne": ""}]}, {"do": "tag", "tag": "rejected_ward:$person", "decades": 50}]},
-      {"weight": 0.2, "text_key": "came_home_betrays", "effects": [{"do": "field", "field": "anti_dragon", "add": 0.3}, {"do": "ledger", "on": "person", "delta": -0.8, "how": "betrayal"}, {"do": "tag", "tag": "turncoat:$person", "decades": 60, "inherit": true}]}
+      {"weight": 0.2, "text_key": "came_home_betrays", "boost": [{"if": [{"tag": "schooled:intrigue", "on": "person"}], "mult": 2}],
+       "effects": [{"do": "field", "field": "anti_dragon", "add": 0.3}, {"do": "ledger", "on": "person", "delta": -0.8, "how": "betrayal"}, {"do": "tag", "tag": "turncoat:$person", "decades": 60, "inherit": true}]},
+      {"weight": 0, "text_key": "came_home_agent", "boost": [{"if": [{"tag": "corrupted:*", "on": "person"}], "add": 0.5}],
+       "effects": [{"do": "tag", "on": "person", "tag": "dragon_agent", "decades": 100}, {"do": "ledger", "on": "person", "delta": 0.3, "how": "agent"}]}
     ]
   }
 ]

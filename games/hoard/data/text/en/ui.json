@@ -25,6 +25,9 @@
  "reason.no_arrival": "no such visitor waits at the lair",
  "reason.no_outcome": "that visitor cannot be answered that way",
  "reason.not_wild": "a court holds that land",
+ "reason.run_ended": "your reign has already ended",
+ "reason.unknown_ending": "there is no such ending ({r.kind})",
+ "reason.ending_not_ready": "that ending is not within reach ({r.kind})",
  "reason.no_hook": "no such hook",
  "reason.hook_by_act": "this hook is answered by an act",
  "reason.no_choice": "no such choice",
@@ -133,5 +136,9 @@
  "fly.note": "fly over a region to act · {d.stamina} stamina left · L to land at the lair",
  "fly.keys": "WASD / arrows / click to fly · hold B to burn · wheel zoom · right-drag pan · Esc closes panels",
  "montage.resume": "Resume",
- "hud.picks.n": "{p.n:plural(one=talent ready,other=# talents ready)}"
+ "hud.picks.n": "{p.n:plural(one=talent ready,other=# talents ready)}",
+ "reason.move_no_access": "they are not at your lair and you are not at their court",
+ "reason.move_no_subject": "no such subject ({r.subject})",
+ "reason.move_unknown": "no such move ({r.move})",
+ "reason.move_no_person": "no such person"
 }

@@ -6,6 +6,8 @@
 #include "ages/growth.h"
 #include "ages/json.h"
 #include "ages/memory_tiers.h"
+#include "ages/moves.h"
+#include "ages/person_record.h"
 #include "ages/rng.h"
 #include "ages/rules/slayers.h"
 #include "ages/world_util.h"
@@ -89,6 +91,29 @@ int towers(const World& w, const Params& p) {
     return n;
 }
 
+// item 05: the same waking told at levels 0, 1 and 2: per level the lines, those with a cause to tell, those that tell one
+json chronicle_shares(const World& w, const Params& p) {
+    json out = json::object();
+    for (int level = 0; level <= 2; ++level) {
+        World c = w;
+        c.wake_snapshot.reset();
+        ChronicleState& cs = c.dragons[kPlayer].chron;
+        cs = ChronicleState();
+        if (level == 0) c.dragons[kPlayer].hostages.clear();
+        if (level == 1) for (auto& f : c.factions) cs.sources.push_back({"src:0:" + f.id, c.year, "taken"});
+        if (level == 2) cs.historians.push_back({"", -1000000, -1});
+        json b = json::parse(briefing_json(c, p, c.sleep_started), nullptr, false);
+        int lines = 0, available = 0, shown = 0;
+        for (auto& l : b.value("lines", json::array())) {
+            ++lines;
+            if (l.value("cause_available", false)) ++available;
+            if (l.value("cause_available", false) && l.value("cause_shown", false)) ++shown;
+        }
+        out[std::to_string(level)] = {lines, available, shown};
+    }
+    return out;
+}
+
 // item 14: the sifter's pick at this waking with its numbers, for interest.py
 json sift_waking(const World& w, const Params& p) {
     const SiftDiag& d = w.sift.diag;
@@ -101,7 +126,26 @@ json sift_waking(const World& w, const Params& p) {
             {"budget", d.budget}, {"tier5", d.tier5}, {"tier5_shown", d.tier5_shown}, {"mean_candidate", d.mean_candidate},
             {"mean_shown", d.mean_shown}, {"headline_pattern", d.headline_pattern}, {"headline_dragon", d.headline_dragon},
             {"headline_reversals", d.headline_reversals}, {"names_earlier", d.names_earlier}, {"lines", lines},
-            {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())}};
+            {"sources", b.value("sources", json::array())}, {"pair", b.value("sift_pair", json::array())},
+            {"chronicle", chronicle_shares(w, p)}};
+}
+
+// item 07: tracked people with a memory of the dragon per court, and each move scored on every tracked person (the
+// census ignores access and skill: it measures the weight table against the people the run made)
+json people_waking(const World& w, const Params& p) {
+    int tracked_n = 0, with_mem = 0;
+    json moves = json::object();
+    for (auto& m : p.moves.moves) moves[m.first] = {0, 0};
+    for (auto& x : w.people) {
+        if (x.faction.empty() || !tracked(w, p, x)) continue;
+        ++tracked_n;
+        if (!x.mem.empty() || !x.permanent.empty()) ++with_mem;
+        for (auto& m : p.moves.moves) {
+            moves[m.first][0] = moves[m.first][0].get<int>() + 1;
+            if (move_score(w, p, x, m.second) >= m.second.threshold) moves[m.first][1] = moves[m.first][1].get<int>() + 1;
+        }
+    }
+    return {{"courts", w.factions.size()}, {"tracked", tracked_n}, {"with_memory", with_mem}, {"moves", moves}};
 }
 
 int next_bucket(int years) {
@@ -132,6 +176,7 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
         if (w.sift.on && w.sift.lines_year == w.year) (*pending)["sift"] = sift_waking(w, p);
+        if (!p.moves.moves.empty()) (*pending)["people"] = people_waking(w, p);   // item 07
     };
     if (o.perturb == "sleep")
         s.adjust_sleep = [](int years, int index) { return index == 0 ? next_bucket(years) : years; };

@@ -2,6 +2,7 @@
 #include <string>
 #include "ages/ages.h"
 #include "ages/arrivals.h"
+#include "ages/chron.h"
 #include "ages/dragon_json.h"
 #include "ages/hook_json.h"
 #include "ages/genesis.h"
@@ -14,6 +15,9 @@
 #include "ages/talents.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
+#include "ages/endings.h"
+#include "ages/profile.h"
+#include "ages/endings_json.h"
 #include "text_api.h"
 
 using namespace ages;
@@ -33,6 +37,7 @@ struct Session {
     Params params;
     World world;
     Recorder recorder;     // every input since the last load or reset, for "Report a problem"
+    Profile profile;       // item 04: the shell's five profile files, updated as the run teaches; never saved with the world
     std::string header;
 };
 
@@ -47,6 +52,7 @@ void start_recording(bool genesis) {
     g.recorder.world = &g.world;
     g.world.recorder = &g.recorder;
     g.header = replay_header(g.world, g.params, genesis);
+    if (genesis && !g.profile.legends.empty()) { json h = json::parse(g.header); h["legends"] = legends_to_json(g.profile.legends); g.header = h.dump(); }   // item 04
 }
 
 json court_snapshot(const World& w) {
@@ -77,7 +83,9 @@ json cmd_load(const json& in) {
     g.data.defences = text_of(d, "defences");
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
     g.data.arrivals = text_of(d, "arrivals");   // item 06
+    g.data.moves = text_of(d, "moves");         // item 07
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
+    g.data.endings = text_of(d, "endings");   // item 04
     g.data.importance = text_of(d, "importance");
     g.data.patterns = text_of(d, "patterns");       // item 14
     g.data.base_rates = text_of(d, "base_rates");
@@ -89,7 +97,9 @@ json cmd_load(const json& in) {
     if (!r.ok) return fail(r.error);
     if (!g.data.text_bundles.empty() && !text_load(g.data.text_bundles, r.error)) return fail(r.error);
     text_set_lang(in.value("lang", std::string("en")));
-    if (in.value("genesis", false) && !make_genesis(r.world, r.params, r.error)) return fail(r.error);   // v0.4 world (S2)
+    g.profile = profile_from_json(in.value("profile", json::object()));   // item 04
+    if (in.value("genesis", false) && !make_genesis(r.world, r.params, g.profile, r.error)) return fail(r.error);   // v0.4 world (S2)
+    note_hatching(g.profile, r.world, r.params);
     g.params = r.params;
     g.world = r.world;
     g.loaded = true;
@@ -101,7 +111,9 @@ json cmd_reset(const json& in) {
     if (!g.loaded) return fail("not loaded");
     LoadResult r = load_data_from_json(g.data, in.value("seed", g.world.seed));
     if (!r.ok) return fail(r.error);
-    if (in.value("genesis", false) && !make_genesis(r.world, r.params, r.error)) return fail(r.error);   // v0.4 world (S2)
+    if (in.contains("profile")) g.profile = profile_from_json(in["profile"]);   // item 04: else the last load's
+    if (in.value("genesis", false) && !make_genesis(r.world, r.params, g.profile, r.error)) return fail(r.error);   // v0.4 world (S2)
+    note_hatching(g.profile, r.world, r.params);
     g.world = r.world;
     start_recording(in.value("genesis", false));
     return {{"ok", true}};
@@ -139,6 +151,7 @@ json cmd_offer(const json& in, bool accept) {
     size_t index = in.value("index", size_t{0});
     size_t first_event = g.world.chronicle.size();
     bool ok = accept ? accept_offer(g.world, g.params, index) : decline_offer(g.world, g.params, index);
+    note_exit(g.profile, g.world, g.params);   // item 04: an exit offer ends the run
     return ok ? json{{"ok", true}, {"events", events_since(first_event)}} : fail("no such offer");
 }
 
@@ -147,9 +160,21 @@ json cmd_sleep(const json& in) {
     if (years < 1) return fail("years must be at least 1");
     int since = g.world.year;
     SleepResult r = sleep(g.world, g.params, years);
+    note_waking(g.profile, g.world, g.params);   // item 04
+    note_death(g.profile, g.world, g.params);
     json j = json::parse(sleep_result_to_json(r, g.world, g.params), nullptr, false);
     j["briefing"] = json::parse(briefing_json(g.world, g.params, since), nullptr, false);
+    if (dragon_dead(g.world)) j["myth"] = myth_qualifies(g.world, g.params);
     return j;
+}
+
+// item 04: the exit act; the epilogue's events and the ending come back
+json cmd_exit(const json& in) {
+    size_t first_event = g.world.chronicle.size();
+    std::string reason;
+    if (!exit_run(g.world, g.params, in.value("kind", ""), reason)) return fail_reason(reason);
+    note_exit(g.profile, g.world, g.params);
+    return {{"ok", true}, {"events", events_since(first_event)}, {"ending", ending_view_json(g.world, g.params)}};
 }
 
 json cmd_briefing(const json& in) {
@@ -232,7 +257,7 @@ json cmd_load_world(const json& in) {
 // ---- v0.4 (S1): wounds in apply_acts, a slain dragon refuses its verbs, talents -----------------------------------
 
 const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_remnant", "cast", "terraform", "demand",
-                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt"};
+                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt", "keep_person", "commune"};
 
 json cmd_apply_acts_wounded(const json& in) {
     double before = g.world.dragons[kPlayer].wounds;
@@ -315,7 +340,23 @@ json cmd_hunt(const json& in) {
     return {{"ok", true}, {"events", events_since(first_event)}};
 }
 
+json cmd_keep_person(const json& in) {
+    std::string reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!keep_person(g.world, g.params, in.value("id", ""), in.value("role", "historian"), reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
+json cmd_commune(const json& in) {
+    std::string reason;
+    size_t first_event = g.world.chronicle.size();
+    if (!commune(g.world, g.params, in.value("relic", ""), in.value("answer", ""), reason)) return fail_reason(reason);
+    return {{"ok", true}, {"events", events_since(first_event)}};
+}
+
 bool hooks_dispatch(const std::string& cmd, const json& in, json& out) {
+    if (cmd == "keep_person") { out = cmd_keep_person(in); return true; }
+    if (cmd == "commune") { out = cmd_commune(in); return true; }
     if (cmd == "receive") { out = cmd_receive(in); return true; }
     if (cmd == "hunt") { out = cmd_hunt(in); return true; }
     if (cmd == "apply_acts") out = cmd_apply_acts_hooked(in);
@@ -376,6 +417,8 @@ json dispatch(const json& in) {
     if (cmd == "load_world") return cmd_load_world(in);
     // v0.4 world (S2)
     if (cmd == "legends") return json::parse(legends_json(g.world, g.params), nullptr, false);
+    if (cmd == "exit") return cmd_exit(in);   // item 04
+    if (cmd == "profile") return {{"ok", true}, {"profile", profile_to_json(g.profile)}};
     return fail("unknown cmd " + cmd);
 }
 

@@ -25,8 +25,20 @@ static void get_tags(const json& j, const char* key, Tags& out) {
     for (auto& t : *it) out.insert(t.get<std::string>());
 }
 
+static void load_chronicle(const json& j, ChronicleConstants& c) {
+    get(j, "lore_counterfactual", c.lore_counterfactual);
+    get(j, "take_sources", c.take_sources);
+    get(j, "relic_chance", c.relic_chance);
+    get(j, "relic_max", c.relic_max);
+    get(j, "quiet_wakings", c.quiet_wakings);
+    get(j, "honest_openness", c.honest_openness);
+    get(j, "cf_min_importance", c.cf_min_importance);
+    for (auto& r : j.value("relics", json::array())) c.relics.push_back({r.value("id", ""), r.value("agenda", ""), r.value("races", std::vector<std::string>())});
+}
+
 static void load_constants(const json& j, Constants& c) {
     if (j.contains("memory")) memory_constants_from_json(j["memory"], c.mem);
+    if (j.contains("chronicle")) load_chronicle(j["chronicle"], c.chron);
     get(j, "step_years", c.step_years);
     get(j, "land_wealth_scale", c.land_wealth_scale);
     get(j, "wealth_upkeep", c.wealth_upkeep);
@@ -112,8 +124,6 @@ static void load_constants(const json& j, Constants& c) {
     get(j, "forgotten_show_as_burn", c.forgotten_show_as_burn);
     get(j, "offer_faith", c.offer_faith);
     get(j, "offer_rival_cohesion", c.offer_rival_cohesion);
-    get(j, "offer_exit_era", c.offer_exit_era);
-    get(j, "offer_exit_faith", c.offer_exit_faith);
     get(j, "offer_expiry_years", c.offer_expiry_years);
     get(j, "offer_tribute_defence", c.offer_tribute_defence);
     get(j, "offer_tribute_worship", c.offer_tribute_worship);
@@ -398,6 +408,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
     if (!d.importance.empty()) { if (!parse_json(d.importance, "importance", j, err)) return false; get(j, "events", p.importance); }
     if (!cards_from_json(d.events, p.cards, err)) return false;
     if (!genesis_from_json(d.genesis, p.genesis, err)) return false;
+    if (!endings_from_json(d.endings, p.endings, err)) return false;   // item 04
 
     if (!parse_json(d.races, "races", j, err)) return false;
     for (auto it = j.begin(); it != j.end(); ++it) {
@@ -472,6 +483,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
     if (!dragon_data_from_json(d, p, err)) return false;   // v0.4 (S1)
     if (!hooks_from_json(d, p, err)) return false;         // v0.4 hooks (S3)
     if (!arrivals_from_json(d, p, err)) return false;      // item 06
+    if (!moves_from_json(d, p, err)) return false;         // item 07
     if (!sift_bank_from_json(d, p.sift, err)) return false;   // item 14
     return true;
 }

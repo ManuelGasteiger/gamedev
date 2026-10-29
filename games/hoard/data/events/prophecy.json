@@ -33,5 +33,62 @@
       {"if": [{"event": ["act_burn", "act_kill", "act_take"], "self_as": "subject", "within_years": 10}], "text_key": "prophecy_fire", "effects": [{"do": "field", "field": "faith", "mul": 0.5}, {"do": "field", "field": "dread", "add": 0.3, "tags": ["prophecy"]}, {"do": "modifier", "var": "anti_dragon_rate", "op": "mul", "value": 2.0, "decades": 30}, {"do": "tag", "tag": "prophecy_of_fire", "decades": 50, "inherit": true}]},
       {"text_key": "prophecy_grace", "weight": 1, "effects": [{"do": "field", "field": "faith", "add": 0.4, "tags": ["prophecy", "gift"]}, {"do": "tag", "tag": "prophecy_of_grace", "decades": 50, "inherit": true}]}
     ]
+  },
+  {
+    "id": "prophecy_cult",
+    "needs_dragon": true,
+    "trigger": [
+      {"tag": "prophecy_known"},
+      {"field": "awe", "gte": 0.3},
+      {"field": "piety", "gt": 0.5},
+      {"tag": "prophecy_cult", "absent": true}
+    ],
+    "chance": 0.1,
+    "keyed": true,
+    "once": true,
+    "object": "dragon",
+    "effects": [
+      {"do": "tag", "tag": "prophecy_cult", "inherit": true},
+      {"do": "modifier", "var": "faith_gain", "op": "mul", "value": 1.5, "decades": 100},
+      {"do": "monument", "bias": "dragon_temple"}
+    ]
+  },
+  {
+    "id": "prophecy_slayers",
+    "needs_dragon": true,
+    "trigger": [
+      {"tag": "prophecy_known"},
+      {"field": "dread", "gte": 0.4},
+      {"field": "militarism", "gt": 0.5}
+    ],
+    "chance": 0.1,
+    "keyed": true,
+    "once": true,
+    "object": "dragon",
+    "effects": [
+      {"do": "field", "field": "anti_dragon", "add": 0.2},
+      {"do": "tag", "tag": "prophecy_slayers", "inherit": true}
+    ]
+  },
+  {
+    "id": "prophecy_schism",
+    "needs_dragon": true,
+    "trigger": [
+      {"tag": "prophecy_known"},
+      {"tag": "prophecy_cult"},
+      {"field": "dread", "gte": 0.3},
+      {"tag": "prophecy_schism", "absent": true}
+    ],
+    "chance": 0.1,
+    "keyed": true,
+    "once": true,
+    "object": "dragon",
+    "effects": [
+      {"do": "tag", "tag": "prophecy_schism", "inherit": true}
+    ],
+    "branches": [
+      {"if": [{"field": "awe", "gt": 1.0, "of": "self.dread"}], "text_key": "prophecy_schism_order", "effects": [{"do": "tag", "tag": "cult_order", "inherit": true}]},
+      {"if": [{"field": "dread", "gte": 1.0, "of": "self.awe"}], "text_key": "prophecy_schism_reformed", "effects": [{"do": "tag", "tag": "cult_reformed", "inherit": true}, {"do": "field", "field": "faith", "mul": 0.6}]}
+    ]
   }
 ]

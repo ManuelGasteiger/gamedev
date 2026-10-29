@@ -29,6 +29,10 @@ add_library(ages STATIC
   sim/ages/recorded.cpp
   sim/ages/save.cpp
   sim/ages/ages.cpp
+  sim/ages/chron_level.cpp
+  sim/ages/chron_keep.cpp
+  sim/ages/chron_voice.cpp
+  sim/ages/chron_cf.cpp
   sim/ages/acts.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
@@ -58,6 +62,10 @@ add_library(ages STATIC
   sim/ages/policy_json.cpp
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
+  sim/ages/person_json.cpp
+  sim/ages/move_data.cpp
+  sim/ages/moves.cpp
+  sim/ages/person_record.cpp
   sim/ages/sleep.cpp
   sim/ages/spells.cpp
   sim/ages/step.cpp
@@ -85,6 +93,9 @@ add_library(ages STATIC
   sim/ages/rules/people.cpp
   sim/ages/rules/people_rise.cpp
   sim/ages/rules/hostages.cpp
+  sim/ages/rules/person_memory.cpp
+  sim/ages/rules/secrets.cpp
+  sim/ages/rules/inquisition.cpp
   sim/ages/rules/threads.cpp
   sim/ages/rules/chronicle.cpp
   # v0.4 (S1)
@@ -116,6 +127,15 @@ add_library(ages STATIC
   sim/ages/genesis_json.cpp
   sim/ages/genesis_world.cpp
   sim/ages/legends.cpp
+  # item 04
+  sim/ages/endings_data.cpp
+  sim/ages/rules/endings.cpp
+  sim/ages/exit.cpp
+  sim/ages/endings_json.cpp
+  sim/ages/prophecy.cpp
+  sim/ages/profile.cpp
+  sim/ages/legend_weave.cpp
+  sim/ages/profile_notes.cpp
   sim/ages/rules/world.cpp
   sim/ages/rules/undying.cpp
   sim/ages/rules/extinction.cpp
@@ -145,7 +165,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/chron_demo.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)
@@ -185,6 +205,12 @@ ages_test(arrival_gating fast)
 ages_test(arrival_cooldown fast)
 ages_test(sift_acceptor fast)
 ages_test(sift_budget fast)
+ages_test(ending_continuity fast)
+ages_test(myth_legend_roundtrip fast)
+ages_test(move_scores fast)
+ages_test(princess_chain fast)
+ages_test(chronicle_levels fast)
+ages_test(sources_bias fast)
 
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)

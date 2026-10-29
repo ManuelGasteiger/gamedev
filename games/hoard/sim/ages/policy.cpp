@@ -2,6 +2,7 @@
 #include "ages.h"
 #include "defences.h"
 #include <algorithm>
+#include "endings.h"
 #include "hooks.h"
 #include "talents.h"
 #include "world_util.h"
@@ -161,7 +162,7 @@ static int policy_sleep(const World& w, const Params& p, const Policy& policy, i
 void run_scenario(World& w, const Params& p, const Scenario& s) {
     int sleep_index = 0;
     int remaining = s.years;
-    while (remaining > 0 && !has_tag(w.tags, "dragon_slain")) {
+    while (remaining > 0 && !has_tag(w.tags, "dragon_slain") && !run_ended(w)) {
         if (sleep_index == 0 && !s.first_acts.empty()) apply_acts(w, p, s.first_acts);
         if (s.policy) {
             pick_talents(w, p, *s.policy);

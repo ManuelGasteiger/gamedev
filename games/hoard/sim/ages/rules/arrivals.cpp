@@ -72,7 +72,7 @@ bool try_kind(World& w, const Params& p, const Faction& f, const ArrivalDef& d, 
 }
 
 void rule_arrivals(World& w, const Params& p) {
-    if (dragon_dead(w) || p.arrivals.kinds.empty() || w.year < w.genesis.hatched_year) return;
+    if (dragon_dead(w) || !w.ended.empty() || p.arrivals.kinds.empty() || w.year < w.genesis.hatched_year) return;
     refresh_lair_knowledge(w, p);
     for (auto& f : w.factions) {
         auto last = w.arrival_fired.find(f.id);

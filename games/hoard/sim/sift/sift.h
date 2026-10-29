@@ -31,6 +31,7 @@ int line_budget(int years);   // L(y) = min(9, 3 + floor(2 log10 y))
 std::vector<int> because_chain(const World& w, const Params& p, int event, int hops);
 
 Source make_source(const World& w, const Params& p, int match, const std::string& court);
+Source make_event_source(const World& w, const Params& p, int event, const std::string& court);
 bool sources_conflict(const World& w, const Source& a, const Source& b);
 
 double thread_score(const World& w, const Params& p, const SiftThread& t);

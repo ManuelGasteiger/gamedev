@@ -12,6 +12,9 @@ namespace ages {
 // genesis_world.cpp: replaces w with a generated world (same seed and region graph), runs the pre-history while the egg
 // lies in the mountain (world tag `egg`), then hatches it
 bool make_genesis(World& w, const Params& p, std::string& err);
+// item 04: with the legends of a profile woven into the pre-history; the prophecy is written in both
+struct Profile;
+bool make_genesis(World& w, const Params& p, const Profile& profile, std::string& err);
 
 // genesis_map.cpp: deals the terrain of every region but the lair, sets land from terrain with jitter, names regions
 void deal_map(World& w, const Params& p, const StartTemplate& t);

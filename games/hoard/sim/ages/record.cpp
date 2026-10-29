@@ -1,6 +1,8 @@
 #include "record.h"
+#include "chron.h"
 #include "ages.h"
 #include "arrivals.h"
+#include "endings.h"
 #include "json.h"
 #include "state_hash.h"
 #include "talents.h"
@@ -56,9 +58,10 @@ uint64_t data_hash(const DataJson& d) {
     };
     add("constants", d.constants); add("races", d.races); add("reactions", d.reactions); add("regions", d.regions);
     add("factions", d.factions); add("shocks", d.shocks); add("names", d.names); add("offers", d.offers); add("text", d.text);
-    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("arrivals", d.arrivals); add("genesis", d.genesis);
+    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("arrivals", d.arrivals); add("moves", d.moves); add("genesis", d.genesis);
     add("importance", d.importance);
     if (!d.patterns.empty()) { add("patterns", d.patterns); add("base_rates", d.base_rates); }   // item 14
+    if (!d.endings.empty()) add("endings", d.endings);   // item 04
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }
@@ -94,6 +97,9 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "kill_person") return kill_person(w, p, str(a, "id"), err);
     if (verb == "receive") return receive(w, p, str(a, "id"), str(a, "outcome"), err);
     if (verb == "hunt") return hunt(w, p, str(a, "region"), err);
+    if (verb == "exit") return exit_run(w, p, str(a, "kind"), err);   // item 04
+    if (verb == "keep_person") return keep_person(w, p, str(a, "id"), str(a, "role"), err);
+    if (verb == "commune") return commune(w, p, str(a, "relic"), str(a, "answer"), err);
     if (verb == "cast") return cast_spell(w, p, str(a, "spell"), str(a, "target"), str(a, "region"), str(a, "against")).cast;
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }

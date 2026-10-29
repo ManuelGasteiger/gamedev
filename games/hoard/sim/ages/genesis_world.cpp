@@ -1,6 +1,8 @@
 #include "genesis.h"
 #include "growth.h"
 #include "importance.h"
+#include "profile.h"
+#include "prophecy.h"
 #include "rules/world_rules.h"
 #include "step.h"
 #include "world_util.h"
@@ -12,7 +14,9 @@
 
 namespace ages {
 
-bool make_genesis(World& w, const Params& p, std::string& err) {
+bool make_genesis(World& w, const Params& p, std::string& err) { return make_genesis(w, p, Profile(), err); }
+
+bool make_genesis(World& w, const Params& p, const Profile& profile, std::string& err) {
     const GenesisDef& g = p.genesis;
     if (!g.present) { err = "genesis requested but data/genesis.json is missing"; return false; }
     World n;
@@ -35,9 +39,14 @@ bool make_genesis(World& w, const Params& p, std::string& err) {
     if (!genesis_start(n, p, err)) return false;
     n.tags.insert("egg");
     int waking = g.story.prehistory_waking_years;
+    std::vector<Weave> weaves = plan_weaves(n, p, profile);   // item 04
+    size_t woven = 0;
+    int prophecy = prophecy_year(n, p);
     while (n.year < years) {
         decade_step(n, p);
         if (waking > 0 && n.year % waking == 0) storyteller_wake(n, p, waking, false);
+        for (; woven < weaves.size() && weaves[woven].year <= n.year; ++woven) weave_legend(n, p, weaves[woven]);
+        if (prophecy > 0 && n.year >= prophecy) write_prophecy(n, p);
     }
     n.tags.erase("egg");
     for (auto& e : n.chronicle) e.tags.insert("prehistory");

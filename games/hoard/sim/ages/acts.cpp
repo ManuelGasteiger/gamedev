@@ -1,3 +1,4 @@
+#include "chron.h"
 #include "ages.h"
 #include "unrecorded.h"
 #include "dragon_acts.h"
@@ -7,7 +8,9 @@
 #include "memory_tiers.h"
 #include "core/detmath.h"
 #include "oaths.h"
+#include "prophecy.h"
 #include "offers.h"
+#include "person_record.h"
 #include "reaction_lines.h"
 #include "rules/coalitions.h"
 #include "rules/rules.h"
@@ -115,6 +118,9 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
             else if (kv.first == "food") w.dragons[kPlayer].hoard.food += amt;
         }
         if (a.payload.empty()) w.dragons[kPlayer].hoard.gold += taken * molten;
+        auto has = [&](const char* k) { auto it = a.payload.find(k); return it != a.payload.end() && it->second > 0; };
+        if (has("books")) take_sources(w, p, f, m);   // item 05
+        if (has("artifacts")) find_relic(w, p, f, m);
     } else if (a.type == "take_hostage") {   // 17.2: the heir (else the ruler) becomes a person in the lair
         f.tags.insert("hostage_taken");
         w.dragons[kPlayer].lineages.push_back(f.id);
@@ -145,6 +151,7 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
             }
         }
     } else if (a.type == "give") {
+        if (a.payload.count("books")) give_sources(w, m);   // item 05
         auto era = a.payload.find("era");
         auto gold = a.payload.find("gold");
         if (era != a.payload.end()) f.era_progress += m * c.era_threshold[static_cast<size_t>(std::min<int>(f.era, 3))] * c.act_give_era_share;
@@ -299,13 +306,16 @@ std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const
             notes.push_back(n);
         } else notes.push_back(react_to(w, p, *f, act, m, act_index));
         witnesses(w, p, act, *f, m, act_index, notes);
+        witness_act(w, p, *f, act, m, act_index);   // item 07
         note_lair_sight(w, p, act);   // item 06
         emit(w, "act_" + act.type, act.target, act.region, m, act_tags(act));
         note_act(w, p, act, m);
+        prophecy_after_act(w, p, act);   // item 04
         resolve_hooks(w, p, act);   // v0.4 hooks (S3)
     }
     if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");
     w.dragons[kPlayer].tags.erase("rage");
+    close_tenures(w);   // item 05: a released or slain historian's book ends
     score_events(w, p);
     return reaction_lines(w, p, notes, first_event);
 }
