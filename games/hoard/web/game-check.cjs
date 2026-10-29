@@ -570,8 +570,10 @@ async function finishSleep() {
   const tookOff = !(await state()).landed;
   check('i.esc', chronOpen && chronClosed && sysClosed && landedByKey && tookOff, `C opens chronicle, Esc closes it, Esc closes game sheet, L lands, Esc takes off`);
   await page.evaluate(() => game.land());
-  await sleepThrough(100);
+  await sleepThrough(100, { paused: true });   // start paused at 20 y/s, so the montage cannot end before the key
   await page.evaluate(() => game.setSpeed(20));
+  await page.keyboard.press(' ');
+  await page.waitForTimeout(100);
   await page.keyboard.press(' ');
   const paused = (await page.evaluate(() => game.montageInfo())).paused;
   const y1 = (await page.evaluate(() => game.montageInfo())).year;
