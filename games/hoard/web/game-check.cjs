@@ -42,8 +42,12 @@ async function sleepThrough(years, opts = {}) {
   await page.$eval('#sleep-years', (el, y) => { el.value = String(y); el.dispatchEvent(new Event('change')); }, years);
   const forecast = await page.$eval('#forecast', (e) => e.textContent);
   if (opts.beforeSleep) await opts.beforeSleep(forecast);
-  await page.click('#sleep-go');
-  await page.evaluate(() => game.setSpeed(2000));
+  // paused: click and pause in one task, so no frame plays the montage past an event the caller steps to
+  if (opts.paused) await page.evaluate(() => { document.querySelector('#sleep-go').click(); game.pauseMontage(); game.setSpeed(2000); });
+  else {
+    await page.click('#sleep-go');
+    await page.evaluate(() => game.setSpeed(2000));
+  }
   return forecast;
 }
 
@@ -318,14 +322,14 @@ async function finishSleep() {
   for (const r of regions) ownerBefore[r.id] = await page.evaluate((id) => game.tileOwnerRing(id), r.id);
   const eraBefore = await page.evaluate((id) => game.settlementCount(id), 'hill_hold');
   await act('burn', { region: rich.capital, magnitude: 0.5 });
-  await sleepThrough(300);
+  await sleepThrough(300, { paused: true });
   const kinds2 = await playMontage();
   await shot('c-wake');
   let s6 = await state();
   // item 06 moved the history on; whether the breached court's oath breaks inside these 300 years is chance, so sleep on until one does
   for (let extra = 0; extra < 10 && !s6.oaths.some((o) => o.status !== 'active'); extra++) {
     if ((await page.evaluate(() => game.wake())).open) await beginRaid();
-    await sleepThrough(100);
+    await sleepThrough(100, { paused: true });
     kinds2.push(...await playMontage());
     s6 = await state();
   }
@@ -345,7 +349,7 @@ async function finishSleep() {
   for (const t of targets) { await fly(t.id); await act('burn', { region: t.id, magnitude: 0.8 }); }
   await page.waitForTimeout(300);
   await shot('c-raze');
-  await sleepThrough(300);
+  await sleepThrough(300, { paused: true });
   const kinds3 = await playMontage();
   await shot('c-wake-2');
   const kindsAll = [...kinds2, ...kinds3];
@@ -415,7 +419,7 @@ async function finishSleep() {
     extraSleeps += 1;
     if (!captured.region_settled) await openLand();
     await closeWake();
-    await sleepThrough(100);
+    await sleepThrough(100, { paused: true });
     kindsAll.push(...await playMontage());
   }
   const s7 = await state();
@@ -454,7 +458,7 @@ async function finishSleep() {
       game.loadWorld(w);
     });
     for (let extra = 0; extra < 8 && !captured.orcs_spawned; extra++) {   // item 06 moved the history on: give the horde a few centuries
-      await sleepThrough(100);
+      await sleepThrough(100, { paused: true });
       await playMontage();
       await beginRaid();
     }
