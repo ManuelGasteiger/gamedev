@@ -6,6 +6,12 @@ One line per decision, newest first, with the doc that carries the detail. A new
 
 | date | decision | detail in |
 |---|---|---|
+| 2026-11-02 | Ascension: first a bot that steers toward it, to learn whether the conditions can be met at all; item 12's cults come after. | `reports/04-endings-prophecy.md` |
+| 2026-11-02 | Mortality gets harder (it was reached in 93 % of first runs by a bot that knew the conditions). | `reports/04-endings-prophecy.md` |
+| 2026-11-02 | Every ending that becomes ready is offered as an exit. | `reports/04-endings-prophecy.md` |
+| 2026-11-02 | The Court move keeps the research threshold 4. | `data/moves.json`, `reports/07-people-moves.md` |
+| 2026-11-02 | More named people per court, but the player sees a person only after contact. | `reports/07-people-moves.md` |
+| 2026-11-02 | A cause shows only when the player knows the history (historian, a source, or other means); pattern lines that carry their own "because" lose it at level 0. | `reports/05-chronicle.md` |
 | 2026-10-28 | Endings in v0.5: Mortality, The Myth, Ascension (D6). | `prompts/04-endings-prophecy.md`, `story-and-endings.md` §3 |
 | 2026-10-28 | The artifact voice is not there from hatching; it speaks only once the dragon holds an item with an agenda (D7: no). | `prompts/05-chronicle.md` |
 | 2026-10-28 | Iteration 4 human check passed: Manu mostly agrees with the sifter's pick in the 15 pairs; the German pattern lines stand. Repeated tier-4 lines of one pattern in one waking fold into one line. | `reports/14-pairs.md` |
