@@ -104,7 +104,8 @@ void heroes(World& w, const Params& p) {
                 break;
             }
         }
-        if (w.rng.chance(c.hero_chance * dts(w, c))) rise_hero(w, p, f, "renown", because("renown"));
+        double renown = static_cast<int>(f.regions.size()) >= c.keeper_second_regions ? c.hero_chance_large : c.hero_chance;
+        if (w.rng.chance(renown * dts(w, c))) rise_hero(w, p, f, "renown", because("renown"));
     }
     // a failed slay attempt this step kills the hero who led it
     for (const Event& ev : events_this_step(w)) {
@@ -145,13 +146,24 @@ static void rise_keeper(World& w, const Params& p, Faction& f, const std::string
     emit(w, "person_rose", s.id, f.id, 0, {role}, cause);
 }
 
+static int with_role(const World& w, const std::string& faction, const std::string& role) {
+    int n = 0;
+    for (auto& x : w.people) if (x.faction == faction && x.role == role) n += 1;
+    return n;
+}
+
+// item 04b: a court of keeper_second_regions or more keeps a second sage from sage_second_era and a second priest
+// while its faith holds priest_second_faith
 void sages_and_priests(World& w, const Params& p) {
     const Constants& c = p.c;
     for (auto& f : w.factions) {
         if (f.era < c.sage_min_era) continue;
-        if (f.culture.traits.openness > c.sage_openness && !find_person_role(w, f.id, "sage"))
+        bool large = static_cast<int>(f.regions.size()) >= c.keeper_second_regions;
+        int sages = large && f.era >= c.sage_second_era ? 2 : 1;
+        int priests = large && f.faith >= c.priest_second_faith ? 2 : 1;
+        if (f.culture.traits.openness > c.sage_openness && with_role(w, f.id, "sage") < sages)
             rise_keeper(w, p, f, "sage", because("learning", {last_event_id(w, "era_advance", f.id)}, {{"openness", f.culture.traits.openness}}));
-        if (f.culture.traits.piety > c.priest_piety && !find_person_role(w, f.id, "priest"))
+        if (f.culture.traits.piety > c.priest_piety && with_role(w, f.id, "priest") < priests)
             rise_keeper(w, p, f, "priest", because("piety", {}, {{"piety", f.culture.traits.piety}}));
     }
 }

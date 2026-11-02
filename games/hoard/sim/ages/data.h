@@ -231,6 +231,7 @@ struct Constants {
     double epithet_trait = 0.75;
     double hero_chance = 0.02;
     int hero_max = 3;
+    double hero_chance_large = 0.02;   // item 04b: renown in a court of keeper_second_regions or more
     double hero_slay_bold_base = 0.5;
     double hero_unite_cohesion = 0.2;
     double hero_usurp_bold = 0.7;
@@ -239,6 +240,9 @@ struct Constants {
     int sage_min_era = 2;
     double sage_openness = 0.5;
     double priest_piety = 0.5;
+    int keeper_second_regions = 2;      // item 04b: a court this large keeps a second sage and a second priest
+    int sage_second_era = 3;
+    double priest_second_faith = 0.3;
     double sage_memory_mult = 0.5;
     double keeper_min_weight = 0.1;   // a dragon memory this faint is not taken up by a new sage or priest
     int keeper_named_years = 200;     // the chronicle names a kept memory only when it is at least this old
