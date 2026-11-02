@@ -37,6 +37,8 @@ void set_eff(Tiers& t, double want);
 // the same-type acts this court remembers from the last rep_years (the awe repetition factor counts them)
 int recent_acts(const Faction& f, const std::string& type, int year, double years);
 
+// years; oral tiers scale with the race's memory (a living sage doubles it), dread may decay faster
+double halflife_of(const World& w, const Params& p, const Faction& f, const std::string& axis, const std::string& tier);
 void decay_tiers(World& w, const Params& p, Faction& f);
 void refresh_monumental(Faction& f);
 void burn_library(Faction& f, const MemoryConstants& m);            // written stocks and entries x library_burn

@@ -197,8 +197,8 @@ static json faction_json(const Faction& f) {
     j["max_regions"] = f.max_regions;
     j["max_realm"] = f.max_realm;
     j["era_years"] = f.era_years;
-    if (f.lair_known >= 0) j["lair_known"] = f.lair_known;
-    if (f.lair_exact) j["lair_exact"] = f.lair_exact;
+    if (f.lair_oral > 0) j["lair_oral"] = f.lair_oral;
+    if (f.lair_written > 0) j["lair_written"] = f.lair_written;
     j["eff"] = {{"growth", f.eff.growth}, {"cohesion_decay", f.eff.cohesion_decay}, {"era_rate", f.eff.era_rate}, {"war_chance", f.eff.war_chance}, {"settle_chance", f.eff.settle_chance}, {"anti_dragon_rate", f.eff.anti_dragon_rate}, {"diffusion", f.eff.diffusion}, {"faith_gain", f.eff.faith_gain}, {"succession_bonus", f.eff.succession_bonus}, {"vassal_wealth", f.eff.vassal_wealth}, {"memory_halflife", f.eff.memory_halflife}};
     return j;
 }
@@ -256,8 +256,8 @@ static Faction faction_from(const json& j) {
     get(j, "max_regions", f.max_regions);
     get(j, "max_realm", f.max_realm);
     get(j, "era_years", f.era_years);
-    get(j, "lair_known", f.lair_known);
-    get(j, "lair_exact", f.lair_exact);
+    get(j, "lair_oral", f.lair_oral);
+    get(j, "lair_written", f.lair_written);
     if (j.contains("eff")) {
         get(j["eff"], "growth", f.eff.growth);
         get(j["eff"], "cohesion_decay", f.eff.cohesion_decay);

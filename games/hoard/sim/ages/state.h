@@ -156,8 +156,7 @@ struct Faction {
     int max_realm = 0;   // own plus vassal regions
     std::vector<int> era_years;
     Effective eff;
-    int lair_known = -1;        // item 06: year the court last learned where the lair is (-1 never); fades with the oral tier
-    bool lair_exact = false;    // a returned person or a thief who came back has seen it
+    double lair_oral = 0, lair_written = 0;   // 06b: what the court knows of where the lair is, 0..1 per memory tier
 };
 
 struct FactionRecord {

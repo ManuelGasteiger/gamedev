@@ -38,12 +38,20 @@ bool arrivals_from_json(const DataJson& d, Params& p, std::string& err) {
     json j = json::parse(d.arrivals, nullptr, false);
     if (j.is_discarded()) { err = "invalid json in arrivals"; return false; }
     ArrivalBook& b = p.arrivals;
-    get(j, "oral_floor", b.oral_floor);
     get(j, "lure_gold", b.lure_gold);
     get(j, "hunt_food", b.hunt_food);
     get(j, "slopes_hunt_mult", b.slopes_hunt_mult);
     get(j, "rumour_years", b.rumour_years);
-    get(j, "lair_memory_years", b.lair_memory_years);
+    if (j.contains("lair")) {
+        const json& l = j["lair"];
+        get(l, "rough", b.lair_rough);
+        get(l, "exact", b.lair_exact);
+        get(l, "written_share", b.lair_written_share);
+        get(l, "flight_falloff", b.flight_falloff);
+        get(l, "evidence", b.lair_evidence);
+        get(l, "caps", b.lair_caps);
+    }
+    get(j, "ledge_gap_wakings", b.ledge_gap_wakings);
     get(j, "thief_era", b.thief_era);
     get(j, "refugee_years", b.refugee_years);
     get(j, "envoy_kill_generations", b.envoy_kill_generations);

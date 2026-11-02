@@ -34,9 +34,9 @@ void arrival_consume(World& w, const std::string& id) {
     w.arrivals.erase(std::remove_if(w.arrivals.begin(), w.arrivals.end(), [&](const Arrival& a) { return a.id == id; }), w.arrivals.end());
 }
 
-void arrivals_depart(World& w, const Params&) {
+void arrivals_depart(World& w, const Params& p) {
     for (auto& a : w.arrivals) {
-        if (Faction* f = find_faction(w, a.court)) if (returns_home(a.kind)) learn_lair(w, *f, true);
+        if (Faction* f = find_faction(w, a.court)) if (returns_home(a.kind)) learn_lair(w, p, *f, "returned");
         leave(w, a, "slept");
     }
     w.arrivals.clear();
@@ -68,12 +68,12 @@ void arrival_ignored(World& w, const Params& p, const Hook& h) {
     const Arrival* a = arrival_for(w, t->arrival, h.faction);
     if (!a) return;
     std::string id = a->id;
-    if (t->arrival == "thief") if (Faction* f = find_faction(w, h.faction)) learn_lair(w, *f, true);
+    if (t->arrival == "thief") if (Faction* f = find_faction(w, h.faction)) learn_lair(w, p, *f, "thief");
     arrival_consume(w, id);
 }
 
-void envoy_returned(World& w, const Offer& of) {
-    if (Faction* f = find_faction(w, of.from_faction)) learn_lair(w, *f, true);
+void envoy_returned(World& w, const Params& p, const Offer& of) {
+    if (Faction* f = find_faction(w, of.from_faction)) learn_lair(w, p, *f, "returned");
     for (auto& a : w.arrivals)
         if (a.kind == "envoy" && a.court == of.from_faction && a.offer_kind == of.kind && a.target == of.target) { arrival_consume(w, a.id); break; }
 }

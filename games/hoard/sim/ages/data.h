@@ -549,9 +549,13 @@ struct ArrivalDef {
 
 struct ArrivalBook {
     std::vector<ArrivalDef> kinds;
-    double oral_floor = 0.05, lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
+    double lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
     int rumour_years = 150, thief_era = 1, refugee_years = 20, envoy_kill_generations = 2, sight_regions = 2;
-    int lair_memory_years = 100;
+    // 06b: lair knowledge. A court knows the lair roughly from `rough`, exactly from `exact`; `evidence` is the gain per
+    // kind of evidence, `caps` the most a kind can teach (flight: a sighting never shows the entrance)
+    double lair_rough = 0.3, lair_exact = 0.75, lair_written_share = 0.6, flight_falloff = 0.5;
+    std::map<std::string, double> lair_evidence, lair_caps;
+    int ledge_gap_wakings = 1;   // a kind at the last waking does not come in the sleep after it
 };
 
 struct Params {

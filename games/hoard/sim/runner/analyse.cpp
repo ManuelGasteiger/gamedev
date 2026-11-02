@@ -174,7 +174,7 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
         json arrivals = json::array();
         for (auto& a : w.arrivals) arrivals.push_back({{"kind", a.kind}, {"court", a.court}, {"because", a.because}});
         json lair = json::array();
-        for (auto& f : w.factions) lair.push_back({{"court", f.id}, {"born", f.born}, {"level", lair_level(f)}});
+        for (auto& f : w.factions) lair.push_back({{"court", f.id}, {"born", f.born}, {"level", lair_level(f, p)}});
         *pending = {{"arrivals", arrivals}, {"lair", lair}, {"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};

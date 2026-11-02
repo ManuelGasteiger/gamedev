@@ -24,8 +24,7 @@ int main() {
         LoadResult r = load_or_die(seed);
         World& w = r.world;
         for (auto& f : w.factions) {
-            f.lair_known = w.year;
-            f.lair_exact = true;
+            f.lair_oral = 1;
             f.cohesion = 0.9;
             f.faith = 0.95;
             f.dread = Tiers{};
@@ -40,13 +39,13 @@ int main() {
             for (int later : {20, 60, 99}) {
                 w.arrivals.clear();
                 w.year = first.year + later;
-                for (auto& g : w.factions) { g.lair_known = w.year; g.lair_exact = true; }
+                for (auto& g : w.factions) g.lair_oral = 1;
                 rule_arrivals(w, r.params);
                 CHECK(!same_cause(w, f.id, first), "the same court, envoy and motive do not repeat within 100 years");
             }
             w.arrivals.clear();
             w.year = first.year + 101;
-            for (auto& g : w.factions) { g.lair_known = w.year; g.lair_exact = true; }
+            for (auto& g : w.factions) g.lair_oral = 1;
             rule_arrivals(w, r.params);
             CHECK(same_cause(w, f.id, first), "after the cooldown the same cause may come again");
             std::printf("arrival_cooldown ok (seed %llu, %s, %s)\n", static_cast<unsigned long long>(seed), f.id.c_str(), first.offer_kind.c_str());

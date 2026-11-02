@@ -1,9 +1,11 @@
 {
   "note": "Item 06. One row per visitor kind; gate names are the closed list in sim/ages/arrival_gates.cpp (item 10 reads it for arrival.needs). Per court per tick the most specific satisfied, unblocked kind off cooldown arrives (ties: file order). Runner-set values, not from the docs: oral_floor, lure_gold (the thief hook's 60), hunt_food, slopes_hunt_mult, the specificity numbers, the answers of scholar, kin and prophet. faith_share reads Faction.faith until item 12 (cults); prophecy_or_cult reads the court tag prophecy and awe_eff at cult_awe until item 04; taught reads an active teach modifier until item 09 logs teach as an act; slayer_band does not require bolt-throwers, the slayer clock decides the attack and the warning must not be droppable (item 08 owns the roster).",
-  "oral_floor": 0.05,
   "lure_gold": 60,
   "rumour_years": 150,
-  "lair_memory_years": 100,
+  "lair": { "rough": 0.3, "exact": 0.75, "written_share": 0.6, "flight_falloff": 0.5,
+            "evidence": { "flight": 0.04, "returned": 0.25, "hostage": 0.4, "thief": 0.35 },
+            "caps": { "flight": 0.45 } },
+  "ledge_gap_wakings": 1,
   "refugee_years": 20,
   "envoy_kill_generations": 2,
   "sight_regions": 2,

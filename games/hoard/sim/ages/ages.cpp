@@ -47,7 +47,7 @@ bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
     if (def) for (auto& t : def->tags) tags.insert(t);
     int sworn = emit(w, "oath_sworn", o.id, of.from_faction, 0, tags, because("offer_accepted", {}, {{"lie", of.is_lie ? 1.0 : 0.0}}), "oath:" + o.id);
     if (!of.envoy.empty()) meet(w, of.envoy, "offer", p.c.known_accept);
-    envoy_returned(w, of);
+    envoy_returned(w, p, of);
     if (of.kind == "hide_heir" || of.kind == "elope") {
         if (Person* x = find_person(w, of.target)) {
             Faction* f = find_faction(w, x->faction);
@@ -134,7 +134,7 @@ bool decline_offer_unrecorded(World& w, const Params& p, size_t index) {
     if (index >= w.offers.size()) return false;
     Offer of = w.offers[index];
     if (!of.envoy.empty()) meet(w, of.envoy, "offer", p.c.known_decline);
-    envoy_returned(w, of);
+    envoy_returned(w, p, of);
     Act a;
     a.type = "show";
     a.target = of.from_faction;

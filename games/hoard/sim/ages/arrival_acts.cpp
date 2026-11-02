@@ -26,7 +26,7 @@ bool receive_outcome(World& w, const Params& p, const Arrival& arrival, const st
         for (auto& r : w.regions) if (r.lair) r.tags.insert("slopes_settled");
     }
     apply_reward(w, p, a.court, "", reward);
-    if (outcome != "eat") if (Faction* f = find_faction(w, a.court)) learn_lair(w, *f, true);
+    if (outcome != "eat") if (Faction* f = find_faction(w, a.court)) learn_lair(w, p, *f, "returned");
     arrival_consume(w, a.id);
     emit(w, "arrival_answered", a.court, a.kind, 0, {outcome}, because("arrival_answered", {last_event_id(w, "act_receive", a.court, "", "", w.year)}));
     w.chronicle.back().text_key = "ev.arrival_" + outcome;

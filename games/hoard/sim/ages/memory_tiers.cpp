@@ -38,6 +38,8 @@ void record(Faction& f, const Deposit& d, const char* axis, const char* tier, do
     f.memory.push_back(e);
 }
 
+}
+
 double halflife_of(const World& w, const Params& p, const Faction& f, const std::string& axis, const std::string& tier) {
     const MemoryConstants& m = p.c.mem;
     if (tier == "written") return m.written_halflife;
@@ -48,6 +50,8 @@ double halflife_of(const World& w, const Params& p, const Faction& f, const std:
     if (axis == "dread") hl /= effect(w, p, "oral_dread_decay_mult");
     return hl;
 }
+
+namespace {
 
 double decay_factor(const World& w, double hl) { return hl > 0 ? det::half_life(w.dt, hl) : 1.0; }
 
@@ -143,6 +147,7 @@ void decay_tiers(World& w, const Params& p, Faction& f) {
 void burn_library(Faction& f, const MemoryConstants& m) {
     f.dread.written *= m.library_burn;
     f.awe.written *= m.library_burn;
+    f.lair_written *= m.library_burn;
     for (auto& e : f.memory) if (e.tier == "written") e.weight *= m.library_burn;
 }
 
