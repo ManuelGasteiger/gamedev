@@ -4,14 +4,14 @@ Branch `item/05b-known-causes` from `origin/main` (4659c29).
 
 ## Done
 
-- `.bare` variants (en, de) for every pattern key that names its own cause; `sift_line_text(..., with_cause)` tries `<key>.bare` first along the usual fallback chain, and `pat.<id>.title.bare` for `{title}`.
-- Briefing (`sift_block`, `tell`): pattern lines use the bare text below level 2; `cause_available` / `cause_shown` count a line's own cause.
-- Sifter (`select.cpp`): tier-4 lines with the same fold key (`pat.<id>.fold[.outcome|.open]`, or `pat.fold.<template>` for raw events) in the same year fold into one line with `{names}`; params `fold_names`, `fold_lines`. Folds into the headline too. One budget slot. `sift_wake` marks every folded thread shown.
-- Fold texts en, de; `pat.list.and`.
+- `.bare` variants and fold texts (en, de); bare text below level 2 in the briefing; tier-4 fold in the sifter.
+- `sift_budget` fixture uses a tier-4 kind without a fold text; `sift_bank_v1.hash` regenerated in a `golden:` commit.
+- Checks: fast tests 24/24, state hashes, wasm build, smoke 1-60, l10n pseudo/de, game-check 90/90.
+- Report `reports/05b-known-causes.md`; page rebuilt.
 
 ## Next
 
-- Build, run fast tests, read the goldens that move, before/after examples, wasm checks, report.
+- Owner review of the causal list and the fixture change.
 
 ## Blocked
 

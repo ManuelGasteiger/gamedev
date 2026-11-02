@@ -49,9 +49,20 @@ Judged not causal (owner may flip any of these; each needs only a `.bare` key, n
 
 ## Numbers
 
-Causes shown (`interest.py`): see the table below.
+`interest.py --seeds 1-60 --years 3000 --policies played --genesis`, main against this branch:
 
-CAUSES_TABLE
+| metric | main | branch |
+|---|---|---|
+| causes shown, level 0 | 0 % | 0 % |
+| causes shown, level 1 | 76 % | 68 % |
+| causes shown, level 2 | 100 % | 100 % |
+| headlines (2661 wakings) | 2460 | 2459 |
+| names an earlier one | 17 % | 16 % |
+| shown threads ended | 75 % | 75 % |
+| lines = L(y) | 28 % | 27 % |
+| fallbacks below the floor | 19 % | 19 % |
+
+Level 1 falls because a pattern line that carries its own cause now counts as `cause_available`; at level 1 it shows a cause only when a source covers it, as before. Level 0 was already 0 % by the metric, but the text of those lines carried the cause; now it does not. The other section 7 metrics are within a point. The headline count differs by one because folded threads are now marked as shown, which changes later callbacks.
 
 ## Before and after
 
@@ -123,7 +134,12 @@ waking 8, 760     before: Mortor founded a slayer order in 760 to answer your fi
 
 ## Checks
 
-CHECKS
+- `ctest --test-dir build -L fast`: 24 of 24 (after the golden and fixture commits).
+- `hoard-sim --golden 1-40` against `state_hashes.txt`: identical.
+- wasm (`web/build.sh` with the LFS glTF assets pulled): built; `node web/smoke.mjs --golden 1-60`: idle and raze MATCH, seeds 1 to 60 identical to `state_hashes.txt`.
+- `node web/l10n-check.cjs --lang pseudo,de`: passed.
+- `node web/game-check.cjs`: 90 of 90, console clean.
+- Rebuilt `web/ages.wasm`, `web/ages-sandbox.html`, `web/hoard-game.html` committed (they embed `patterns.json`).
 
 ## How to verify in five minutes
 
