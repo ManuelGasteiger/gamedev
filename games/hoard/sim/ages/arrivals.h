@@ -15,6 +15,7 @@ namespace ages {
 // arrival_gates.cpp
 int lair_distance(const World& w, const std::string& region);   // regions from the lair, 1000 when unreachable
 void learn_lair(World& w, Faction& f, bool exact);
+int lair_level(const Faction& f);   // 0 unknown, 1 rough, 2 exact
 void note_lair_sight(World& w, const Params& p, const Act& a);   // after an act is witnessed: who now knows where the lair is
 void refresh_lair_knowledge(World& w, const Params& p);          // the oral tier fades, written records keep it
 bool route_open(const World& w, const Faction& f);

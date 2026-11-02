@@ -13,6 +13,7 @@
 #include "ages/world_util.h"
 #include "ages/wounds.h"
 #include "ages/ages.h"
+#include "ages/arrivals.h"
 
 namespace ages {
 
@@ -172,7 +173,9 @@ void attach_analysis(Scenario& s, const Params& p, const AnalyseOptions& o) {
         for (auto& h : w.hooks) hooks.push_back({{"kind", h.kind}, {"refs", h.refs}});
         json arrivals = json::array();
         for (auto& a : w.arrivals) arrivals.push_back({{"kind", a.kind}, {"court", a.court}, {"because", a.because}});
-        *pending = {{"arrivals", arrivals}, {"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
+        json lair = json::array();
+        for (auto& f : w.factions) lair.push_back({{"court", f.id}, {"born", f.born}, {"level", lair_level(f)}});
+        *pending = {{"arrivals", arrivals}, {"lair", lair}, {"index", index}, {"year", w.year}, {"since_hatch", w.year - w.genesis.hatched_year},
                     {"phase", w.dragons[kPlayer].phase}, {"health_max", health_max(w, p)}, {"wounds", w.dragons[kPlayer].wounds},
                     {"listed", listed_wounds(w, p, acts)}, {"towers", towers(w, p)}, {"hooks", hooks}};
         if (w.sift.on && w.sift.lines_year == w.year) (*pending)["sift"] = sift_waking(w, p);

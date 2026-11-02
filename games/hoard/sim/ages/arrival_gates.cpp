@@ -128,6 +128,8 @@ void learn_lair(World& w, Faction& f, bool exact) {
     if (exact) f.lair_exact = true;
 }
 
+int lair_level(const Faction& f) { return f.lair_known < 0 ? 0 : (f.lair_exact ? 2 : 1); }
+
 // a witnessed act within sight_regions of the lair, a show at a capital, a hostage sent home
 void note_lair_sight(World& w, const Params& p, const Act& a) {
     const Region* at = act_region(w, a);
