@@ -21,6 +21,7 @@ struct Knobs {
     bool stamina = true;
     std::map<std::string, double> cost, magnitude, take_payload;
     double give_gold = 1, show_dread_max = 0.4;
+    int extra_gifts = 4;
     std::vector<std::string> accept_offers;
     std::string sleep = "short";
 };
@@ -158,6 +159,19 @@ std::vector<Act> plan(World& w, const Params& p, const Knobs& k, const std::vect
         a.payload = k.take_payload;
         out.push_back(a);
     }
+    // the rest of the stamina buys gifts for the least faithful targets: faith from a gift is not damped by repetition
+    std::map<std::string, int> gifts;
+    for (int n = 0; n < k.extra_gifts * static_cast<int>(targets.size()); ++n) {
+        const Faction* low = nullptr;
+        for (auto& id : targets)
+            if (const Faction* f = find_faction(w, id))
+                if (gifts[id] < k.extra_gifts && (!low || f->faith + 0.05 * gifts[id] < low->faith + 0.05 * gifts[low->id])) low = f;
+        if (!low || !spend("give")) break;
+        gifts[low->id] += 1;
+        Act a = act_on(w, k, "give", *low);
+        a.payload["gold"] = k.give_gold;
+        out.push_back(a);
+    }
     return out;
 }
 
@@ -262,6 +276,7 @@ bool attach_ascend_bot(Scenario& s, const Params& p, bool free, AscendBot& out, 
     k->magnitude = j.value("magnitude", std::map<std::string, double>());
     k->take_payload = j.value("take_payload", std::map<std::string, double>());
     k->give_gold = j.value("give_gold", 1.0);
+    k->extra_gifts = j.value("extra_gifts", 4);
     k->show_dread_max = j.value("show_dread_max", 0.4);
     k->accept_offers = j.value("accept_offers", std::vector<std::string>());
     k->sleep = j.value("sleep", std::string("short"));
