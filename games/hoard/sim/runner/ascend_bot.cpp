@@ -266,6 +266,15 @@ void sample(const World& w, const Params& p, json& probe) {
     best(parts, "races_awe_0.6", static_cast<double>(awe_races.size()));
     best(parts, "courts_faith_0.4", faith);
     best(parts, "courts_both", both);
+    int temple = 0, tag_only = 0;
+    for (auto& f : w.factions) {
+        bool built = false;
+        for (auto& m : f.monuments) if (m.bias == "dragon_temple") built = true;
+        if (built) ++temple;
+        else if (has_tag(f.tags, "dragon_temple")) ++tag_only;
+    }
+    best(parts, "courts_temple", temple);
+    best(parts, "courts_temple_tag_no_monument", tag_only);
     best(parts, "max_awe", top_awe);
     best(parts, "max_faith", top_faith);
     best(parts, "courts", static_cast<double>(w.factions.size()));
