@@ -105,4 +105,30 @@ std::string protagonist(const SiftPattern& p, const SiftThread& t) {
     return it == t.cast.end() ? "" : it->second;
 }
 
+std::vector<std::string> fold_names(const SiftLine& l) {
+    std::vector<std::string> out;
+    auto it = l.params.find("fold_names");
+    if (it == l.params.end()) return out;
+    for (size_t at = 0; at <= it->second.size();) {
+        size_t end = std::min(it->second.find(',', at), it->second.size());
+        if (end > at) out.push_back(it->second.substr(at, end - at));
+        at = end + 1;
+    }
+    return out;
+}
+
+std::vector<std::pair<int, int>> fold_lines(const SiftLine& l) {
+    std::vector<std::pair<int, int>> out;
+    auto it = l.params.find("fold_lines");
+    if (it == l.params.end()) return out;
+    for (size_t at = 0; at < it->second.size();) {
+        size_t end = std::min(it->second.find(',', at), it->second.size());
+        std::string one = it->second.substr(at, end - at);
+        size_t colon = one.find(':');
+        if (colon != std::string::npos) out.push_back({std::atoi(one.substr(0, colon).c_str()), std::atoi(one.substr(colon + 1).c_str())});
+        at = end + 1;
+    }
+    return out;
+}
+
 }

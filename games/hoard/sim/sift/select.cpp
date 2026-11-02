@@ -1,8 +1,10 @@
 #include <algorithm>
 #include "candidate.h"
 #include "sift.h"
+#include "line_text.h"
 #include "sift_util.h"
 #include "core/detmath.h"
+#include "ages/importance.h"
 #include "ages/world_util.h"
 
 // research-story-sifting.md sections 3 and 4: candidates, the headline in Facade's order (top priority tier, score,
@@ -196,6 +198,50 @@ struct Picker {
         return l;
     }
 
+    int line_event(const Candidate& c) const { return c.thread && c.thread->emitted ? c.thread->emitted : lead(c); }
+
+    // tier-4 lines of one pattern (or one event template) in one year read as one line, when a fold text exists
+    std::string fold_key(const Candidate& c) const {
+        if (c.tier != 4 || c.kind != "line") return "";
+        std::string fk;
+        if (c.pattern) {
+            std::string key = key_of(c), base = "pat." + c.pattern->id;
+            if (key == base + ".open") fk = base + ".fold.open";
+            else if (key.rfind(base + ".line", 0) == 0) fk = base + ".fold" + key.substr(base.size() + 5);
+        } else if (const Event* e = sift_event(w, lead(c))) fk = "pat.fold." + template_key(*e);
+        if (fk.empty() || !sift_text_exists(p, fk)) return "";
+        const Event* e = sift_event(w, line_event(c));
+        return fk + "@" + std::to_string(e ? e->year : 0);
+    }
+
+    // marks the others of i's fold as used and turns l into their one line; returns the events they tell
+    std::vector<int> fold(size_t i, std::vector<bool>& used, const std::set<int>& printed, ThreadLine& l) const {
+        std::string g = fold_key(cands[i]);
+        if (g.empty()) return {};
+        std::vector<size_t> more;
+        for (size_t j = 0; j < cands.size(); ++j) {
+            if (used[j] || j == i || fold_key(cands[j]) != g) continue;
+            bool told = false;
+            for (int id : cands[j].fresh) if (printed.count(id) || std::count(cands[i].fresh.begin(), cands[i].fresh.end(), id)) told = true;
+            if (!told) more.push_back(j);
+        }
+        if (more.empty()) return {};
+        std::stable_sort(more.begin(), more.end(), [&](size_t a, size_t b) { return cands[a].score > cands[b].score; });
+        std::string names = cands[i].protagonist, lines = std::to_string(l.thread) + ":" + std::to_string(l.event);
+        std::vector<int> told;
+        for (size_t j : more) {
+            used[j] = true;
+            names += "," + cands[j].protagonist;
+            lines += "," + std::to_string(cands[j].thread ? cands[j].thread->id : 0) + ":" + std::to_string(line_event(cands[j]));
+            told.insert(told.end(), cands[j].fresh.begin(), cands[j].fresh.end());
+            told.push_back(line_event(cands[j]));
+        }
+        l.text_key = g.substr(0, g.find('@'));
+        l.params["fold_names"] = names;
+        l.params["fold_lines"] = lines;
+        return told;
+    }
+
     // ages: cut at a new hegemon or a rise of the valley's era, named after it; at most max_ages
     void ages() {
         struct Age { int from; std::string key, who; };
@@ -261,6 +307,7 @@ struct Picker {
             }
             used[pickd] = true;
             out.push_back(line_of(cands[pickd], "headline"));
+            fold(pickd, used, {}, out.back());
         }
         // 2. tier 5, outside the budget
         for (size_t i = 0; i < cands.size(); ++i)
@@ -285,6 +332,8 @@ struct Picker {
         auto take = [&](size_t i, const std::string& kind) {
             used[i] = true;
             ThreadLine l = line_of(cands[i], kind);
+            std::vector<int> folded = fold(i, used, printed, l);
+            printed.insert(folded.begin(), folded.end());
             out.push_back(l);
             per_court[cands[i].court] += 1;
             if (cands[i].pattern) per_pattern[cands[i].pattern->id] += 1;
@@ -292,7 +341,7 @@ struct Picker {
             printed.insert(cands[i].fresh.begin(), cands[i].fresh.end());
             printed.insert(l.event);
             // under 30 years a thread still under way may take a second line, event by event
-            if (years < 30 && cands[i].thread && cands[i].thread->state == "open" && cands[i].kind == "line" && cands[i].fresh.size() >= 2 && left > 0 &&
+            if (folded.empty() && years < 30 && cands[i].thread && cands[i].thread->state == "open" && cands[i].kind == "line" && cands[i].fresh.size() >= 2 && left > 0 &&
                 !printed.count(cands[i].fresh[cands[i].fresh.size() - 2]) ) {
                 ThreadLine more = l;
                 more.kind = "line";
@@ -413,7 +462,7 @@ void sift_wake(World& w, const Params& p, int since_year) {
         return find_person(w, id) || std::any_of(w.dead_people.begin(), w.dead_people.end(), [&](const DeadPerson& x) { return x.id == id; });
     };
     for (auto& l : lines) {
-        std::vector<std::string> ids;
+        std::vector<std::string> ids = fold_names(l);
         for (auto& kv : l.params) if (kv.first.rfind("role:", 0) == 0) ids.push_back(kv.second);
         if (const Event* e = sift_event(w, l.event)) { ids.push_back(e->subject); ids.push_back(e->object); }
         for (auto& id : ids) if (!id.empty() && is_person(id) && w.sift.named.count(id)) d.names_earlier = true;
@@ -421,9 +470,13 @@ void sift_wake(World& w, const Params& p, int since_year) {
     for (auto& l : lines) {
         if (const Event* e = sift_event(w, l.event)) for (auto* id : {&e->subject, &e->object}) if (is_person(*id)) w.sift.named.insert(*id);
         for (auto& kv : l.params) if (kv.first.rfind("role:", 0) == 0 && is_person(kv.second)) w.sift.named.insert(kv.second);
-        if (!l.thread) { if (const Event* e = sift_event(w, l.event)) if (!e->subject.empty()) w.sift.named.insert(e->subject); continue; }
+        for (auto& id : fold_names(l)) if (!id.empty() && (!l.thread || is_person(id))) w.sift.named.insert(id);
+        std::set<int> told;
+        for (auto& x : fold_lines(l)) if (x.first) told.insert(x.first);
+        if (l.thread) told.insert(l.thread);
+        if (!l.thread) { if (const Event* e = sift_event(w, l.event)) if (!e->subject.empty()) w.sift.named.insert(e->subject); }
         for (auto& t : w.sift.threads)
-            if (t.id == l.thread && (t.shown.empty() || t.shown.back().waking != w.sift.waking + 0 || t.shown.back().year != w.year)) {
+            if (told.count(t.id) && (t.shown.empty() || t.shown.back().waking != w.sift.waking + 0 || t.shown.back().year != w.year)) {
                 t.shown.push_back({w.sift.waking, static_cast<int>(t.events.size()), w.year, t.state});
                 if (const SiftPattern* pat = find_pattern(p, t.pattern)) { std::string who = protagonist(*pat, t); if (!who.empty()) w.sift.named.insert(who); }
             }

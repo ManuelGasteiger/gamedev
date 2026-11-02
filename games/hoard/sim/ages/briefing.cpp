@@ -313,7 +313,20 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
     auto tell = [&](const SiftLine& l) {
         Told t;
         t.level = line_level(w, p, year_of(l), l.thread, l.event);
-        t.text = sift_line_text(w, p, l);
+        std::vector<std::pair<int, int>> folded = fold_lines(l);
+        for (auto& m : folded) {   // a folded line is told at the level its least known member has
+            const Event* x = sift_event(w, m.second);
+            t.level = std::min(t.level, line_level(w, p, x ? x->year : year_of(l), m.first, m.second));
+        }
+        // a pattern line that names its cause in its own words drops it below level 2 (decision of 2026-11-02)
+        std::string full = sift_line_text(w, p, l), bare = sift_line_text(w, p, l, "en", false);
+        bool own_cause = full != bare;
+        t.text = t.level >= 2 ? full : bare;
+        if (!folded.empty()) {   // the members' sources and causes are not told one by one
+            t.available = own_cause;
+            t.shown = own_cause && t.level >= 2;
+            return t;
+        }
         const Event* e = sift_event(w, l.event);
         if (t.text.empty() && e && e->id >= kCompoundBase && !e->cause.refs.empty()) e = sift_event(w, e->cause.refs.back());
         auto tell_sources = [&](int match, int event) {
@@ -334,7 +347,8 @@ static void sift_block(const World& w, const Params& p, const Narrator& n, int s
         for (auto& kv : l.params) if (kv.first.rfind("ev:", 0) == 0) told_in_line.insert(kv.second);
         for (int id : l.because)
             if (const Event* x = find_event(w, id)) if (refs.size() < 2 && !told_in_line.count(std::to_string(id))) refs.push_back(x);
-        t.available = !refs.empty();
+        t.available = !refs.empty() || own_cause;
+        t.shown = own_cause && t.level >= 2;
         if (t.level == 1) tell_sources(l.thread, l.event);
         else if (t.level >= 2 && !refs.empty()) {
             std::map<std::string, std::string> v = {{"ref", n.brief(*refs[0])}};

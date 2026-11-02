@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "line_text.h"
 #include "sift_util.h"
 #include "ages/names.h"
@@ -6,6 +7,7 @@
 
 // pat.* keys from data/text/<lang>/patterns.json. A missing key falls back (pat.x.line.fell -> pat.x.line; a closed
 // callback to the pattern's own line; pat.x.cb.cut -> pat.cb.cut), so a pattern needs only its plain line.
+// Without its cause a key is tried as <key>.bare first; a line that carries no cause has no .bare.
 
 namespace ages {
 
@@ -45,24 +47,51 @@ std::vector<std::string> keys_for(const std::string& key) {
         std::string o = outcome("line");
         if (!o.empty()) out.push_back(base + ".line." + o);
         out.push_back(base + ".line");
+    } else if (rest.rfind("fold", 0) == 0 && rest != "fold.open" && id != "fold") {
+        std::string o = outcome("fold");
+        if (!o.empty()) out.push_back(base + ".fold." + o);
+        out.push_back(base + ".fold");
     } else out.push_back(key);
     return out;
 }
 
-const std::string* lookup(const text::Bundle& b, const std::string& key, std::string& used) {
-    for (auto& k : keys_for(key))
-        if (const std::string* s = text::find_string(b, k)) { used = k; return s; }
+const std::string* lookup(const text::Bundle& b, const std::string& key, bool with_cause) {
+    for (auto& k : keys_for(key)) {
+        if (!with_cause)
+            if (const std::string* s = text::find_string(b, k + ".bare")) return s;
+        if (const std::string* s = text::find_string(b, k)) return s;
+    }
     return nullptr;
 }
 
+std::string joined(const World& w, const text::Bundle& b, const std::string& ids) {
+    std::vector<std::string> names;
+    for (size_t at = 0; at <= ids.size();) {
+        size_t end = std::min(ids.find(',', at), ids.size());
+        if (end > at) names.push_back(display_name(w, ids.substr(at, end - at)));
+        at = end + 1;
+    }
+    const std::string* a = text::find_string(b, "pat.list.and");
+    std::string out;
+    for (size_t i = 0; i < names.size(); ++i) {
+        if (i) out += i + 1 == names.size() ? " " + (a ? *a : std::string("and")) + " " : ", ";
+        out += names[i];
+    }
+    return out;
 }
 
-std::string sift_line_text(const World& w, const Params& p, const SiftLine& l, const std::string& lang) {
+}
+
+bool sift_text_exists(const Params& p, const std::string& key) {
+    const text::Bundle* b = p.sift.texts ? p.sift.texts->get("en") : nullptr;
+    return b && lookup(*b, key, true);
+}
+
+std::string sift_line_text(const World& w, const Params& p, const SiftLine& l, const std::string& lang, bool with_cause) {
     if (l.text_key.rfind("pat.", 0) != 0 || !p.sift.texts) return "";
     const text::Bundle* b = p.sift.texts->get(lang);
     if (!b) return "";
-    std::string used;
-    const std::string* tmpl = lookup(*b, l.text_key, used);
+    const std::string* tmpl = lookup(*b, l.text_key, with_cause);
     if (!tmpl) return "";
     text::Ctx c;
     for (auto& kv : l.params) {
@@ -96,9 +125,15 @@ std::string sift_line_text(const World& w, const Params& p, const SiftLine& l, c
         size_t i = static_cast<size_t>(std::atoi(l.params.at("era").c_str()));
         c.vars["era"] = i < p.texts.era_names.size() ? p.texts.era_names[i] : l.params.at("era");
     }
+    if (l.params.count("fold_names")) {
+        c.vars["names"] = joined(w, *b, l.params.at("fold_names"));
+        if (const Event* e = sift_event(w, l.event)) c.vars["year"] = std::to_string(e->year);
+    }
     if (l.text_key.rfind("pat.", 0) == 0 && l.text_key.rfind("pat.cb.", 0) != 0 && l.text_key.rfind("pat.age.", 0) != 0) {
         std::string id = l.text_key.substr(4, l.text_key.find('.', 4) - 4);
-        if (const std::string* t = text::find_string(*b, "pat." + id + ".title")) c.vars["title"] = text::render(*b, *t, c);
+        const std::string* t = with_cause ? nullptr : text::find_string(*b, "pat." + id + ".title.bare");
+        if (!t) t = text::find_string(*b, "pat." + id + ".title");
+        if (t) c.vars["title"] = text::render(*b, *t, c);
     }
     std::vector<std::string> problems;
     return text::render(*b, *tmpl, c, &problems);
