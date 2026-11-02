@@ -22,6 +22,7 @@ struct Knobs {
     std::map<std::string, double> cost, magnitude, take_payload;
     double give_gold = 1, show_dread_max = 0.4;
     int extra_gifts = 4;
+    bool teach = true;
     std::vector<std::string> accept_offers;
     std::string sleep = "short";
 };
@@ -186,6 +187,15 @@ void answer(World& w, const Params& p, const Knobs& k, const std::vector<std::st
     for (auto& id : waiting) { std::string reason; receive(w, p, id, "receive", reason); }
 }
 
+// the arcane era (or magic) is the craft condition, castles the strong one: teach the target nearest the next era
+void teach_one(World& w, const Params& p, const std::vector<std::string>& targets) {
+    const Faction* best = nullptr;
+    for (auto& id : targets)
+        if (const Faction* f = find_faction(w, id))
+            if (f->era < 4 && (!best || f->era > best->era)) best = f;
+    if (best) cast_spell(w, p, "teach", best->id, "", "");
+}
+
 const EndingDef* ascension(const Params& p) {
     for (auto& e : p.endings.endings) if (e.id == "ascension" && e.enabled) return &e;
     return nullptr;
@@ -229,6 +239,17 @@ void sample(const World& w, const Params& p, json& probe) {
                 }
             }
         }
+    }
+    if (const EndingState* st = ending_state(w, "ascension")) {
+        int met = 0, held = 0;
+        json missing = json::array();
+        for (size_t i = 0; i < e->conds.size() && i < st->conds.size(); ++i) {
+            if (st->conds[i].met) ++met;
+            else missing.push_back(e->conds[i].id);
+            if (cond_held(st->conds[i], w.year, e->conds[i])) ++held;
+        }
+        if (met > probe.value("met_together", -1)) { probe["met_together"] = met; probe["missing_then"] = missing; }
+        best(probe, "held_together", held);
     }
     json& parts = probe["parts"];
     int awe = 0, faith = 0, both = 0;
@@ -277,6 +298,7 @@ bool attach_ascend_bot(Scenario& s, const Params& p, bool free, AscendBot& out, 
     k->take_payload = j.value("take_payload", std::map<std::string, double>());
     k->give_gold = j.value("give_gold", 1.0);
     k->extra_gifts = j.value("extra_gifts", 4);
+    k->teach = j.value("teach", true);
     k->show_dread_max = j.value("show_dread_max", 0.4);
     k->accept_offers = j.value("accept_offers", std::vector<std::string>());
     k->sleep = j.value("sleep", std::string("short"));
@@ -295,6 +317,7 @@ bool attach_ascend_bot(Scenario& s, const Params& p, bool free, AscendBot& out, 
         (*probe)["targets"] = *targets;
         acts = plan(w, p, *k, *targets);
         answer(w, p, *k, *targets);
+        if (k->teach) teach_one(w, p, *targets);
     };
     if (k->sleep == "short") { out.base->sleep_cycle = {"short"}; out.base->sleep_open.clear(); }
     return true;

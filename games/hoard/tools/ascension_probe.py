@@ -7,6 +7,7 @@ Per condition: share of runs where it was ever met, longest hold, and the best v
 from (courts, races, mean dread); then the parts (courts with awe >= 0.6, with faith >= 0.4, both, Dominion, ...).
 """
 import argparse, json, os, subprocess, sys
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -67,6 +68,11 @@ def main():
                 print(f"      {k:28} lowest {min(vals):.2f} in {len(vals)} runs" if vals else f"      {k:28} never 4 courts")
                 continue
             print(f"      {k:28} {dist(vals)}")
+    together = Counter(r.get("met_together", 0) for r in runs)
+    print("\nmost conditions met at one waking: " + ", ".join(f"{k}: {v} runs" for k, v in sorted(together.items())))
+    print(f"most conditions held 150 years at one waking: {dist([r.get('held_together', 0) for r in runs])}")
+    best_runs = [r for r in runs if r.get("met_together", 0) == max(together)]
+    print("missing at that waking in the best runs: " + ", ".join(f"{k} {v}" for k, v in Counter(m for r in best_runs for m in r.get("missing_then", [])).most_common()))
     print("\nparts (best value per run):")
     for k in sorted(runs[0].get("parts", {})):
         print(f"  {k:20} {dist([r['parts'].get(k, 0) for r in runs])}")
