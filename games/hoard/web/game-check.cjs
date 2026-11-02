@@ -18,11 +18,11 @@ let page;
 function check(id, ok, detail) { results.push({ id, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + id + (detail ? '  ' + detail : '')); return ok; }
 async function shot(name) { await page.screenshot({ path: path.join(shots, name + '.png'), timeout: 180000 }); }   // swiftshader on a busy machine is slow
 const state = () => page.evaluate(() => game.state());
-// item 06: an envoy climbs only to a lair its court has seen, so the lab lets every court see it before a sleep
+// item 06: an envoy climbs only to a lair its court knows (06b: on record), so the lab lets every court know it before a sleep
 async function seeLair() {
   await page.evaluate(() => {
     const w = game.world();
-    for (const f of w.factions) { f.lair_known = w.year; f.lair_exact = true; }
+    for (const f of w.factions) { f.lair_oral = 1; f.lair_written = 1; }
     game.loadWorld(w);
   });
   await page.waitForTimeout(100);

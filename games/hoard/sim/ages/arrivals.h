@@ -37,6 +37,9 @@ const ArrivalDef* arrival_def(const Params& p, const std::string& kind);
 const Arrival* arrival_for(const World& w, const std::string& kind, const std::string& court);
 Arrival* find_arrival(World& w, const std::string& id);
 void arrival_consume(World& w, const std::string& id);
+// 06b: the kind may not come for this court now: its cooldowns run, or it was at the ledge at the last waking
+bool arrival_resting(const World& w, const Params& p, const std::string& court, const ArrivalDef& d, const std::string& cause);
+void arrival_noted(World& w, const ArrivalDef& d, const std::string& court, const std::string& cause);   // the cooldowns start
 void arrivals_depart(World& w, const Params& p);    // the dragon sleeps: whoever still waits goes home
 void arrivals_at_wake(World& w, const Params& p);   // the dragon wakes: short windows and expired offers have passed
 void arrival_ignored(World& w, const Params& p, const Hook& h);   // an unanswered hook of an arrival

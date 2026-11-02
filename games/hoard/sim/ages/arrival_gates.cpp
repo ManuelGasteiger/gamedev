@@ -20,6 +20,11 @@ bool any_oath(const World& w, const std::string& court) {
     return false;
 }
 
+int memory_rank(const Faction& f, const MemoryConstants& m) {
+    std::string t = memory_tier(f, m);
+    return t == "monumental" ? 3 : (t == "written" ? 2 : (t == "oral" ? 1 : 0));
+}
+
 bool gold_rumour(const World& w, const Params& p, const Faction& f) {
     if (w.dragons[kPlayer].hoard.gold >= p.arrivals.lure_gold) return true;
     for (size_t i = w.acts.size(); i > 0; --i) {
@@ -66,7 +71,7 @@ bool value_of(const GateCtx& g, const std::string& n, double& v) {
     if (n == "awe_or_oath") { v = any_oath(w, f.id) ? 1.0 : awe_eff(f); return true; }
     if (n == "knows_lair") return b(lair_level(f, g.p) >= 1);
     if (n == "knows_lair_exact") return b(lair_level(f, g.p) >= 2);
-    if (n == "lair_on_record") return b(f.lair_written >= g.p.arrivals.lair_rough || lair_level(f, g.p) >= 2);
+    if (n == "lair_on_record") return b((memory_rank(f, c.mem) >= 2 && lair_level(f, g.p) >= 1) || lair_level(f, g.p) >= 2);   // written memory and the way roughly known, or exact
     if (n == "route_open") return b(route_open(w, f));
     if (n == "motive") return b(g.motive);
     if (n == "debt") return b(any_oath(w, f.id));
@@ -142,25 +147,25 @@ int lair_level(const Faction& f, const Params& p) {
     return x >= p.arrivals.lair_exact ? 2 : (x >= p.arrivals.lair_rough ? 1 : 0);
 }
 
-// a court that sees the dragon within sight_regions of the lair learns a little of where it flies home, the closest
-// sighting of a waking counting once; a show at a capital says nothing of the lair; a released hostage lived there
+// a flight home is seen by the witnesses of an act within sight_regions of the lair and by every court with land within
+// sight_regions of it, halved per region of distance; the closest sighting of a waking counts once. A show or a
+// receive is no flight; a released hostage lived in the lair
 void note_lair_sight(World& w, const Params& p, const Act& a) {
     if (a.type == "release") if (Faction* f = find_faction(w, a.target)) learn_lair(w, p, *f, "hostage");
-    if (a.type == "show") return;
+    if (contains(p.arrivals.no_flight, a.type)) return;
     const Region* at = act_region(w, a);
-    int d = at ? lair_distance(w, at->id) : 1000;
-    if (d > p.arrivals.sight_regions) return;
+    int act_d = at ? lair_distance(w, at->id) : 1000;
     auto seen = [&](int dist) { double s = 1; for (int i = 0; i < dist; ++i) s *= p.arrivals.flight_falloff; return s; };
-    for (auto& id : a.witnesses) {
-        Faction* f = find_faction(w, id);
-        if (!f) continue;
-        auto year = w.arrival_fired.find(id + "|sight");
-        double before = 0;
-        if (year != w.arrival_fired.end() && year->second == w.year) before = seen(w.arrival_fired[id + "|sight_d"]);
+    for (auto& f : w.factions) {
+        int d = contains(a.witnesses, f.id) ? act_d : 1000;
+        for (auto& rid : f.regions) d = std::min(d, lair_distance(w, rid));
+        if (d > p.arrivals.sight_regions) continue;
+        auto year = w.arrival_fired.find(f.id + "|sight");
+        double before = year != w.arrival_fired.end() && year->second == w.year ? seen(w.arrival_fired[f.id + "|sight_d"]) : 0;
         if (seen(d) <= before) continue;
-        learn_lair(w, p, *f, "flight", seen(d) - before);
-        w.arrival_fired[id + "|sight"] = w.year;
-        w.arrival_fired[id + "|sight_d"] = d;
+        learn_lair(w, p, f, "flight", seen(d) - before);
+        w.arrival_fired[f.id + "|sight"] = w.year;
+        w.arrival_fired[f.id + "|sight_d"] = d;
     }
 }
 

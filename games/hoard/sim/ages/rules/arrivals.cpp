@@ -51,7 +51,7 @@ bool try_kind(World& w, const Params& p, const Faction& f, const ArrivalDef& d, 
         clauses.push_back(r.gate == "motive" ? "motive." + draft.motive : gate_key(r));
     }
     std::string cause = !draft.kind.empty() ? draft.kind : (d.cause.empty() ? d.kind : d.cause);
-    if (cooling(w, key_of(f.id, d.kind, cause), d.cooldown_years)) return false;
+    if (arrival_resting(w, p, f.id, d, cause)) return false;
     for (auto& b : d.blocked_when) {
         if (!gate_holds(g, b)) continue;
         std::string shrine = key_of(f.id, d.kind, b.event);
@@ -103,8 +103,7 @@ void rule_arrivals(World& w, const Params& p) {
             Rng rng = rng_for(w.seed, "arrival_lie", a.id);
             roll_envoy_lie(w, p, f, best.draft, rng, a.stated_reason, a.is_lie);
         }
-        w.arrival_fired[f.id] = w.year;
-        w.arrival_fired[key_of(f.id, d.kind, best.cause)] = w.year;
+        arrival_noted(w, d, f.id, best.cause);
         w.arrivals.push_back(a);
         emit(w, "arrival", f.id, d.kind, 0, {}, because("arrival"));
         w.chronicle.back().text_key = "ev.arrival_" + d.kind;
