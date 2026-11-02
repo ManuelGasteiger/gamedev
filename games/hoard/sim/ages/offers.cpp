@@ -236,11 +236,12 @@ static void ledger(World& w, const Params& p, const Act& a, double m) {
     else if (a.type == "defend" || a.type == "give" || a.type == "miracle") delta = c.known_help * std::max(m, 0.5);
     else if (a.type == "show") delta = c.known_show;
     else return;
-    // a show, a defence or a gift is the dragon at the court itself: the ruler is met; harm only moves existing ledgers
+    // a show, a defence or a gift is the dragon at the court itself: the ruler and the heir are met (item 04b: the heir
+    // too, since the player sees only people met); harm only moves existing ledgers
     bool introduces = a.type == "show" || a.type == "defend" || a.type == "give";
     for (auto& x : w.people) {
         if (x.faction != a.target || (x.role != "ruler" && x.role != "heir")) continue;
-        if ((introduces && x.role == "ruler") || find_known(w, x.id)) meet(w, x.id, how, delta);
+        if (introduces || find_known(w, x.id)) meet(w, x.id, how, delta);
     }
 }
 

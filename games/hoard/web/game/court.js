@@ -78,7 +78,7 @@ function renderCourt() {
   el.innerHTML = `<h3><span class="sw" style="background:${factionCss(fid)}"></span>The court of ${factionTitle(fid)}</h3>
     <div class="meta">${f.dominant_race} · ${eraWord(f.era)} age · capital ${regionTitle(f.capital)} · dread ${fmt(f.dread_eff)} · awe ${fmt(f.awe_eff)}${f.memory_tier ? ` (${f.memory_tier})` : ""} · faith ${fmt(f.faith)}${oaths.length ? ` · <b class="up">sworn to you</b>` : ''}</div>
     ${armsCourtHtml(fid)}
-    ${atCourt.map((p) => personRowHtml(p, fid)).join('') || '<div class="muted">no one of name</div>'}
+    ${atCourt.map((p) => personRowHtml(p, fid)).join('') || '<div class="muted">no one you have met or heard named</div>'}
     ${inLair.length ? `<div class="meta" style="margin-top:4px">in your lair: ${inLair.map((p) => `<b>${escapeHtml(p.name)}</b> (${roleWord(p.role)}, ${yearsNum(world.year - p.hostage_since)}${p.tags.includes('dragon_raised') ? ', raised as yours' : ''})`).join(', ')}
       <button data-pverb="release" data-pid="${inLair[0].id}" style="font-size:11px;padding:1px 7px;margin-left:4px" ${play.stamina >= COST.release ? '' : 'disabled'} title="send ${escapeHtml(inLair[0].name)} home">Release <small>${COST.release} st</small></button></div>` : ''}
     ${atCourt.length ? `<div class="cost-note">A kill costs ${COST.kill_person} stamina and is never forgotten: ${factionTitle(fid)} remembers the murder (dread +${CONSTANTS.offers?.envoy_kill_dread ?? 0.3}, cohesion drops)${oaths.length ? ', and you are sworn to them: it is a betrayal' : ''}.</div>` : ''}`;

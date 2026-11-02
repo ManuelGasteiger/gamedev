@@ -765,9 +765,14 @@ async function finishSleep() {
     const has = (f, role) => w.people.some((p) => p.faction === f.id && p.role === role && !p.tags.includes('hostage'));
     return w.factions.find((f) => f.capital && has(f, 'ruler') && has(f, 'heir'))?.id ?? '';
   });
-  let courtId = await courtWithHeir(), courtRests = 0;
+  // item 04b: the card lists only people the dragon has met, so the dragon shows itself at every capital first
+  const meetCourts = () => page.evaluate(() => {
+    for (const f of game.world().factions) if (f.capital) game.sim({ cmd: 'apply_acts', acts: [{ type: 'show', target: f.id, region: f.capital, magnitude: 0.1, witnesses: [] }] });
+  });
+  let courtId = '', courtRests = 0;
   while (!courtId && courtRests < 100) {
     courtRests += 1;
+    await meetCourts();
     await page.evaluate(() => game.sleep(1));
     await finishSleep();
     await page.keyboard.press('Enter');
