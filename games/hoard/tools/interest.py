@@ -729,7 +729,8 @@ def arrivals_summary(runs):
 def people_count(wakings_log, events, after=300):
     """item 07: tracked people with a dragon memory per court from `after` years past the hatching, the move census
     (each move scored on every tracked person at every waking) and trait flips against finished lives."""
-    courts = with_mem = wakings = 0
+    courts = with_mem = wakings = tracked = seen = 0
+    roles = Counter()
     moves = Counter(), Counter()
     for w in wakings_log:
         pw = w.get("people")
@@ -743,9 +744,13 @@ def people_count(wakings_log, events, after=300):
         wakings += 1
         courts += pw["courts"]
         with_mem += pw["with_memory"]
+        tracked += pw.get("tracked", 0)
+        seen += pw.get("seen", 0)
+        roles.update(pw.get("roles", {}))
     flips = sum(e.get("count", 1) for e in events if e["kind"] == "trait_flipped")
     deaths = sum(e.get("count", 1) for e in events if e["kind"] == "person_died")
-    return {"wakings": wakings, "courts": courts, "with_memory": with_mem, "tried": dict(moves[0]), "accepted": dict(moves[1]),
+    return {"wakings": wakings, "courts": courts, "with_memory": with_mem, "tracked": tracked, "seen": seen, "roles": dict(roles),
+            "tried": dict(moves[0]), "accepted": dict(moves[1]),
             "flips": flips, "deaths": deaths}
 
 
@@ -759,7 +764,13 @@ def people_summary(runs):
         accepted.update(r["accepted"])
     courts = sum(r["courts"] for r in runs)
     deaths = sum(r["deaths"] for r in runs)
+    roles = Counter()
+    for r in runs:
+        roles.update(r.get("roles", {}))
     return {"memory_per_court": sum(r["with_memory"] for r in runs) / courts if courts else 0.0,
+            "tracked_per_court": sum(r.get("tracked", 0) for r in runs) / courts if courts else 0.0,
+            "seen_per_court": sum(r.get("seen", 0) for r in runs) / courts if courts else 0.0,
+            "roles_per_court": {k: v / courts for k, v in sorted(roles.items())} if courts else {},
             "acceptance": {m: accepted[m] / tried[m] if tried[m] else 0.0 for m in sorted(tried)},
             "flips": sum(r["flips"] for r in runs), "deaths": deaths,
             "flips_per_life": sum(r["flips"] for r in runs) / deaths if deaths else 0.0}
@@ -975,6 +986,8 @@ def print_table(summaries):
         if pe:   # item 07
             print(f"[{s['policy']}] people: {pe['memory_per_court']:.2f} tracked people with a dragon memory per court after year 300; "
                   f"trait flips {pe['flips']} over {pe['deaths']} finished lives ({pe['flips_per_life']:.3f} per life)")
+            print(f"[{s['policy']}] tracked people per court {pe.get('tracked_per_court', 0):.2f}, seen by the player {pe.get('seen_per_court', 0):.2f}; by role "
+                  + ", ".join(f"{k} {v:.2f}" for k, v in pe.get("roles_per_court", {}).items()))
             print(f"[{s['policy']}] move census (accepted share): " + ", ".join(f"{k} {100 * v:.0f}%" for k, v in pe["acceptance"].items()))
         for label, key in (("most", "most_interesting"), ("least", "least_interesting")):
             print(f"[{s['policy']}] {label} interesting seeds:")
