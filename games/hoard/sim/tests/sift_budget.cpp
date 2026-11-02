@@ -3,7 +3,8 @@
 
 using namespace ages;
 
-// a sleep of `years` holding more lines than any budget: twelve tier-4 events on different courts and two tier-5 ones
+// a sleep of `years` holding more lines than any budget: twelve tier-4 events on different courts (a kind without a
+// fold text, so they stay twelve lines) and two tier-5 ones
 static void check_sleep(int years, int expect) {
     LoadResult r = load_or_die(1);
     World& w = r.world;
@@ -13,7 +14,7 @@ static void check_sleep(int years, int expect) {
     emit(w, "sleep_begin", "dragon", "", years, {}, {}, "", false);
     for (int i = 0; i < 12; ++i) {
         w.year = 1000 + (years * i) / 12;
-        emit(w, "slayers_founded", "court" + std::to_string(i));
+        emit(w, "people_arrived", "court" + std::to_string(i));
     }
     w.year = 1000 + years;
     emit(w, "faction_destroyed", "lost_a");
