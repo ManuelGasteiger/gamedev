@@ -104,8 +104,7 @@ void heroes(World& w, const Params& p) {
                 break;
             }
         }
-        double renown = static_cast<int>(f.regions.size()) >= c.keeper_second_regions ? c.hero_chance_large : c.hero_chance;
-        if (w.rng.chance(renown * dts(w, c))) rise_hero(w, p, f, "renown", because("renown"));
+        if (w.rng.chance(c.hero_chance * dts(w, c))) rise_hero(w, p, f, "renown", because("renown"));
     }
     // a failed slay attempt this step kills the hero who led it
     for (const Event& ev : events_this_step(w)) {
@@ -152,18 +151,14 @@ static int with_role(const World& w, const std::string& faction, const std::stri
     return n;
 }
 
-// item 04b: a court of keeper_second_regions or more keeps a second sage from sage_second_era and a second priest
-// while its faith holds priest_second_faith
+// item 04b: priests from priest_min_era, and from keeper_second_era a second sage and a second priest
 void sages_and_priests(World& w, const Params& p) {
     const Constants& c = p.c;
     for (auto& f : w.factions) {
-        if (f.era < c.sage_min_era) continue;
-        bool large = static_cast<int>(f.regions.size()) >= c.keeper_second_regions;
-        int sages = large && f.era >= c.sage_second_era ? 2 : 1;
-        int priests = large && f.faith >= c.priest_second_faith ? 2 : 1;
-        if (f.culture.traits.openness > c.sage_openness && with_role(w, f.id, "sage") < sages)
+        int keep = f.era >= c.keeper_second_era ? 2 : 1;
+        if (f.era >= c.sage_min_era && f.culture.traits.openness > c.sage_openness && with_role(w, f.id, "sage") < keep)
             rise_keeper(w, p, f, "sage", because("learning", {last_event_id(w, "era_advance", f.id)}, {{"openness", f.culture.traits.openness}}));
-        if (f.culture.traits.piety > c.priest_piety && with_role(w, f.id, "priest") < priests)
+        if (f.era >= c.priest_min_era && f.culture.traits.piety > c.priest_piety && with_role(w, f.id, "priest") < keep)
             rise_keeper(w, p, f, "priest", because("piety", {}, {{"piety", f.culture.traits.piety}}));
     }
 }

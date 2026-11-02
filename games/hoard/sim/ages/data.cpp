@@ -195,7 +195,6 @@ static void load_constants(const json& j, Constants& c) {
         get(v, "epithet_trait", c.epithet_trait);
         get(v, "hero_chance", c.hero_chance);
         get(v, "hero_max", c.hero_max);
-        get(v, "hero_chance_large", c.hero_chance_large);
         get(v, "hero_slay_bold_base", c.hero_slay_bold_base);
         get(v, "hero_unite_cohesion", c.hero_unite_cohesion);
         get(v, "hero_usurp_bold", c.hero_usurp_bold);
@@ -204,9 +203,8 @@ static void load_constants(const json& j, Constants& c) {
         get(v, "sage_min_era", c.sage_min_era);
         get(v, "sage_openness", c.sage_openness);
         get(v, "priest_piety", c.priest_piety);
-        get(v, "keeper_second_regions", c.keeper_second_regions);
-        get(v, "sage_second_era", c.sage_second_era);
-        get(v, "priest_second_faith", c.priest_second_faith);
+        get(v, "priest_min_era", c.priest_min_era);
+        get(v, "keeper_second_era", c.keeper_second_era);
         get(v, "sage_memory_mult", c.sage_memory_mult);
         get(v, "keeper_min_weight", c.keeper_min_weight);
         get(v, "keeper_named_years", c.keeper_named_years);
