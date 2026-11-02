@@ -18,6 +18,7 @@
 #include "ages/endings.h"
 #include "ages/profile.h"
 #include "bot.h"
+#include "ascend_bot.h"
 #include "text_cmd.h"
 #include "chron_demo.h"
 
@@ -410,10 +411,14 @@ int main(int argc, char** argv) {
     ao.bucket_samples = o.bucket_samples;
     ao.perturb = o.perturb;
     if (ao.snapshots || ao.wakings || !ao.perturb.empty()) attach_analysis(s, p, ao);
+    AscendBot ascend;
     if (!o.bot.empty()) {   // item 04
         Bot bot;
         if (!parse_bot(o.bot, bot)) { std::fprintf(stderr, "unknown bot %s\n", o.bot.c_str()); return 2; }
-        attach_bot(s, p, bot_target(bot, profile, p));
+        std::string target = bot_target(bot, profile, p);
+        if (target == "ascension") {   // item 04b
+            if (!attach_ascend_bot(s, p, bot.free, ascend, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
+        } else attach_bot(s, p, target);
     }
     auto traced = s.after_sleep;
     s.after_sleep = [&](const World& x) { if (traced) traced(x); note_waking(profile, x, p); };
@@ -446,6 +451,10 @@ int main(int argc, char** argv) {
         json lines = json::array();
         for (auto& e : w.chronicle) lines.push_back(event_sentence(w, p, e));
         if (!write_file(base + "narrated.json", lines.dump(1))) { std::fprintf(stderr, "cannot write narrated.json\n"); return 1; }
+    }
+    if (ascend.probe) {
+        finish_ascend_probe(w, p, *ascend.probe);
+        if (!write_file(base + "ascension.json", ascend.probe->dump(1))) { std::fprintf(stderr, "cannot write ascension.json\n"); return 1; }
     }
     if (!legends.empty() && !write_file(base + "legends.json", legends)) { std::fprintf(stderr, "cannot write legends\n"); return 1; }   // v0.4 world (S2)
     std::string briefing = briefing_json(w, p, w.sleep_started);
