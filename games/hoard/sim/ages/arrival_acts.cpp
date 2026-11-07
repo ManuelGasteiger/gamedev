@@ -20,7 +20,10 @@ bool receive_outcome(World& w, const Params& p, const Arrival& arrival, const st
     act.target = a.court;
     act.item = outcome;
     act.magnitude = 1.0;
-    apply_acts(w, p, {act});
+    act.source = "lair";
+    act.args["who"] = a.id;
+    act.args["outcome"] = outcome;
+    apply_logged_acts(w, p, {act});
     std::map<std::string, double> reward = answer->second;
     if (reward.erase("settle_slopes")) {
         for (auto& r : w.regions) if (r.lair) r.tags.insert("slopes_settled");
@@ -60,6 +63,7 @@ bool hunt_unrecorded(World& w, const Params& p, const std::string& region, std::
     a.type = "hunt";
     a.target = region;
     a.region = region;
+    a.target_kind = "region";
     w.acts.push_back(a);
     emit(w, "act_hunt", region, "", food);
     return true;

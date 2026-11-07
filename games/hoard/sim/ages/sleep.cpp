@@ -1,4 +1,5 @@
 #include "chron.h"
+#include "act_kinds.h"
 #include "ages.h"
 #include "unrecorded.h"
 #include "chronicle.h"
@@ -51,6 +52,12 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     if (years < 1) years = 1;
     size_t start = w.chronicle.size();
     size_t acts_at_sleep = w.acts.size();
+    Act act;   // item 09: sleep as a logged act, after the counterfactual's span
+    act.year = w.year;
+    act.type = "sleep";
+    act.source = "sleep";
+    act.payload["years"] = years;
+    w.acts.push_back(act);
     age_in_hoard(w, years);   // item 05
     std::map<std::string, double> growth_before = w.dragons[kPlayer].growth;
     std::map<std::string, int> ranks_before = all_ranks(w.dragons[kPlayer], p.talents);
@@ -90,6 +97,7 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     w.dragons[kPlayer].magic += effect(w, p, "magic_per_sleep_add");
     note_ranks(w, p, ranks_before);
     adapt_after_sleep(w, p, wounded_share, start);
+    if (!has_tag(w.tags, "dragon_slain")) lair_roles_after_sleep(w, p);   // item 09
     emit(w, "wake", "dragon", res.wake_reason, slept, {}, {}, "", false);
     score_events(w, p);
     if (!has_tag(w.tags, "dragon_slain")) { arrivals_at_wake(w, p); rule_arrivals(w, p); generate_offers(w, p); }

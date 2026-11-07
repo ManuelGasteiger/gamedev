@@ -58,10 +58,11 @@ uint64_t data_hash(const DataJson& d) {
     };
     add("constants", d.constants); add("races", d.races); add("reactions", d.reactions); add("regions", d.regions);
     add("factions", d.factions); add("shocks", d.shocks); add("names", d.names); add("offers", d.offers); add("text", d.text);
-    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("arrivals", d.arrivals); add("moves", d.moves); add("genesis", d.genesis);
+    add("events", d.events); add("talents", d.talents); add("defences", d.defences); add("hooks", d.hooks); add("arrivals", d.arrivals); add("moves", d.moves); add("slayers", d.slayers); add("genesis", d.genesis);
     add("importance", d.importance);
     if (!d.patterns.empty()) { add("patterns", d.patterns); add("base_rates", d.base_rates); }   // item 14
     if (!d.endings.empty()) add("endings", d.endings);   // item 04
+    if (!d.gates.empty()) add("gates", d.gates);   // item 09
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }

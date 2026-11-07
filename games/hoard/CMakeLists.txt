@@ -34,6 +34,15 @@ add_library(ages STATIC
   sim/ages/chron_voice.cpp
   sim/ages/chron_cf.cpp
   sim/ages/acts.cpp
+  sim/ages/act_data.cpp
+  sim/ages/act_gates.cpp
+  sim/ages/act_log.cpp
+  sim/ages/acts_routed.cpp
+  sim/ages/acts_force.cpp
+  sim/ages/acts_speech.cpp
+  sim/ages/acts_arcana.cpp
+  sim/ages/acts_lair.cpp
+  sim/ages/aging_json.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
   sim/ages/data_io.cpp
@@ -60,10 +69,16 @@ add_library(ages STATIC
   sim/ages/card_data.cpp
   sim/ages/policy.cpp
   sim/ages/policy_json.cpp
+  sim/ages/policy_pick.cpp
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
   sim/ages/person_json.cpp
   sim/ages/move_data.cpp
+  sim/ages/slayer_data.cpp
+  sim/ages/slayer_roster.cpp
+  sim/ages/slayer_json.cpp
+  sim/ages/slayer_view.cpp
+  sim/ages/resolve_fight.cpp
   sim/ages/moves.cpp
   sim/ages/person_record.cpp
   sim/ages/person_seen.cpp
@@ -109,6 +124,8 @@ add_library(ages STATIC
   sim/ages/wounds.cpp
   sim/ages/rules/anti_dragon.cpp
   sim/ages/rules/slayers.cpp
+  sim/ages/rules/slayer_order.cpp
+  sim/ages/rules/slayer_march.cpp
   # v0.4 hooks (S3)
   sim/ages/hook_data.cpp
   sim/ages/hook_json.cpp
@@ -166,7 +183,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

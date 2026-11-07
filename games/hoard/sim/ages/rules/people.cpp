@@ -1,6 +1,7 @@
 #include "people_life.h"
 #include "../names.h"
 #include "../person_record.h"
+#include "../slayer_roster.h"
 #include "../world_util.h"
 
 // 17.2: named mortals with race lifespans (races.json "person"). A ruler dies of age or when the reign counter of the
@@ -60,6 +61,7 @@ static void bury(World& w, const Params& p, const Person& person) {
     w.dead_people.push_back(d);
     if (Known* k = find_known(w, person.id)) k->tags.insert("dead");
     inherit_memory(w, p, person);   // item 07
+    slayer_died(w, p, person);      // item 08
     erase_value(w.dragons[kPlayer].hostages, person.id);
     std::string id = person.id;
     w.people.erase(std::remove_if(w.people.begin(), w.people.end(), [&](const Person& x) { return x.id == id; }), w.people.end());

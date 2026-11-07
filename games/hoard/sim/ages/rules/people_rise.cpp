@@ -33,7 +33,7 @@ void name_reigns(World& w, const Params& p) {
 
 static int heroes_of(const World& w, const std::string& faction) {
     int n = 0;
-    for (auto& x : w.people) if (x.faction == faction && x.role == "hero") n += 1;
+    for (auto& x : w.people) if (x.faction == faction && x.role == "hero" && x.slayer.rank.empty()) n += 1;
     return n;
 }
 
@@ -110,7 +110,7 @@ void heroes(World& w, const Params& p) {
     for (const Event& ev : events_this_step(w)) {
         if (ev.kind != "slay_attempt_failed" || ev.object.empty()) continue;
         Person* lead = find_person(w, ev.object);
-        if (lead) retire(w, p, *lead, "slain_by_dragon", because("slay_attempt_failed", {ev.id}));
+        if (lead && lead->slayer.rank.empty()) retire(w, p, *lead, "slain_by_dragon", because("slay_attempt_failed", {ev.id}));
     }
     // usurpation: a bold hero takes a weak throne and the realm rallies to the new line
     for (auto& f : w.factions) {

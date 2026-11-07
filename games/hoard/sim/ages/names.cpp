@@ -64,6 +64,10 @@ std::string epithet_for(const Params& p, const Person& person) {
 std::string person_sex(uint64_t seed, const std::string& id) { return rng_for(seed, "sex", id).chance(0.5) ? "f" : "m"; }
 
 Person new_person(World& w, const Params& p, const std::string& race, const std::string& faction, const std::string& role) {
+    return new_person(w, p, race, faction, role, w.rng);
+}
+
+Person new_person(World& w, const Params& p, const std::string& race, const std::string& faction, const std::string& role, Rng& r) {
     Person person;
     int n = ++w.person_counters[race];
     person.id = race + std::to_string(n);
@@ -74,14 +78,14 @@ Person new_person(World& w, const Params& p, const std::string& race, const std:
     person.sex = person_sex(w.seed, person.id);
     const NameTable* t = table(p.names.people, race);
     if (t) {
-        int ia = w.rng.range(0, static_cast<int>(t->a.size()));
-        int ib = w.rng.range(0, static_cast<int>(t->b.size()));
+        int ia = r.range(0, static_cast<int>(t->a.size()));
+        int ib = r.range(0, static_cast<int>(t->b.size()));
         person.name = t->a[static_cast<size_t>(ia)] + t->b[static_cast<size_t>(ib)];
     } else person.name = person.id;
-    person.traits.bold = w.rng.uniform();
-    person.traits.pious = w.rng.uniform();
-    person.traits.greedy = w.rng.uniform();
-    person.traits.cunning = w.rng.uniform();
+    person.traits.bold = r.uniform();
+    person.traits.pious = r.uniform();
+    person.traits.greedy = r.uniform();
+    person.traits.cunning = r.uniform();
     std::string ep = epithet_for(p, person);
     if (!ep.empty()) person.name += " " + ep;
     assign_traits(w, p, person);   // item 07

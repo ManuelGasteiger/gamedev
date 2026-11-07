@@ -13,6 +13,16 @@ namespace {
 
 bool is_copy(const World& w) { return w.counterfactual.count("copy") > 0; }
 
+// item 09: acts other verbs log (sleep, talents, oaths sworn to envoys, spells, shaping, the voice, the historian) are
+// left out of the replay, as before they were logged
+bool replayable(const Act& a) {
+    for (const char* t : {"sleep", "pick_talent", "swear", "terraform", "commune", "bless", "ward", "curse", "incite", "raise_undead"})
+        if (a.type == t) return false;
+    if (a.type == "keep" && a.args.count("role") && a.args.at("role") == "historian") return false;
+    if (a.type == "teach" && a.item.empty()) return false;
+    return true;
+}
+
 bool reaches(const World& w, const Event& e, int lo, int hi, int depth, int& act) {
     for (int r : e.cause.refs) {
         if (r >= lo && r < hi) {
@@ -61,7 +71,8 @@ void counterfactual_after_sleep(World& w, const Params& p, int years, size_t act
     }
     if (!best) return;
     const Event* ae = find_event(w, best_act);
-    std::vector<Act> all(w.acts.begin() + static_cast<std::ptrdiff_t>(snap->acts.size()), w.acts.begin() + static_cast<std::ptrdiff_t>(acts_end));
+    std::vector<Act> all;
+    for (size_t i = snap->acts.size(); i < acts_end; ++i) if (replayable(w.acts[i])) all.push_back(w.acts[i]);
     std::vector<Act> without;
     bool dropped = false;
     for (auto& a : all) {
@@ -71,7 +82,7 @@ void counterfactual_after_sleep(World& w, const Params& p, int years, size_t act
     if (!dropped) return;
     auto run = [&](const std::vector<Act>& acts) {
         World c = *snap;
-        apply_acts_unrecorded(c, p, acts);
+        apply_logged_acts(c, p, acts);
         sleep_unrecorded(c, p, years);
         return c;
     };

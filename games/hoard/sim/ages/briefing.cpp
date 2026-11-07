@@ -9,6 +9,7 @@
 #include "names.h"
 #include "offers.h"
 #include "person_seen.h"
+#include "slayer_view.h"
 #include "world_util.h"
 #include "../sift/line_text.h"
 #include "../text/render.h"
@@ -93,6 +94,15 @@ struct Narrator {
         return role("hero");
     }
 
+    // ", led by NAME," and, for a rostered slayer, his scars and the traits the dragon has learned
+    std::string led_by(const std::string& id) const {
+        const Person* x = find_person(w, id);
+        if (!x || x->slayer.rank.empty()) return misc_with("led_by", "{name}", name(id));
+        std::string s = misc_with("led_by_roster", "{name}", x->name);
+        replace_all(s, "{details}", slayer_details(w, p, *x));
+        return s;
+    }
+
     std::string fill(std::string s, const Event& e) const {
         std::string t0 = tag_at(e, 0), t1 = tag_at(e, 1);
         if (s.find("{A_rose_role}") != std::string::npos) replace_all(s, "{A_rose_role}", cap(a_an(rose_role(e))));
@@ -134,7 +144,7 @@ struct Narrator {
             for (auto& x : e.tags) if (x.rfind("successor:", 0) == 0) ids.push_back(name(x.substr(10)));
             replace_all(s, "{successors}", list(ids));
         }
-        if (s.find("{led_by}") != std::string::npos) replace_all(s, "{led_by}", e.object.empty() ? "" : misc_with("led_by", "{name}", name(e.object)));
+        if (s.find("{led_by}") != std::string::npos) replace_all(s, "{led_by}", e.object.empty() ? "" : led_by(e.object));
         fill_params(s, e.cause.params);
         return s;
     }
@@ -251,6 +261,11 @@ struct Narrator {
 // collapse sentence already covers (its successors, the deposed ruler); great rulers are told through reign_named
 bool skip_in_briefing(const World& w, const Event& e) {
     if (e.kind == "sleep_begin" || e.kind == "wake") return true;
+    if (e.kind == "order_formed" || e.kind == "grandmaster_named" || e.kind == "slayer_promoted" || e.kind == "slayer_scarred" || e.kind == "slayer_armed") {   // item 08: only people the dragon knows of
+        const std::string& id = e.kind == "order_formed" ? e.object : e.subject;
+        const Person* x = find_person(w, id);
+        return !find_known(w, id) && !(x && person_seen(w, *x));
+    }
     if (e.kind == "tribute_paid" || e.kind == "bad_century" || e.kind == "tyrant_rises" || e.kind == "golden_age") return true;
     if (e.kind == "successor_founded" && e.cause.text_key == "collapse") return true;
     if (e.kind == "person_rose") return e.tags.count("heir") || ((e.tags.count("sage") || e.tags.count("priest")) && !find_known(w, e.subject));
@@ -679,6 +694,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         opps.push_back({{"text", s}, {"kind", "slayers"}, {"faction", f.id}, {"progress", f.anti_dragon}});
     }
     out["opportunities"] = opps;
+    out["slayers"] = slayers_block(w, p);   // item 08
     json courts = json::array();   // item 02: what each court feels, and in which tier it remembers it
     for (auto& f : w.factions)
         courts.push_back({{"faction", f.id}, {"dread", dread_eff(f)}, {"awe", awe_eff(f)}, {"memory_tier", memory_tier(f, c.mem)},

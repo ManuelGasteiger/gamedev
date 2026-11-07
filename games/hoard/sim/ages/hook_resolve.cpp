@@ -79,7 +79,7 @@ void resolve(World& w, const Params& p, const Hook& h, const std::string& choice
     if (dragon_dead(w)) return;
     auto cr = t->choice_reward.find(choice);
     std::map<std::string, double> grown = reward(w, p, h.faction, h.other, cr == t->choice_reward.end() ? t->reward : cr->second);
-    if (h.kind == "slayers") if (Faction* f = find_faction(w, h.faction)) disperse_slayers(w, *f);
+    if (h.kind == "slayers") if (Faction* f = find_faction(w, h.faction)) disperse_slayers(w, p, *f);
     if (!t->arrival.empty()) {   // item 06: the visitor is answered; a choice is a receive
         if (const Arrival* a = arrival_for(w, t->arrival, h.faction)) {
             if (choice.empty()) arrival_consume(w, a->id);

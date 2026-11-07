@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "endings.h"
 #include "hooks.h"
+#include "chron.h"
+#include "policy_pick.h"
 #include "talents.h"
 #include "world_util.h"
 
@@ -92,10 +94,45 @@ static std::vector<std::string> keyword_targets(const World& w, const Params& p,
         if (best) ids.push_back(best->id);
         return ids;
     }
+    for (const char* k : {"faithful", "awed", "orc", "hostages", "pretender", "liar", "slayer_neighbour"})   // item 09
+        if (key == k) return extra_targets(w, p, key);
     return {key};
 }
 
+// item 09: an act on the lair, a remnant, a speaking relic or a region nobody holds names no court
+static bool courtless(const World& w, const PolicyAct& t, Act& a) {
+    a.type = t.type;
+    a.magnitude = t.magnitude;
+    a.payload = t.payload_share;
+    a.args = t.args;
+    a.source = t.source;
+    if (t.target_kind == "lair") { a.target_kind = "lair"; a.target = "lair"; return true; }
+    if (t.target_kind == "remnant") {
+        if (w.remnants.empty()) return false;
+        a.target_kind = "remnant";
+        a.target = w.remnants.front().race;
+        return true;
+    }
+    if (t.target_kind == "item") {
+        const Relic* r = speaking_relic(w);
+        if (!r) return false;
+        a.target_kind = "item";
+        a.target = r->id;
+        return true;
+    }
+    std::string rid = region_of(w, nullptr, t.region);
+    if (rid.empty()) return false;
+    a.target_kind = "region";
+    a.target = rid;
+    return true;
+}
+
 static void expand(const World& w, const Params& p, const PolicyAct& t, std::vector<Act>& out) {
+    if (t.target == "none") {
+        Act a;
+        if (courtless(w, t, a)) out.push_back(a);
+        return;
+    }
     std::vector<std::string> targets = keyword_targets(w, p, t.target);
     for (auto& id : targets) {
         const Faction* f = resolve_lineage(w, id);
@@ -107,6 +144,26 @@ static void expand(const World& w, const Params& p, const PolicyAct& t, std::vec
         a.region = t.region == "largest" ? largest_region(w, *f) : t.region;
         a.payload = t.payload_share;
         a.witnesses = everyone(w);
+        a.args = t.args;
+        a.source = t.source;
+        if (!t.person.empty()) {   // item 09
+            std::string id = person_of(w, *f, t.person);
+            if (id.empty()) continue;
+            a.target_kind = "person";
+            a.target = id;
+        }
+        if (t.region == "lair" || t.region == "wild" || t.region == "wild_burned" || t.region == "capital") {
+            std::string rid = region_of(w, f, t.region);
+            if (rid.empty()) continue;
+            if (t.target_kind == "region") { a.target_kind = "region"; a.target = rid; a.region.clear(); }
+            else a.region = rid;
+        } else if (t.target_kind == "region" && !a.region.empty()) { a.target_kind = "region"; a.target = a.region; }
+        if (t.against == "neighbour" || t.against == "enemy" || t.against == "non_orc_neighbour") {
+            a.against = second_court(w, p, *f, t.against);
+            if (a.against.empty()) continue;
+            out.push_back(a);
+            continue;
+        }
         if (t.against != "any_attacker") { a.against = t.against; out.push_back(a); continue; }
         for (auto& att : attackers_of(w, p, *f)) { a.against = att; out.push_back(a); }
     }
@@ -170,6 +227,7 @@ void run_scenario(World& w, const Params& p, const Scenario& s) {
             if (s.at_waking) s.at_waking(w, acts, sleep_index);
             apply_acts(w, p, acts);
             answer_hooks(w, p, *s.policy);   // v0.4 hooks (S3)
+            policy_leftovers(w, p, *s.policy);   // item 09
         }
         int years = s.policy ? policy_sleep(w, p, *s.policy, sleep_index, s.sleep) : s.sleep;
         if (s.adjust_sleep) years = s.adjust_sleep(years, sleep_index);

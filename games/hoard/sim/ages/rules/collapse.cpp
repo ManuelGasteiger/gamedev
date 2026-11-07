@@ -8,7 +8,7 @@ void remove_faction(World& w, const std::string& id) {
     Faction* f = find_faction(w, id);
     if (!f) return;
     w.graveyard.push_back(record_of(*f, w.year));
-    for (auto& r : w.regions) if (r.owner == id) r.owner.clear();
+    for (auto& r : w.regions) if (r.owner == id) { r.owner.clear(); r.abandoned_year = w.year; }   // item 09: world-aging
     end_wars_of(w, id);
     for (auto& o : w.oaths)
         if (o.status == "active" && (o.parties[0] == id || o.parties[1] == id)) o.status = "expired";

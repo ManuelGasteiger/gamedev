@@ -57,6 +57,7 @@ CMakeLists.txt                  library `ages`, runner `ages`, six ctest targets
 data/constants.json             every number in the doc, plus the ones added below
 data/races.json                 race templates (doc section 3) plus temperament, trait start values, affinity rows, orc off-map remnant
 data/reactions.json             act x relationship reaction rows (doc section 5)
+data/slayers.json               item 08: slayer roster (ranks, power, counters, hates, fears, scars, missions, fight numbers)
 data/regions.json               12 regions with terrain: lair, east/west vales and marches, hill hold + deep hold (hills), elder/deep/old wood, north scar, south fen
 data/factions.json              bronze-age start: aldmere, vessary (human, 2 regions each), dorun (dwarf, hill_hold + deep_hold), ilvareth (elf, elder_wood + deep_wood)
 data/shocks.json                plague, bad century, volcanic winter (now a chance per mega raze)
@@ -122,6 +123,11 @@ sim/ages/rules/card_ctx.h       the context a card is evaluated in (bound variab
 sim/ages/rules/people.cpp       17.2 lives: ages, deaths, heirs, crowning, orphans (people_life.h shares its helpers)
 sim/ages/rules/people_rise.cpp  heroes, sages and priests, keepers of the court's oldest memory, named reigns
 sim/ages/rules/hostages.cpp     people in the lair: taken, raised there, released
+sim/ages/rules/slayer_order.cpp the order turn (item 08): founding on grief, missions, recruiting, ranks, what the dragon learns
+sim/ages/rules/slayer_march.cpp what a failed march or a fight at the gate costs the named slayers
+sim/ages/slayer_roster.cpp      slayer traits, power, scars, reveals, promotion, succession; slayer_data.cpp loads data/slayers.json
+sim/ages/resolve_fight.cpp      resolve_fight for the fight act (item 09), reveal_order
+sim/ages/slayer_view.cpp        the briefing's slayer lines and attempt estimate; slayer_json.cpp saves and the view scrub
 sim/ages/rules/threads.cpp      17.8 closes threads whose arc ended
 sim/ages/rules/chronicle.cpp    compact this decade's repeated events, score importance
 sim/runner/main.cpp             CLI, stats.json
@@ -290,3 +296,40 @@ The trigger language gains `count` (courts where a sub-condition holds, with `ra
 - Mortality: awe 0.5, a keeper sage or priest held 50 years, an arrival from that court within two wakings. Court threshold 4.
 - Constants `people.priest_min_era` 1, `people.keeper_second_era` 2 (a second sage and a second priest).
 - The player sees a person only after contact (`sim/ages/person_seen.cpp`): `people`, the world view and the briefing people block are filtered; saves keep everyone.
+
+## Item 09: the act API v1.1
+
+Every act of `docs/act-api.schema.json` goes through `apply_acts`. An act arrives in the schema's shape (`target: {kind, id}`, `secondary`, typed `payload`, `source`, `answers`) or the older flat one; `normalise_act` resolves region and person targets to their court. It is checked against its rule and gates in `data/gates.json` (target kinds, required payload values, growth points per axis, any one talent, phase, pool cost, once per waking, secret) and the world (`*_refusal` per family); a refused act is not logged and comes back as `refused: true, reason, refusals: [{index, type, reason, reason_text}]`. Acts that existed as verbs call them (`acts_routed.cpp`); those verbs now log their act, so `sleep`, `pick_talent`, `cast` (as the spell's act), `accept_offer` (as `swear`), `commune`, `keep_person` (as `keep`), `terraform`, `hunt`, `exit` and `demand` all appear in `World.acts`. wasm `act_gates` returns per act type the reason its gates refuse it now. The runner writes `act_log.json` (schema form); `--act-script FILE` applies `{world, acts}` one act at a time. Numbers of the new acts: `constants.json` "acts".
+
+```
+data/gates.json                 per act: target kinds, payload values, gates, pool, secret, once, via; keep roles, build, reveal(lie), sponsor
+data/policies/schemer.json      guise, corrupt, reveal, broker and the other intrigue and lair acts
+data/policies/priest.json       consecrate, receive, bless, miracle and the faith and lair acts
+sim/ages/act_data.h/.cpp        gates.json and constants.json "acts"
+sim/ages/act_gates.h/.cpp       rule and gate check, pool payment, secret acts
+sim/ages/act_log.h/.cpp         schema shape in and out, normalise_act, act_log_json
+sim/ages/act_kinds.h            the families' interface
+sim/ages/acts_routed.cpp        acts that call the older verbs
+sim/ages/acts_force.cpp         burn structures and world-aging, crush, destroy_altar, take item, fight
+sim/ages/acts_speech.cpp        teach (court subjects, person move), broker, reveal, judge
+sim/ages/acts_arcana.cpp        haunt, guise, consecrate, corrupt (person), curse kinds
+sim/ages/acts_lair.cpp          keep roles, dismiss, build, sponsor, ignore, the consort's line after a sleep
+sim/ages/aging_json.h/.cpp      region last_burn_year, destroyed_share_at_last_burn, ruin_year, abandoned_year, resettled_year
+sim/ages/policy_pick.h/.cpp     policy targets: persons, regions, second courts; hooks ignored, offers sworn, exits taken
+sim/runner/act_script.h/.cpp    --act-script
+tools/act_check.py              schema validation and act coverage of act logs or policy runs
+tools/act_scenarios.py          the 15 act-api scenarios in a lab world
+```
+
+| constant (`acts`) | value | note |
+|---|---|---|
+| `library_era_rate`, `library_decades` | 0.9, 10 | burn(library): neighbours' era_rate |
+| `temple_faith` | -0.3 | burn(temple) |
+| `foundry_era_progress`, `foundry_anti_dragon` | -20, -0.1 | burn(foundry) |
+| `granary_wealth` | 0.1 | burn(granary): share of wealth lost |
+| `ruin_burn` | 1.0 | burn at which a region is a ruin |
+| `trade_growth`, `trade_decades` | 1.1, 10 | broker(trade) |
+| `haunt_abdicate`, `haunt_desert`, `haunt_cult` | 0.1, 0.2, 0.3 | haunt outcomes (desert x (1 - bold)) |
+| `guise_discovery`, `guise_per_sage`, `guise_forewarned`, `guise_show` | 0.1, 0.05, 0.1, 0.5 | guise discovery roll and the show it reads as |
+| `curse_research_mult`, `curse_research_stacks`, `curse_blight_land` | 0.75, 3, 0.5 | curse kinds |
+| runner-set | | `take_item_artifacts` 1, `craft_era_progress` 10, `war_militarism` 0.1, `war_anti_dragon` 0.1, `magic_world` 0.05, `intrigue_cunning` 0.1, `guise_preach_faith` 0.1, `guise_learn_knowledge` 1, `consort_line_years` 100, haunt memory rows |

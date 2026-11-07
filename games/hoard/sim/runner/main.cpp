@@ -7,11 +7,14 @@
 #include <string>
 #include <vector>
 #include "ages/ages.h"
+#include "ages/act_log.h"
 #include "ages/genesis.h"
 #include "ages/state_hash.h"
 #include "ages/record.h"
 #include "ages/save.h"
 #include "analyse.h"
+#include "roster_stats.h"
+#include "ages/names.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -21,6 +24,7 @@
 #include "ascend_bot.h"
 #include "text_cmd.h"
 #include "chron_demo.h"
+#include "act_script.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -55,6 +59,7 @@ struct Options {
     std::string profile;    // item 04: the profile folder (read before genesis, written at the end)
     std::string bot;        // item 04: amnesiac | carry | oracle:<ending>
     uint64_t chron_demo = 0;                   // item 05, chron_demo.h
+    std::string act_script;                    // item 09, act_script.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -88,6 +93,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--bucket-samples") { if (!need(v)) return false; o.bucket_samples = std::max(1, std::atoi(v.c_str())); }
         else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--profile") { if (!need(o.profile)) return false; }
+        else if (k == "--act-script") { if (!need(o.act_script)) return false; }
         else if (k == "--bot") { if (!need(o.bot)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
@@ -148,7 +154,7 @@ json death_json(const World& w) {
             const Event& x = w.chronicle[k];
             warned = x.subject == e.subject && (x.kind == "slayers_ready" || x.kind == "slayers_coming" || x.kind == "slayers_forming");
         }
-        return {{"cause", wounds ? "wounds" : "slaying"}, {"year", e.year}, {"court", e.subject}, {"warned", warned}};
+        return {{"cause", wounds ? "wounds" : "slaying"}, {"year", e.year}, {"court", e.subject}, {"warned", warned}, {"slayer", is_person_id(w, e.object) ? display_name(w, e.object) : std::string()}};
     }
     return nullptr;
 }
@@ -269,6 +275,7 @@ json stats_json(const World& w, const Params& p) {
     j["hunger_wakes"] = hunger_wakes;
     j["dragon"]["hunger"] = w.dragons[kPlayer].hunger;
     j["dragon_death"] = death_json(w);   // v0.4 (S1)
+    j["roster"] = roster_json(w);        // item 08
     j["dragon_growth"] = {{"phase", w.dragons[kPlayer].phase}, {"points", w.dragons[kPlayer].growth}, {"talents", w.dragons[kPlayer].talents}, {"wounds", w.dragons[kPlayer].wounds}};
     j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
     j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)
@@ -310,7 +317,8 @@ std::string out_dir(const std::string& out) {
 }
 
 bool write_core(const std::string& base, const World& w, const Params& p) {
-    return write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
+    return write_file(base + "act_log.json", act_log_json(w)) &&   // item 09: the act log in act-api.schema.json form
+           write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
            write_file(base + "world_final.json", world_to_json(w)) &&
            write_file(base + "stats.json", stats_json(w, p).dump(1));
 }
@@ -351,6 +359,7 @@ int main(int argc, char** argv) {
     }
     if (o.golden_to) return golden(o);
     if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
+    if (!o.act_script.empty()) return act_script_cmd(o.data, o.act_script);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);

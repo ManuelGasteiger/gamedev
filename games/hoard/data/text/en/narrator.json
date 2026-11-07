@@ -334,6 +334,34 @@
       "text": "Your {o_word} rose to rank {m0}.",
       "brief": "your {o_word} rank of {year}"
     },
+    "order_formed": {
+      "text": "{S} gathered its grievance into an order of slayers under {O}.",
+      "brief": "the order of {s} under {o} in {year}"
+    },
+    "grandmaster_named": {
+      "text": "{S} became grandmaster of the slayers of {O}.",
+      "brief": "the grandmaster {s} from {year}"
+    },
+    "slayer_promoted": {
+      "text": "{S} rose to {t0_word} of the order of {O}.",
+      "brief": "the rise of {s} in {year}"
+    },
+    "slayer_scarred": {
+      "text": "{S} of {O} came back from your lair marked: {t0_word}.",
+      "brief": "the scarring of {s} in {year}"
+    },
+    "slayer_armed": {
+      "text": "{S} of {O} found a ward against you.",
+      "brief": "the ward of {s} in {year}"
+    },
+    "slayer_fought": {
+      "text": "{S} of {O} faced you in single combat.",
+      "brief": "the duel with {s} in {year}"
+    },
+    "dragon_slain_duel": {
+      "text": "{O}, slayer of {S}, struck you down in single combat.",
+      "brief": "your death at the hands of {o}"
+    },
     "slayers_forming": {
       "text": "{S} gathered a slayer band{led_by} against you.",
       "brief": "the slayer band of {s} from {year}"
@@ -1081,6 +1109,314 @@
     "terms_refused": {
       "text": "{S} refused the terms you sent home with {o}.",
       "brief": "the terms refused in {year}"
+    },
+    "act_fight": {
+      "text": "You fought {S}.",
+      "brief": "your fight with {s} in {year}"
+    },
+    "act_crush": {
+      "text": "You came down on {S} and broke its garrison.",
+      "brief": "your landing on {s} in {year}"
+    },
+    "act_burn_library": {
+      "text": "You burned the library of {S}; what it had written down is ash.",
+      "brief": "the library you burned in {s} in {year}"
+    },
+    "act_burn_temple": {
+      "text": "You burned the temple of {S}; its priests scatter.",
+      "brief": "the temple you burned in {s} in {year}"
+    },
+    "act_burn_foundry": {
+      "text": "You burned the foundries of {S}; its smiths start over.",
+      "brief": "the foundries you burned in {s} in {year}"
+    },
+    "act_burn_walls": {
+      "text": "You burned the walls of {S} down to the stones.",
+      "brief": "the walls you burned in {s} in {year}"
+    },
+    "act_burn_altar": {
+      "text": "You burned the altar of {S}.",
+      "brief": "the altar you burned in {s} in {year}"
+    },
+    "act_burn_granary": {
+      "text": "You burned the granaries of {S}; it will be a hungry winter.",
+      "brief": "the granaries you burned in {s} in {year}"
+    },
+    "act_burn_tower": {
+      "text": "You burned the towers of {S}; its defences are down until you sleep.",
+      "brief": "the towers you burned in {s} in {year}"
+    },
+    "act_take_item": {
+      "text": "You carried a named treasure of {S} to the hoard.",
+      "brief": "the treasure you took from {s} in {year}"
+    },
+    "act_take_hostage_consent": {
+      "text": "{S} gave you a hostage of its own will.",
+      "brief": "the hostage {s} gave you in {year}"
+    },
+    "act_teach": {
+      "text": "You taught {S}.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_letters": {
+      "text": "You taught {S} letters.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_craft": {
+      "text": "You taught {S} the craft of fire and metal.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_magic": {
+      "text": "You taught {S} magic.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_war": {
+      "text": "You taught {S} war.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_intrigue": {
+      "text": "You taught {S} intrigue.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_teach_dragon_lore": {
+      "text": "You taught {S} the lore of dragons.",
+      "brief": "your teaching of {s} in {year}"
+    },
+    "act_broker_marriage": {
+      "text": "You brokered a marriage between {S} and {O}.",
+      "brief": "the marriage you made in {year}"
+    },
+    "act_broker_peace": {
+      "text": "You made {S} and {O} lay down their arms.",
+      "brief": "the peace you made in {year}"
+    },
+    "act_broker_alliance": {
+      "text": "You bound {S} and {O} in alliance.",
+      "brief": "the alliance you made in {year}"
+    },
+    "act_broker_trade": {
+      "text": "You opened trade between {S} and {O}.",
+      "brief": "the trade you opened in {year}"
+    },
+    "act_broker_vassalage": {
+      "text": "You set one of {S} and {O} under the other.",
+      "brief": "the fealty you arranged in {year}"
+    },
+    "act_reveal_hidden_region": {
+      "text": "You showed {S} a valley it did not know.",
+      "brief": "what you showed {s} in {year}"
+    },
+    "act_reveal_plot": {
+      "text": "You told {S} of a plot in its own halls.",
+      "brief": "what you told {s} in {year}"
+    },
+    "act_reveal_heir_location": {
+      "text": "You told {S} where the lost heir hides.",
+      "brief": "what you told {s} in {year}"
+    },
+    "act_reveal_slayer_plan": {
+      "text": "You told {S} what the slayers plan.",
+      "brief": "what you told {s} in {year}"
+    },
+    "act_reveal_lie": {
+      "text": "You told {S} which envoy lied.",
+      "brief": "what you told {s} in {year}"
+    },
+    "act_judge_guilty": {
+      "text": "You judged {S} guilty before the court of {O}, and the sentence was death.",
+      "brief": "your judgement of {s} in {year}"
+    },
+    "act_judge_spare": {
+      "text": "You judged {S} before the court of {O} and spared them.",
+      "brief": "your judgement of {s} in {year}"
+    },
+    "act_haunt_warning": {
+      "text": "You came to {S} in a dream with a warning.",
+      "brief": "the dream you sent {s} in {year}"
+    },
+    "act_haunt_summons": {
+      "text": "You came to {S} in a dream and called them to you.",
+      "brief": "the dream you sent {s} in {year}"
+    },
+    "act_haunt_prophecy": {
+      "text": "You came to {S} in a dream and spoke a prophecy.",
+      "brief": "the dream you sent {s} in {year}"
+    },
+    "act_haunt_nightmare": {
+      "text": "You walked through the sleep of {S} as a nightmare.",
+      "brief": "the nightmare you sent {s} in {year}"
+    },
+    "act_guise_visit": {
+      "text": "You walked the streets of {S} in mortal shape.",
+      "brief": "your walk through {s} in {year}"
+    },
+    "act_guise_court": {
+      "text": "You walked the halls of {S} in mortal shape and found someone willing.",
+      "brief": "your walk through {s} in {year}"
+    },
+    "act_guise_learn": {
+      "text": "You read in the library of {S} in mortal shape.",
+      "brief": "your walk through {s} in {year}"
+    },
+    "act_guise_spy": {
+      "text": "You listened in the halls of {S} in mortal shape.",
+      "brief": "your walk through {s} in {year}"
+    },
+    "act_guise_preach": {
+      "text": "You preached in the squares of {S} in mortal shape.",
+      "brief": "your walk through {s} in {year}"
+    },
+    "act_guise_discovered": {
+      "text": "You walked {S} in mortal shape, and they saw through it.",
+      "brief": "your unmasking in {s} in {year}"
+    },
+    "act_consecrate": {
+      "text": "You consecrated a temple of {S} to yourself.",
+      "brief": "the temple you took in {s} in {year}"
+    },
+    "act_keep_hostage": {
+      "text": "You keep {S} as a hostage.",
+      "brief": "the hostage you keep since {year}"
+    },
+    "act_keep_scribe": {
+      "text": "You set {S} to write for you.",
+      "brief": "your scribe since {year}"
+    },
+    "act_keep_consort": {
+      "text": "You took {S} as your consort.",
+      "brief": "your consort since {year}"
+    },
+    "act_keep_priest": {
+      "text": "You keep {S} as your priest.",
+      "brief": "your priest since {year}"
+    },
+    "act_keep_champion": {
+      "text": "You keep {S} as your champion.",
+      "brief": "your champion since {year}"
+    },
+    "act_keep_ward": {
+      "text": "You raise {S} as your ward.",
+      "brief": "your ward since {year}"
+    },
+    "act_dismiss": {
+      "text": "You sent {S} away from the lair.",
+      "brief": "the one you sent away in {year}"
+    },
+    "act_build_library": {
+      "text": "You built a library in the lair.",
+      "brief": "the library you built in {year}"
+    },
+    "act_build_nest": {
+      "text": "You built a nest in the lair.",
+      "brief": "the nest you built in {year}"
+    },
+    "act_build_altar": {
+      "text": "You built an altar in the lair.",
+      "brief": "the altar you built in {year}"
+    },
+    "act_build_vault": {
+      "text": "You built a vault in the lair.",
+      "brief": "the vault you built in {year}"
+    },
+    "act_build_forge": {
+      "text": "You built a forge in the lair.",
+      "brief": "the forge you built in {year}"
+    },
+    "act_build_gate": {
+      "text": "You built a gate at the lair.",
+      "brief": "the gate you built in {year}"
+    },
+    "act_sponsor_remnant": {
+      "text": "You called {S} back to the valley.",
+      "brief": "the return you sponsored in {year}"
+    },
+    "act_sponsor_hero": {
+      "text": "You raised a hero sworn to you in {S}.",
+      "brief": "the hero you raised in {s} in {year}"
+    },
+    "act_sponsor_claimant": {
+      "text": "You raised a claimant in {S}.",
+      "brief": "the claimant you raised in {s} in {year}"
+    },
+    "act_ignore": {
+      "text": "You let a call go unanswered.",
+      "brief": "the call you let go in {year}"
+    },
+    "act_curse": {
+      "text": "You cursed {S}.",
+      "brief": "your curse on {s} in {year}"
+    },
+    "act_curse_lineage": {
+      "text": "You cursed the line of {S}.",
+      "brief": "your curse on {s} in {year}"
+    },
+    "act_curse_research": {
+      "text": "You cursed the scholars of {S}.",
+      "brief": "your curse on {s} in {year}"
+    },
+    "act_curse_blight": {
+      "text": "You cursed the fields of {S}.",
+      "brief": "your curse on {s} in {year}"
+    },
+    "act_corrupt_dark": {
+      "text": "You turned {S} toward the dark.",
+      "brief": "what you made of {s} in {year}"
+    },
+    "act_corrupt_undead": {
+      "text": "You turned {S} toward the dead.",
+      "brief": "what you made of {s} in {year}"
+    },
+    "act_corrupt_chaos": {
+      "text": "You turned {S} toward chaos.",
+      "brief": "what you made of {s} in {year}"
+    },
+    "act_corrupt_dragon": {
+      "text": "You turned {S} toward yourself.",
+      "brief": "what you made of {s} in {year}"
+    },
+    "act_bless_land": {
+      "text": "You blessed the land of {S}.",
+      "brief": "your blessing on {s} in {year}"
+    },
+    "act_bless_plague": {
+      "text": "You lifted the plague from {S}.",
+      "brief": "your blessing on {s} in {year}"
+    },
+    "act_bless_blight": {
+      "text": "You lifted the blight from {S}.",
+      "brief": "your blessing on {s} in {year}"
+    },
+    "act_ward": {
+      "text": "You set a ward over {O}.",
+      "brief": "your ward over {o} in {year}"
+    },
+    "act_incite": {
+      "text": "You turned {S} on {O}.",
+      "brief": "the war you started in {year}"
+    },
+    "act_raise_undead": {
+      "text": "You raised the dead against {S}.",
+      "brief": "the dead you raised in {year}"
+    },
+    "order_disbanded": {
+      "text": "The slayer order of {S} disbanded at your word.",
+      "brief": "the end of {s}'s order in {year}"
+    },
+    "grandmaster_fled": {
+      "text": "{S}, who led the slayers, fled to {O} with a grudge.",
+      "brief": "the flight of {s} in {year}"
+    },
+    "structure_torn_down": {
+      "text": "{S} tore down its {o} at your word.",
+      "brief": "what {s} tore down in {year}"
+    },
+    "pact_brokered": {
+      "text": "{S} and {O} swore the pact you made.",
+      "brief": "the pact of {s} and {o} in {year}"
+    },
+    "arrival_sworn_pilgrim": {
+      "text": "Pilgrims of {S} came up the mountain, as their oath to you demands.",
+      "brief": "the sworn pilgrims of {s} in {year}"
     }
   },
   "causes": {
@@ -1307,7 +1643,18 @@
     "threatened": "under your threat",
     "released_with_terms": "",
     "inquisition": "",
-    "purge": ""
+    "purge": "",
+    "consent": "",
+    "demanded": "because you demanded it",
+    "disbanded": "",
+    "brokered": "because you brokered it",
+    "revealed": "because you told them",
+    "judged": "by your judgement",
+    "haunted": "after a dream you sent",
+    "consecrated": "",
+    "kept": "",
+    "dismissed": "",
+    "consort_line": "of your consort's line"
   },
   "motives": {
     "survival": "they fear for their survival",
@@ -1374,6 +1721,13 @@
     "pretender": "pretender"
   },
   "words": {
+    "grandmaster": "grandmaster",
+    "master": "master",
+    "slayer": "slayer",
+    "burn": "burned",
+    "claw": "clawed",
+    "tail": "struck by your tail",
+    "deaf": "deafened",
     "submission": "submission",
     "exhaustion": "exhaustion",
     "annihilation": "annihilation",
@@ -1524,6 +1878,29 @@
     "because.piety": "its people are pious",
     "an_envoy": "An envoy",
     "led_by": ", led by {name},",
+    "slayer.marked": "marked by you: ",
+    "slayer.details": "{scars}counter {counter}, hates {hate}, fears {fear}",
+    "slayer.scar.burn": "burned",
+    "slayer.scar.claw": "clawed",
+    "slayer.scar.tail": "struck by your tail",
+    "slayer.scar.deaf": "deafened",
+    "slayer.name.fireward": "a fireward",
+    "slayer.name.plate": "plate",
+    "slayer.name.runeward": "a runeward",
+    "slayer.name.waxed_ears": "waxed ears",
+    "slayer.name.forewarned": "forewarning",
+    "slayer.name.smoke": "smoke",
+    "slayer.name.banners": "banners",
+    "slayer.name.gold": "gold",
+    "slayer.name.roar": "your roar",
+    "slayer.name.fire": "fire",
+    "slayer.name.heights": "heights",
+    "slayer.name.dark": "the dark",
+    "slayer.name.dead": "the dead",
+    "led_by_roster": ", led by {name} ({details}),",
+    "slayer_line": "The slayers of {court}, led by {name} ({details}), stand at {power} against your strength; {when}.",
+    "slayer_when_ready": "they mean to come in your next sleep",
+    "slayer_when_forming": "they may come about {year}",
     "brief_fallback": "the {kind} of {year}",
     "and": " and ",
     "quiet": "Nothing the chroniclers thought worth a line.",
@@ -1663,6 +2040,18 @@
     "tag.sacked.help": "It has not forgotten its sack, and is grateful for any friend.",
     "tag.robbed_the_dragon.harm": "It knows why you came: someone there still has your gold.",
     "tag.false_dragon": "Its king claims to speak for you, and now has to explain you.",
-    "tag.old_enemies.help": "Its old enemies will hear of it."
+    "tag.old_enemies.help": "Its old enemies will hear of it.",
+    "crush.any": "{F} saw you land on its walls; its garrison is gone and its neighbours bar their gates.",
+    "fight.any": "{F} watched you fight in the open and does not know whether to mourn or to marvel.",
+    "judge.any": "{F} watched you judge, and its people call it justice.",
+    "broker.any": "{F} saw you set its crown beside another's; it does not know yet what it owes you.",
+    "consecrate.any": "{F} saw its temple given to you; its priests now pray in your name.",
+    "teach.any": "{F} learned from you and wonders what the lesson will cost.",
+    "sponsor.any": "{F} has a new champion who owes you everything.",
+    "bless.any": "{F} saw its fields answer your blessing.",
+    "curse.any": "{F} feels your curse settle on it and knows whose it is.",
+    "incite.any": "{F} marches where you pointed it.",
+    "raise_undead.any": "{F} sees the dead walk against it, and knows whose work it is.",
+    "dismiss.any": "{person} is home in {F}, sent away from your lair."
   }
 }

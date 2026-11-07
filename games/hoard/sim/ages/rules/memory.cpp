@@ -13,6 +13,8 @@ namespace ages {
 static void faith_floors(World& w, const Params& p) {
     const MemoryConstants& m = p.c.mem;
     for (auto& f : w.factions) if (awe_eff(f) >= m.temple_awe) f.faith = std::max(f.faith, m.faith_floor);
+    // item 09: a consecrated dragon temple, or a priest of the court kept at the lair
+    for (auto& f : w.factions) if (has_tag(f.tags, "consecrated") || has_tag(f.tags, "priest_kept")) f.faith = std::max(f.faith, m.faith_floor);
     if (effect(w, p, "brood") > 0)
         for (auto& f : w.factions) if (has_tag(f.tags, "dragon_raised")) f.faith = std::max(f.faith, p.c.brood_faith);
     if (effect(w, p, "cult") <= 0) return;

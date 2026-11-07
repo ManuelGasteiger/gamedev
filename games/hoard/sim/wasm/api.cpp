@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include "ages/ages.h"
+#include "ages/act_gates.h"
 #include "ages/arrivals.h"
 #include "ages/chron.h"
 #include "ages/dragon_json.h"
@@ -84,8 +85,10 @@ json cmd_load(const json& in) {
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
     g.data.arrivals = text_of(d, "arrivals");   // item 06
     g.data.moves = text_of(d, "moves");         // item 07
+    g.data.slayers = text_of(d, "slayers");     // item 08
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.endings = text_of(d, "endings");   // item 04
+    g.data.gates = text_of(d, "gates");       // item 09
     g.data.importance = text_of(d, "importance");
     g.data.patterns = text_of(d, "patterns");       // item 14
     g.data.base_rates = text_of(d, "base_rates");
@@ -132,7 +135,8 @@ json cmd_apply_acts(const json& in) {
     if (!acts_from_json(in.value("acts", json::array()).dump(), acts, err)) return fail(err);
     json before = court_snapshot(g.world);
     size_t first_event = g.world.chronicle.size();
-    json lines = json::parse(reaction_lines_to_json(apply_acts(g.world, g.params, acts)), nullptr, false);
+    std::vector<ActRefusal> refused;
+    json lines = json::parse(reaction_lines_to_json(apply_acts(g.world, g.params, acts, &refused)), nullptr, false);
     json after = court_snapshot(g.world);
     json changed = json::array();   // every court the acts moved: the targets first, then the witnesses the sim chose
     std::vector<std::string> order;
@@ -144,7 +148,27 @@ json cmd_apply_acts(const json& in) {
         for (auto& c : changed) if (c["id"] == id) seen = true;
         if (!seen) changed.push_back({{"id", id}, {"before", before[id]}, {"after", after[id]}});
     }
-    return {{"ok", true}, {"changed", changed}, {"events", events_since(first_event)}, {"lines", lines}};
+    json out = {{"ok", true}, {"changed", changed}, {"events", events_since(first_event)}, {"lines", lines}};
+    if (!refused.empty()) {   // item 09: a refused act is not logged; the first reason is worded for the page
+        json list = json::array();
+        for (auto& r : refused) list.push_back({{"index", r.index}, {"type", r.type}, {"reason", r.reason}, {"reason_text", text_reason(r.reason)}});
+        out["refused"] = true;
+        out["reason"] = refused.front().reason;
+        out["refusals"] = list;
+    }
+    return out;
+}
+
+// item 09: per act type, the reason its gates refuse it now ("" when open); the page greys what is refused
+json cmd_act_gates() {
+    json out = json::object();
+    for (auto& kv : g.params.act_book.acts) {
+        Act a;
+        a.type = kv.first;
+        std::string why = act_gate_refusal(g.world, g.params, a);
+        out[kv.first] = why.empty() ? json({{"open", true}}) : json({{"open", false}, {"reason", why}, {"reason_text", text_reason(why)}});
+    }
+    return {{"ok", true}, {"acts", out}};
 }
 
 json cmd_offer(const json& in, bool accept) {
@@ -404,6 +428,7 @@ json dispatch(const json& in) {
     if (cmd == "cast") return cmd_cast(in);
     if (cmd == "terraform") return cmd_terraform(in);
     if (cmd == "demand") return cmd_demand(in);
+    if (cmd == "act_gates") return cmd_act_gates();   // item 09
     if (cmd == "catalogue") { json j = json::parse(spells_catalogue_json(g.params), nullptr, false); j["ok"] = true; return j; }
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
     if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);

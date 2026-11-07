@@ -67,6 +67,19 @@ bool clause_holds(const World& w, const Params& p, const Oath& o, const Clause& 
             if (e.year >= window_from && e.kind == "region_taken" && e.tags.count(f->id)) attacker = e.subject;
         return dragon_defended(w, f->id, attacker, window_from);
     }
+    if (cl.pred == "no_harm_to") {   // item 09: the court leaves the third court alone
+        for (auto& e : w.chronicle)
+            if (e.year >= window_from && e.kind == "region_taken" && e.subject == f->id && e.tags.count(o.target)) return false;
+        for (auto& x : w.wars) if (x.started >= window_from && x.a == f->id && x.b == o.target) return false;
+        return true;
+    }
+    if (cl.pred == "disband") return !has_tag(f->tags, "slayers");
+    if (cl.pred == "tear_down") {
+        for (auto& rid : f->regions)
+            if (const Region* r = find_region(w, rid)) if (!o.ask.empty() && has_tag(r->tags, o.ask)) return false;
+        return true;
+    }
+    if (cl.pred == "pilgrimage") return remembered;
     if (cl.pred == "hostage") {
         by_dragon = true;
         for (auto& l : w.dragons[kPlayer].lineages) if (l == f->race || l == f->id) return true;

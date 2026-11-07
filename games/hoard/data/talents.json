@@ -71,6 +71,8 @@
       "effects": { "arcane_armor_mult": 0.6 }, "look": { "runes": 2 } },
     { "id": "sleepers_ward", "axis": "arcana", "node": 3, "name": "Sleeper's Ward", "text": "Every sleep wards the lair: no sieges, and slayers succeed 30 % less often.",
       "effects": { "lair_ward": 1, "slay_mult": 0.7 }, "look": { "aura": 2 } },
+    { "id": "mortal_guise",  "axis": "arcana", "node": 3, "name": "Mortal Guise", "text": "New action Guise: walk a city unseen, once a waking.",
+      "effects": {}, "look": {} },
 
     { "id": "old_tongues",   "axis": "lore", "node": 0, "name": "Old Tongues",    "text": "Demand needs only half the knowledge.",
       "effects": { "demand_mult": 0.5 }, "look": { "crest": 1 } },

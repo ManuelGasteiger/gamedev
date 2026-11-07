@@ -11,6 +11,8 @@ data.hooks = readFileSync(join(root, 'data/hooks.json'), 'utf8');   // v0.4 hook
 data.arrivals = readFileSync(join(root, 'data/arrivals.json'), 'utf8');   // item 06
 data.endings = readFileSync(join(root, 'data/endings.json'), 'utf8');   // item 04
 data.moves = readFileSync(join(root, 'data/moves.json'), 'utf8');   // item 07
+data.gates = readFileSync(join(root, 'data/gates.json'), 'utf8');   // item 09
+data.slayers = readFileSync(join(root, 'data/slayers.json'), 'utf8');   // item 08
 data.text = readFileSync(join(root, 'data/text/en/narrator.json'), 'utf8');
 data.importance = readFileSync(join(root, 'data/importance.json'), 'utf8');
 data.text_bundles = Object.fromEntries(readdirSync(join(root, 'data/text'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {

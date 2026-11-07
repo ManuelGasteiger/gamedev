@@ -6,9 +6,9 @@
 
 namespace ages {
 
-std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts) {
+std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts, std::vector<ActRefusal>* refused) {
     RecordScope rec(w);
-    auto out = apply_acts_unrecorded(w, p, acts);
+    auto out = apply_acts_unrecorded(w, p, acts, refused);
     rec.done("apply_acts", args_acts(acts));
     return out;
 }

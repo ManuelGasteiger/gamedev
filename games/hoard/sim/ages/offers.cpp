@@ -265,7 +265,8 @@ bool kill_person_unrecorded(World& w, const Params& p, const std::string& id, st
     bool envoy = false;
     for (auto& of : w.offers) if (of.envoy == id) envoy = true;
     if (envoy) for (auto& r : w.regions) if (r.lair) a.region = r.id;   // v0.4: an envoy dies in the lair, out of reach of its court's defences
-    std::vector<ReactionLine> told = apply_acts(w, p, {a});
+    a.source = "lair";
+    std::vector<ReactionLine> told = apply_logged_acts(w, p, {a});
     if (lines) *lines = told;
     Deposit d;
     d.type = "kill_person";

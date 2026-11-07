@@ -2,6 +2,7 @@
 #include "core/detmath.h"
 #include "defences.h"
 #include "memory_tiers.h"
+#include "oaths.h"
 #include "rules/slayers.h"
 #include "talents.h"
 #include "world_util.h"
@@ -88,6 +89,7 @@ bool value_of(const GateCtx& g, const std::string& n, double& v) {
     if (n == "lair_wasteland") { const Region* r = find_region(w, lair_id(w)); return b(r && has_tag(r->tags, "wasteland")); }
     if (n == "prophecy_or_cult") return b(has_tag(f.tags, "prophecy") || awe_eff(f) >= c.mem.cult_awe);   // until item 04 and item 12
     if (n == "false_dragon") return b(has_tag_prefix(f.tags, "false_dragon:"));
+    if (n == "sworn_pilgrimage") return b(active_oath_with_pred(w, f.id, "pilgrimage") != nullptr);   // item 09: demand(pilgrimage)
     return false;
 }
 

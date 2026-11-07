@@ -36,6 +36,7 @@ void step(World& w, const Params& p, int dt) {
     anti_dragon_marks(w, p);
     rule_people(w, p);
     rule_person_memory(w, p);   // item 07
+    if (slow) rule_slayer_order(w, p);   // item 08
     rule_secrets(w, p);
     rule_inquisition(w, p);
     rule_threads(w, p);

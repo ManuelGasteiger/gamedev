@@ -42,6 +42,8 @@ struct ReleaseReading {
 
 double move_score(const World& w, const Params& p, const Person& x, const MoveDef& def);
 MoveOutcome resolve_move(World& w, const Params& p, const std::string& person, const std::string& move, const MoveCtx& ctx);
+// item 09: the refusal resolve_move would return, without the roll or any write ("" when the move may be tried)
+std::string move_refusal(const World& w, const Params& p, const std::string& person, const std::string& move, const MoveCtx& ctx);
 // writes the reading on the person; release_hostage_person calls it
 ReleaseReading read_release(World& w, const Params& p, const std::string& person);
 // an oath draft the court answers when the person comes home (status "draft" until then)

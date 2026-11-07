@@ -24,6 +24,10 @@ bool policy_from_json(const std::string& text, Policy& out, std::string& err) {
             get(v, "against", a.against);
             get(v, "magnitude", a.magnitude);
             get(v, "payload_share", a.payload_share);
+            get(v, "args", a.args);
+            get(v, "person", a.person);
+            get(v, "target_kind", a.target_kind);
+            get(v, "source", a.source);
             out.acts.push_back(a);
         }
     }
@@ -33,6 +37,9 @@ bool policy_from_json(const std::string& text, Policy& out, std::string& err) {
     get(j, "sleep_open", out.sleep_open);
     get(j, "avoid_rings", out.avoid_rings);
     get(j, "act_wakings", out.act_wakings);
+    get(j, "ignore_hooks", out.ignore_hooks);
+    get(j, "swear_offers", out.swear_offers);
+    get(j, "take_exit", out.take_exit);
     if (j.contains("answer_hooks")) {   // v0.4 hooks (S3)
         const json& h = j["answer_hooks"];
         get(h, "acts", out.hook_acts);

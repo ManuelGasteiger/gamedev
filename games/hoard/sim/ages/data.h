@@ -6,6 +6,8 @@
 #include "endings_def.h"
 #include "genesis_data.h"
 #include "move_data.h"
+#include "act_data.h"
+#include "slayer_data.h"
 #include "../sift/bank.h"
 #include "state.h"
 
@@ -585,15 +587,21 @@ struct Params {
     HookBook hooks;               // v0.4 hooks (S3)
     ArrivalBook arrivals;         // item 06
     MoveBook moves;               // item 07
+    SlayerBook slayers;           // item 08
     GenesisDef genesis;           // v0.4 world (S2): data/genesis.json
     SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
     EndingsDef endings;           // item 04: data/endings.json
+    ActBook act_book;             // item 09: data/gates.json, constants.json "acts"
 };
 
 struct PolicyAct {
     std::string type, target, region, against;
     double magnitude = 0;
     std::map<std::string, double> payload_share;
+    // item 09: the typed payload's strings, a person of the target court (ruler | heir | hero | sage | priest | hostage
+    // | judged), and a target kind for acts on the lair, a remnant or a speaking relic
+    std::map<std::string, std::string> args;
+    std::string person, target_kind, source;
 };
 
 struct Policy {
@@ -615,6 +623,8 @@ struct Policy {
     double hook_wound_cap = 0.4;
     int hook_reach = 0;   // regions from the lair the raid flies to answer a hook (0: any)
     int hook_max = 0;     // hooks answered per waking (0: all it can)
+    // item 09: hooks left unanswered are ignored by act; offers are sworn; a ready ending is taken
+    bool ignore_hooks = false, swear_offers = false, take_exit = false;
 };
 
 struct DataJson {
@@ -627,8 +637,10 @@ struct DataJson {
     std::string importance;            // data/importance.json
     std::string arrivals;              // item 06: data/arrivals.json
     std::string moves;                 // item 07: data/moves.json
+    std::string slayers;               // item 08: data/slayers.json
     std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
     std::string endings;               // item 04: data/endings.json; optional
+    std::string gates;                 // item 09: data/gates.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
@@ -638,6 +650,8 @@ bool dragon_data_from_json(const DataJson& d, Params& out, std::string& err);   
 bool hooks_from_json(const DataJson& d, Params& out, std::string& err);         // v0.4 hooks (S3), hook_data.cpp
 bool arrivals_from_json(const DataJson& d, Params& out, std::string& err);      // item 06, arrival_data.cpp
 bool moves_from_json(const DataJson& d, Params& out, std::string& err);         // item 07, move_data.cpp
+bool act_book_from_json(const DataJson& d, Params& out, std::string& err);      // item 09, act_data.cpp
+bool slayers_from_json(const DataJson& d, Params& out, std::string& err);       // item 08, slayer_data.cpp
 bool sift_bank_from_json(const DataJson& d, SiftBank& out, std::string& err);   // item 14, sim/sift/bank_data.cpp
 
 // file IO, data_io.cpp (not part of the wasm build)

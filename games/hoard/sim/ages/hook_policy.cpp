@@ -52,6 +52,8 @@ Act answer_act(const World& w, const Policy& policy, const Hook& h, const std::s
     if (verb == "take") a.payload = policy.hook_payload;
     if (verb == "kill") a.payload["soldiers"] = 1;
     a.witnesses = everyone(w);
+    a.source = "hook";
+    a.answers = h.id;
     return a;
 }
 

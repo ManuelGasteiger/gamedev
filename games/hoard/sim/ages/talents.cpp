@@ -131,6 +131,13 @@ bool pick_talent_unrecorded(World& w, const Params& p, const std::string& id, st
         if (pk.axis != t->axis || pk.node != t->node) continue;
         if (!pk.open) { reason = "needs_phase|n=" + std::to_string(pk.needs_phase); return false; }
         w.dragons[kPlayer].talents.push_back(id);
+        Act a;   // item 09: pick_talent as a logged act
+        a.year = w.year;
+        a.type = "pick_talent";
+        a.source = "lair";
+        a.args["node"] = t->axis + "." + std::to_string(t->node);
+        a.args["choice"] = id;
+        w.acts.push_back(a);
         emit(w, "talent_taken", "dragon", id, pk.points, {t->axis}, because("growth", {}, {{"points", growth_of(w.dragons[kPlayer], t->axis)}}));
         return true;
     }

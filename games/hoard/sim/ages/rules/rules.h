@@ -55,6 +55,7 @@ void fall_person(World& w, const Params& p, const std::string& id, const std::st
 
 // item 07: person memory, secrets, the inquisition (after rule_people)
 void rule_person_memory(World&, const Params&);
+void rule_slayer_order(World&, const Params&);   // item 08
 void rule_secrets(World&, const Params&);
 void rule_inquisition(World&, const Params&);
 double secret_rate(const World& w, const Params& p, const Secret& s);       // discovery chance per decade

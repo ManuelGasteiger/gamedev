@@ -30,6 +30,16 @@ bool keep_person_unrecorded(World& w, const Params& p, const std::string& id, co
         t.to = w.year;
     }
     d.chron.historians.push_back({id, w.year, -1});
+    Act a;   // item 09: keep(historian) as a logged act; no court sees it
+    a.year = w.year;
+    a.type = "keep";
+    a.target_kind = "person";
+    a.target = x->faction;
+    a.item = id;
+    a.source = "lair";
+    a.args["role"] = role;
+    w.acts.push_back(a);
+    x->tags.insert("kept:historian");
     emit(w, "historian_kept", id, x->faction, 0, {x->role});
     return true;
 }
