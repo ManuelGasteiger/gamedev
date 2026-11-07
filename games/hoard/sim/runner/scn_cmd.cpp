@@ -64,7 +64,7 @@ void log_waking(const World& w, ScnRun& run) {
         }
         shown.push_back({{"id", s.scenario}, {"slot", s.slot}, {"cites", cites}, {"answered", s.answered}});
     }
-    json line = {{"waking", W}, {"year", w.year}, {"eligible", w.scn.diag_eligible}, {"depth", w.scn.diag_depth}, {"acted", w.scn.diag_acted}, {"shown", shown}};
+    json line = {{"waking", W}, {"year", w.year}, {"era", w.scn.diag_era}, {"eligible", w.scn.diag_eligible}, {"depth", w.scn.diag_depth}, {"acted", w.scn.diag_acted}, {"shown", shown}};
     if (!run.refused.empty()) { line["refused"] = run.refused; run.refused.clear(); }
     (*run.log) << line.dump() << "\n";
 }

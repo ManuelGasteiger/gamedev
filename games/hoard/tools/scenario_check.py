@@ -1,7 +1,8 @@
-"""Steps 1 and 2 of the scenario validation pipeline (scenario-spec.md s8): schema, then lint; with --text, the text
-lint of every language and the forced-state renders (tools/text/lint.py).
+"""Steps 1 to 4 of the scenario validation pipeline (scenario-spec.md s8): schema, lint, and with --lab
+satisfiability and the forced-state test in the sim (tools/scenario_lab.py); with --text, the text lint of every language and
+the forced-state renders (tools/text/lint.py). --usage prints the vocabulary usage table.
 Usage: python3 scenario_check.py <scenario.schema.json> <act-api.schema.json> <vocab.json> <scenarios.json>...
-       [--text DATA --bin HOARD_SIM [--langs en,de]]"""
+       [--text DATA --bin HOARD_SIM [--langs en,de]] [--lab --bin HOARD_SIM [--data DATA]] [--usage]"""
 import json, os, re, sys
 import jsonschema
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "text"))
@@ -116,9 +117,46 @@ def check(sc, vocab, act_validator, errors):
     read = set(re.findall(r"([a-z_]+\.[a-z_]+)", " ".join(sc.get("require", []))))
     if len(read) < 2: e(f"require reads fewer than two distinct state elements ({len(read)})")
 
+def usage(scenarios, vocab):
+    """the vocabulary usage table (Six Ages' compiler report): how often each closed-list entry is used"""
+    from collections import Counter
+    use = {k: Counter() for k in ("theme", "tone", "ending", "race", "gate", "chooser", "noun", "path", "option act", "act role", "kind")}
+    for sc in scenarios:
+        use["kind"][sc["kind"]] += 1
+        for t in sc["tags"]:
+            ns, _, v = t.partition(":")
+            if ns in use: use[ns][v] += 1
+        for g in sc.get("arrival", {}).get("needs", []): use["gate"][g] += 1
+        types = {r: role_type(d) for r, d in sc["roles"].items()}
+        for r, d in sc["roles"].items():
+            b = d[types[r]]
+            if "choose" in b: use["chooser"][b["choose"]] += 1
+            if "noun" in d: use["noun"][d["noun"]] += 1
+            if types[r] == "act":
+                for t in (b["type"] if isinstance(b["type"], list) else [b["type"]]): use["act role"][t] += 1
+        preds = sc.get("require", []) + [x["if"] for x in sc.get("salience", [])] + [v["if"] for v in sc["text"].get("variants", [])] + [o["gate"] for o in sc["options"] if "gate" in o]
+        for p in preds:
+            for m in re.finditer(r"([a-z][a-z0-9_]*)\.([a-z_]+)\s*(?:>=|<=|==|!=|>|<)", p):
+                scope = m.group(1) if m.group(1) in GLOBALS else types.get(m.group(1), "?")
+                use["path"][f"{scope}.{m.group(2)}"] += 1
+        for o in sc["options"]: use["option act"][o["act"]["type"]] += 1
+    lists = {"theme": vocab["themes"], "tone": vocab["tones"], "ending": vocab["endings"], "race": vocab["races"], "gate": vocab["gates"],
+             "chooser": vocab["choosers"], "noun": vocab["nouns"],
+             "path": [f"{k}.{f}" for k, fs in vocab["fields"].items() for f in fs if k != "act"]}
+    print("vocabulary usage")
+    for k, c in use.items():
+        unused = sorted(set(lists.get(k, [])) - set(c))
+        print(f"  {k:10s} " + ", ".join(f"{v} {n}" for v, n in c.most_common()))
+        if unused: print(f"  {'':10s} unused: {', '.join(unused)}")
+
+
 def main(argv):
     opts = {}
-    for flag in ("--text", "--bin", "--langs"):
+    for flag in ("--lab", "--usage"):
+        if flag in argv:
+            opts[flag] = True
+            argv.remove(flag)
+    for flag in ("--text", "--bin", "--langs", "--data"):
         if flag in argv:
             i = argv.index(flag)
             opts[flag] = argv[i + 1]
@@ -134,6 +172,22 @@ def main(argv):
             for x in se[:3]: errors.append(f"{sc.get('id','?')}: schema: {'/'.join(map(str, x.path))}: {x.message[:140]}")
             continue
         check(sc, vocab, av, errors)
+    import scenario_lab
+    data = opts.get("--data") or os.path.dirname(os.path.dirname(os.path.abspath(argv[3])))
+    if "--lab" in opts:
+        emitted = scenario_lab.emitted_acts(data, scenarios)
+        for sc in scenarios:
+            if sc["id"] in {e.split(":")[0] for e in errors}: continue
+            errors += [f"{sc['id']}: satisfiability: {x}" for x in scenario_lab.satisfiable(sc, emitted)]
+        results = scenario_lab.forced_state(scenarios, data, opts["--bin"], {"seed": 7, "years": 1200, "policy": "played", "genesis": True})
+        bad = 0
+        for r in results:
+            found = scenario_lab.judge(r)
+            bad += 1 if found else 0
+            errors += [f"{r['scenario']}: forced state: {x}" for x in found]
+        print(f"forced state: {len(results)} scenarios, {len(results) - bad} pass, {sum(len(r.get('options', [])) for r in results)} options played, "
+              f"{sum(r.get('renders', 0) for r in results)} renders")
+    if "--usage" in opts: usage(scenarios, vocab)
     used_themes = {t.split(":")[1] for s in scenarios for t in s["tags"] if t.startswith("theme:")}
     print(f"{len(scenarios)} scenarios, {len(errors)} problems; themes used {len(used_themes)}/{len(vocab['themes'])}; unused: {sorted(set(vocab['themes']) - used_themes)}")
     if "--text" in opts:

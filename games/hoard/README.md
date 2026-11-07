@@ -333,3 +333,29 @@ tools/act_scenarios.py          the 15 act-api scenarios in a lab world
 | `guise_discovery`, `guise_per_sage`, `guise_forewarned`, `guise_show` | 0.1, 0.05, 0.1, 0.5 | guise discovery roll and the show it reads as |
 | `curse_research_mult`, `curse_research_stacks`, `curse_blight_land` | 0.75, 3, 0.5 | curse kinds |
 | runner-set | | `take_item_artifacts` 1, `craft_era_progress` 10, `war_militarism` 0.1, `war_anti_dragon` 0.1, `magic_world` 0.05, `intrigue_cunning` 0.1, `guise_preach_faith` 0.1, `guise_learn_knowledge` 1, `consort_line_years` 100, haunt memory rows |
+
+## Item 10: the scenario runtime
+
+The scenario bank (`data/scenarios/*.json`, `docs/scenario-spec.md`) runs in `sim/scenarios/`, namespace `scn` (`ages::run_scenario` is the policy runner and unrelated). It runs only while `World.scn.on`: the runner's `--scenarios`, the wasm `load`/`reset` flag `scenarios: true`. The golden suite runs with it off, so goldens do not move. At every wake `scn::wake` selects per spec section 6 (eligibility, binding, score, slots, tier-first weighted pick inside 3 points, quotas, pity) and records `shown`; the briefing gains `scenarios[]` (rendered headline, body or variant, because-line from chronicle level `because_level`, options with the resolved act, gate reason and `defences_strike`). `answer_scenario {id, option, magnitude?}` resolves the option's act (`source: scenario`, `answers: id`) through `apply_acts` and runs the outcomes (suppress, history, seek, reveal). Seen counts across runs come frozen from the profile (`seen.scenarios`). A shown scenario names its people for the page (`person_seen.cpp`).
+
+```
+data/scenarios/*.json           the bank (seed-01-10, 11-20, 21-30); vocab.json the closed lists and gate_rows (vocab gate -> arrival gate rows)
+data/bots/scenario_answers.json how the dry-run bots answer (act type preference per bot)
+data/policies/random.json       the dry run's random bot: the five bot policies in turn
+sim/scenarios/bank.h/.cpp       loader, fails on an unknown role, option, field, tag, gate or chooser; bank hash in the data hash
+sim/scenarios/predicate.h/.cpp  the spec section 4 grammar to clauses, evaluation
+sim/scenarios/fields.h/.cpp     the vocab fields of roles, dragon, lair and world; tags; act wakings; vocab gates
+sim/scenarios/bind.h/.cpp       role binders with backtracking, act patterns, remembers
+sim/scenarios/select.cpp        selection per waking, wake(), enable(), note_seen()
+sim/scenarios/present.cpp       briefing block, option act resolution
+sim/scenarios/text_ctx.h/.cpp   renderer entities for bound roles
+sim/scenarios/answer.cpp        answer_scenario (recorded wrapper in recorded.cpp, replay case in record.cpp)
+sim/scenarios/lab.cpp           lab_world: the forced-state test's world overlay
+sim/scenarios/scn_json.cpp      World.scn in saves
+sim/runner/scn_cmd.h/.cpp       --scenario-bot, --scenario-log, --lab
+tools/scenario_check.py         steps 1 to 4 (--lab for the forced-state test, --usage for the vocabulary table)
+tools/scenario_lab.py           satisfiability and lab specs for scenario_check.py
+tools/scenario_dryrun.py        steps 5 to 7: 300 seeds x 6 bots, cut and flag lists, bank metrics, summary.json for item 11
+```
+
+`constants.json` "scenarios": the spec's score weights (`specificity_w` 2, `cite_w` 9, `cite_half_wakings` 2, `recent_w` 9, `recent_half_wakings` 4, `theme_w` 3 over `theme_wakings` 3, `seen_w` 3 capped at `seen_cap` 9, `theme_share` 0.15 at `theme_share_w` 9, `window` 3, `seek_w` 9), pity (`pity_magnitude` 0.2, `pity_wakings` 2, `arrival_pity_after` 4, `arrival_pity_w` 3), citation budget (`cites_per_run` 2, `cites_per_waking` 1, `cites_monumental` 4), runner-set `remember_stock` 0.1, `renown_events` 10, `candidates_per_role` 12, `because_level` 1, `eras`, `sizes`.

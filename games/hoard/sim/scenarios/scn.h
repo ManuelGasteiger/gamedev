@@ -28,6 +28,7 @@ struct Diag {
     int consequence_depth = 0;   // eligible consequences
     bool acted_last = false;     // a witnessed act in the last waking
     bool pity = false;
+    int era = 0;   // of the strongest court
 };
 
 // select.cpp: the pure selection for the dragon's current waking; wake() records it as shown

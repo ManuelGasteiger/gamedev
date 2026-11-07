@@ -133,7 +133,7 @@ std::vector<std::string> faction_candidates(const Ctx& x, const json& s) {
             double bv = -2;
             for (auto& f : w.factions) if (dread_eff(f) - awe_eff(f) > bv) { bv = dread_eff(f) - awe_eff(f); best = f.id; }
             if (!best.empty()) pool.push_back(best);
-        } else if (c.first == "has_tag") { for (auto& f : w.factions) if (tag_match(f.tags, c.second)) pool.push_back(f.id); }
+        } else if (c.first == "has_tag") { for (auto& f : w.factions) if (faction_tag(w, f, c.second)) pool.push_back(f.id); }
     } else for (auto& f : w.factions) pool.push_back(f.id);
     std::vector<std::string> out;
     for (auto& id : pool) {
@@ -147,7 +147,7 @@ std::vector<std::string> faction_candidates(const Ctx& x, const json& s) {
         if (!in_range(s, "piety", f->culture.traits.piety) || !in_range(s, "openness", f->culture.traits.openness)) continue;
         if (!flag_is(s, "at_war", !f->at_war_with.empty())) continue;
         bool tags = true;
-        for (auto& t : s.value("has_tag", json::array())) tags = tags && tag_match(f->tags, t.get<std::string>());
+        for (auto& t : s.value("has_tag", json::array())) tags = tags && faction_tag(w, *f, t.get<std::string>());
         if (!tags) continue;
         Value prophecy = faction_value(x, *f, "knows_prophecy"), slayers = faction_value(x, *f, "has_slayers"), temple = faction_value(x, *f, "has_temple");
         Value library = faction_value(x, *f, "has_library"), stage = faction_value(x, *f, "slayer_stage"), tier = faction_value(x, *f, "memory_tier");

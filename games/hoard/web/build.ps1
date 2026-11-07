@@ -5,7 +5,7 @@ $WasiSdk = if ($env:WASI_SDK) { $env:WASI_SDK } else { 'D:\tools\wasi-sdk' }
 $Cxx = Join-Path $WasiSdk 'bin\clang++.exe'
 $Sysroot = Join-Path $WasiSdk 'share\wasi-sysroot'
 
-$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\text\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
+$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\sift\*.cpp, sim\scenarios\*.cpp, sim\text\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
 $Sources += (Resolve-Path sim\wasm\api.cpp).Path
 $Sources += (Resolve-Path sim\wasm\text_api.cpp).Path
 
@@ -42,6 +42,10 @@ $Data['text_bundles'] = $Bundles
 $Cards = Get-ChildItem data\events\*.json | Sort-Object Name | ForEach-Object { Get-Content -Raw $_.FullName }
 $Data['events'] = '[' + ($Cards -join ",`n") + ']'
 $Data['genesis'] = Get-Content -Raw 'data\genesis.json'   # v0.4 world (S2)
+# item 10: the scenario bank joined as data_io.cpp does, and its vocabulary
+$Scn = Get-ChildItem data\scenarios\*.json | Where-Object { $_.Name -ne 'vocab.json' } | Sort-Object Name | ForEach-Object { Get-Content -Raw $_.FullName }
+$Data['scenarios'] = '[' + ($Scn -join ",`n") + ']'
+$Data['scenario_vocab'] = Get-Content -Raw 'data\scenarios\vocab.json'
 $DataJson = $Data | ConvertTo-Json -Compress -Depth 2
 Write-Host "web\ages.wasm $((Get-Item web\ages.wasm).Length) bytes"
 foreach ($pair in @(@('web\sandbox.template.html', 'web\ages-sandbox.html'), @('web\game.template.html', 'web\hoard-game.html'))) {

@@ -45,6 +45,7 @@ Value faction_value(const Ctx& x, const ages::Faction& f, const std::string& k);
 bool has_tag_of(const Ctx& x, const std::string& role, const std::string& tag);
 PredEnv env_of(const Ctx& x);
 bool tag_match(const ages::Tags& t, const std::string& tag);   // exact, or `tag:<anything>`
+bool faction_tag(const ages::World& w, const ages::Faction& f, const std::string& tag);   // its own tags or a region's (walls, library, temple)
 
 // the person helpers the binders share
 std::string person_court(const ages::World& w, const ages::Person& x);   // "lair" for a hostage

@@ -139,6 +139,7 @@ std::vector<Pick> select(const World& w, const Params& p, Diag* diag) {
         for (auto& c : cands) { diag->eligible.push_back(c.d->id); diag->scores[c.d->id] = c.score; if (c.d->kind == "consequence") diag->consequence_depth += 1; }
         diag->acted_last = acted;
         diag->pity = pity;
+        diag->era = cache.strongest_era;
     }
 
     std::set<std::string> used_keys;
@@ -203,6 +204,7 @@ void wake(World& w, const Params& p) {
     w.scn.diag_eligible = diag.eligible;
     w.scn.diag_depth = diag.consequence_depth;
     w.scn.diag_acted = diag.acted_last;
+    w.scn.diag_era = diag.era;
 }
 
 void enable(World& w, const Profile* pr) {

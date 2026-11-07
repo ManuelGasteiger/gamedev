@@ -376,7 +376,7 @@
         "person": {
           "court": "$court",
           "role": "hero",
-          "memory_has": "sworn_to_memory",
+          "tag": "sworn_to",
           "choose": "by_score:renown"
         },
         "noun": "hero",
@@ -497,7 +497,6 @@
       "agent": {
         "person": {
           "tag": "corrupted:dark",
-          "memory_has": "schooled:intrigue",
           "knows_dragon": true,
           "choose": "most_recent"
         },
@@ -513,7 +512,8 @@
     },
     "require": [
       "court.piety >= 0.6",
-      "agent.role == ruler"
+      "agent.role == ruler",
+      "has_tag(agent, schooled:intrigue)"
     ],
     "salience": [
       {

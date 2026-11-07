@@ -141,8 +141,16 @@ bool person_role(const World& w, const Person& x, const std::string& role) {
     return false;
 }
 
+bool faction_tag(const World& w, const Faction& f, const std::string& tag) {
+    if (tag_match(f.tags, tag)) return true;
+    for (auto& rid : f.regions) if (const Region* r = find_region(w, rid)) if (tag_match(r->tags, tag)) return true;
+    return false;
+}
+
+// the person's own tags, or a court tag naming them (`false_dragon:<id>`, `inquisition:<id>`), or the roster and lair
 bool person_tag(const World& w, const Person& x, const std::string& tag) {
     if (tag_match(x.tags, tag)) return true;
+    if (const Faction* f = find_faction(w, x.faction)) if (has_tag(f->tags, tag + ":" + x.id)) return true;
     if (tag == "slayer") return !x.slayer.rank.empty();
     if (tag == "hostage") return person_court(w, x) == "lair";
     return x.role == tag;
@@ -166,14 +174,10 @@ Cache make_cache(const World& w, const Params& p) {
     for (size_t i = 0; i < fs.size(); ++i) c.wealth_rank[fs[i]->id] = static_cast<int>(i) + 1;
     double best = -1;
     for (auto& f : w.factions) if (power(f, p.c) > best) { best = power(f, p.c); c.strongest = f.id; c.strongest_era = f.era; }
-    // wakings in a row, newest first, whose acts were ignores only (sleep and pick_talent aside)
-    std::vector<int> ignores(static_cast<size_t>(c.waking + 1), 0), others(static_cast<size_t>(c.waking + 1), 0);
-    for (size_t i = 0; i < w.acts.size(); ++i) {
-        const std::string& t = w.acts[i].type;
-        if (t == "sleep" || t == "pick_talent") continue;
-        (t == "ignore" ? ignores : others)[static_cast<size_t>(c.act_waking[i])] += 1;
-    }
-    for (int k = c.waking - 1; k >= 0 && ignores[static_cast<size_t>(k)] > 0 && others[static_cast<size_t>(k)] == 0; --k) c.ignored_streak += 1;
+    // wakings in a row, newest first, in which the dragon ignored something (a hook or a scenario)
+    std::vector<int> ignores(static_cast<size_t>(c.waking + 1), 0);
+    for (size_t i = 0; i < w.acts.size(); ++i) if (w.acts[i].type == "ignore") ignores[static_cast<size_t>(c.act_waking[i])] += 1;
+    for (int k = c.waking - 1; k >= 0 && ignores[static_cast<size_t>(k)] > 0; --k) c.ignored_streak += 1;
     return c;
 }
 
@@ -300,7 +304,7 @@ bool has_tag_of(const Ctx& x, const std::string& role, const std::string& tag) {
     if (role == "world") return tag_match(w.tags, tag);
     if (!x.bound(role)) return false;
     std::string id = x.id(role), kind = x.kind(role);
-    if (kind == "faction") { const Faction* f = find_faction(w, id); return f && tag_match(f->tags, tag); }
+    if (kind == "faction") { const Faction* f = find_faction(w, id); return f && faction_tag(w, *f, tag); }
     if (kind == "person") { const Person* p = find_person(w, id); return p && person_tag(w, *p, tag); }
     if (kind == "region") { const Region* r = find_region(w, id); return r && tag_match(r->tags, tag); }
     return false;

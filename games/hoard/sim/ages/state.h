@@ -551,7 +551,7 @@ struct ScnState {
     std::set<std::string> closed;      // exclusive groups answered this run
     // the last selection, for the dry run; not saved, not hashed
     std::vector<std::string> diag_eligible;
-    int diag_depth = 0;
+    int diag_depth = 0, diag_era = 0;
     bool diag_acted = false;
 };
 

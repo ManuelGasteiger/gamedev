@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include "ages/ages.h"
+#include "scenarios/scn.h"
 #include "ages/act_gates.h"
 #include "ages/arrivals.h"
 #include "ages/chron.h"
@@ -54,6 +55,7 @@ void start_recording(bool genesis) {
     g.world.recorder = &g.recorder;
     g.header = replay_header(g.world, g.params, genesis);
     if (genesis && !g.profile.legends.empty()) { json h = json::parse(g.header); h["legends"] = legends_to_json(g.profile.legends); g.header = h.dump(); }   // item 04
+    if (g.world.scn.on) { json h = json::parse(g.header); h["scenarios"] = true; g.header = h.dump(); }   // item 10
 }
 
 json court_snapshot(const World& w) {
@@ -92,6 +94,8 @@ json cmd_load(const json& in) {
     g.data.importance = text_of(d, "importance");
     g.data.patterns = text_of(d, "patterns");       // item 14
     g.data.base_rates = text_of(d, "base_rates");
+    g.data.scenarios = text_of(d, "scenarios");             // item 10
+    g.data.scenario_vocab = text_of(d, "scenario_vocab");
     g.data.text_bundles.clear();
     if (d.contains("text_bundles") && d["text_bundles"].is_object())
         for (auto it = d["text_bundles"].begin(); it != d["text_bundles"].end(); ++it)
@@ -103,6 +107,7 @@ json cmd_load(const json& in) {
     g.profile = profile_from_json(in.value("profile", json::object()));   // item 04
     if (in.value("genesis", false) && !make_genesis(r.world, r.params, g.profile, r.error)) return fail(r.error);   // v0.4 world (S2)
     note_hatching(g.profile, r.world, r.params);
+    if (in.value("scenarios", false)) scn::enable(r.world, &g.profile);   // item 10
     g.params = r.params;
     g.world = r.world;
     g.loaded = true;
@@ -117,6 +122,7 @@ json cmd_reset(const json& in) {
     if (in.contains("profile")) g.profile = profile_from_json(in["profile"]);   // item 04: else the last load's
     if (in.value("genesis", false) && !make_genesis(r.world, r.params, g.profile, r.error)) return fail(r.error);   // v0.4 world (S2)
     note_hatching(g.profile, r.world, r.params);
+    if (in.value("scenarios", g.world.scn.on)) scn::enable(r.world, &g.profile);   // item 10
     g.world = r.world;
     start_recording(in.value("genesis", false));
     return {{"ok", true}};
@@ -429,6 +435,7 @@ json dispatch(const json& in) {
     if (cmd == "terraform") return cmd_terraform(in);
     if (cmd == "demand") return cmd_demand(in);
     if (cmd == "act_gates") return cmd_act_gates();   // item 09
+    if (cmd == "answer_scenario") return scn::answer_json(scn::answer_scenario(g.world, g.params, text_of(in, "id"), text_of(in, "option"), in.value("magnitude", -1.0)));   // item 10
     if (cmd == "catalogue") { json j = json::parse(spells_catalogue_json(g.params), nullptr, false); j["ok"] = true; return j; }
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
     if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);

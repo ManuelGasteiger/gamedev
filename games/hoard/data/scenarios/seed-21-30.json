@@ -828,7 +828,7 @@
       "spared": {
         "person": {
           "knows_dragon": true,
-          "memory_has": "spared_by_dragon",
+          "tag": "pardoned",
           "choose": "most_recent"
         },
         "noun": "ruler",
