@@ -69,6 +69,7 @@ add_library(ages STATIC
   sim/ages/card_data.cpp
   sim/ages/policy.cpp
   sim/ages/policy_json.cpp
+  sim/ages/policy_pick.cpp
   sim/ages/pop.cpp
   sim/ages/serialise.cpp
   sim/ages/person_json.cpp

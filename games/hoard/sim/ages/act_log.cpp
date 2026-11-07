@@ -110,6 +110,7 @@ void normalise_act(const World& w, Act& a) {
     else if (a.type == "demand") pair(a.item, a.args, "clause");
     else if (a.type == "exit") pair(a.item, a.args, "kind");
     else if (a.type == "take") pair(a.item, a.args, "item");
+    else if (a.type == "burn") pair(a.item, a.args, "structure");
     else if (a.type == "show" && arg(a, "kind").empty()) a.args["kind"] = a.magnitude <= 0.1 ? "flyover" : (a.magnitude <= 0.3 ? "roar" : "land");
     else if (a.type == "miracle") {
         if (arg(a, "kind").empty()) a.args["kind"] = num(a, "terror") > 0 ? "terror" : "protector";

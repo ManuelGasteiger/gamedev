@@ -596,6 +596,10 @@ struct PolicyAct {
     std::string type, target, region, against;
     double magnitude = 0;
     std::map<std::string, double> payload_share;
+    // item 09: the typed payload's strings, a person of the target court (ruler | heir | hero | sage | priest | hostage
+    // | judged), and a target kind for acts on the lair, a remnant or a speaking relic
+    std::map<std::string, std::string> args;
+    std::string person, target_kind, source;
 };
 
 struct Policy {
@@ -617,6 +621,8 @@ struct Policy {
     double hook_wound_cap = 0.4;
     int hook_reach = 0;   // regions from the lair the raid flies to answer a hook (0: any)
     int hook_max = 0;     // hooks answered per waking (0: all it can)
+    // item 09: hooks left unanswered are ignored by act; offers are sworn; a ready ending is taken
+    bool ignore_hooks = false, swear_offers = false, take_exit = false;
 };
 
 struct DataJson {
