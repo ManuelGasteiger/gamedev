@@ -532,6 +532,29 @@ struct Prophecy {
     std::string book;
 };
 
+// item 10: one scenario shown at a waking (scenario-spec.md section 6.8); roles map a role to the bound id (an act
+// role to its index in World.acts), cites the act indices it cites, answered the option id once answered
+struct ScnShown {
+    std::string scenario, slot, answered;
+    int waking = 0, year = 0;
+    std::map<std::string, std::string> roles;
+    std::vector<int> cites;
+};
+
+// item 10: the scenario runtime's state; saved and hashed only while on. seen_before is frozen from the profile at run
+// start; suppress maps a theme tag to the year it is free again; seek holds follow-up tags and the waking they apply at
+struct ScnState {
+    bool on = false;
+    std::vector<ScnShown> shown;
+    std::map<std::string, int> seen_before, suppress, arrival_open;
+    std::map<std::string, int> seek;   // tag -> waking from which it counts (one waking only)
+    std::set<std::string> closed;      // exclusive groups answered this run
+    // the last selection, for the dry run; not saved, not hashed
+    std::vector<std::string> diag_eligible;
+    int diag_depth = 0;
+    bool diag_acted = false;
+};
+
 struct Recorder;
 
 constexpr size_t kPlayer = 0;
@@ -586,6 +609,7 @@ struct World {
     std::vector<EndingState> endings;      // item 04: in registry order
     Prophecy prophecy;                     // item 04: empty ending on the fixed start
     std::string ended;                     // item 04: the exit kind once the run ended
+    ScnState scn;                          // item 10: saved and hashed only while on
     Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
     // item 05, level 3: the world at the last wake, and what the last sleep would have been without one act; not saved, not hashed
     std::shared_ptr<const World> wake_snapshot;

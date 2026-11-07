@@ -3,6 +3,7 @@
 #include "arrivals.h"
 #include "endings.h"
 #include "chron.h"
+#include "../scenarios/scn.h"
 
 namespace ages {
 
@@ -112,4 +113,14 @@ bool commune(World& w, const Params& p, const std::string& relic, const std::str
     return ok;
 }
 
+}
+
+// item 10
+scn::Answer scn::answer_scenario(ages::World& w, const ages::Params& p, const std::string& id, const std::string& option, double magnitude) {
+    ages::RecordScope rec(w);
+    Answer a = answer_unrecorded(w, p, id, option, magnitude);
+    nlohmann::json args = {{"id", id}, {"option", option}};
+    if (magnitude >= 0) args["magnitude"] = magnitude;
+    if (a.ok) rec.done("answer_scenario", args.dump());
+    return a;
 }

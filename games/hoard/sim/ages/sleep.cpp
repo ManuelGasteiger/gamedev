@@ -15,6 +15,7 @@
 #include "world_util.h"
 #include "wounds.h"
 #include "../sift/sift.h"
+#include "../scenarios/scn.h"
 
 namespace ages {
 
@@ -103,6 +104,7 @@ SleepResult sleep_unrecorded(World& w, const Params& p, int years) {
     if (!has_tag(w.tags, "dragon_slain")) { arrivals_at_wake(w, p); rule_arrivals(w, p); generate_offers(w, p); }
     if (!has_tag(w.tags, "dragon_slain")) res.hooks = generate_hooks(w, p);   // v0.4 hooks (S3): after everything the sleep brought
     sift_wake(w, p, w.sleep_started);   // item 14: the briefing's lines, recorded as shown
+    scn::wake(w, p);                    // item 10: the waking's scenarios, recorded as shown
     close_tenures(w);                   // item 05
     counterfactual_after_sleep(w, p, years, acts_at_sleep);
     snapshot_at_wake(w, p);

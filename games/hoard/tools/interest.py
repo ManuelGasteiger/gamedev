@@ -16,7 +16,7 @@ events after the hatching, and the storyteller's wakings (majors per 10, breathe
 the share whose briefing leads with an event of at least importance_min, sleeps of 50+ years with a major).
 """
 import argparse
-import json
+import glob, json
 import math
 import os
 import shutil
@@ -45,10 +45,18 @@ def parse_range(text):
     return range(1, int(text) + 1)
 
 
+SCENARIOS = {"on": False, "bots": {}, "tags": {}}   # item 10: --scenarios
+
+
 def run_binary(binary, data, seed, years, policy, sleep, out, narrate=False, genesis=False):
     cmd = [binary, "--data", data, "--seed", str(seed), "--years", str(years), "--sleep", str(sleep), "--out", out]
     if policy != "idle":
         cmd += ["--policy", policy]
+    scn = SCENARIOS["on"] and policy != "idle"
+    if scn:   # item 10: the bank on, answered by the policy's bot (data/bots/scenario_answers.json); idle stays the bank-off baseline
+        cmd += ["--scenarios", "--scenario-log", os.path.join(out, "scn.jsonl")]
+        if policy in SCENARIOS["bots"]:
+            cmd += ["--scenario-bot", policy]
     if narrate:
         cmd += ["--narrate"]
     if genesis:
@@ -66,6 +74,9 @@ def run_binary(binary, data, seed, years, policy, sleep, out, narrate=False, gen
         stats = json.load(f)
     with open(os.path.join(out, "wakings.jsonl")) as f:
         stats["wakings_log"] = [json.loads(line) for line in f if line.strip()]
+    if scn:
+        with open(os.path.join(out, "scn.jsonl")) as f:
+            stats["scn_log"] = [json.loads(line) for line in f if line.strip()]
     if narrate:   # the sim's own narrator (data/text/en/narrator.json), cause clauses included, one sentence per chronicle event
         with open(os.path.join(out, "narrated.json")) as f:
             for e, text in zip(chron, json.load(f)):
@@ -371,10 +382,15 @@ def seed_metrics(events, world, stats, idle_events, numbers=None):
         "agency_chain": agency_chain(events, stats.get("wakings_log", []), (world.get("genesis") or {}).get("hatched_year", 0)),
         "sift": sift_seed(stats.get("wakings_log", []), world),   # item 14
         "people": people_count(stats.get("wakings_log", []), events),   # item 07
+        "scenarios": scn_seed(stats["scn_log"]) if "scn_log" in stats else None,   # item 10
     }
     if numbers:
         out["world"] = world_metrics(events, world, numbers)
     return out
+
+
+def _scn_init(scn):
+    SCENARIOS.update(scn)
 
 
 def worker(args):
@@ -634,6 +650,7 @@ def summarise_policy(policy, per_seed):
         "arrivals": arrivals_summary([per_seed[s].get("arrivals") for s in seeds]),
         "sift": sift_summary([per_seed[s].get("sift") for s in seeds], BANK_IDS),   # item 14
         "people": people_summary([per_seed[s].get("people") for s in seeds]),   # item 07
+        "scenarios": scn_summary([per_seed[s].get("scenarios") for s in seeds]),   # item 10
         "flatness_flags": flags,
         "most_interesting": [headline(s, per_seed[s]) for s in ranked[::-1][:5]],
         "least_interesting": [headline(s, per_seed[s]) for s in ranked[:5]],
@@ -641,6 +658,32 @@ def summarise_policy(policy, per_seed):
         "weights": WEIGHTS,
         "world": summarise_world(per_seed) if all("world" in per_seed[s] for s in seeds) else None,
     }
+
+
+def scn_seed(log):
+    """item 10: per run, from hoard-sim --scenario-log: shown, citing shown, slots filled, theme counts"""
+    shown = [x for l in log for x in l["shown"]]
+    slots = Counter(x["slot"] for x in shown)
+    themes = Counter(t for x in shown for t in SCENARIOS["tags"].get(x["id"], []) if t.startswith("theme:"))
+    return {"wakings": len(log), "shown": len(shown), "citing": sum(1 for x in shown if x["cites"]),
+            "slots": dict(slots), "themes": dict(themes), "answered": sum(1 for x in shown if x["answered"])}
+
+
+def scn_summary(rows):
+    rows = [r for r in rows if r]
+    if not rows:
+        return None
+    wakings = sum(r["wakings"] for r in rows)
+    shown = sum(r["shown"] for r in rows)
+    slots, themes = Counter(), Counter()
+    for r in rows:
+        slots.update(r["slots"])
+        themes.update(r["themes"])
+    return {"cited_player_act_share": sum(r["citing"] for r in rows) / shown if shown else 0.0,
+            "slot_fill": {k: slots[k] / wakings if wakings else 0.0 for k in ("must", "consequence", "audience", "open")},
+            "per_waking": shown / wakings if wakings else 0.0,
+            "theme_share_max": max(themes.values()) / shown if shown else 0.0,
+            "theme_top": themes.most_common(5), "answered_share": sum(r["answered"] for r in rows) / shown if shown else 0.0}
 
 
 def agency_summary(rows):
@@ -998,6 +1041,11 @@ def print_table(summaries):
         for o in s["outcome_distribution"][:4]:
             print(f"    {o['seeds']:4d}  {o['largest_race']}/{o['hegemon_race']}/era{o['leader_era']}/{o['living_factions']}f")
         print(f"[{s['policy']}] reversals per 1000 y by kind: " + ", ".join(f"{k} {v:.2f}" for k, v in sorted(s['reversals_per_1000y_by_kind'].items())))
+        sc = s.get("scenarios")
+        if sc:   # item 10
+            fill = ", ".join(f"{k} {100 * v:.0f}%" for k, v in sc["slot_fill"].items())
+            print(f"[{s['policy']}] scenarios: {sc['per_waking']:.2f} per waking, citing a player act {100 * sc['cited_player_act_share']:.0f}%, "
+                  f"slots filled {fill}, top theme share {100 * sc['theme_share_max']:.0f}%, answered {100 * sc['answered_share']:.0f}%")
         d = s.get("deaths")
         if d:   # v0.4 (S1)
             print(f"[{s['policy']}] dragon deaths: wounds {d['wounds']}, slaying {d['slaying']} (unwarned {d['unwarned']}), median year {fmt(d['median_year'], 0)}")
@@ -1259,7 +1307,16 @@ def main():
     ap.add_argument("--bands", nargs="?", const="data/bands.json", default=None,
                     help="check the bands file (generated worlds, played-style policies; sweep bands from --sweep); exit 1 on a failed v0.4 band")
     ap.add_argument("--sweep", default="out/sweep/summary.json", help="sweep.py summary for the sweep.* bands")
+    ap.add_argument("--scenarios", action="store_true", help="item 10: the scenario bank on for every policy but idle, answered by data/bots/scenario_answers.json")
     args = ap.parse_args()
+    if args.scenarios:
+        SCENARIOS["on"] = True
+        with open(os.path.join(args.data, "bots", "scenario_answers.json")) as f:
+            SCENARIOS["bots"] = json.load(f)["bots"]
+        for path in sorted(glob.glob(os.path.join(args.data, "scenarios", "*.json"))):
+            if not path.endswith("vocab.json"):
+                for sc in json.load(open(path)):
+                    SCENARIOS["tags"][sc["id"]] = sc["tags"]
     BANK_IDS[:] = bank_ids(args.data)
 
     if args.read:
@@ -1292,7 +1349,7 @@ def main():
     per_policy = {p: {} for p in policies}
     jobs = [(args.bin, args.data, s, args.years, args.sleep, policies, args.genesis) for s in seeds]
     done = 0
-    with ProcessPoolExecutor(max_workers=args.jobs) as ex:
+    with ProcessPoolExecutor(max_workers=args.jobs, initializer=_scn_init, initargs=(SCENARIOS,)) as ex:
         futures = [ex.submit(worker, j) for j in jobs]
         for fut in as_completed(futures):
             seed, results = fut.result()

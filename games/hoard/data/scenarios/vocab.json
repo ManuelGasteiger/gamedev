@@ -4,6 +4,15 @@
   "endings": ["ascension", "lichdom", "portal", "mountain", "brood", "emperor", "last_flame", "scholar", "mortality", "sun_eater", "myth"],
   "races": ["human", "dwarf", "elf", "orc", "undead"],
   "gates": ["court.knows_lair", "court.knows_lair_exact", "court.dares", "court.route_open", "court.faith_share_min", "court.awe_min", "court.has_library", "court.motive", "court.gold_rumour", "court.order_alive", "court.grievance", "court.kin_alive", "court.lost_region", "court.knows_prophecy"],
+  "gate_rows": {
+    "note": "item 10: each vocab gate as alternatives of data/arrivals.json gate rows (sim/ages/arrival_gates.cpp names, plus knows_prophecy and order_grievance); any alternative holds. dares is the envoy's blocked_when row negated; faith_share_min and awe_min are the pilgrim's rows.",
+    "court.knows_lair": [{"gate": "knows_lair"}], "court.knows_lair_exact": [{"gate": "knows_lair_exact"}],
+    "court.dares": [{"gate": "dread_eff", "lt": 0.6}, {"gate": "debt"}], "court.route_open": [{"gate": "route_open"}],
+    "court.faith_share_min": [{"gate": "faith_share", "gte": 0.5}], "court.awe_min": [{"gate": "awe_eff", "gte": 0.15}],
+    "court.has_library": [{"gate": "library"}], "court.motive": [{"gate": "motive"}], "court.gold_rumour": [{"gate": "gold_rumour"}],
+    "court.order_alive": [{"gate": "slayer_order"}], "court.grievance": [{"gate": "order_grievance"}], "court.kin_alive": [{"gate": "relative_held"}],
+    "court.lost_region": [{"gate": "lost_region"}], "court.knows_prophecy": [{"gate": "knows_prophecy"}]
+  },
   "fields": {
     "faction": ["dread", "awe", "memory_tier", "era", "cohesion", "faith_share", "at_war", "piety", "openness", "militarism", "has_slayers", "slayer_stage", "knows_prophecy", "portal_progress", "wealth_rank", "race", "is_vassal", "has_library", "has_temple", "cult_fervor", "name"],
     "region": ["terrain", "burn", "owner", "has_structure", "name"],

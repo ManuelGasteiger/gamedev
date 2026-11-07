@@ -385,5 +385,15 @@
     "motivating": ["grudge", "grudge_against_the_dragon", "grudge_dragon", "old_enemies", "old_enemies_again", "oath_sworn", "oath_of_recovery",
                    "oath_breached_by_dragon", "oath_breached_by_them", "act_burn", "act_take", "act_kill", "act_take_hostage", "prophecy", "slayers_founded"],
     "harm": ["war_started", "region_taken", "sack_of_the_capital", "joined_war", "holy_war", "vassal_absorbed"]
+  },
+  "scenarios": {
+    "note": "item 10: selection per waking (scenario-spec.md section 6). The formula's weights are the spec's. Runner-set: theme_share applies once total x share >= 1 shown; remember_stock is the spec's 0.1 for `remembers`; renown_events chronicle lines naming a person make renown 1; candidates_per_role caps the binder's backtracking; because_level is the chronicle level a because-line needs (1: a source held or a historian); sizes word an act's magnitude for {act.size}.",
+    "specificity_w": 2, "cite_w": 9, "cite_half_wakings": 2, "recent_w": 9, "recent_half_wakings": 4, "theme_w": 3, "theme_wakings": 3,
+    "seen_w": 3, "seen_cap": 9, "theme_share": 0.15, "theme_share_w": 9, "window": 3, "seek_w": 9,
+    "pity_magnitude": 0.2, "pity_wakings": 2, "arrival_pity_after": 4, "arrival_pity_w": 3,
+    "cites_per_run": 2, "cites_per_waking": 1, "cites_monumental": 4, "remember_stock": 0.1,
+    "renown_events": 10, "candidates_per_role": 12, "because_level": 1,
+    "eras": ["bronze", "iron", "castles", "gunpowder", "arcane"],
+    "sizes": [[0.15, "tenth"], [0.3, "quarter"], [0.45, "third"], [0.7, "half"], [1.0, "most"]]
   }
 }

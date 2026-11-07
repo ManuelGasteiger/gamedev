@@ -1,0 +1,11 @@
+{
+  "note": "item 10: how the dry-run bots answer scenarios (hoard-sim --scenario-bot NAME). Per bot the act types it prefers, first wins among the open options; with none preferred it ignores, else takes the first open option. random draws among the open options. The six bots of scenario-spec.md section 8.5 run these policies: burner raze_all, sleeper-hoarder rest_only, protector protect_one, priest priest, schemer schemer, random random (data/policies/random.json).",
+  "bots": {
+    "raze_all": ["burn", "kill", "fight", "crush", "destroy_altar", "take", "demand", "take_hostage"],
+    "rest_only": ["take", "keep", "demand", "sleep", "receive", "release", "give"],
+    "protect_one": ["defend", "give", "bless", "swear", "release", "show", "teach", "broker", "receive"],
+    "priest": ["receive", "bless", "miracle", "consecrate", "show", "keep", "commune", "teach", "give"],
+    "schemer": ["guise", "reveal", "corrupt", "broker", "incite", "haunt", "judge", "sponsor", "demand", "keep", "teach", "swear"],
+    "random": "random"
+  }
+}

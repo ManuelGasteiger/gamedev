@@ -22,6 +22,7 @@ bool person_seen(const World& w, const Person& x) {
     if (find_known(w, x.id) || has_tag(x.tags, "hostage")) return true;
     for (auto& o : w.offers) if (o.envoy == x.id) return true;
     for (auto& a : w.arrivals) if (a.person == x.id) return true;
+    for (auto& s : w.scn.shown) for (auto& r : s.roles) if (r.second == x.id) return true;   // item 10: named by a scenario
     if (x.slayer.rank == "grandmaster" && (!slayer_stage(w, x.faction).empty() || has_tag(w.tags, "slayers_coming:" + x.faction))) return true;   // item 08: named in the briefing's slayer line
     if (x.faction.empty()) return false;
     if (captive_of(w, x.faction) || source_of(w, x.faction)) return true;

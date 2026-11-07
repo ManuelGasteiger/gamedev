@@ -9,6 +9,7 @@
 #include "act_data.h"
 #include "slayer_data.h"
 #include "../sift/bank.h"
+#include "../scenarios/bank.h"
 #include "state.h"
 
 namespace ages {
@@ -592,6 +593,7 @@ struct Params {
     SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
     EndingsDef endings;           // item 04: data/endings.json
     ActBook act_book;             // item 09: data/gates.json, constants.json "acts"
+    scn::Bank scenarios;          // item 10: data/scenarios, constants.json "scenarios"
 };
 
 struct PolicyAct {
@@ -641,6 +643,7 @@ struct DataJson {
     std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
     std::string endings;               // item 04: data/endings.json; optional
     std::string gates;                 // item 09: data/gates.json; optional
+    std::string scenarios, scenario_vocab;   // item 10: data/scenarios/*.json joined into one array (vocab.json apart); optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 

@@ -170,6 +170,17 @@ add_library(ages STATIC
   sim/text/bundle_io.cpp
   sim/text/batch.cpp
   sim/text/reason.cpp
+  # item 10: scenario runtime
+  sim/scenarios/bank.cpp
+  sim/scenarios/predicate.cpp
+  sim/scenarios/fields.cpp
+  sim/scenarios/bind.cpp
+  sim/scenarios/select.cpp
+  sim/scenarios/present.cpp
+  sim/scenarios/text_ctx.cpp
+  sim/scenarios/answer.cpp
+  sim/scenarios/lab.cpp
+  sim/scenarios/scn_json.cpp
 )
 target_include_directories(ages PUBLIC sim)
 hoard_sim_flags(ages)
@@ -183,7 +194,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp sim/runner/scn_cmd.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

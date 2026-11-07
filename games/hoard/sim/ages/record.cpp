@@ -6,6 +6,7 @@
 #include "json.h"
 #include "state_hash.h"
 #include "talents.h"
+#include "../scenarios/scn.h"
 
 #ifndef HOARD_BUILD
 #define HOARD_BUILD "dev"
@@ -63,6 +64,7 @@ uint64_t data_hash(const DataJson& d) {
     if (!d.patterns.empty()) { add("patterns", d.patterns); add("base_rates", d.base_rates); }   // item 14
     if (!d.endings.empty()) add("endings", d.endings);   // item 04
     if (!d.gates.empty()) add("gates", d.gates);   // item 09
+    if (!d.scenarios.empty()) { add("scenarios", d.scenarios); add("scenario_vocab", d.scenario_vocab); }   // item 10
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }
@@ -104,6 +106,7 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "cast") return cast_spell(w, p, str(a, "spell"), str(a, "target"), str(a, "region"), str(a, "against")).cast;
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }
+    if (verb == "answer_scenario") return scn::answer_unrecorded(w, p, str(a, "id"), str(a, "option"), a.value("magnitude", -1.0)).ok;   // item 10
     if (verb == "load_world") {
         World n;
         if (!world_from_json(a.value("world", json::object()).dump(), n, err)) return false;
