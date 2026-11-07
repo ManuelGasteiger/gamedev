@@ -203,6 +203,8 @@ static void load_constants(const json& j, Constants& c) {
         get(v, "sage_min_era", c.sage_min_era);
         get(v, "sage_openness", c.sage_openness);
         get(v, "priest_piety", c.priest_piety);
+        get(v, "priest_min_era", c.priest_min_era);
+        get(v, "keeper_second_era", c.keeper_second_era);
         get(v, "sage_memory_mult", c.sage_memory_mult);
         get(v, "keeper_min_weight", c.keeper_min_weight);
         get(v, "keeper_named_years", c.keeper_named_years);

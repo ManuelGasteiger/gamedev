@@ -283,3 +283,10 @@ tools/endings_runs.py           P(ending by run N) per bot, knowledge leverage
 ```
 
 The trigger language gains `count` (courts where a sub-condition holds, with `races_gte` and a `mean` bound) and `within_wakings` on events; new fields `temples`, `temple_years`, `monumental` (court) and `reign`, `legends`, `growth:<axis>`, `acts:<a|b>` (dragon). A card with `keyed: true` rolls its chance on `rng_for(seed, id, self@year)`.
+
+## Item 04b: endings and people follow-ups
+
+- `--bot oracle:ascension` (`oracle:ascension:free` without a stamina budget) runs the Ascension test bot (`sim/runner/ascend_bot.cpp`, `data/bots/ascension.json`) and writes `ascension.json`; `tools/ascension_probe.py` runs it over seeds.
+- Mortality: awe 0.5, a keeper sage or priest held 50 years, an arrival from that court within two wakings. Court threshold 4.
+- Constants `people.priest_min_era` 1, `people.keeper_second_era` 2 (a second sage and a second priest).
+- The player sees a person only after contact (`sim/ages/person_seen.cpp`): `people`, the world view and the briefing people block are filtered; saves keep everyone.

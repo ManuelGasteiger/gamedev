@@ -213,6 +213,8 @@
     "sage_min_era": 2,
     "sage_openness": 0.5,
     "priest_piety": 0.5,
+    "priest_min_era": 1,
+    "keeper_second_era": 2,
     "sage_memory_mult": 0.85,
     "keeper_min_weight": 0.1,
     "keeper_named_years": 200,

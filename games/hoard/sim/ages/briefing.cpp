@@ -8,6 +8,7 @@
 #include "json.h"
 #include "names.h"
 #include "offers.h"
+#include "person_seen.h"
 #include "world_util.h"
 #include "../sift/line_text.h"
 #include "../text/render.h"
@@ -544,7 +545,8 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     std::set<std::string> named;
     for (auto& e : slept) {
         if (e.kind != "person_died" && e.kind != "person_crowned" && e.kind != "raised_in_lair" && e.kind != "hostage_taken" && e.kind != "hostage_released") continue;
-        if (!find_known(w, e.subject)) continue;
+        const Person* alive = find_person(w, e.subject);
+        if (!find_known(w, e.subject) && !(alive && person_seen(w, *alive))) continue;   // item 04b
         people.push_back({{"text", n.sentence(e, told(e))}, {"person", e.subject}, {"year", e.year}, {"kind", e.kind}, {"importance", n.importance(e)}});
         named.insert(e.subject);
     }
@@ -552,7 +554,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
         if (o.status != "active") continue;
         const Faction* f = find_faction(w, o.parties[1]);
         const Person* r = f ? find_person_role(w, f->id, "ruler") : nullptr;
-        if (!r || named.count(r->id)) continue;
+        if (!r || named.count(r->id) || !person_seen(w, *r)) continue;
         named.insert(r->id);
         std::string s = n.misc("people_ruler");
         Narrator::replace_all(s, "{faction}", Narrator::cap(f->id));

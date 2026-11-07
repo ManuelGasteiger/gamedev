@@ -8,6 +8,7 @@
 #include "ages/memory_tiers.h"
 #include "ages/moves.h"
 #include "ages/person_record.h"
+#include "ages/person_seen.h"
 #include "ages/rng.h"
 #include "ages/rules/slayers.h"
 #include "ages/world_util.h"
@@ -133,19 +134,22 @@ json sift_waking(const World& w, const Params& p) {
 // item 07: tracked people with a memory of the dragon per court, and each move scored on every tracked person (the
 // census ignores access and skill: it measures the weight table against the people the run made)
 json people_waking(const World& w, const Params& p) {
-    int tracked_n = 0, with_mem = 0;
+    int tracked_n = 0, with_mem = 0, seen = 0;
+    json roles = json::object();
     json moves = json::object();
     for (auto& m : p.moves.moves) moves[m.first] = {0, 0};
     for (auto& x : w.people) {
         if (x.faction.empty() || !tracked(w, p, x)) continue;
         ++tracked_n;
+        roles[x.role] = roles.value(x.role, 0) + 1;
+        if (person_seen(w, x)) ++seen;
         if (!x.mem.empty() || !x.permanent.empty()) ++with_mem;
         for (auto& m : p.moves.moves) {
             moves[m.first][0] = moves[m.first][0].get<int>() + 1;
             if (move_score(w, p, x, m.second) >= m.second.threshold) moves[m.first][1] = moves[m.first][1].get<int>() + 1;
         }
     }
-    return {{"courts", w.factions.size()}, {"tracked", tracked_n}, {"with_memory", with_mem}, {"moves", moves}};
+    return {{"courts", w.factions.size()}, {"tracked", tracked_n}, {"with_memory", with_mem}, {"seen", seen}, {"roles", roles}, {"moves", moves}};
 }
 
 int next_bucket(int years) {

@@ -1,0 +1,16 @@
+{
+  "note": "item 04b: the Ascension test bot (sim/runner/ascend_bot.cpp). It keeps a set of cult courts of several races, helps them every waking (defend, miracle, offering, gift, show) within the page's stamina (what is left buys up to extra_gifts more gifts per target, least faithful first), never harms them, takes art and gold from the richest court outside the set, accepts their tribute oaths, receives their visitors, casts teach on the target nearest the next era and sleeps short. Talents, hook answers and sleep come from base_policy. Costs are the page's (web/game.template.html COST).",
+  "base_policy": "steer_ascension",
+  "courts": 5,
+  "races": 3,
+  "stamina": true,
+  "cost": { "defend": 12, "miracle": 0, "accept_offering": 5, "give": 5, "show": 3, "take": 10 },
+  "magnitude": { "defend": 0.5, "miracle": 1.0, "accept_offering": 0.5, "give": 0.2, "show": 0.3, "take": 0.2 },
+  "give_gold": 1,
+  "extra_gifts": 4,
+  "teach": true,
+  "show_dread_max": 0.4,
+  "take_payload": { "art": 0.6, "gold": 0.4 },
+  "accept_offers": ["tribute"],
+  "sleep": "short"
+}

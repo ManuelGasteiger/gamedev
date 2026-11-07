@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const { chromium } = require('playwright');
 
-const SEED = 39;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2's people and offers
+const SEED = 40;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2, 39 before item 04b
 const ONLY_V04 = process.argv.includes('--v04');   // `node web/game-check.cjs --v04` runs the v0.4 screens alone
 const shots = path.resolve(__dirname, 'shots');
 const results = [];
@@ -765,9 +765,14 @@ async function finishSleep() {
     const has = (f, role) => w.people.some((p) => p.faction === f.id && p.role === role && !p.tags.includes('hostage'));
     return w.factions.find((f) => f.capital && has(f, 'ruler') && has(f, 'heir'))?.id ?? '';
   });
-  let courtId = await courtWithHeir(), courtRests = 0;
+  // item 04b: the card lists only people the dragon has met, so the dragon shows itself at every capital first
+  const meetCourts = () => page.evaluate(() => {
+    for (const f of game.world().factions) if (f.capital) game.sim({ cmd: 'apply_acts', acts: [{ type: 'show', target: f.id, region: f.capital, magnitude: 0.1, witnesses: [] }] });
+  });
+  let courtId = '', courtRests = 0;
   while (!courtId && courtRests < 100) {
     courtRests += 1;
+    await meetCourts();
     await page.evaluate(() => game.sleep(1));
     await finishSleep();
     await page.keyboard.press('Enter');

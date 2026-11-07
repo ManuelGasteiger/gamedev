@@ -239,6 +239,8 @@ struct Constants {
     int sage_min_era = 2;
     double sage_openness = 0.5;
     double priest_piety = 0.5;
+    int priest_min_era = 2;
+    int keeper_second_era = 2;   // item 04b: from this era a court keeps a second sage and a second priest
     double sage_memory_mult = 0.5;
     double keeper_min_weight = 0.1;   // a dragon memory this faint is not taken up by a new sage or priest
     int keeper_named_years = 200;     // the chronicle names a kept memory only when it is at least this old

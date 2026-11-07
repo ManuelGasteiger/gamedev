@@ -13,6 +13,7 @@
 #include "../sift/sift_json.h"
 #include "endings_json.h"
 #include "person_json.h"
+#include "person_seen.h"
 
 namespace ages {
 
@@ -584,6 +585,7 @@ std::string people_json(const World& w, const Params& p) {
     (void)p;
     json arr = json::array();
     for (auto& x : w.people) {
+        if (!person_seen(w, x)) continue;   // item 04b
         json j = person_json(x);
         if (const Known* k = find_known(w, x.id)) j["known"] = {{"relationship", k->relationship}, {"met", k->met}, {"how", k->how}, {"tags", tags_json(k->tags)}};
         arr.push_back(j);
@@ -653,6 +655,11 @@ std::string spells_catalogue_json(const Params& p) { return spells_json(p).dump(
 
 std::string world_view_json(const World& w, const Params& p) {
     json j = world_json(w, p);   // v0.4 hooks (S3): hooks in the view shape
+    json seen = json::array(), seen_dead = json::array();   // item 04b: only the people the dragon has met or learned of
+    for (size_t i = 0; i < w.people.size(); ++i) if (person_seen(w, w.people[i])) seen.push_back(j["people"][i]);
+    for (size_t i = 0; i < w.dead_people.size(); ++i) if (find_known(w, w.dead_people[i].id)) seen_dead.push_back(j["dead_people"][i]);
+    j["people"] = seen;
+    j["dead_people"] = seen_dead;
     std::map<std::string, std::string> capitals;
     for (size_t i = 0; i < w.factions.size(); ++i) {
         const Faction& f = w.factions[i];
