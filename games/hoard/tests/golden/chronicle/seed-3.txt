@@ -1277,7 +1277,6 @@
 1010 act_burn morgrim hill_hold 0.5 -
 1010 act_take belgrim deep_hold 0.3 -
 1010 hook_resolved belgrim deep_hold 0 hook
-1010 arrival_left galstead prophet 0 arrival_left
 1010 sleep_begin dragon - 20 -
 1020 region_abandoned lorareth west_marches 1 burned_out
 1020 prophecy_cult galstead dragon 0 prophecy_cult
@@ -2770,7 +2769,6 @@
 1920 person_died elf9 lorareth 0 dragon_will
 1920 hook_ignored lorareth lair 0 -
 1920 hook_ignored belgrim deep_hold 0 -
-1920 arrival_left galstead prophet 0 arrival_left
 1920 sleep_begin dragon - 100 -
 1930 slayers_forming drakun - 25.9135 slayers
 1930 slayers_forming khazok dwarf193 25.9135 slayers_led
@@ -4651,7 +4649,6 @@
 3150 hook_resolved sormor west_marches 0 hook
 3150 act_take drakun west_vale 0.3 -
 3150 hook_resolved drakun west_vale 0 hook
-3150 arrival_left wenstead prophet 0 arrival_left
 3150 sleep_begin dragon - 100 -
 3160 warlord_died uzgothak - 0 warlord_death
 3160 collapse uzgulzag - 1 own_size
