@@ -7,6 +7,7 @@
 #include "../growth.h"
 #include "../talents.h"
 #include "../world_util.h"
+#include "../slayer_roster.h"
 #include "../wounds.h"
 
 namespace ages {
@@ -55,6 +56,15 @@ const Person* boldest_hero(const World& w, const Faction& f) {
     return lead;
 }
 
+const Person* lead_of(const World& w, const Faction& f) {
+    if (const Person* g = grandmaster(w, f.id)) return g;
+    return boldest_hero(w, f);
+}
+
+bool rostered(const World& w, const Params& p, const Faction& f) {
+    return !p.slayers.present || !roster(w, f.id).empty();
+}
+
 double hoard_value(const Hoard& h) { return std::max(0.0, h.gold + h.books + h.artifacts + h.art); }
 
 // the burn the faction remembers hardest plus the founding of its order; a bold hero leading it raises the odds (17.2)
@@ -87,13 +97,13 @@ bool forewarned(World& w, const Params& p, const Faction& f, const std::string& 
 }
 
 void form(World& w, const Params& p, Faction& f) {
-    const Person* lead = boldest_hero(w, f);
+    const Person* lead = lead_of(w, f);
     int ev = emit(w, kForming, f.id, lead ? lead->id : "", slayer_strength(w, p, f), {}, slay_cause(w, f, lead));
     set_stage(w, f, kForming, ev);
 }
 
 void ready(World& w, const Params& p, Faction& f) {
-    const Person* lead = boldest_hero(w, f);
+    const Person* lead = lead_of(w, f);
     Cause cause = slay_cause(w, f, lead);
     cause.params["strength"] = slayer_strength(w, p, f);
     add_ref(cause, last_event_id(w, kForming, f.id));
@@ -103,7 +113,7 @@ void ready(World& w, const Params& p, Faction& f) {
 
 void attempt(World& w, const Params& p, Faction& f) {
     const Constants& c = p.c;
-    const Person* lead = boldest_hero(w, f);
+    const Person* lead = lead_of(w, f);
     std::string hero = lead ? lead->id : "";
     double odds = slaying_odds(w, p, f);
     Cause cause = slay_cause(w, f, lead);
@@ -127,7 +137,8 @@ void attempt(World& w, const Params& p, Faction& f) {
     deposit(w, p, f, d);
     w.dragons[kPlayer].tags.insert("rage");
     if (w.wake_reason.empty()) w.wake_reason = "slay_attempt_failed";
-    emit(w, "slay_attempt_failed", f.id, hero, odds, {}, cause);
+    int failed = emit(w, "slay_attempt_failed", f.id, hero, odds, {}, cause);
+    march_failed(w, p, f, failed);
 }
 
 // 06b: a band marches only on a lair its court knows, and not while the slayer_band arrival rests (data/arrivals.json)
@@ -137,6 +148,11 @@ bool band_may_march(const World& w, const Params& p, const Faction& f) {
     return !d || !arrival_resting(w, p, f.id, *d, d->cause.empty() ? d->kind : d->cause);
 }
 
+bool strong_enough(const World& w, const Params& p, const Faction& f) {
+    const Order* o = find_order(w, f.id);
+    return !p.slayers.present || (o && o->power_total >= slayer_strength(w, p, f) * p.slayers.ready_ratio);
+}
+
 }
 
 double adaptation_factor(const World& w, const Params& p) {
@@ -144,16 +160,25 @@ double adaptation_factor(const World& w, const Params& p) {
     return std::max(c.adapt_min, std::min(c.adapt_max, c.adapt_base + c.adapt_step * w.dragons[kPlayer].adaptation));
 }
 
-double slayer_strength(const World& w, const Params& p, const Faction& f) {
+double dragon_points(const World& w, const Params& p) {
     const Constants& c = p.c;
-    double points = c.slay_points_base + c.slay_points_hoard * std::sqrt(hoard_value(w.dragons[kPlayer].hoard)) + c.slay_points_growth * total_growth(w.dragons[kPlayer]);
-    return points * era_mult(c, f.era) * adaptation_factor(w, p);
+    return c.slay_points_base + c.slay_points_hoard * std::sqrt(hoard_value(w.dragons[kPlayer].hoard)) + c.slay_points_growth * total_growth(w.dragons[kPlayer]);
+}
+
+double slayer_strength(const World& w, const Params& p, const Faction& f) {
+    return dragon_points(w, p) * era_mult(p.c, f.era) * adaptation_factor(w, p);
 }
 
 double slaying_odds(const World& w, const Params& p, const Faction& f) {
     const Constants& c = p.c;
     double odds = clamp01(slayer_strength(w, p, f) / (health_max(w, p) * c.slay_health_div));
-    if (const Person* lead = boldest_hero(w, f)) odds = clamp01(odds * (c.hero_slay_bold_base + lead->traits.bold));
+    if (const Person* lead = lead_of(w, f)) {
+        odds = clamp01(odds * (c.hero_slay_bold_base + lead->traits.bold));
+        if (!lead->slayer.rank.empty()) {
+            odds *= 1.0 + p.slayers.grandmaster_odds * lead->slayer.power;
+            if (counters_dragon(w, p, *lead)) odds *= p.slayers.counter_mult;
+        }
+    }
     return clamp01(odds * (1.0 + w.dragons[kPlayer].wounds / std::max(1.0, health_max(w, p))) * effect(w, p, "slay_mult"));
 }
 
@@ -174,11 +199,11 @@ void slayer_clock(World& w, const Params& p) {
         double dread = dread_eff(f);
         bool eligible = order && dread >= c.mem.slayer_dread;
         const TimedTag* t = stage_tag(w, f.id);
-        if (!t) { if (eligible) form(w, p, f); continue; }
-        if (!order || dread < c.slay_lapse_dread) { clear_stage(w, f); continue; }
+        if (!t) { if (eligible && rostered(w, p, f)) form(w, p, f); continue; }
+        if (!order || dread < c.slay_lapse_dread || !rostered(w, p, f)) { clear_stage(w, f); continue; }
         if (t->from > w.sleep_started) continue;   // reported this sleep: the next stage waits for a waking
         if (t->tag == kForming) {
-            if (eligible && band_may_march(w, p, f) && w.rng.chance(c.slay_ready_rate * k * slayer_pressure(f, c.mem) / c.mem.slayer_dread)) ready(w, p, f);
+            if (eligible && band_may_march(w, p, f) && w.rng.chance(c.slay_ready_rate * k * slayer_pressure(f, c.mem) / c.mem.slayer_dread) && strong_enough(w, p, f)) ready(w, p, f);
             continue;
         }
         attempt(w, p, f);
@@ -186,7 +211,8 @@ void slayer_clock(World& w, const Params& p) {
     }
 }
 
-void disperse_slayers(World& w, Faction& f) {
+void disperse_slayers(World& w, const Params& p, Faction& f) {
+    gate_fight(w, p, f);
     clear_stage(w, f);
     forget_warning(w, "slayers_coming:" + f.id);
 }

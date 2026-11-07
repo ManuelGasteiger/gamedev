@@ -150,7 +150,6 @@
  "reason.gate.phase": "needs phase {r.n}",
  "reason.gate.pool": "needs {r.pool} {r.n}",
  "reason.gate.once": "only once a waking",
- "reason.fight.unavailable": "the fight is not in the sim yet",
  "reason.broker.not_at_war": "they are not at war",
  "reason.broker.already": "they are already bound",
  "reason.reveal.nothing": "you know no {r.secret} to tell",
@@ -192,5 +191,6 @@
  "word.plot": "plot",
  "word.heir_location": "hiding place of an heir",
  "word.slayer_plan": "slayer plan",
- "word.lie": "lie"
+ "word.lie": "lie",
+ "reason.fight.not_slayer": "they are not a slayer of an order"
 }

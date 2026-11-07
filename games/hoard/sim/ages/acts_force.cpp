@@ -1,6 +1,7 @@
 #include "act_kinds.h"
 #include "memory_tiers.h"
 #include "defences.h"
+#include "resolve_fight.h"
 #include "world_util.h"
 
 // item 09: burn with a structure, crush, destroy_altar, take of a named item, fight
@@ -78,7 +79,7 @@ std::string force_refusal(const World& w, const Params& p, const Act& a) {
     if (a.type == "fight") {
         const Person* x = find_person(w, a.item);
         if (!x) return "act.no_target";
-        return "fight.unavailable";   // resolve_fight is item 08's; see reports/09-new-acts.md
+        return x->slayer.rank.empty() ? "fight.not_slayer" : "";   // item 08 rosters the slayers resolve_fight takes
     }
     if (a.type == "crush" && !find_faction(w, a.target)) return "act.no_target";
     return "";
@@ -106,7 +107,18 @@ bool force_effects(World& w, const Params& p, Act& a, double m, int act_index) {
         if (!a.item.empty()) w.dragons[kPlayer].hoard.artifacts += nums(p).take_item_artifacts;
         return true;
     }
-    return a.type == "fight";
+    if (a.type == "fight") {   // item 08's duel; the family is that of the dragon's last act this waking that has one
+        std::string family;
+        for (size_t i = w.acts.size(); i > 0 && family.empty(); --i) {
+            if (w.acts[i - 1].year < w.year) break;
+            family = act_family(p, w.acts[i - 1].type);
+        }
+        FightResult r = resolve_fight(w, p, a.item, family);
+        a.args["outcome"] = r.slayer_outcome;
+        if (r.artifact) a.args["artifact"] = "1";
+        return true;
+    }
+    return false;
 }
 
 }

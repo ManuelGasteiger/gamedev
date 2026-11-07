@@ -57,6 +57,7 @@ CMakeLists.txt                  library `ages`, runner `ages`, six ctest targets
 data/constants.json             every number in the doc, plus the ones added below
 data/races.json                 race templates (doc section 3) plus temperament, trait start values, affinity rows, orc off-map remnant
 data/reactions.json             act x relationship reaction rows (doc section 5)
+data/slayers.json               item 08: slayer roster (ranks, power, counters, hates, fears, scars, missions, fight numbers)
 data/regions.json               12 regions with terrain: lair, east/west vales and marches, hill hold + deep hold (hills), elder/deep/old wood, north scar, south fen
 data/factions.json              bronze-age start: aldmere, vessary (human, 2 regions each), dorun (dwarf, hill_hold + deep_hold), ilvareth (elf, elder_wood + deep_wood)
 data/shocks.json                plague, bad century, volcanic winter (now a chance per mega raze)
@@ -122,6 +123,11 @@ sim/ages/rules/card_ctx.h       the context a card is evaluated in (bound variab
 sim/ages/rules/people.cpp       17.2 lives: ages, deaths, heirs, crowning, orphans (people_life.h shares its helpers)
 sim/ages/rules/people_rise.cpp  heroes, sages and priests, keepers of the court's oldest memory, named reigns
 sim/ages/rules/hostages.cpp     people in the lair: taken, raised there, released
+sim/ages/rules/slayer_order.cpp the order turn (item 08): founding on grief, missions, recruiting, ranks, what the dragon learns
+sim/ages/rules/slayer_march.cpp what a failed march or a fight at the gate costs the named slayers
+sim/ages/slayer_roster.cpp      slayer traits, power, scars, reveals, promotion, succession; slayer_data.cpp loads data/slayers.json
+sim/ages/resolve_fight.cpp      resolve_fight for the fight act (item 09), reveal_order
+sim/ages/slayer_view.cpp        the briefing's slayer lines and attempt estimate; slayer_json.cpp saves and the view scrub
 sim/ages/rules/threads.cpp      17.8 closes threads whose arc ended
 sim/ages/rules/chronicle.cpp    compact this decade's repeated events, score importance
 sim/runner/main.cpp             CLI, stats.json

@@ -1,42 +1,43 @@
 # 09 · New acts: progress
 
-Branch `item/09-new-acts` from main 1478254. Build with `-j2`. Item 08 had pushed nothing at the start (no `item/08-slayer-roster` on origin).
+Branch `item/09-new-acts` from main 1478254. Build with `-j2`. Item 08 pushed `resolve_fight` on `item/08-slayer-roster` (6a71ed4); merged into this branch.
 
 ## Inventory (schema act → what the tree has)
 
-| act | today | plan |
+| act | before 09 | now |
 |---|---|---|
-| burn, kill, take, defend, show, give, take_hostage, release, accept_offering, miracle | `acts.cpp` | keep; add structure, item, consent |
-| destroy_altar, crush | reaction row only (generic path) | handler |
-| receive, hunt | `receive`, `hunt` verbs (`arrival_acts.cpp`); receive writes an act through `apply_acts` | route the act to the verb |
-| exit | `exit` verb (`exit.cpp`), writes an act | route |
-| commune | `commune` verb (`chron_voice.cpp`), no act | route, log |
-| keep | `keep_person` verb, historian only (`chron_keep.cpp`), no act | keep(historian) calls it; other roles new; old verb stays for replays |
-| demand | `demand` verb (`ages.cpp`), tribute/no_walls/no_settle, writes an act | route; new clauses |
-| swear | `accept_offer` verb | route by offer id |
-| teach (faction), curse, bless, ward, incite, raise_undead, corrupt (faction, disabled) | `cast` verb (`spells.cpp`), no act | route; log the act |
-| teach, corrupt (person) | `resolve_move` (`moves.cpp`), no API verb in the tree | call from the act |
-| terraform | `terraform` verb, no act | route, log |
-| sponsor | `sponsor_remnant` (spell act) | route |
-| sleep, pick_talent | verbs, no act | log as acts |
-| fight, broker, reveal, judge, haunt, consecrate, guise, dismiss, build, ignore | none | new |
-
-The brief lists the six moves as API verbs; the tree has `resolve_move` only (item 07 left the plumbing to 09).
+| burn, kill, take, defend, show, give, take_hostage, release, accept_offering, miracle | `acts.cpp` | same path; burn structures, take item, take_hostage consent added |
+| destroy_altar, crush | reaction row only | `acts_force.cpp` |
+| receive, hunt, exit, commune, demand, swear, terraform, sleep, pick_talent | API verbs | the act calls the verb (`acts_routed.cpp`); the verb logs the act |
+| keep | `keep_person` (historian) | keep(historian) calls it; other roles `acts_lair.cpp`; `keep_person` stays for saves and replays |
+| teach, corrupt (court), curse, bless, ward, incite, raise_undead | `cast` | the act casts; `cast` logs the act |
+| teach, corrupt (person) | `resolve_move` only | `acts_speech.cpp`, `acts_arcana.cpp` |
+| sponsor | spell act | `acts_lair.cpp` |
+| fight | none | `resolve_fight` (item 08) from `acts_force.cpp` |
+| broker, reveal, judge, haunt, consecrate, guise, dismiss, build, ignore | none | new |
 
 ## Done
 
-- branch, inventory
+- act record (source, answers, target kind, args), schema act log (`act_log.json`), world-aging fields
+- `data/gates.json`, gate check, refusals (`apply_acts` out param, wasm `refused`, `act_gates` command)
+- routing of the old verbs, logging of sleep, pick_talent, cast, swear, commune, keep, terraform
+- new acts by family, demand clauses, sworn pilgrims arrival, Mortal Guise (arcana node 3)
+- reaction rows, narrator lines, reason keys en and de, importance
+- policies `schemer.json`, `priest.json`; `tools/act_check.py`; `tools/act_scenarios.py` with `hoard-sim --act-script`
+- world-aging from abandon, collapse, fading, settle
+- merge of item 08, fight wired (build running)
 
 ## Next
 
-1. Act record (source, answers, target kind, string args), schema act log export, schema-shaped input.
-2. `data/gates.json` and the gate check, refusals out of `apply_acts`.
-3. Route the existing verbs, log sleep, pick_talent, cast.
-4. New acts by family.
-5. World-aging fields, reactions, narration, reason keys.
-6. Policies schemer, priest; `tools/act_check.py`, `tools/act_scenarios.py`.
-7. fight (merge 08 if `resolve_fight` is there).
-8. Goldens (rules 11), report.
+1. build, `ctest -L fast`, act_scenarios, act_check 300 x 3, interest after; played vs 08 tip
+2. merge commit, then `golden:` commit (rules 11): state_hashes, chronicle texts and hashes, sift bank hash, replays, save expect
+3. wasm build (LFS gltf), smoke, l10n, game-check, check.cjs
+4. README, report
+
+## Baselines
+
+- interest main (idle, played, 300 seeds): scratchpad `main/games/interest_main.txt`
+- played chronicle hashes equal to main on seeds 1 to 60 before the 08 merge
 
 ## Blocked
 

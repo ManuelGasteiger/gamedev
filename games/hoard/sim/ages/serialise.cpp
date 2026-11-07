@@ -13,6 +13,7 @@
 #include "../sift/sift_json.h"
 #include "endings_json.h"
 #include "person_json.h"
+#include "slayer_json.h"
 #include "person_seen.h"
 #include "act_log.h"
 #include "aging_json.h"
@@ -423,6 +424,7 @@ static json person_json(const Person& x) {
               {"tags", tags_json(x.tags)}, {"memory_of_dragon", x.memory_of_dragon}, {"hostage_since", x.hostage_since}};
     if (!x.sex.empty()) j["sex"] = x.sex;   // absent in rules-1 saves, so their stored hash still checks
     person_record_json(x, j);   // item 07
+    slayer_person_json(x, j);   // item 08
     return j;
 }
 
@@ -446,6 +448,7 @@ static Person person_from(const json& j) {
     get(j, "memory_of_dragon", x.memory_of_dragon);
     get(j, "hostage_since", x.hostage_since);
     person_record_from(j, x);   // item 07
+    slayer_person_from(j, x);   // item 08
     return x;
 }
 
@@ -539,6 +542,7 @@ static json world_json(const World& w) {
     }
     j["person_counters"] = w.person_counters;
     secrets_json(w, j);   // item 07
+    orders_json(w, j);    // item 08
     j["offers_pending"] = json::array();
     for (auto& of : w.offers) {
         json o = {{"id", of.id}, {"text_key", of.text_key}, {"kind", of.kind}, {"from_faction", of.from_faction}, {"envoy", of.envoy}, {"target", of.target},
@@ -596,6 +600,7 @@ std::string people_json(const World& w, const Params& p) {
     for (auto& x : w.people) {
         if (!person_seen(w, x)) continue;   // item 04b
         json j = person_json(x);
+        scrub_unknown(x, j);
         if (const Known* k = find_known(w, x.id)) j["known"] = {{"relationship", k->relationship}, {"met", k->met}, {"how", k->how}, {"tags", tags_json(k->tags)}};
         arr.push_back(j);
     }
@@ -665,9 +670,11 @@ std::string spells_catalogue_json(const Params& p) { return spells_json(p).dump(
 std::string world_view_json(const World& w, const Params& p) {
     json j = world_json(w, p);   // v0.4 hooks (S3): hooks in the view shape
     json seen = json::array(), seen_dead = json::array();   // item 04b: only the people the dragon has met or learned of
-    for (size_t i = 0; i < w.people.size(); ++i) if (person_seen(w, w.people[i])) seen.push_back(j["people"][i]);
+    for (size_t i = 0; i < w.people.size(); ++i)
+        if (person_seen(w, w.people[i])) { json e = j["people"][i]; scrub_unknown(w.people[i], e); seen.push_back(e); }
     for (size_t i = 0; i < w.dead_people.size(); ++i) if (find_known(w, w.dead_people[i].id)) seen_dead.push_back(j["dead_people"][i]);
     j["people"] = seen;
+    j.erase("orders");   // item 08: an order shows through its court's slayers view once the dragon has learned of it
     j["dead_people"] = seen_dead;
     std::map<std::string, std::string> capitals;
     for (size_t i = 0; i < w.factions.size(); ++i) {
@@ -917,6 +924,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
         }
     get(j, "person_counters", w.person_counters);
     secrets_from(j, w);   // item 07
+    orders_from(j, w);    // item 08
     if (j.contains("offers_pending")) for (auto& v : j["offers_pending"]) w.offers.push_back(offer_from(v));
     if (j.contains("arrivals"))
         for (auto& v : j["arrivals"]) {

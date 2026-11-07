@@ -28,6 +28,7 @@ data['hooks'] = (root / 'data/hooks.json').read_text()   # v0.4 hooks (S3)
 data['arrivals'] = (root / 'data/arrivals.json').read_text()   # item 06
 data['moves'] = (root / 'data/moves.json').read_text()   # item 07
 data['gates'] = (root / 'data/gates.json').read_text()   # item 09
+data['slayers'] = (root / 'data/slayers.json').read_text()   # item 08
 data['text'] = (root / 'data/text/en/narrator.json').read_text()
 data['importance'] = (root / 'data/importance.json').read_text()
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it

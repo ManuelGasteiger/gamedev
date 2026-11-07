@@ -50,6 +50,10 @@ std::string person_of(const World& w, const Faction& f, const std::string& key) 
         }
         return "";
     }
+    if (key == "slayer") {   // item 08's roster
+        for (auto& x : w.people) if (x.faction == f.id && !x.slayer.rank.empty()) return x.id;
+        return "";
+    }
     if (key == "visitor") {
         for (auto& a : w.arrivals) if (a.court == f.id && !a.person.empty()) return a.person;
         return "";

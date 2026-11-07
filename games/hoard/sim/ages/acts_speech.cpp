@@ -5,6 +5,7 @@
 #include "oaths.h"
 #include "rules/rules.h"
 #include "rules/slayers.h"
+#include "resolve_fight.h"
 #include "world_util.h"
 
 // item 09: teach (on a court with a subject, on a person as the Teach move), broker, reveal, judge
@@ -134,6 +135,7 @@ void reveal(World& w, const Params& p, Act& a, int act_index) {
         if (const Faction* o = plotting_order(w, a)) {
             std::string order = o->id;
             find_faction(w, order)->tags.insert("slayer_plan_known");
+            reveal_order(w, order);   // item 08: every named slayer's traits become known
             find_faction(w, a.target)->tags.insert("forewarned");
             betrayed(w, p, order);
         }

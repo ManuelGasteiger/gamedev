@@ -334,6 +334,34 @@
       "text": "Your {o_word} rose to rank {m0}.",
       "brief": "your {o_word} rank of {year}"
     },
+    "order_formed": {
+      "text": "{S} gathered its grievance into an order of slayers under {O}.",
+      "brief": "the order of {s} under {o} in {year}"
+    },
+    "grandmaster_named": {
+      "text": "{S} became grandmaster of the slayers of {O}.",
+      "brief": "the grandmaster {s} from {year}"
+    },
+    "slayer_promoted": {
+      "text": "{S} rose to {t0_word} of the order of {O}.",
+      "brief": "the rise of {s} in {year}"
+    },
+    "slayer_scarred": {
+      "text": "{S} of {O} came back from your lair marked: {t0_word}.",
+      "brief": "the scarring of {s} in {year}"
+    },
+    "slayer_armed": {
+      "text": "{S} of {O} found a ward against you.",
+      "brief": "the ward of {s} in {year}"
+    },
+    "slayer_fought": {
+      "text": "{S} of {O} faced you in single combat.",
+      "brief": "the duel with {s} in {year}"
+    },
+    "dragon_slain_duel": {
+      "text": "{O}, slayer of {S}, struck you down in single combat.",
+      "brief": "your death at the hands of {o}"
+    },
     "slayers_forming": {
       "text": "{S} gathered a slayer band{led_by} against you.",
       "brief": "the slayer band of {s} from {year}"
@@ -1693,6 +1721,13 @@
     "pretender": "pretender"
   },
   "words": {
+    "grandmaster": "grandmaster",
+    "master": "master",
+    "slayer": "slayer",
+    "burn": "burned",
+    "claw": "clawed",
+    "tail": "struck by your tail",
+    "deaf": "deafened",
     "submission": "submission",
     "exhaustion": "exhaustion",
     "annihilation": "annihilation",
@@ -1843,6 +1878,29 @@
     "because.piety": "its people are pious",
     "an_envoy": "An envoy",
     "led_by": ", led by {name},",
+    "slayer.marked": "marked by you: ",
+    "slayer.details": "{scars}counter {counter}, hates {hate}, fears {fear}",
+    "slayer.scar.burn": "burned",
+    "slayer.scar.claw": "clawed",
+    "slayer.scar.tail": "struck by your tail",
+    "slayer.scar.deaf": "deafened",
+    "slayer.name.fireward": "a fireward",
+    "slayer.name.plate": "plate",
+    "slayer.name.runeward": "a runeward",
+    "slayer.name.waxed_ears": "waxed ears",
+    "slayer.name.forewarned": "forewarning",
+    "slayer.name.smoke": "smoke",
+    "slayer.name.banners": "banners",
+    "slayer.name.gold": "gold",
+    "slayer.name.roar": "your roar",
+    "slayer.name.fire": "fire",
+    "slayer.name.heights": "heights",
+    "slayer.name.dark": "the dark",
+    "slayer.name.dead": "the dead",
+    "led_by_roster": ", led by {name} ({details}),",
+    "slayer_line": "The slayers of {court}, led by {name} ({details}), stand at {power} against your strength; {when}.",
+    "slayer_when_ready": "they mean to come in your next sleep",
+    "slayer_when_forming": "they may come about {year}",
     "brief_fallback": "the {kind} of {year}",
     "and": " and ",
     "quiet": "Nothing the chroniclers thought worth a line.",

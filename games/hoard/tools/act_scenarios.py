@@ -82,7 +82,8 @@ def add_hero(w, court):
     h = copy.deepcopy(base)
     h["id"] = base["race"] + "9" + str(len(w["people"]))
     h["role"] = "hero"
-    h["tags"] = []
+    h["tags"] = ["slayer"]
+    h["slayer"] = {"rank": "slayer", "power": 3, "counter": "", "hate": "", "fear": ""}   # item 08's roster record
     w["people"].append(h)
     w["people"].sort(key=lambda x: x["id"])
     return h["id"]

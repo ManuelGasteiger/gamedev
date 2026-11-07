@@ -30,7 +30,7 @@
     { "type": "curse",  "target": "has_slayers", "args": { "kind": "research" }, "source": "lair" },
     { "type": "crush",  "target": "has_slayers", "region": "largest" },
     { "type": "destroy_altar", "target": "faithful", "region": "largest" },
-    { "type": "fight",  "target": "has_slayers", "person": "hero" },
+    { "type": "fight",  "target": "has_slayers", "person": "slayer" },
     { "type": "sponsor", "target": "weakest_human", "args": { "kind": "claimant" }, "source": "lair" },
     { "type": "release", "target": "hostages", "magnitude": 0.1 },
     { "type": "dismiss", "target": "hostages", "person": "hostage", "source": "lair" }

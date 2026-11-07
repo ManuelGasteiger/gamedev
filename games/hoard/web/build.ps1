@@ -27,6 +27,7 @@ $Data['hooks'] = Get-Content -Raw 'data\hooks.json'   # v0.4 hooks (S3)
 $Data['arrivals'] = Get-Content -Raw 'data\arrivals.json'   # item 06
 $Data['moves'] = Get-Content -Raw 'data\moves.json'   # item 07
 $Data['gates'] = Get-Content -Raw 'data\gates.json'   # item 09
+$Data['slayers'] = Get-Content -Raw 'data\slayers.json'   # item 08
 $Data['text'] = Get-Content -Raw 'data\text\en\narrator.json'
 $Data['importance'] = Get-Content -Raw 'data\importance.json'
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it

@@ -8,6 +8,8 @@
 #include "offers.h"
 #include "rules/rules.h"
 #include "rules/slayers.h"
+#include "slayer_roster.h"
+#include <algorithm>
 #include "arrivals.h"
 #include "endings.h"
 #include "talents.h"
@@ -90,10 +92,14 @@ static void demand_now(World& w, const Params& p, Faction& f, const std::string&
         if (!contains(w.dragons[kPlayer].lineages, f.id)) w.dragons[kPlayer].lineages.push_back(f.id);
         take_hostage_person(w, p, *x, false, because("demanded", {sworn}));
     } else if (pred == "disband") {
-        f.tags.erase("slayers");
-        disperse_slayers(w, f);
+        for (const char* t : {"slayers", "slayers_forming", "slayers_ready"}) f.tags.erase(t);
+        w.tags.erase("slayers_coming:" + f.id);
         emit(w, "order_disbanded", f.id, "", 0, {}, because("demanded", {sworn}));
-        Person* gm = find_person_role(w, f.id, "hero");
+        Person* gm = grandmaster(w, f.id);
+        std::string gm_id = gm ? gm->id : "";
+        for (Person* x : roster(w, f.id)) if (x->id != gm_id) x->slayer = Slayer();   // item 08's roster
+        w.orders.erase(std::remove_if(w.orders.begin(), w.orders.end(), [&](const Order& o) { return o.court == f.id; }), w.orders.end());
+        gm = find_person(w, gm_id);
         const Faction* to = nullptr;
         for (auto& g : w.factions) if (g.id != f.id && adjacent(w, f, g) && (!to || power(g, p.c) > power(*to, p.c))) to = &g;
         if (gm && to) {

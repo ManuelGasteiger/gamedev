@@ -74,6 +74,11 @@ add_library(ages STATIC
   sim/ages/serialise.cpp
   sim/ages/person_json.cpp
   sim/ages/move_data.cpp
+  sim/ages/slayer_data.cpp
+  sim/ages/slayer_roster.cpp
+  sim/ages/slayer_json.cpp
+  sim/ages/slayer_view.cpp
+  sim/ages/resolve_fight.cpp
   sim/ages/moves.cpp
   sim/ages/person_record.cpp
   sim/ages/person_seen.cpp
@@ -119,6 +124,8 @@ add_library(ages STATIC
   sim/ages/wounds.cpp
   sim/ages/rules/anti_dragon.cpp
   sim/ages/rules/slayers.cpp
+  sim/ages/rules/slayer_order.cpp
+  sim/ages/rules/slayer_march.cpp
   # v0.4 hooks (S3)
   sim/ages/hook_data.cpp
   sim/ages/hook_json.cpp
@@ -176,7 +183,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

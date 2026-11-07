@@ -150,7 +150,6 @@
  "reason.gate.phase": "braucht Phase {r.n}",
  "reason.gate.pool": "braucht {r.pool} {r.n}",
  "reason.gate.once": "nur einmal je Erwachen",
- "reason.fight.unavailable": "der Kampf ist noch nicht in der Simulation",
  "reason.broker.not_at_war": "sie führen keinen Krieg",
  "reason.broker.already": "sie sind schon verbunden",
  "reason.reveal.nothing": "du kennst kein {r.secret}, das du verraten könntest",
@@ -192,5 +191,6 @@
  "word.plot": "Komplott",
  "word.heir_location": "Versteck eines Erben",
  "word.slayer_plan": "Plan der Drachentöter",
- "word.lie": "Lüge"
+ "word.lie": "Lüge",
+ "reason.fight.not_slayer": "sie gehören keinem Drachentöterorden an"
 }
