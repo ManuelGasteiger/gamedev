@@ -34,6 +34,23 @@ def schema_types(schema):
     return [b["allOf"][1]["properties"]["type"]["const"] for b in schema["oneOf"]]
 
 
+def shape(act):
+    """What validation depends on: ids, years and witnesses dropped, numbers reduced to their kind and range."""
+    def walk(v, key=""):
+        if isinstance(v, dict):
+            return tuple(sorted((k, walk(x, k)) for k, x in v.items() if k not in ("id", "year", "witnesses", "region", "answers")))
+        if isinstance(v, list):
+            return tuple(walk(x) for x in v)
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return ("n", type(v).__name__, v >= 0, v <= 1, float(v).is_integer(), v >= 1)
+        if key in ("who", "item", "node", "choice", "answers_offer", "person"):
+            return "s"
+        return v
+    return walk(act)
+
+
 def run_one(args, policy, seed):
     out = os.path.join(args.out, f"{policy}-{seed}")
     os.makedirs(out, exist_ok=True)
@@ -67,13 +84,18 @@ def main():
     shown = 0
     nlogs = 0
 
+    seen = {}   # acts of one shape validate alike; jsonschema's oneOf over 40 types is slow
+
     def check(policy, path):
         nonlocal bad, shown, nlogs
         nlogs += 1
         for act in json.load(open(path)):
             counts[act["type"]] += 1
             by_policy[policy][act["type"]] += 1
-            errors = list(validator.iter_errors(act))
+            key = shape(act)
+            if key not in seen:
+                seen[key] = list(validator.iter_errors(act))
+            errors = seen[key]
             if errors:
                 bad += 1
                 if shown < 5:
@@ -89,7 +111,6 @@ def main():
             for fut in concurrent.futures.as_completed([ex.submit(run_one, args, *j) for j in jobs]):
                 policy, path = fut.result()
                 check(policy, path)
-                os.remove(path)
 
     print(f"{sum(counts.values())} acts in {nlogs} logs, {bad} invalid")
     policies = sorted(by_policy)

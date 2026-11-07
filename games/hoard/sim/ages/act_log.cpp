@@ -104,6 +104,7 @@ void normalise_act(const World& w, Act& a) {
         a.target.clear();
     } else if (a.target_kind == "offer") {
         a.args["answers_offer"] = a.target;
+        a.item = a.target;
         a.target.clear();
     } else if (a.target_kind == "lair") a.target.clear();
     if (a.type == "receive") pair(a.item, a.args, "outcome");
@@ -160,6 +161,17 @@ json act_schema_json(const World& w, const Act& a, int id) {
     if (a.type == "kill") { pl.erase("soldiers"); if (num(a, "soldiers") > 0) pl["who"] = "army"; }
     if (a.type == "miracle") pl.erase("terror");
     if (a.type == "release") pl = json::object();
+    if (a.type == "swear") {   // the oath the envoy's offer drafted, as the schema's terms
+        pl.erase("oath");
+        json terms = {{"parties", json::array({"dragon", a.target})}, {"clauses", json::array()}};
+        for (auto& o : w.oaths) {
+            if (o.id != arg(a, "oath")) continue;
+            terms["parties"] = json::array({o.parties[0], o.parties[1]});
+            for (auto& cl : o.clauses) terms["clauses"].push_back({{"who", cl.who == "dragon" ? "dragon" : "them"}, {"pred", cl.pred}});
+            break;
+        }
+        pl["terms"] = terms;
+    }
     if (!pl.empty() || loot) j["payload"] = pl;
     j["witnesses"] = a.witnesses;
     return j;

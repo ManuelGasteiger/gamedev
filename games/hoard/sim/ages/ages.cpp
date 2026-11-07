@@ -52,6 +52,7 @@ bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
     sw.source = "lair";
     sw.answers = of.id;
     sw.args["answers_offer"] = of.id;
+    sw.args["oath"] = o.id;
     w.acts.push_back(sw);
     const OfferDef* def = offer_def(p, of.kind);
     Tags tags = {of.text_key};

@@ -27,6 +27,7 @@
     { "type": "demand", "target": "has_slayers", "args": { "clause": "disband" }, "source": "lair" },
     { "type": "demand", "target": "weakest_human", "args": { "clause": "tribute" }, "source": "lair" },
     { "type": "incite", "target": "orc", "against": "non_orc_neighbour", "source": "lair" },
+    { "type": "raise_undead", "target": "none", "region": "wild_burned", "source": "lair" },
     { "type": "curse",  "target": "has_slayers", "args": { "kind": "research" }, "source": "lair" },
     { "type": "crush",  "target": "has_slayers", "region": "largest" },
     { "type": "destroy_altar", "target": "faithful", "region": "largest" },
