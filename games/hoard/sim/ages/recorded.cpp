@@ -121,6 +121,6 @@ scn::Answer scn::answer_scenario(ages::World& w, const ages::Params& p, const st
     Answer a = answer_unrecorded(w, p, id, option, magnitude);
     nlohmann::json args = {{"id", id}, {"option", option}};
     if (magnitude >= 0) args["magnitude"] = magnitude;
-    if (a.ok) rec.done("answer_scenario", args.dump());
+    rec.done("answer_scenario", args.dump());   // a refused answer may still have touched the world (a routed cast logs spell_failed)
     return a;
 }

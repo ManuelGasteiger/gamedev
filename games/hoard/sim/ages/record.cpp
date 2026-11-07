@@ -106,7 +106,7 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "cast") return cast_spell(w, p, str(a, "spell"), str(a, "target"), str(a, "region"), str(a, "against")).cast;
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }
-    if (verb == "answer_scenario") return scn::answer_unrecorded(w, p, str(a, "id"), str(a, "option"), a.value("magnitude", -1.0)).ok;   // item 10
+    if (verb == "answer_scenario") { scn::answer_unrecorded(w, p, str(a, "id"), str(a, "option"), a.value("magnitude", -1.0)); return true; }   // item 10: recorded refused or not
     if (verb == "load_world") {
         World n;
         if (!world_from_json(a.value("world", json::object()).dump(), n, err)) return false;
