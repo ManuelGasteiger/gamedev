@@ -8,7 +8,7 @@
     "first_slayers": 2
   },
   "ranks": { "masters": 2, "slayers": 6 },
-  "power": { "start_min": 1, "start_max": 4, "cap": 12, "hunter": 0.25, "ready_ratio": 0.8, "grandmaster_odds": 0.1, "counter_mult": 1.25, "hate_bonus": 1 },
+  "power": { "start_min": 1, "start_max": 4, "cap": 12, "hunter": 0.25, "ready_ratio": 0.6, "grandmaster_odds": 0.2, "counter_mult": 1.25, "hate_bonus": 1 },
   "counters": { "fireward": "flame", "plate": "might", "runeward": "arcana", "waxed_ears": "dominion", "forewarned": "lore" },
   "hates": ["smoke", "banners", "gold", "roar"],
   "fears": ["fire", "heights", "dark", "dead"],

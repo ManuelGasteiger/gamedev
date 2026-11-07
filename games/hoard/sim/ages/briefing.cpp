@@ -261,6 +261,11 @@ struct Narrator {
 // collapse sentence already covers (its successors, the deposed ruler); great rulers are told through reign_named
 bool skip_in_briefing(const World& w, const Event& e) {
     if (e.kind == "sleep_begin" || e.kind == "wake") return true;
+    if (e.kind == "order_formed" || e.kind == "grandmaster_named" || e.kind == "slayer_promoted" || e.kind == "slayer_scarred" || e.kind == "slayer_armed") {   // item 08: only people the dragon knows of
+        const std::string& id = e.kind == "order_formed" ? e.object : e.subject;
+        const Person* x = find_person(w, id);
+        return !find_known(w, id) && !(x && person_seen(w, *x));
+    }
     if (e.kind == "tribute_paid" || e.kind == "bad_century" || e.kind == "tyrant_rises" || e.kind == "golden_age") return true;
     if (e.kind == "successor_founded" && e.cause.text_key == "collapse") return true;
     if (e.kind == "person_rose") return e.tags.count("heir") || ((e.tags.count("sage") || e.tags.count("priest")) && !find_known(w, e.subject));
