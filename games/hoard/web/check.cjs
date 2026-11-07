@@ -35,6 +35,13 @@ const { chromium } = require('playwright');
   const briefingParas = await page.$$eval('#briefing .bgroup p', (p) => p.length);
   const briefingCols = await page.$eval('#briefing', (e) => /People/i.test(e.innerText) && /Threads/i.test(e.innerText) && /Opportunities/i.test(e.innerText));
   const briefingClean = await page.$eval('#briefing', (e) => !/\{[^{}]*\}/.test(e.innerText));
+  // item 04b: the people table lists only people the dragon has met; a show at every court meets the rulers and heirs (the sandbox world has no heirs at year 0, so after the sleep)
+  for (const id of await page.$$eval('#factions tbody tr[data-id]', (r) => r.map((x) => x.dataset.id))) {
+    await page.click(`#factions tbody tr[data-id="${id}"]`);
+    await page.selectOption('#act-type', 'show');
+    await page.click('#act-add');
+  }
+  await page.click('#act-apply');
   const peopleRows = await page.$$eval('#people tbody tr', (r) => r.map((x) => x.children[3]?.textContent));
   await page.screenshot({ path: path.resolve(__dirname, 'sandbox-check.png'), fullPage: true });
 
