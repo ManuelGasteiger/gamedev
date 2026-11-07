@@ -1,4 +1,5 @@
 #include "rules.h"
+#include "../defences.h"
 #include "../memory_tiers.h"
 #include "../world_util.h"
 
@@ -40,6 +41,7 @@ static void elves_withdraw(World& w, const Params& p) {
         erase_value(f.regions, border);
         f.last_region_lost = w.year;
         r->owner.clear();
+        r->abandoned_year = w.year;   // item 09: world-aging
         r->tags.insert("elf_withdrawn");
         bool afraid = dread_eff(f) > c.elf_withdraw_dread;
         int ref = afraid ? last_event_id(w, "act_burn", f.id) : std::max(last_event_id(w, "war_started", pressing, f.id), last_event_id(w, "region_taken", pressing));
@@ -64,7 +66,13 @@ static void settle(World& w, const Constants& c) {
         if (open.empty() || !w.rng.chance(c.settle_chance * f.eff.settle_chance)) continue;
         std::sort(open.begin(), open.end());
         const std::string& pick = open[static_cast<size_t>(w.rng.range(0, static_cast<int>(open.size())))];
+        bool farmed = false;   // item 09: land next to the capital is farmed from it, not settled with a town
+        if (const Region* seat = find_region(w, capital_region(w, f))) farmed = contains(seat->neighbours, pick);
         transfer_region(w, pick, "", f.id);
+        if (Region* r = find_region(w, pick)) {
+            if (r->abandoned_year >= 0) r->resettled_year = w.year;
+            if (farmed) r->tags.insert("farmland");
+        }
         int freed = std::max(last_event_id(w, "elves_withdrew", "", pick), std::max(last_event_id(w, "region_abandoned", "", pick), last_event_id(w, "faction_destroyed")));
         emit(w, "region_settled", f.id, pick, 0, {}, because("open_land", {freed}, {{"cohesion", f.cohesion}}));
     }
@@ -78,6 +86,7 @@ static void abandon_razed(World& w, const Constants& c) {
         erase_value(f->regions, r.id);
         f->last_region_lost = w.year;
         r.owner.clear();
+        r.abandoned_year = w.year;   // item 09: world-aging
         emit(w, "region_abandoned", f->id, r.id, r.burn, {}, because("burned_out", {last_event_id(w, "act_burn", "", r.id)}, {{"burn", r.burn}}));
     }
 }

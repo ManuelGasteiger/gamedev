@@ -24,7 +24,7 @@ static void depart(World& w, const Params& p, Faction& f) {
     std::string rid = away[static_cast<size_t>(w.rng.range(0, static_cast<int>(away.size())))];
     erase_value(f.regions, rid);
     f.last_region_lost = w.year;
-    if (Region* r = find_region(w, rid)) r->owner.clear();
+    if (Region* r = find_region(w, rid)) { r->owner.clear(); r->abandoned_year = w.year; }   // item 09: world-aging
     bool found = false;
     for (auto& rem : w.remnants) if (rem.race == "elf") { rem.strength += c.fading_remnant_gain; found = true; }
     if (!found) {
