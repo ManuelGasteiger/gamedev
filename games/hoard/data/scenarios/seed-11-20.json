@@ -295,7 +295,7 @@
       }
     },
     "require": [
-      "dragon.might >= 400",
+      "dragon.might >= 150",
       "dragon.phase >= 4"
     ],
     "salience": [
@@ -304,7 +304,7 @@
         "w": 3
       },
       {
-        "if": "dragon.might >= 600",
+        "if": "dragon.might >= 250",
         "w": 9
       }
     ],
@@ -337,7 +337,7 @@
             "kind": "mountain"
           }
         },
-        "gate": "dragon.might >= 600 and bound(ground)"
+        "gate": "dragon.might >= 250 and bound(ground)"
       },
       {
         "id": "demand",

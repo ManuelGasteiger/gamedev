@@ -33,7 +33,10 @@ bool read_json(const std::string& path, json& out) {
 std::vector<std::string> bot_choices(const World& w, const json& sc, const json& prefs, const std::string& bot) {
     std::vector<std::string> open, out;
     std::map<std::string, std::string> type;
-    for (auto& o : sc["options"]) if (o.value("open", false)) { open.push_back(o["id"].get<std::string>()); type[open.back()] = o["act"].value("type", std::string()); }
+    for (auto& o : sc["options"]) {   // a bot never sleeps or leaves from inside a waking: the run loop owns both
+        std::string t = o["act"].value("type", std::string());
+        if (o.value("open", false) && t != "sleep" && t != "exit") { open.push_back(o["id"].get<std::string>()); type[open.back()] = t; }
+    }
     if (prefs.is_string() && prefs.get<std::string>() == "random") {
         Rng g = rng_for(w.seed, "scn.bot." + bot, sc.value("id", std::string()) + ":" + std::to_string(w.year));
         for (size_t i = open.size(); i > 1; --i) std::swap(open[i - 1], open[static_cast<size_t>(g.range(0, static_cast<int>(i)))]);
@@ -93,8 +96,19 @@ bool attach_scenarios(Scenario& s, const Params& p, const std::string& data, Scn
         }
     };
     auto before = s.before_sleep;
-    s.before_sleep = [before, &run](const World& w, int index) {
+    s.before_sleep = [before, &run, &p](const World& w, int index) {
         if (before) before(w, index);
+        if (!run.why.empty() && run.log) {   // why the named scenarios bind or not, before this waking's sleep
+            scn::Cache cache = scn::make_cache(w, p);
+            json why = json::object();
+            for (auto& id : run.why) {
+                const scn::Def* d = p.scenarios.find(id);
+                if (!d) continue;
+                scn::Ctx x{w, p, *d, cache, {}};
+                why[id] = scn::bind_roles(x, [](int) { return true; }, cache.waking) ? "binds" : scn::bind_why(x);
+            }
+            (*run.log) << json({{"why", why}, {"year", w.year}}).dump() << "\n";
+        }
         log_waking(w, run);
     };
     return true;

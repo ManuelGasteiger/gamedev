@@ -17,7 +17,11 @@ struct Cache {
     int waking = 0;   // sleeps so far: the waking the dragon is in
     std::vector<int> act_waking;
     std::map<std::string, std::vector<int>> acts_by_type;   // act indices, oldest first
-    std::map<std::string, int> renown, wealth_rank;
+    std::map<std::string, int> wealth_rank;
+    const ages::World* world = nullptr;
+    mutable bool renown_done = false;
+    mutable std::map<std::string, int> renown;   // chronicle lines naming a person, counted on first use
+    int renown_of(const std::string& person) const;
     std::string strongest;
     int strongest_era = 0;
     int ignored_streak = 0;

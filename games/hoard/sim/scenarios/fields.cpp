@@ -79,8 +79,7 @@ Value person_field(const Ctx& x, const Person& p, const std::string& k) {
     if (k == "race") return word(p.race);
     if (k == "court") return word(person_court(w, p));
     if (k == "renown") {   // chronicle lines naming the person, renown_events of them for 1
-        auto it = x.c.renown.find(p.id);
-        return num(std::min(1.0, (it == x.c.renown.end() ? 0 : it->second) / std::max(1.0, x.p.scenarios.n.renown_events)));
+        return num(std::min(1.0, x.c.renown_of(p.id) / std::max(1.0, x.p.scenarios.n.renown_events)));
     }
     if (k == "cunning") return num(p.traits.cunning);
     if (k == "is_lie") return flag(person_is_lie(w, p));
@@ -164,10 +163,7 @@ Cache make_cache(const World& w, const Params& p) {
         c.acts_by_type[w.acts[i].type].push_back(static_cast<int>(i));
         if (w.acts[i].type == "sleep") c.waking += 1;
     }
-    for (auto& e : w.chronicle) {
-        if (is_person_id(w, e.subject)) c.renown[e.subject] += 1;
-        if (!e.object.empty() && e.object != e.subject && is_person_id(w, e.object)) c.renown[e.object] += 1;
-    }
+    c.world = &w;
     std::vector<const Faction*> fs;
     for (auto& f : w.factions) fs.push_back(&f);
     std::sort(fs.begin(), fs.end(), [](const Faction* a, const Faction* b) { return a->wealth != b->wealth ? a->wealth > b->wealth : a->id < b->id; });
@@ -179,6 +175,18 @@ Cache make_cache(const World& w, const Params& p) {
     for (size_t i = 0; i < w.acts.size(); ++i) if (w.acts[i].type == "ignore") ignores[static_cast<size_t>(c.act_waking[i])] += 1;
     for (int k = c.waking - 1; k >= 0 && ignores[static_cast<size_t>(k)] > 0; --k) c.ignored_streak += 1;
     return c;
+}
+
+int Cache::renown_of(const std::string& person) const {
+    if (!renown_done) {
+        renown_done = true;
+        for (auto& e : world->chronicle) {
+            if (is_person_id(*world, e.subject)) renown[e.subject] += 1;
+            if (!e.object.empty() && e.object != e.subject && is_person_id(*world, e.object)) renown[e.object] += 1;
+        }
+    }
+    auto it = renown.find(person);
+    return it == renown.end() ? 0 : it->second;
 }
 
 int act_age_wakings(const Cache& c, int act) { return c.waking - 1 - c.act_waking[static_cast<size_t>(act)]; }

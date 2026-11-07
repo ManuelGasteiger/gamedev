@@ -64,6 +64,8 @@ struct Options {
     std::string act_script;                    // item 09, act_script.h
     bool scenarios = false;                    // item 10: the scenario runtime on (the goldens run without it)
     std::string scenario_bot, scenario_log, lab;   // item 10, scn_cmd.h
+    std::vector<std::string> scenario_why;      // item 10: --scenario-why a,b
+    int min_sleep = 0;                         // item 10: a floor on every sleep (the dry run's sleeper-hoarder)
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -102,7 +104,12 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--scenarios") o.scenarios = true;
         else if (k == "--scenario-bot") { if (!need(o.scenario_bot)) return false; o.scenarios = true; }
         else if (k == "--scenario-log") { if (!need(o.scenario_log)) return false; }
+        else if (k == "--scenario-why") {
+            if (!need(v)) return false;
+            for (size_t at = 0; at <= v.size();) { size_t c = v.find(',', at); o.scenario_why.push_back(v.substr(at, c == std::string::npos ? std::string::npos : c - at)); if (c == std::string::npos) break; at = c + 1; }
+        }
         else if (k == "--lab") { if (!need(o.lab)) return false; }
+        else if (k == "--min-sleep") { if (!need(v)) return false; o.min_sleep = std::atoi(v.c_str()); }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -444,7 +451,9 @@ int main(int argc, char** argv) {
     std::ofstream scn_log;
     if (!o.scenario_log.empty()) { scn_log.open(o.scenario_log); scn_run.log = &scn_log; }
     scn_run.bot = o.scenario_bot;
+    scn_run.why = o.scenario_why;
     if (w.scn.on && !attach_scenarios(s, p, o.data, scn_run, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
+    if (o.min_sleep > 0) { auto adj = s.adjust_sleep; int floor = o.min_sleep; s.adjust_sleep = [adj, floor](int y, int i) { return std::max(adj ? adj(y, i) : y, floor); }; }   // item 10: the dry run's sleeper
     auto traced = s.after_sleep;
     s.after_sleep = [&](const World& x) { if (traced) traced(x); note_waking(profile, x, p); };
     Recorder recorder;

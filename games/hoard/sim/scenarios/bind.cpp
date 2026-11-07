@@ -81,7 +81,7 @@ double score_of(const Ctx& x, const std::string& kind, const std::string& id, co
     if (kind == "person") {
         const Person* p = find_person(w, id);
         if (!p) return 0;
-        if (by == "renown") { auto it = x.c.renown.find(id); return it == x.c.renown.end() ? 0 : it->second; }
+        if (by == "renown") return x.c.renown_of(id);
         if (by == "cunning") return p->traits.cunning;
         if (by == "piety") return p->traits.pious;
         if (by == "age") return w.year - p->born;
@@ -214,8 +214,7 @@ std::vector<std::string> person_candidates(const Ctx& x, const Role& r) {
         if (!flag_is(s, "knows_dragon", knows_dragon(w, p))) continue;
         if (s.contains("memory_has") && !memory_has(p, s["memory_has"].get<std::string>())) continue;
         if (!flag_is(s, "is_lie", person_is_lie(w, p))) continue;
-        auto it = x.c.renown.find(p.id);
-        double renown = std::min(1.0, (it == x.c.renown.end() ? 0 : it->second) / std::max(1.0, x.p.scenarios.n.renown_events));
+        double renown = s.contains("renown") ? std::min(1.0, x.c.renown_of(p.id) / std::max(1.0, x.p.scenarios.n.renown_events)) : 0;
         if (!in_range(s, "renown", renown) || !in_range(s, "cunning", p.traits.cunning) || !in_range(s, "age", w.year - p.born)) continue;
         if (r.sex != "any" && p.sex != r.sex) continue;
         bool taken = false;   // one person, one role
@@ -230,10 +229,19 @@ std::vector<std::string> candidates(const Ctx& x, const Role& r, const std::func
     std::vector<std::string> out;
     const json& s = r.spec;
     if (r.kind == "act") {
+        bool recent = s.value("choose", std::string("most_recent")) == "most_recent";
+        int max_w = s.contains("age_wakings") ? s["age_wakings"][1].get<int>() : -1, max_y = s.contains("age_years") ? s["age_years"][1].get<int>() : -1;
         for (auto& t : types_of(s)) {
             auto it = x.c.acts_by_type.find(t);
             if (it == x.c.acts_by_type.end()) continue;
-            for (int i : it->second) if (act_matches(x, s, i) && cite_ok(i)) out.push_back(std::to_string(i));
+            int found = 0;
+            for (auto i = it->second.rbegin(); i != it->second.rend(); ++i) {
+                if (max_w >= 0 && act_age_wakings(x.c, *i) > max_w) break;
+                if (max_y >= 0 && x.w.year - x.w.acts[static_cast<size_t>(*i)].year > max_y) break;
+                if (!act_matches(x, s, *i) || !cite_ok(*i)) continue;
+                out.push_back(std::to_string(*i));
+                if (recent && ++found >= x.p.scenarios.n.candidates_per_role) break;
+            }
         }
     } else if (r.kind == "faction") out = faction_candidates(x, s);
     else if (r.kind == "region") out = region_candidates(x, s);

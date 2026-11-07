@@ -11,6 +11,7 @@ namespace ages {
 
 struct ScnRun {
     std::string bot;          // a key of data/bots/scenario_answers.json ("" answers nothing)
+    std::vector<std::string> why;       // --scenario-why: scenarios whose binding the log explains at every waking
     std::ostream* log = nullptr;
     int logged = -1;          // the last waking written
     std::vector<std::string> refused;   // answers the sim refused this waking: "<scenario>.<option>: <reason>"

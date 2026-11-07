@@ -278,11 +278,8 @@
       "a": {
         "act": {
           "type": "kill",
-          "payload_has": [
-            "who"
-          ],
           "magnitude": [
-            0.4,
+            0.3,
             1.0
           ],
           "age_wakings": [

@@ -2,7 +2,8 @@
 policies, the cut and flag lists, the bank metrics, and a JSON summary for the authoring pipeline (item 11).
 
 Bots (spec 8.5) and the policy files they run: burner raze_all, sleeper-hoarder rest_only, protector protect_one, priest
-priest, schemer schemer, random random. Each answers scenarios by data/bots/scenario_answers.json.
+priest, schemer schemer, random random. Each answers scenarios by data/bots/scenario_answers.json. rest_only sleeps one
+year at a time (3000 wakings a run); the sleeper-hoarder runs it with --min-sleep 100.
 
 Usage: python3 tools/scenario_dryrun.py --bin build/hoard-sim --data data --seeds 1-300 --jobs 2 --out /tmp/dryrun
        python3 tools/scenario_dryrun.py --read /tmp/dryrun/summary.json"""
@@ -21,11 +22,12 @@ def parse_range(text):
 
 def run(args):
     binary, data, seed, years, policy = args
+    extra = ["--min-sleep", "100"] if policy == "rest_only" else []
     tmp = tempfile.mkdtemp(prefix="scn_dry_")
     try:
         log = os.path.join(tmp, "scn.jsonl")
         cmd = [binary, "--data", data, "--seed", str(seed), "--years", str(years), "--genesis", "--policy", policy,
-               "--scenario-bot", policy, "--scenario-log", log, "--out", os.path.join(tmp, "out")]
+               "--scenario-bot", policy, "--scenario-log", log, "--out", os.path.join(tmp, "out")] + extra
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             return seed, policy, None, r.stderr.strip()[:200]
