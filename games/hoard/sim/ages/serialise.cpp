@@ -14,6 +14,8 @@
 #include "endings_json.h"
 #include "person_json.h"
 #include "person_seen.h"
+#include "act_log.h"
+#include "aging_json.h"
 
 namespace ages {
 
@@ -46,6 +48,10 @@ static json act_json(const Act& a) {
     j["item"] = a.item;
     j["spell"] = a.spell;
     j["race"] = a.race;
+    if (!a.source.empty()) j["source"] = a.source;   // item 09: written only when set, so older acts hash as before
+    if (!a.answers.empty()) j["answers"] = a.answers;
+    if (!a.target_kind.empty()) j["target_kind"] = a.target_kind;
+    if (!a.args.empty()) j["args"] = a.args;
     return j;
 }
 
@@ -53,15 +59,17 @@ static Act act_from(const json& j) {
     Act a;
     get(j, "year", a.year);
     get(j, "type", a.type);
-    get(j, "target", a.target);
     get(j, "region", a.region);
     get(j, "magnitude", a.magnitude);
     get(j, "against", a.against);
     get(j, "witnesses", a.witnesses);
-    get(j, "payload", a.payload);
     get(j, "item", a.item);
     get(j, "spell", a.spell);
     get(j, "race", a.race);
+    get(j, "source", a.source);
+    get(j, "answers", a.answers);
+    get(j, "target_kind", a.target_kind);
+    act_payload_from(j, a);
     return a;
 }
 
@@ -552,6 +560,7 @@ static json world_json(const World& w) {
         j["timed_tags"].push_back({{"on", t.on}, {"target", t.target}, {"tag", t.tag}, {"from", t.from}, {"until", t.until}, {"event", t.event}, {"inherit", t.inherit}});
     j["card_fired"] = w.card_fired;
     genesis_fields_to_json(w, j);   // v0.4 world (S2)
+    aging_fields_to_json(w, j);     // item 09
     if (w.sift.on) j["sift"] = sift_state_json(w.sift);   // item 14
     endings_fields_to_json(w, j);   // item 04
     return j;
@@ -945,6 +954,7 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
     get(j, "card_fired", w.card_fired);
     hooks_state_from_json(j, w);   // v0.4 hooks (S3)
     genesis_fields_from_json(j, w);   // v0.4 world (S2)
+    aging_fields_from_json(j, w);     // item 09
     if (j.contains("sift")) sift_state_from_json(j["sift"], w.sift);   // item 14
     endings_fields_from_json(j, w);   // item 04
     sort_by_id(w);

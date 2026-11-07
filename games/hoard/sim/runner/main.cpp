@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "ages/ages.h"
+#include "ages/act_log.h"
 #include "ages/genesis.h"
 #include "ages/state_hash.h"
 #include "ages/record.h"
@@ -310,7 +311,8 @@ std::string out_dir(const std::string& out) {
 }
 
 bool write_core(const std::string& base, const World& w, const Params& p) {
-    return write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
+    return write_file(base + "act_log.json", act_log_json(w)) &&   // item 09: the act log in act-api.schema.json form
+           write_file(base + "chronicle.json", chronicle_to_json(w.chronicle)) &&
            write_file(base + "world_final.json", world_to_json(w)) &&
            write_file(base + "stats.json", stats_json(w, p).dump(1));
 }
