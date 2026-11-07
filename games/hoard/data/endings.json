@@ -33,13 +33,14 @@
       "id": "mortality", "enabled": true, "exit_kind": "mortality",
       "offer_text_key": "endings.mortality.offer", "epilogue_text_key": "endings.mortality.epilogue",
       "conditions": [
-        { "id": "voice", "hold_years": 10, "lapse_years": 0,
-          "todo": "No witch or god_voice tag exists; a living sage or priest of the court stands in.",
-          "when": [ { "find": "faction", "bind": "court" }, { "field": "awe", "on": "court", "gte": 0.4 },
-                    { "any": [ { "person": "sage", "on": "court" }, { "person": "priest", "on": "court" } ] } ],
+        { "id": "voice", "hold_years": 50, "lapse_years": 0,
+          "todo": "No witch or god_voice tag exists; a living sage or priest of the court who keeps the dragon's memory (keeper) stands in. Item 04b: awe 0.5, hold 50, keeper.",
+          "when": [ { "find": "faction", "bind": "court" }, { "field": "awe", "on": "court", "gte": 0.5 },
+                    { "any": [ { "person": "sage", "on": "court", "tag": "keeper" }, { "person": "priest", "on": "court", "tag": "keeper" } ] } ],
           "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["person_rose"] }, { "via": "event", "kinds": ["arrival"] } ] },
         { "id": "audience", "hold_years": 10, "lapse_years": 0, "with_previous": true,
-          "when": [ { "event": ["act_receive", "act_broker"], "on": "court", "self_as": "subject", "within_wakings": 2 } ],
+          "todo": "Item 04b: the court sought the dragon out (an arrival from it), received or not; was act_receive or act_broker.",
+          "when": [ { "event": ["arrival"], "on": "court", "self_as": "subject", "within_wakings": 2 } ],
           "rumors": [ { "via": "death_report" }, { "via": "event", "kinds": ["arrival_answered"] }, { "via": "event", "kinds": ["hook_resolved"] } ] }
       ]
     },
