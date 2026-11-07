@@ -175,9 +175,9 @@ async function finishSleep() {
   await page.evaluate(() => game.setLairTab('chronicle'));
   const chronText = await page.$eval('#lair-chron', (e) => e.innerText);
   const firstLines = chronText.split('\n').filter((l) => /^\d+\S/.test(l)).slice(0, 8).join(' | ');
-  const expectedActs = ['act_burn', 'act_take', 'act_take', 'act_take', 'act_show', 'act_give', 'act_take_hostage', 'act_release'];
+  const expectedActs = ['act_burn', 'act_kill', 'act_take', 'act_take', 'act_take', 'act_show', 'act_give', 'act_take_hostage', 'act_release'];
   const lines = chronText.split('\n').filter((l) => /^\d+dragon:/.test(l));
-  check('b.actlog', landed && JSON.stringify(acts1) === JSON.stringify(expectedActs) && /release on Vessary/.test(lines[0]) && /burn on Aldmere at East Vale \(m 0.40\)/.test(lines[7]) && lines.length === 8, `acts: ${acts1.join(',')} | chronicle newest first: ${firstLines.slice(0, 200)}`);
+  check('b.actlog', landed && JSON.stringify(acts1) === JSON.stringify(expectedActs) && /release on Vessary/.test(lines[0]) && /burn on Aldmere at East Vale \(m 0.40\)/.test(lines[8]) && lines.length === 9, `acts: ${acts1.join(',')} | chronicle newest first: ${firstLines.slice(0, 200)}`);
   await shot('b-chronicle');
   await page.evaluate(() => game.setLairTab('hoard'));
   await shot('b-hoard');
@@ -312,6 +312,17 @@ async function finishSleep() {
   const curseLabel = (await page.evaluate(() => game.labels())).find((l) => l.id === rich.capital);
   await shot('e-cursed-region');
   check('e.cast', magic >= 1.5 && s5.modifiers.includes('dragon.curse>' + rich.id) && new RegExp('Curse on ' + rich.id, 'i').test(spellsText) && wardRow && /curse cohesion_decay mul 2 until/.test(curseFacts) && /cursed/.test(curseLabel.text), `magic ${magic.toFixed(2)} -> ${s5.dragon.magic.toFixed(2)}; modifiers ${s5.modifiers.join(', ')}; ward row ${s5.dragon.magic < 1 ? 'gated' : 'castable'} at magic ${s5.dragon.magic.toFixed(2)}: ${wardRow}; label "${curseLabel.text}"`);
+
+  // the civilian toll of a burn (data/raid_diff.json, 0.2) lowers cohesion and in this seed no era advances in 1200 years; the era lab runs without it
+  await page.evaluate(() => {
+    const w = game.world();
+    const str = typeof DATA.raid_diff === 'string';
+    const d = str ? JSON.parse(DATA.raid_diff) : DATA.raid_diff;
+    d.civilian_toll_factor = 0;
+    DATA.raid_diff = str ? JSON.stringify(d) : d;
+    sim({ cmd: 'load', data: DATA, seed: 1 });
+    sim({ cmd: 'load_world', world: w });   // not game.loadWorld: the page keeps its age history
+  });
 
   // ---- c. sleeps 300 + 300 with hard burns: wars, conquest, collapse, era, plague, settle, orcs, expiry ------------
   const wanted = { war_started: 'c-war', region_taken: 'c-conquest', collapse: 'c-collapse', era_advance: 'c-era', plague: 'c-plague', region_settled: 'c-settled', orcs_spawned: 'c-orcs', spell_expired: 'e-expiry', vassal_sworn: 'c-vassal' };

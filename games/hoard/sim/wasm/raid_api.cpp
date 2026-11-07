@@ -2,6 +2,7 @@
 #include "ages/act_log.h"
 #include "ages/chron.h"
 #include "ages/importance.h"
+#include "ages/memory_tiers.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
 #include "raid/report.h"

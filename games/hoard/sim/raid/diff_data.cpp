@@ -26,6 +26,7 @@ bool raid_diff_from_json(const DataJson& d, Params& out, std::string& err) {
     get(j, "structures", b.structures);
     get(j, "plain", b.plain);
     get(j, "structure_share", b.structure_share);
+    get(j, "oath_defends", b.oath_defends);
     get(j, "kill_person", b.kill_person);
     get(j, "hostage", b.hostage);
     get(j, "repelled", b.repelled);

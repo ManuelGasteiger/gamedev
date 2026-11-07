@@ -5,6 +5,7 @@
   "plain": ["house", "keep", "monument"],
   "structure_share": { "library": 0.15, "temple": 0.2, "foundry": 0.15, "walls": 0.2, "granary": 0.1, "tower": 0.1, "altar": 0.05 },
   "show": { "land": 0.5, "roar": 0.3, "flyover": 0.1, "flyover_seconds": 3 },
+  "oath_defends": false,
   "kill_person": 0.05,
   "hostage": 0.5,
   "repelled": 0.5,

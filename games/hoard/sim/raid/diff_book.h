@@ -13,6 +13,7 @@ struct RaidDiffBook {
     std::vector<std::string> plain;        // building classes that count toward the plain burn
     std::map<std::string, double> structure_share;   // of a settlement's value, for each structure its region holds
     double show_land = 0.5, show_roar = 0.3, show_flyover = 0.1, flyover_seconds = 3;
+    bool oath_defends = false;           // a hit on the army of a court the dragon is sworn to also defends it (the design table); off, only a repelled army defends
     double kill_person = 0.05, hostage = 0.5, repelled = 0.5, item = 0.05;
     double value_per_wealth = 1, population_per_wealth = 10, garrison_per_power = 25, soldiers_per_power = 100, army_per_power = 100;
     std::map<std::string, double> holdings;   // per loot category, of the court's wealth

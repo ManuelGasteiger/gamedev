@@ -159,7 +159,7 @@ struct Diff {
             }
             const Faction* fd = find_faction(w, defender);
             bool oath = fd && (active_oath_with_pred(w, defender, "defend") || active_oath_with_pred(w, defender, "no_harm"));
-            if (!(x.repelled || (x.killed_share > 0 && oath))) continue;
+            if (!(x.repelled || (x.killed_share > 0 && book.oath_defends && oath))) continue;
             if (!fd || !at_war(*fd, x.attacker)) { warn("raid.not_at_war|attacker=" + x.attacker + "|defender=" + defender); continue; }
             Act a = act("defend", defender, x.region, x.killed_share > 0 ? x.killed_share : book.repelled);
             a.against = x.attacker;
