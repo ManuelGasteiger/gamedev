@@ -28,13 +28,16 @@ async function seeLair() {
   });
   await page.waitForTimeout(100);
 }
-// 06b caps the ledge at one envoy; the protect lab lifts the cap while it waits for a court at war to ask
+// 06b keeps envoys rare (one at the ledge, none two wakings running, 400 years between any two); the protect lab lifts that while it waits for a court at war to ask
 async function ledgeCap(on) {
   await page.evaluate((on) => {
     const w = game.world();
     const str = typeof DATA.arrivals === 'string';
     const a = str ? JSON.parse(DATA.arrivals) : DATA.arrivals;
     a.ledge_one_per_kind = on;
+    a.ledge_no_repeat = on;
+    const envoy = (a.kinds ?? a.visitors ?? []).find((k) => k.kind === 'envoy');
+    if (envoy) { envoy.world_cooldown_lab ??= envoy.world_cooldown_years; envoy.world_cooldown_years = on ? envoy.world_cooldown_lab : 0; }
     DATA.arrivals = str ? JSON.stringify(a) : a;
     sim({ cmd: 'load', data: DATA, seed: 1 });
     game.loadWorld(w);
