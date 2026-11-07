@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const { chromium } = require('playwright');
 
-const SEED = 39;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2's people and offers
+const SEED = 40;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2, 39 before item 04b
 const ONLY_V04 = process.argv.includes('--v04');   // `node web/game-check.cjs --v04` runs the v0.4 screens alone
 const shots = path.resolve(__dirname, 'shots');
 const results = [];
