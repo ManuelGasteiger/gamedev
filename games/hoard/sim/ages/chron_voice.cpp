@@ -128,7 +128,15 @@ bool commune_unrecorded(World& w, const Params& p, const std::string& relic, con
         else for (auto& f : w.factions) set_eff(f.dread, std::min(1.0, dread_eff(f) + 0.1));
     }
     r->answer = answer;
-    emit(w, "act_commune", "dragon", relic, 0, {answer, r->agenda});
+    Act a;   // item 09: commune as a logged act; no court sees it
+    a.year = w.year;
+    a.type = "commune";
+    a.target_kind = "item";
+    a.item = relic;
+    a.source = "lair";
+    a.args["answer"] = answer;
+    w.acts.push_back(a);
+    emit(w, "act_commune", "dragon", relic, 0, {answer, r->agenda}, because("", {}, {{"act", static_cast<double>(w.acts.size() - 1)}}));
     return true;
 }
 

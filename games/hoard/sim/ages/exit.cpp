@@ -37,6 +37,8 @@ bool exit_unrecorded(World& w, const Params& p, const std::string& kind, std::st
     a.type = "exit";
     a.target = court;
     a.item = kind;
+    a.source = "lair";
+    a.args["kind"] = kind;
     w.acts.push_back(a);
     int ready = last_event_id(w, "ending_ready", def->id);
     emit(w, "ending", "dragon", court, 0, {kind}, because("ending", {ready}));

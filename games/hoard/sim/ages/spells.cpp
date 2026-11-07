@@ -148,8 +148,8 @@ static SpellDef with_talents(const World& w, const Params& p, SpellDef s) {
     return s;
 }
 
-CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& spell, const std::string& target,
-                      const std::string& region, const std::string& against) {
+CastResult cast_spell_effect(World& w, const Params& p, const std::string& spell, const std::string& target,
+                             const std::string& region, const std::string& against) {
     CastResult r;
     r.spell = spell;
     r.target = target;
@@ -168,6 +168,31 @@ CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& s
     if (r.cast && spell == "curse" && effect(w, p, "hex") > 0)
         if (Faction* f = find_faction(w, r.target)) f->anti_dragon *= p.c.hex_anti_dragon_mult;
     if (r.cast && spell == "teach") prophecy_after_teach(w, p, r.target);   // item 04
+    return r;
+}
+
+// item 09: a cast is the act of its spell (curse, bless, ...), logged and reacted to like any other act
+Act cast_act(const World& w, const CastResult& r) {
+    Act a;
+    a.type = r.spell;
+    a.source = "lair";
+    a.magnitude = 1;
+    a.against = r.against.empty() ? r.war_with : r.against;
+    bool on_region = r.spell == "raise_undead" || r.spell == "ward" || r.spell == "bless";
+    if (on_region && !r.region.empty()) {
+        a.target_kind = "region";
+        a.region = r.region;
+        if (const Region* reg = find_region(w, r.region)) a.target = reg->owner;
+    } else a.target = r.target;
+    if (r.spell == "raise_undead") a.target = a.against;   // the court the dead march on is the one that reacts
+    if (r.spell == "bless") a.args["kind"] = "land";
+    return a;
+}
+
+CastResult cast_spell_unrecorded(World& w, const Params& p, const std::string& spell, const std::string& target,
+                      const std::string& region, const std::string& against) {
+    CastResult r = cast_spell_effect(w, p, spell, target, region, against);
+    if (r.cast) apply_logged_acts(w, p, {cast_act(w, r)});
     return r;
 }
 
@@ -196,7 +221,16 @@ TerraformResult terraform_unrecorded(World& w, const Params& p, const std::strin
         r.has_modifier = true;
     }
     r.done = true;
-    emit(w, "terraformed", reg->id, kind, r.cost, {k->second.tag});
+    Act a;   // item 09: terraform as a logged act
+    a.year = w.year;
+    a.type = "terraform";
+    a.target_kind = "region";
+    a.region = reg->id;
+    a.target = reg->owner;
+    a.source = "lair";
+    a.args["kind"] = kind;
+    w.acts.push_back(a);
+    emit(w, "terraformed", reg->id, kind, r.cost, {k->second.tag}, because("", {}, {{"act", static_cast<double>(w.acts.size() - 1)}}));
     return r;
 }
 

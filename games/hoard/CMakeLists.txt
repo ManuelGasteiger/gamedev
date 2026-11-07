@@ -34,6 +34,15 @@ add_library(ages STATIC
   sim/ages/chron_voice.cpp
   sim/ages/chron_cf.cpp
   sim/ages/acts.cpp
+  sim/ages/act_data.cpp
+  sim/ages/act_gates.cpp
+  sim/ages/act_log.cpp
+  sim/ages/acts_routed.cpp
+  sim/ages/acts_force.cpp
+  sim/ages/acts_speech.cpp
+  sim/ages/acts_arcana.cpp
+  sim/ages/acts_lair.cpp
+  sim/ages/aging_json.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
   sim/ages/data_io.cpp

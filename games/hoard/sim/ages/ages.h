@@ -83,8 +83,14 @@ struct ReactionLine {
     std::string text;
 };
 
+// item 09: an act apply_acts refused (index in the input, reason code); refused acts are not logged
+struct ActRefusal {
+    size_t index = 0;
+    std::string type, reason;
+};
+
 // applies the act log (section 5) and narrates the reactions it caused, one line per court that reacted
-std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts);
+std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vector<Act>& acts, std::vector<ActRefusal>* refused = nullptr);
 std::string reaction_lines_to_json(const std::vector<ReactionLine>& lines);
 SleepResult sleep(World& w, const Params& p, int years);   // 17.4: any years >= 1; a sub-decade sleep is one short step
 Forecast forecast(const World& w, const Params& p, int years);   // dry run on a copy, blurred by 1/(1+knowledge)

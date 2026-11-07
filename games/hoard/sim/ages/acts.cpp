@@ -2,6 +2,9 @@
 #include "ages.h"
 #include "unrecorded.h"
 #include "dragon_acts.h"
+#include "act_gates.h"
+#include "act_kinds.h"
+#include "act_log.h"
 #include "arrivals.h"
 #include "hooks.h"
 #include "importance.h"
@@ -37,6 +40,9 @@ static std::string gain_key(const Act& a, const std::string& rel) {
     } else if (a.type == "take" && !a.item.empty()) kind = "item";
     else if (a.type == "receive") kind = a.item == "receive" ? "" : a.item;
     else if (a.type == "miracle") kind = rel;
+    else if (a.type == "take_hostage" && a.payload.count("consent") && a.payload.at("consent") > 0) kind = "consent";
+    else if (a.type == "guise" && a.args.count("discovered")) kind = "discovered";
+    else if (a.type == "judge" && a.args.count("untagged")) return "kill.person";
     return kind.empty() ? a.type : a.type + "." + kind;
 }
 
@@ -125,7 +131,9 @@ static void immediate(World& w, const Params& p, Faction& f, const Act& a, doubl
         f.tags.insert("hostage_taken");
         w.dragons[kPlayer].lineages.push_back(f.id);
         Person* x = a.item.empty() ? pick_hostage(w, f.id) : find_person(w, a.item);
-        if (x && x->faction == f.id && !has_tag(x->tags, "hostage")) take_hostage_person(w, p, *x, false, because("seized", {}, {{"dread", dread_eff(f)}}));
+        bool consent = a.payload.count("consent") && a.payload.at("consent") > 0;
+        if (x && x->faction == f.id && !has_tag(x->tags, "hostage"))
+            take_hostage_person(w, p, *x, consent, because(consent ? "consent" : "seized", {}, {{"dread", dread_eff(f)}}));
     } else if (a.type == "release") {   // the heir goes home and the lair no longer holds that line
         f.tags.erase("hostage_taken");
         erase_value(w.dragons[kPlayer].lineages, f.id);
@@ -205,7 +213,7 @@ static std::vector<std::string> witnesses_of(const World& w, const Faction& targ
 static void witnesses(World& w, const Params& p, const Act& a, const Faction& target, double m, int act_index, std::vector<ReactionNote>& notes) {
     double weight = p.c.mem.witness_neighbour * effect(w, p, "witness_mult");
     for (auto& wid : a.witnesses) {
-        if (wid == target.id || (a.type == "defend" && wid == a.against)) continue;
+        if (wid == target.id || ((a.type == "defend" || a.type == "broker") && wid == a.against)) continue;
         Faction* f = find_faction(w, wid);
         if (!f) continue;
         std::string rel = "neutral";
@@ -232,7 +240,7 @@ static void witnesses(World& w, const Params& p, const Act& a, const Faction& ta
 
 // spell sponsor_remnant: the knowledge-gated verb resolves to a spawn; payload {race} or act.race names the remnant,
 // act.region (or the remnant's origin, or any open home region) is where it rises
-static void sponsor_remnant(World& w, const Params& p, const Act& a) {
+void sponsor_remnant(World& w, const Params& p, const Act& a) {
     std::string race = a.race;
     if (race.empty()) for (auto& kv : a.payload) if (p.races.count(kv.first)) race = kv.first;
     if (w.dragons[kPlayer].knowledge < p.c.remnant_sponsor_knowledge) { emit(w, "spell_failed", "dragon", race, 0, {"knowledge"}); return; }
@@ -255,69 +263,164 @@ static void sponsor_remnant(World& w, const Params& p, const Act& a) {
     emit(w, "spell_failed", "dragon", race, 0, {"no_remnant"});
 }
 
-// a take names what it carried off (loot:<kind>) so later cards can tell gold from an elven heirloom
+// the acts acts.cpp resolved before item 09; their events keep the tags they had
+static bool legacy(const std::string& t) {
+    for (const char* k : {"burn", "kill", "take", "defend", "show", "give", "take_hostage", "release", "accept_offering", "miracle", "receive", "destroy_altar"})
+        if (t == k) return true;
+    return false;
+}
+
+// a take names what it carried off (loot:<kind>) so later cards can tell gold from an elven heirloom; the newer acts
+// name their kind (subject, pact, verdict, ...)
 static Tags act_tags(const Act& a) {
     Tags t;
     if (!a.item.empty()) t.insert(a.item);
     if (a.type == "take")
         for (auto& kv : a.payload) if (kv.second > 0) t.insert("loot:" + kv.first);
+    if (legacy(a.type)) return t;
+    for (const char* k : {"subject", "pact", "secret", "verdict", "message", "purpose", "role", "what", "kind", "toward", "outcome"})
+        if (a.args.count(k)) t.insert(a.args.at(k));
+    if (a.args.count("discovered")) t.insert("discovered");
     return t;
 }
 
-std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const std::vector<Act>& acts) {
-    if (dragon_dead(w)) return {};
+// the narrated variant of a newer act ("ev.act_broker_marriage", "ev.act_burn_library"); "" for the plain line
+static std::string sub_kind(const Act& a) {
+    if (a.type == "burn") return a.item;
+    if (a.type == "take") return a.item.empty() ? "" : "item";
+    if (a.type == "take_hostage") return a.payload.count("consent") && a.payload.at("consent") > 0 ? "consent" : "";
+    if (legacy(a.type)) return "";
+    if (a.type == "guise" && a.args.count("discovered")) return "discovered";
+    for (const char* k : {"subject", "pact", "secret", "verdict", "message", "purpose", "role", "what", "kind", "toward"})
+        if (a.args.count(k)) return a.args.at(k);
+    return "";
+}
+
+void learn_act(World& w, const Params& p, Faction& f, int act_index) {
+    if (act_index < 0 || static_cast<size_t>(act_index) >= w.acts.size()) return;
+    Act a = w.acts[static_cast<size_t>(act_index)];
+    react(w, p, f, a, relationship(w, p, f, a), "owner", a.magnitude > 0 ? a.magnitude : 1.0, 1.0, act_index);
+}
+
+namespace {
+
+// one apply_acts call: a rage or a forgotten dragon colours every act in it, the burns add up, the lines are told at the end
+struct ActRun {
+    World& w;
+    const Params& p;
     double burn_total = 0;
-    bool rage = has_tag(w.dragons[kPlayer].tags, "rage");
-    // a dragon nobody believes in any more (the forgotten-dragon card) is read like an enraged one: a show is a burn
-    bool forgotten = has_tag(w.tags, "dragon_forgotten");
-    size_t first_event = w.chronicle.size();
+    bool rage, forgotten;
+    size_t first_event;
     std::vector<ReactionNote> notes;
-    for (auto& a : acts) {
-        if (dragon_dead(w)) break;
+
+    ActRun(World& w_, const Params& p_)
+        : w(w_), p(p_), rage(has_tag(w_.dragons[kPlayer].tags, "rage")), forgotten(has_tag(w_.tags, "dragon_forgotten")), first_event(w_.chronicle.size()) {}
+
+    void one(const Act& a) {
+        if (dragon_dead(w)) return;
         Act act = a;
         act.year = w.year;
-        if (act.type == "wound") { passive_wound(w, p, act); continue; }
+        if (act.type == "wound") { passive_wound(w, p, act); return; }
         w.acts.push_back(act);
+        int act_index = static_cast<int>(w.acts.size()) - 1;
         if (act.type == "spell") {
             if (act.spell == "sponsor_remnant" || act.payload.count("sponsor_remnant")) sponsor_remnant(w, p, act);
             emit(w, "act_spell", act.spell.empty() ? "sponsor_remnant" : act.spell, act.race);
-            continue;
+            return;
         }
+        bool secret = act_secret(p, act);
         Faction* f = find_faction(w, act.target);
-        if (!f) continue;
-        w.acts.back().witnesses = witnesses_of(w, *f);
+        if (!f && legacy(act.type)) return;
+        if (f && !secret) w.acts.back().witnesses = witnesses_of(w, *f);
+        else w.acts.back().witnesses.clear();
         act.witnesses = w.acts.back().witnesses;
-        int act_index = static_cast<int>(w.acts.size()) - 1;
         double m = clamp01(act.magnitude);
-        if (rage && act.type == "burn") m = clamp01(m * p.c.rage_burn_mult);
-        if (act.type == "burn") m = warded_burn(w, p, act, m);
-        strike(w, p, act);
-        if (dragon_dead(w)) break;
-        if (act.type == "burn") burn_total += m;
-        immediate(w, p, *f, act, m);
-        if (act.type == "burn") after_burn(w, p, *f, act, m);
-        feed(w, p, act, m);
-        if ((rage || forgotten) && act.type == "show") {
-            Act as_burn = act;
-            as_burn.type = "burn";
-            as_burn.magnitude = rage ? p.c.rage_show_as_burn : p.c.forgotten_show_as_burn;
-            ReactionNote n = react_to(w, p, *f, as_burn, as_burn.magnitude, act_index);
-            n.act = rage ? "show_in_rage" : "show_forgotten";
-            notes.push_back(n);
-        } else notes.push_back(react_to(w, p, *f, act, m, act_index));
-        witnesses(w, p, act, *f, m, act_index, notes);
-        witness_act(w, p, *f, act, m, act_index);   // item 07
-        note_lair_sight(w, p, act);   // item 06
-        emit(w, "act_" + act.type, act.target, act.region, m, act_tags(act));
+        if (f) {
+            if (rage && act.type == "burn") m = clamp01(m * p.c.rage_burn_mult);
+            if (act.type == "burn") m = warded_burn(w, p, act, m);
+            strike(w, p, act);
+            if (dragon_dead(w)) return;
+            if (act.type == "burn") burn_total += m;
+            immediate(w, p, *f, act, m);
+            if (act.type == "burn") after_burn(w, p, *f, act, m);
+            feed(w, p, act, m);
+        }
+        if (!force_effects(w, p, act, m, act_index) && !speech_effects(w, p, act, m, act_index) && !arcana_effects(w, p, act, m, act_index))
+            lair_effects(w, p, act, m, act_index);
+        if (dragon_dead(w)) return;
+        w.acts[static_cast<size_t>(act_index)].args = act.args;
+        f = find_faction(w, act.target);
+        if (f && !secret) {
+            if ((rage || forgotten) && act.type == "show") {
+                Act as_burn = act;
+                as_burn.type = "burn";
+                as_burn.magnitude = rage ? p.c.rage_show_as_burn : p.c.forgotten_show_as_burn;
+                ReactionNote n = react_to(w, p, *f, as_burn, as_burn.magnitude, act_index);
+                n.act = rage ? "show_in_rage" : "show_forgotten";
+                notes.push_back(n);
+            } else notes.push_back(react_to(w, p, *f, act, m, act_index));
+            if (act.type == "broker") if (Faction* g = find_faction(w, act.against)) notes.push_back(react_to(w, p, *g, act, m, act_index));
+            witnesses(w, p, act, *f, m, act_index, notes);
+            witness_act(w, p, *f, act, m, act_index);   // item 07
+            note_lair_sight(w, p, act);   // item 06
+        }
+        bool on_person = act.target_kind == "person" && !act.item.empty();
+        std::string subject = on_person ? act.item : !act.target.empty() ? act.target : (!act.item.empty() ? act.item : "dragon");
+        emit(w, "act_" + act.type, subject, on_person ? act.target : act.region, m, act_tags(act), because("", {}, {{"act", act_index}}));
+        std::string sub = sub_kind(act);
+        if (!sub.empty()) w.chronicle.back().text_key = "ev.act_" + act.type + "_" + sub;
         note_act(w, p, act, m);
         prophecy_after_act(w, p, act);   // item 04
         resolve_hooks(w, p, act);   // v0.4 hooks (S3)
     }
-    if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");
-    w.dragons[kPlayer].tags.erase("rage");
-    close_tenures(w);   // item 05: a released or slain historian's book ends
-    score_events(w, p);
-    return reaction_lines(w, p, notes, first_event);
+
+    std::vector<ReactionLine> finish() {
+        if (burn_total >= p.shocks.volcanic_trigger_burn_total) w.tags.insert("mega_raze_pending");
+        w.dragons[kPlayer].tags.erase("rage");
+        close_tenures(w);   // item 05: a released or slain historian's book ends
+        score_events(w, p);
+        return reaction_lines(w, p, notes, first_event);
+    }
+};
+
+}
+
+std::vector<ReactionLine> apply_logged_acts(World& w, const Params& p, const std::vector<Act>& acts) {
+    if (dragon_dead(w)) return {};
+    ActRun run(w, p);
+    for (auto& a : acts) run.one(a);
+    return run.finish();
+}
+
+// item 09: each act is checked against its rule and gates first; a refused act is not logged
+std::vector<ReactionLine> apply_acts_unrecorded(World& w, const Params& p, const std::vector<Act>& acts, std::vector<ActRefusal>* refused) {
+    if (dragon_dead(w)) return {};
+    ActRun run(w, p);
+    for (size_t i = 0; i < acts.size(); ++i) {
+        if (dragon_dead(w)) break;
+        Act act = acts[i];
+        if (act.type == "wound" || act.type == "spell") { run.one(act); continue; }
+        act.year = w.year;
+        normalise_act(w, act);
+        std::string why = act_fields_refusal(w, p, act);
+        if (why.empty()) why = act_gate_refusal(w, p, act);
+        if (why.empty() && act_routed(p, act)) {
+            why = apply_routed(w, p, act);
+            if (why.empty()) continue;
+        } else if (why.empty()) {
+            why = force_refusal(w, p, act);
+            if (why.empty()) why = speech_refusal(w, p, act);
+            if (why.empty()) why = arcana_refusal(w, p, act);
+            if (why.empty()) why = lair_refusal(w, p, act);
+        }
+        if (!why.empty()) {
+            if (refused) refused->push_back({i, act.type, why});
+            continue;
+        }
+        pay_act(w, p, act);
+        run.one(act);
+    }
+    return run.finish();
 }
 
 }
