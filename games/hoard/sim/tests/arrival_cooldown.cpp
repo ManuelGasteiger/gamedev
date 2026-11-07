@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "fixtures.h"
 #include "ages/arrivals.h"
 #include "ages/memory_tiers.h"
@@ -24,8 +25,7 @@ int main() {
         LoadResult r = load_or_die(seed);
         World& w = r.world;
         for (auto& f : w.factions) {
-            f.lair_known = w.year;
-            f.lair_exact = true;
+            f.lair_oral = 1;
             f.cohesion = 0.9;
             f.faith = 0.95;
             f.dread = Tiers{};
@@ -37,16 +37,18 @@ int main() {
             const Arrival* e = envoy_of(w, f.id);
             if (!e) continue;
             Arrival first = *e;
-            for (int later : {20, 60, 99}) {
+            const ArrivalDef* d = arrival_def(r.params, "envoy");
+            int cd = std::max(d->cooldown_years, d->world_cooldown_years);   // 06b: the per-court and the world cooldown
+            for (int later : {20, 60, 99, cd - 1}) {
                 w.arrivals.clear();
                 w.year = first.year + later;
-                for (auto& g : w.factions) { g.lair_known = w.year; g.lair_exact = true; }
+                for (auto& g : w.factions) g.lair_oral = 1;
                 rule_arrivals(w, r.params);
-                CHECK(!same_cause(w, f.id, first), "the same court, envoy and motive do not repeat within 100 years");
+                CHECK(!same_cause(w, f.id, first), "the same court, envoy and motive do not repeat within the cooldown");
             }
             w.arrivals.clear();
-            w.year = first.year + 101;
-            for (auto& g : w.factions) { g.lair_known = w.year; g.lair_exact = true; }
+            w.year = first.year + cd + 1;
+            for (auto& g : w.factions) g.lair_oral = 1;
             rule_arrivals(w, r.params);
             CHECK(same_cause(w, f.id, first), "after the cooldown the same cause may come again");
             std::printf("arrival_cooldown ok (seed %llu, %s, %s)\n", static_cast<unsigned long long>(seed), f.id.c_str(), first.offer_kind.c_str());

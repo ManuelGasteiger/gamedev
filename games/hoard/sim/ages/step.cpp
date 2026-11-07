@@ -27,6 +27,7 @@ void step(World& w, const Params& p, int dt) {
     if (slow) rule_hegemony(w, p);
     rule_land(w, p);
     rule_oaths(w, p);
+    fade_lair_knowledge(w, p);   // 06b
     rule_arrivals(w, p);   // item 06
     if (slow) rule_shocks(w, p);
     rule_cards(w, p);

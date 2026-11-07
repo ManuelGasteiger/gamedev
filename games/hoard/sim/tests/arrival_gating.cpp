@@ -6,7 +6,7 @@ using namespace ages;
 
 namespace {
 
-void prepare(World& w, double awe, double dread) {
+void prepare(World& w, const Params& p, double awe, double dread) {
     Faction& f = *find_faction(w, "aldmere");
     f.memory.clear();
     f.monuments.clear();
@@ -16,8 +16,8 @@ void prepare(World& w, double awe, double dread) {
     set_eff(f.dread, dread);
     f.faith = 0.8;
     f.cohesion = 0.9;
-    f.lair_known = w.year;
-    f.lair_exact = false;
+    f.lair_oral = (p.arrivals.lair_rough + p.arrivals.lair_exact) / 2;   // rough, not exact
+    f.lair_written = 0;
     w.arrivals.clear();
     w.arrival_fired.clear();
 }
@@ -33,8 +33,8 @@ int main() {
     LoadResult r = load_or_die(1);
     World loved = r.world;
     World feared = r.world;
-    prepare(loved, 0.2, 0.0);
-    prepare(feared, 0.2, 0.6);
+    prepare(loved, r.params, 0.2, 0.0);
+    prepare(feared, r.params, 0.2, 0.6);
     rule_arrivals(loved, r.params);
     rule_arrivals(feared, r.params);
 

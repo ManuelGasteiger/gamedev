@@ -9,6 +9,13 @@ namespace {
 // exact knowledge comes from someone who stood at the lair and walked home
 bool returns_home(const std::string& kind) { return kind != "slayer_band" && kind != "thief"; }
 
+void seen(World& w, const std::string& kind) { w.arrival_fired["ledge|" + kind] = w.year; }
+
+bool since(const World& w, const std::string& key, int years) {
+    auto it = w.arrival_fired.find(key);
+    return years > 0 && it != w.arrival_fired.end() && w.year - it->second < years;
+}
+
 void leave(World& w, const Arrival& a, const char* why) {
     emit(w, "arrival_left", a.court, a.kind, 0, {why}, because("arrival_left"));
 }
@@ -30,13 +37,28 @@ Arrival* find_arrival(World& w, const std::string& id) {
     return nullptr;
 }
 
+bool arrival_resting(const World& w, const Params& p, const std::string& court, const ArrivalDef& d, const std::string& cause) {
+    if (since(w, court + "|" + d.kind + "|" + cause, d.cooldown_years) || since(w, "*|" + d.kind, d.world_cooldown_years)) return true;
+    if (p.arrivals.ledge_one_per_kind) for (auto& a : w.arrivals) if (a.kind == d.kind) return true;
+    auto it = w.arrival_fired.find("ledge|" + d.kind);
+    return p.arrivals.ledge_no_repeat && it != w.arrival_fired.end() && it->second == w.sleep_started;
+}
+
+void arrival_noted(World& w, const ArrivalDef& d, const std::string& court, const std::string& cause) {
+    w.arrival_fired[court] = w.year;
+    w.arrival_fired[court + "|" + d.kind + "|" + cause] = w.year;
+    w.arrival_fired["*|" + d.kind] = w.year;
+}
+
 void arrival_consume(World& w, const std::string& id) {
+    for (auto& a : w.arrivals) if (a.id == id) seen(w, a.kind);
     w.arrivals.erase(std::remove_if(w.arrivals.begin(), w.arrivals.end(), [&](const Arrival& a) { return a.id == id; }), w.arrivals.end());
 }
 
-void arrivals_depart(World& w, const Params&) {
+void arrivals_depart(World& w, const Params& p) {
     for (auto& a : w.arrivals) {
-        if (Faction* f = find_faction(w, a.court)) if (returns_home(a.kind)) learn_lair(w, *f, true);
+        if (Faction* f = find_faction(w, a.court)) if (returns_home(a.kind)) learn_lair(w, p, *f, "returned");
+        seen(w, a.kind);
         leave(w, a, "slept");
     }
     w.arrivals.clear();
@@ -58,7 +80,8 @@ void arrivals_at_wake(World& w, const Params& p) {
         kept.push_back(a);
     }
     w.arrivals = kept;
-    for (auto it = w.arrival_fired.begin(); it != w.arrival_fired.end();) it = w.year - it->second > 300 ? w.arrival_fired.erase(it) : std::next(it);
+    for (auto it = w.arrival_fired.begin(); it != w.arrival_fired.end();)
+        it = w.year - it->second > p.arrivals.fired_keep_years && it->first[0] != '*' && it->first.rfind("ledge|", 0) != 0 ? w.arrival_fired.erase(it) : std::next(it);
 }
 
 // a hook of an arrival went unanswered: a thief gets away with what he saw
@@ -68,12 +91,12 @@ void arrival_ignored(World& w, const Params& p, const Hook& h) {
     const Arrival* a = arrival_for(w, t->arrival, h.faction);
     if (!a) return;
     std::string id = a->id;
-    if (t->arrival == "thief") if (Faction* f = find_faction(w, h.faction)) learn_lair(w, *f, true);
+    if (t->arrival == "thief") if (Faction* f = find_faction(w, h.faction)) learn_lair(w, p, *f, "thief");
     arrival_consume(w, id);
 }
 
-void envoy_returned(World& w, const Offer& of) {
-    if (Faction* f = find_faction(w, of.from_faction)) learn_lair(w, *f, true);
+void envoy_returned(World& w, const Params& p, const Offer& of) {
+    if (Faction* f = find_faction(w, of.from_faction)) learn_lair(w, p, *f, "returned");
     for (auto& a : w.arrivals)
         if (a.kind == "envoy" && a.court == of.from_faction && a.offer_kind == of.kind && a.target == of.target) { arrival_consume(w, a.id); break; }
 }

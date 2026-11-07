@@ -544,6 +544,7 @@ struct ArrivalGateDef {
 struct ArrivalDef {
     std::string kind, person_role, window = "wake", text_key, cause;   // window: wake | short (leaves after the phase's short sleep)
     int specificity = 0, cooldown_years = 100;
+    int world_cooldown_years = 0;   // 06b: no second visitor of the kind from any court within these years
     bool ignores_decade_limit = false;
     std::vector<ArrivalGateDef> requires_, blocked_when;
     std::map<std::string, std::map<std::string, double>> answers;       // receive outcome -> reward keys of hooks.json
@@ -551,9 +552,16 @@ struct ArrivalDef {
 
 struct ArrivalBook {
     std::vector<ArrivalDef> kinds;
-    double oral_floor = 0.05, lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
+    double lure_gold = 60, hunt_food = 10, slopes_hunt_mult = 1.5;
     int rumour_years = 150, thief_era = 1, refugee_years = 20, envoy_kill_generations = 2, sight_regions = 2;
-    int lair_memory_years = 100;
+    // 06b: lair knowledge. A court knows the lair roughly from `rough`, exactly from `exact`; `evidence` is the gain per
+    // kind of evidence, `caps` the most a kind can teach (flight: a sighting never shows the entrance)
+    double lair_rough = 0.3, lair_exact = 0.7, lair_written_share = 0.6, flight_falloff = 0.5;
+    std::map<std::string, double> lair_evidence, lair_caps;
+    std::vector<std::string> no_flight;   // acts that show no flight home
+    int fired_keep_years = 300;   // the longest cooldown the per-court keys need
+    bool ledge_one_per_kind = true;   // one visitor of a kind waits at the ledge at a time
+    bool ledge_no_repeat = true;   // a kind seen at the last waking does not come in the sleep after it
 };
 
 struct Params {

@@ -14,9 +14,13 @@ namespace ages {
 
 // arrival_gates.cpp
 int lair_distance(const World& w, const std::string& region);   // regions from the lair, 1000 when unreachable
-void learn_lair(World& w, Faction& f, bool exact);
-void note_lair_sight(World& w, const Params& p, const Act& a);   // after an act is witnessed: who now knows where the lair is
-void refresh_lair_knowledge(World& w, const Params& p);          // the oral tier fades, written records keep it
+// 06b: evidence of where the lair is (data/arrivals.json lair.evidence: returned, hostage, thief, flight); a court
+// that keeps records writes a share of it down
+void learn_lair(World& w, const Params& p, Faction& f, const std::string& evidence, double scale = 1.0);
+double lair_lore(const Faction& f);
+int lair_level(const Faction& f, const Params& p);   // 0 unknown, 1 rough, 2 exact
+void note_lair_sight(World& w, const Params& p, const Act& a);   // after an act is witnessed: a flight home seen
+void fade_lair_knowledge(World& w, const Params& p);             // per step: the oral tier at the court's memory, the written slower
 bool route_open(const World& w, const Faction& f);
 
 struct GateCtx {
@@ -33,10 +37,13 @@ const ArrivalDef* arrival_def(const Params& p, const std::string& kind);
 const Arrival* arrival_for(const World& w, const std::string& kind, const std::string& court);
 Arrival* find_arrival(World& w, const std::string& id);
 void arrival_consume(World& w, const std::string& id);
+// 06b: the kind may not come for this court now: its cooldowns run, or it was at the ledge at the last waking
+bool arrival_resting(const World& w, const Params& p, const std::string& court, const ArrivalDef& d, const std::string& cause);
+void arrival_noted(World& w, const ArrivalDef& d, const std::string& court, const std::string& cause);   // the cooldowns start
 void arrivals_depart(World& w, const Params& p);    // the dragon sleeps: whoever still waits goes home
 void arrivals_at_wake(World& w, const Params& p);   // the dragon wakes: short windows and expired offers have passed
 void arrival_ignored(World& w, const Params& p, const Hook& h);   // an unanswered hook of an arrival
-void envoy_returned(World& w, const Offer& of);     // the envoy leaves alive: the court has seen the lair
+void envoy_returned(World& w, const Params& p, const Offer& of);   // the envoy leaves alive: the court has seen the lair
 std::string ledge_text(const World& w, const Params& p, const Arrival& a);
 
 // arrival_acts.cpp: the verbs (recorded wrappers are in recorded.cpp)
