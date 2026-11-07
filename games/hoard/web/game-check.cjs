@@ -865,6 +865,7 @@ async function finishSleep() {
   // envoys when their situation calls for it, so sleep on a century at a time (at most ten) until one has come in person
   // (06b: one envoy waits at the ledge at a time; with one, it is eaten and the late-task check is skipped)
   const envoysWaiting = () => page.evaluate(() => game.world().offers.filter((o) => o.envoy && game.people().some((p) => p.id === o.envoy)).length);
+  if ((await envoysWaiting()) < 1) await ledgeCap(false);
   for (let extra = 0; extra < 10 && (await envoysWaiting()) < 1; extra++) {
     await seeLair();
     await sleepThrough(100);
@@ -961,6 +962,7 @@ async function checksV04() {
   // the real wasm (S1) on the classic map: growth, health, defences and the arms race show; hooks, legends and names do not
   await page.goto(file);
   await page.waitForSelector('body[data-ready="1"]', { timeout: 120000 });
+  await ledgeCap(true);
   await page.evaluate((seed) => { try { localStorage.clear(); } catch (e) { /* ignore */ } game.newGame(seed); }, SEED);
   const plain = await v04();
   const catalogue = await page.evaluate(() => game.sim({ cmd: 'talents' }));
