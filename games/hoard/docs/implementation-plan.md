@@ -135,6 +135,8 @@ Status 2026-11-07: merged together in pull request 18 (rules version 10; reports
 
 Gate: the 30 seed scenarios run; the sandbox's check passes unchanged in outcome through `raid_diff`; zero unwarned deaths in bot logs; every schema act appears in the 300-seed coverage table.
 
+Status 2026-11-07: 08 and 09 merged together in pull request 20 (rules version 11; reports `08-slayer-roster.md`, `09-new-acts.md`). 08: named slayer orders, `resolve_fight`; played, 300 seeds: 0 unwarned slayings, 3.7 slayings per 100 seeds (unchanged), a scarred or promoted slayer returns in 93 % of seeds with an attempt, `ready_ratio` 0.6. 09: all 40 schema acts in the API with gates and reason codes, 0 invalid acts in 485,393, every act covered, 14 of 15 act-api scenarios (no mountain terraform). Open for Manu: promotion lines (majors per 10 wakings 49 to 111), deaths by wounds 3 to 15, roster against the people cap, full-state autosave, the guessed trait maps; mountain terraform, `incite` beyond orcs, Mortal Guise on the 25-point node, effects that are tags only, the proposed tests of both. 10 and 15 next, briefs in `prompts/10-scenario-runtime.md` and `prompts/15-raid-diff.md` (10 uses the 30 existing seed scenarios).
+
 ### Iteration 7: content (11 and 12)
 
 - 11 (Sonnet script, Opus or Fable drafts): bank rounds 1 and 2, German per batch through 19's script.
