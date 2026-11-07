@@ -9,6 +9,7 @@
 #include "act_data.h"
 #include "slayer_data.h"
 #include "../sift/bank.h"
+#include "../raid/diff_book.h"
 #include "state.h"
 
 namespace ages {
@@ -592,6 +593,7 @@ struct Params {
     SiftBank sift;                // item 14: data/patterns, importance.json "tiers", constants.json "sift"
     EndingsDef endings;           // item 04: data/endings.json
     ActBook act_book;             // item 09: data/gates.json, constants.json "acts"
+    RaidDiffBook raid_diff;       // item 15: data/raid_diff.json
 };
 
 struct PolicyAct {
@@ -641,6 +643,7 @@ struct DataJson {
     std::string patterns, base_rates;  // item 14: data/patterns/*.json joined into one array, data/patterns/base_rates.json; optional
     std::string endings;               // item 04: data/endings.json; optional
     std::string gates;                 // item 09: data/gates.json; optional
+    std::string raid_diff;             // item 15: data/raid_diff.json; optional
     std::map<std::string, std::string> text_bundles;   // item 19: per language, sim/text/bundle_io.h; hashed, never read by the sim
 };
 
@@ -652,6 +655,7 @@ bool arrivals_from_json(const DataJson& d, Params& out, std::string& err);      
 bool moves_from_json(const DataJson& d, Params& out, std::string& err);         // item 07, move_data.cpp
 bool act_book_from_json(const DataJson& d, Params& out, std::string& err);      // item 09, act_data.cpp
 bool slayers_from_json(const DataJson& d, Params& out, std::string& err);       // item 08, slayer_data.cpp
+bool raid_diff_from_json(const DataJson& d, Params& out, std::string& err);   // item 15, sim/raid/diff_data.cpp
 bool sift_bank_from_json(const DataJson& d, SiftBank& out, std::string& err);   // item 14, sim/sift/bank_data.cpp
 
 // file IO, data_io.cpp (not part of the wasm build)

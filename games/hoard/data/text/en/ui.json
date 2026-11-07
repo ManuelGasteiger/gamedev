@@ -192,5 +192,17 @@
  "word.heir_location": "hiding place of an heir",
  "word.slayer_plan": "slayer plan",
  "word.lie": "lie",
- "reason.fight.not_slayer": "they are not a slayer of an order"
+ "reason.fight.not_slayer": "they are not a slayer of an order",
+ "reason.sortie.already_open": "a sortie is already open",
+ "reason.sortie.not_open": "no sortie is open",
+ "reason.raid.unknown_region": "the report names {r.region}, which held no settlement when the sortie began",
+ "reason.raid.unknown_class": "the report names {r.class}, which the diff does not know",
+ "reason.raid.no_structure": "{r.region} held no {r.structure} when the sortie began",
+ "reason.raid.no_value": "{r.region} had no building value to take a share of",
+ "reason.raid.no_holdings": "{r.court} held no {r.what} when the sortie began",
+ "reason.raid.capped": "a {r.type} at {r.region} was more than the settlement held and is capped",
+ "reason.raid.sortie_mismatch": "the report is for another sortie than the open one ({r.n})",
+ "reason.raid.unknown_army": "the army of {r.attacker} is not known",
+ "reason.raid.not_at_war": "{r.attacker} is not at war with {r.defender}, so there is nothing to defend",
+ "reason.raid.loot_lost": "some of the {r.what} taken never reached the lair"
 }

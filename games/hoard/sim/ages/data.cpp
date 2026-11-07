@@ -489,6 +489,7 @@ bool params_from_json(const DataJson& d, Params& p, std::string& err) {
     if (!act_book_from_json(d, p, err)) return false;      // item 09
     if (!slayers_from_json(d, p, err)) return false;       // item 08
     if (!sift_bank_from_json(d, p.sift, err)) return false;   // item 14
+    if (!raid_diff_from_json(d, p, err)) return false;        // item 15
     return true;
 }
 

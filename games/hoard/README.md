@@ -333,3 +333,23 @@ tools/act_scenarios.py          the 15 act-api scenarios in a lab world
 | `guise_discovery`, `guise_per_sage`, `guise_forewarned`, `guise_show` | 0.1, 0.05, 0.1, 0.5 | guise discovery roll and the show it reads as |
 | `curse_research_mult`, `curse_research_stacks`, `curse_blight_land` | 0.75, 3, 0.5 | curse kinds |
 | runner-set | | `take_item_artifacts` 1, `craft_era_progress` 10, `war_militarism` 0.1, `war_anti_dragon` 0.1, `magic_world` 0.05, `intrigue_cunning` 0.1, `guise_preach_faith` 0.1, `guise_learn_knowledge` 1, `consort_line_years` 100, haunt memory rows |
+
+## Item 15: RaidReport and raid_diff
+
+Both shells report facts; the core makes acts (`docs/raid-design.md` section 3). `begin_sortie {sortie}` records what the courts held (`World.sortie`: per settlement its building value, population, garrison, soldiers and structures; per court its wealth and holdings per loot category; the armies) and returns it to the shell with the civilian toll factor. `end_sortie {report}` diffs a `RaidReport` (`docs/raid_report.schema.json`) against that snapshot with `data/raid_diff.json`, applies the acts through `apply_acts` and returns `{acts, refused, warnings, changed, events, lines, hooks_resolved, wounds, slain}`. One act per (type, region, structure) per sortie, magnitudes summed and clamped to 1 (a capped one is a warning code, not a refusal); pure arithmetic, no rng. `World.sortie` is saved and hashed only while a sortie is open; a save taken mid-sortie keeps it, and a sleep closes an open sortie. Both verbs are recorded (`begin_sortie`, `end_sortie` in `apply_input`). `apply_acts` stays for the debug page, the policies and scenario answers. The valley sandbox sends every panel action as a sortie of one (`web/game/raid.js`); `--raid-report FILE` of the runner applies `{world, report}`, `tools/raid_report_check.py` validates reports and the acts they make.
+
+```
+data/raid_diff.json             toll factor, structure threshold, show and hostage magnitudes, snapshot units, holdings per category
+docs/raid_report.schema.json    the report
+sim/raid/snapshot.h             SortieState (the snapshot in World)
+sim/raid/diff_book.h            RaidDiffBook
+sim/raid/diff_data.cpp          raid_diff.json
+sim/raid/report.h               RaidReport, DiffResult, SortieResult, the API
+sim/raid/report_json.cpp        report and snapshot JSON
+sim/raid/diff.cpp               raid_diff
+sim/raid/sortie.cpp             snapshot, begin_sortie, end_sortie, the lair's drop
+sim/wasm/raid_api.h/.cpp        wasm begin_sortie and end_sortie
+sim/runner/raid_script.h/.cpp   --raid-report
+web/game/raid.js                the tactical panel's facts
+tools/raid_report_check.py      schema validation of reports and of the acts they make
+```
