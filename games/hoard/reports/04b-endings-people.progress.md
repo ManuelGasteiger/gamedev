@@ -17,6 +17,12 @@ Branch `item/04b-endings-people` from origin/main 4659c29. Owner's decisions of 
 - Do not edit headers while a build runs: objects compiled during the edit stay stale (two tests segfaulted once).
 - Baseline binary copy: `out/hoard-sim-base`; data of main: `git archive origin/main games/hoard/data`.
 
+## Measured so far
+
+- Ascension probe (120 seeds, `out/ascend.txt`): ready 0 %; at best 6 of 7 conditions met at one waking; temples blocks (met in 5 % of runs, best 170 y).
+- People (100 seeds played): tracked per court 2.93 -> 3.94, with memory 1.72 -> 2.31, seen 1.35. Court acceptance 30 % -> 18 % at threshold 4.
+- Mortality variants (150 seeds played / 100 first runs oracle): cur 27.3 % / 0.97; v1 awe .5 hold 50: 8.0 / 0.76; v3 +keeper: 0.7 / 0.20; l2 awe .5 hold 30 keeper, audience = an arrival from the court: 18.7 / 0.35. Running l2 and l5 (hold 50) with amnesiac.
+
 ## Next
 
-Measure people census after the rebuild; tune; then Mortality variants; final Ascension probe; goldens.
+Pick Mortality variant, put it in data/endings.json; goldens (rules 9); wasm and page checks; report.
