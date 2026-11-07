@@ -1,0 +1,9 @@
+{
+  "note": "item 10: the dry run's random bot. Each waking plays the next of the five other bot policies in turn (talents and sleeps as schemer's); its scenario answers are random (data/bots/scenario_answers.json).",
+  "cycle": ["raze_all", "rest_only", "protect_one", "priest", "schemer"],
+  "talents": ["old_tongues", "keen_eyes", "premonition", "patient_mind", "chronicler", "spell_sense", "hex", "dragon_sight", "mortal_guise",
+              "earth_shaker", "thick_hide", "iron_scales", "tithe", "cult_of_the_mountain", "terror", "dragon_king",
+              "hotter_breath", "clinging_fire", "white_fire", "tower_breaker"],
+  "sleep_cycle": ["short", "short", "long"],
+  "min_sleep": 10
+}

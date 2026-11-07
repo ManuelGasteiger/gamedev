@@ -14,6 +14,7 @@
 #include "../sift/line_text.h"
 #include "../text/render.h"
 #include "../sift/sift.h"
+#include "../scenarios/scn.h"
 #include "../sift/sift_util.h"
 
 // 17.5: the narrator. Every sentence is a template from data/text/en/narrator.json filled with names and numbers; a cause clause
@@ -554,6 +555,7 @@ std::string briefing_json(const World& w, const Params& p, int since_year) {
     }
     out["while_you_slept"] = groups;
     sift_block(w, p, n, since_year, out);
+    if (w.scn.on) out["scenarios"] = scn::briefing_block(w, p);   // item 10
 
     // 3. people: known people who died, rose or were crowned; the rulers of every court the dragon has an oath with
     json people = json::array();

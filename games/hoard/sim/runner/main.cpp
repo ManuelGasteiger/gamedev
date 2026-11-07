@@ -25,6 +25,9 @@
 #include "text_cmd.h"
 #include "chron_demo.h"
 #include "act_script.h"
+#include "scn_cmd.h"
+#include "scenarios/scn.h"
+#include "raid_script.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -60,6 +63,11 @@ struct Options {
     std::string bot;        // item 04: amnesiac | carry | oracle:<ending>
     uint64_t chron_demo = 0;                   // item 05, chron_demo.h
     std::string act_script;                    // item 09, act_script.h
+    bool scenarios = false;                    // item 10: the scenario runtime on (the goldens run without it)
+    std::string scenario_bot, scenario_log, lab;   // item 10, scn_cmd.h
+    std::vector<std::string> scenario_why;      // item 10: --scenario-why a,b
+    int min_sleep = 0;                         // item 10: a floor on every sleep (the dry run's sleeper-hoarder)
+    std::string raid_script;                   // item 15, raid_script.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -94,7 +102,17 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--profile") { if (!need(o.profile)) return false; }
         else if (k == "--act-script") { if (!need(o.act_script)) return false; }
+        else if (k == "--raid-report") { if (!need(o.raid_script)) return false; }
         else if (k == "--bot") { if (!need(o.bot)) return false; }
+        else if (k == "--scenarios") o.scenarios = true;
+        else if (k == "--scenario-bot") { if (!need(o.scenario_bot)) return false; o.scenarios = true; }
+        else if (k == "--scenario-log") { if (!need(o.scenario_log)) return false; }
+        else if (k == "--scenario-why") {
+            if (!need(v)) return false;
+            for (size_t at = 0; at <= v.size();) { size_t c = v.find(',', at); o.scenario_why.push_back(v.substr(at, c == std::string::npos ? std::string::npos : c - at)); if (c == std::string::npos) break; at = c + 1; }
+        }
+        else if (k == "--lab") { if (!need(o.lab)) return false; }
+        else if (k == "--min-sleep") { if (!need(v)) return false; o.min_sleep = std::atoi(v.c_str()); }
         else if (k == "--golden") {
             if (!need(v)) return false;
             size_t dash = v.find('-');
@@ -339,6 +357,7 @@ int replay(const Options& o) {
     Profile woven;   // item 04: the legends genesis wove when it was recorded
     if (h.contains("legends")) woven.legends = legends_from_json(h["legends"]);
     if (h.value("genesis", false) && !make_genesis(loaded.world, loaded.params, woven, err)) { std::fprintf(stderr, "genesis failed: %s\n", err.c_str()); return 1; }
+    if (h.value("scenarios", false)) scn::enable(loaded.world);   // item 10
     if (hash_hex(state_hash(loaded.world).root) != h.value("start", "")) { std::printf("start state differs from the recording\n"); return 3; }
     std::vector<std::string> body(lines.begin() + 1, lines.end());
     ReplayResult r = replay_lines(loaded.world, loaded.params, body);
@@ -360,6 +379,8 @@ int main(int argc, char** argv) {
     if (o.golden_to) return golden(o);
     if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
     if (!o.act_script.empty()) return act_script_cmd(o.data, o.act_script);
+    if (!o.lab.empty()) return scn_lab_cmd(o.data, o.lab);
+    if (!o.raid_script.empty()) return raid_script_cmd(o.data, o.raid_script);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);
@@ -382,6 +403,7 @@ int main(int argc, char** argv) {
         if (!in || load_save(ss.str(), w, err) != LoadSave::ok) { std::fprintf(stderr, "cannot load %s: %s\n", o.load_save.c_str(), err.c_str()); return 1; }
     }
 
+    if (o.scenarios && !w.scn.on) scn::enable(w, &profile);   // item 10
     std::vector<Act> log;
     if (!o.acts.empty()) {
         std::ifstream in(o.acts);
@@ -429,6 +451,13 @@ int main(int argc, char** argv) {
             if (!attach_ascend_bot(s, p, bot.free, ascend, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
         } else attach_bot(s, p, target);
     }
+    ScnRun scn_run;   // item 10
+    std::ofstream scn_log;
+    if (!o.scenario_log.empty()) { scn_log.open(o.scenario_log); scn_run.log = &scn_log; }
+    scn_run.bot = o.scenario_bot;
+    scn_run.why = o.scenario_why;
+    if (w.scn.on && !attach_scenarios(s, p, o.data, scn_run, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }
+    if (o.min_sleep > 0) { auto adj = s.adjust_sleep; int floor = o.min_sleep; s.adjust_sleep = [adj, floor](int y, int i) { return std::max(adj ? adj(y, i) : y, floor); }; }   // item 10: the dry run's sleeper
     auto traced = s.after_sleep;
     s.after_sleep = [&](const World& x) { if (traced) traced(x); note_waking(profile, x, p); };
     Recorder recorder;
@@ -436,6 +465,7 @@ int main(int argc, char** argv) {
     if (!o.record.empty()) {
         header = replay_header(w, p, o.genesis);
         if (!profile.legends.empty()) { json hj = json::parse(header); hj["legends"] = legends_to_json(profile.legends); header = hj.dump(); }   // item 04: genesis wove them
+        if (w.scn.on) { json hj = json::parse(header); hj["scenarios"] = true; header = hj.dump(); }   // item 10
         recorder.world = &w;
         w.recorder = &recorder;
     }
@@ -448,6 +478,8 @@ int main(int argc, char** argv) {
         for (auto& l : recorder.lines) rec << l << "\n";
         rec << json({{"end", 1}, {"year", w.year}, {"h", hash_hex(state_hash(w).root)}}).dump() << "\n";
     }
+    log_waking(w, scn_run);   // item 10: the last waking
+    if (w.scn.on) scn::note_seen(profile, w);
     note_death(profile, w, p);   // item 04
     note_exit(profile, w, p);
     if (!o.profile.empty() && !save_profile(o.profile, profile, gerr)) { std::fprintf(stderr, "%s\n", gerr.c_str()); return 1; }

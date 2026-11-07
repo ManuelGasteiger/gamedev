@@ -285,10 +285,17 @@
           "choose": "by_score:awe"
         },
         "optional": true
+      },
+      "ground": {
+        "region": {
+          "owner": "$settlers",
+          "choose": "random"
+        },
+        "optional": true
       }
     },
     "require": [
-      "dragon.might >= 400",
+      "dragon.might >= 150",
       "dragon.phase >= 4"
     ],
     "salience": [
@@ -297,7 +304,7 @@
         "w": 3
       },
       {
-        "if": "dragon.might >= 600",
+        "if": "dragon.might >= 250",
         "w": 9
       }
     ],
@@ -325,12 +332,12 @@
         "label": "Raise the ground around you and settle in",
         "act": {
           "type": "terraform",
-          "target": "$settlers",
+          "target": "$ground",
           "payload": {
             "kind": "mountain"
           }
         },
-        "gate": "dragon.might >= 600"
+        "gate": "dragon.might >= 250 and bound(ground)"
       },
       {
         "id": "demand",
@@ -451,7 +458,7 @@
         "id": "dismiss",
         "label": "Send {willing.obj} down the mountain, kindly",
         "act": {
-          "type": "dismiss",
+          "type": "release",
           "target": "$willing"
         }
       },
@@ -764,7 +771,7 @@
           "target": "$court",
           "payload": {
             "secret": "lie",
-            "about": "$envoy"
+            "about": "$court"
           }
         },
         "gate": "dragon.lore >= 3"
@@ -1357,7 +1364,7 @@
           "target": "$court",
           "payload": {
             "secret": "slayer_plan",
-            "about": "$slayer"
+            "about": "$court"
           }
         },
         "gate": "dragon.lore >= 15"

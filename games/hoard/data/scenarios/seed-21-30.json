@@ -99,7 +99,8 @@
           "type": "demand",
           "target": "$court",
           "payload": {
-            "clause": "tear_down"
+            "clause": "tear_down",
+            "structure": "walls"
           }
         },
         "gate": "dragon.lore >= 3"
@@ -227,26 +228,9 @@
         "id": "defend",
         "label": "Promise to stand between them",
         "act": {
-          "type": "swear",
+          "type": "defend",
           "target": "$court",
-          "payload": {
-            "terms": {
-              "parties": [
-                "dragon",
-                "$court"
-              ],
-              "clauses": [
-                {
-                  "who": "dragon",
-                  "pred": "defend"
-                },
-                {
-                  "who": "them",
-                  "pred": "tribute"
-                }
-              ]
-            }
-          }
+          "secondary": "$rival"
         }
       },
       {
@@ -294,11 +278,8 @@
       "a": {
         "act": {
           "type": "kill",
-          "payload_has": [
-            "who"
-          ],
           "magnitude": [
-            0.4,
+            0.3,
             1.0
           ],
           "age_wakings": [
@@ -828,7 +809,7 @@
       "spared": {
         "person": {
           "knows_dragon": true,
-          "memory_has": "spared_by_dragon",
+          "tag": "pardoned",
           "choose": "most_recent"
         },
         "noun": "ruler",
@@ -838,6 +819,14 @@
         "faction": {
           "is": "owner_of($spared)"
         }
+      },
+      "rival": {
+        "faction": {
+          "is": "neighbour_of($court)",
+          "at_war": true,
+          "choose": "by_score:power"
+        },
+        "optional": true
       }
     },
     "require": [
@@ -880,12 +869,12 @@
         "act": {
           "type": "broker",
           "target": "$court",
-          "secondary": "$court",
+          "secondary": "$rival",
           "payload": {
             "pact": "peace"
           }
         },
-        "gate": "dragon.lore >= 15"
+        "gate": "dragon.lore >= 15 and bound(rival)"
       },
       {
         "id": "haunt",

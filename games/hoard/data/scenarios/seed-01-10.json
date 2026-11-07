@@ -94,7 +94,7 @@
             "role": "historian"
           }
         },
-        "gate": "dragon.lore >= 3"
+        "gate": "dragon.lore >= 3 and has_tag(hostage, lettered)"
       },
       {
         "id": "release",
@@ -376,7 +376,7 @@
         "person": {
           "court": "$court",
           "role": "hero",
-          "memory_has": "sworn_to_memory",
+          "tag": "slayer",
           "choose": "by_score:renown"
         },
         "noun": "hero",
@@ -394,6 +394,10 @@
       },
       {
         "if": "hero.trait == vengeful",
+        "w": 3
+      },
+      {
+        "if": "has_tag(hero, sworn_to)",
         "w": 3
       }
     ],
@@ -497,7 +501,6 @@
       "agent": {
         "person": {
           "tag": "corrupted:dark",
-          "memory_has": "schooled:intrigue",
           "knows_dragon": true,
           "choose": "most_recent"
         },
@@ -513,7 +516,8 @@
     },
     "require": [
       "court.piety >= 0.6",
-      "agent.role == ruler"
+      "agent.role == ruler",
+      "has_tag(agent, schooled:intrigue)"
     ],
     "salience": [
       {

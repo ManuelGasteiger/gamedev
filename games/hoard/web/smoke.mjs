@@ -13,6 +13,7 @@ data.endings = readFileSync(join(root, 'data/endings.json'), 'utf8');   // item 
 data.moves = readFileSync(join(root, 'data/moves.json'), 'utf8');   // item 07
 data.gates = readFileSync(join(root, 'data/gates.json'), 'utf8');   // item 09
 data.slayers = readFileSync(join(root, 'data/slayers.json'), 'utf8');   // item 08
+data.raid_diff = readFileSync(join(root, 'data/raid_diff.json'), 'utf8');   // item 15
 data.text = readFileSync(join(root, 'data/text/en/narrator.json'), 'utf8');
 data.importance = readFileSync(join(root, 'data/importance.json'), 'utf8');
 data.text_bundles = Object.fromEntries(readdirSync(join(root, 'data/text'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {

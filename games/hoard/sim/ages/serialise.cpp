@@ -11,12 +11,14 @@
 #include "step.h"
 #include "world_util.h"
 #include "../sift/sift_json.h"
+#include "../scenarios/scn.h"
 #include "endings_json.h"
 #include "person_json.h"
 #include "slayer_json.h"
 #include "person_seen.h"
 #include "act_log.h"
 #include "aging_json.h"
+#include "raid/report.h"
 
 namespace ages {
 
@@ -566,7 +568,9 @@ static json world_json(const World& w) {
     genesis_fields_to_json(w, j);   // v0.4 world (S2)
     aging_fields_to_json(w, j);     // item 09
     if (w.sift.on) j["sift"] = sift_state_json(w.sift);   // item 14
+    if (w.scn.on) j["scn"] = scn::state_json(w.scn);      // item 10
     endings_fields_to_json(w, j);   // item 04
+    if (w.sortie.open) j["sortie"] = json::parse(sortie_to_json(w.sortie), nullptr, false);   // item 15
     return j;
 }
 
@@ -964,7 +968,9 @@ bool world_from_json_as_saved(const std::string& text, World& w, std::string& er
     genesis_fields_from_json(j, w);   // v0.4 world (S2)
     aging_fields_from_json(j, w);     // item 09
     if (j.contains("sift")) sift_state_from_json(j["sift"], w.sift);   // item 14
+    if (j.contains("scn")) scn::state_from_json(j["scn"], w.scn);      // item 10
     endings_fields_from_json(j, w);   // item 04
+    if (j.contains("sortie")) sortie_from_json(j["sortie"].dump(), w.sortie);   // item 15
     sort_by_id(w);
     return true;
 }

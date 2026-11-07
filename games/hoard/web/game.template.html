@@ -1517,42 +1517,44 @@ function act(name, params = {}) {
     if (!target || !spend(burnStamina(m))) return null;
     beam(region);
     spawnFlames(region, 10 + Math.round(m * 36));
-    res = applyActs([{ type: 'burn', target, region, magnitude: burnMagnitude(m), witnesses }]);
+    const burned = burnMagnitude(m);
+    res = sortie((snap) => burnFacts(snap, region, burned));
   } else if (name === 'take') {
     if (!target || !spend(COST.take)) return null;
     const category = params.category ?? 'gold';
-    const payload = {}; payload[category] = 1;
-    res = applyActs([{ type: 'take', target, region, magnitude: clamp(params.magnitude ?? 0.2, 0.05, 0.9), witnesses, payload }]);
+    const share = clamp(params.magnitude ?? 0.2, 0.05, 0.9);
+    res = sortie((snap) => takeFacts(snap, region, target, category, share));
     if (res.ok) toast(`took ${category} from ${factionTitle(target)}`);
   } else if (name === 'kill') {
     const attacker = params.attacker ?? model.armies.find((a) => a.region === region)?.attacker;
     if (!attacker || !spend(killStamina())) return null;
     const g = armies.get(attacker + '|' + r.owner + '|' + region);
     if (g) puff(g.position, factionColor3(attacker));
-    res = applyActs([{ type: 'kill', target: attacker, region, magnitude: killMagnitude(params.magnitude ?? 0.3), witnesses: witnessesFor(region, attacker), payload: { soldiers: 1 } }]);
+    const killed = killMagnitude(params.magnitude ?? 0.3);
+    res = sortie(() => killFacts(region, attacker, r.owner, killed));
     story.target = attacker;
   } else if (name === 'crush') {
     if (!target || !spend(CRUSH.cost)) return null;
     crushEffect(region);
-    res = applyActs(crushActs(region, target));
+    res = sortie(() => speechFacts(crushActs(region, target)));
   } else if (name === 'defend') {
     if (!target || !params.against || !spend(COST.defend)) return null;
     beam(region, 0.6);
-    res = applyActs([{ type: 'defend', target, region, magnitude: 0.5, against: params.against, witnesses }]);
+    res = sortie(() => defendFacts(region, params.against, target));
     if (res.events?.some((e) => e.kind === 'war_ended' || e.kind === 'coalition_ended')) toast(`${factionTitle(params.against)} withdraws: the war ends`);
   } else if (name in simple) {
     if (!target || !spend(simple[name])) return null;
-    res = applyActs([{ type: name, target, region, magnitude: name === 'show' ? 0.3 : 0.5, witnesses, ...(name === 'take_hostage' && params.item ? { item: params.item } : {}) }]);
+    res = sortie(() => name === 'show' ? roarFacts(region) : name === 'take_hostage' ? hostageFacts(region, params.item) : speechFacts([{ type: name, target, region, magnitude: 0.5, witnesses }]));
     const moved = res.events?.find((e) => e.kind === (name === 'take_hostage' ? 'hostage_taken' : 'hostage_released'));
     if (name === 'take_hostage' && res.ok) toast(moved ? `${nameOf(moved.subject)} is carried to the lair` : `the court of ${target} has no one left to take`, !moved);
     if (name === 'release' && res.ok) toast(moved ? `${nameOf(moved.subject)} goes home to ${factionTitle(target)}` : `no hostage of ${target} to release`, !moved);
   } else if (name === 'give') {
     if (!target || !spend(COST.give)) return null;
-    res = applyActs([{ type: 'give', target, region, magnitude: 0.2, witnesses, payload: { gold: params.gold ?? 1 } }]);
+    res = sortie(() => speechFacts([{ type: 'give', target, region, magnitude: 0.2, witnesses, payload: { gold: params.gold ?? 1 } }]));
   } else if (name === 'miracle') {
     if (!target) return null;
     const payload = params.terror ? { terror: 1 } : {};
-    res = applyActs([{ type: 'miracle', target, region, magnitude: 1, witnesses, payload }]);
+    res = sortie(() => speechFacts([{ type: 'miracle', target, region, magnitude: 1, witnesses, payload }]));
     flashTile(region, new THREE.Color(params.terror ? 0xff4040 : 0xfff0a0));
   } else if (name === 'demand') {
     if (!target || !spend(COST.demand)) return null;
@@ -1586,8 +1588,6 @@ function act(name, params = {}) {
   actOutcome(res, region, { act: name, shown });
   return res;
 }
-
-function applyActs(acts) { return sim({ cmd: 'apply_acts', acts }); }
 
 // what an act did beyond the map (v0.4): wounds, answered hooks, death
 function actOutcome(res, region, ctx = {}) {
@@ -2334,6 +2334,7 @@ window.game = {
 <script src="game/profile.js"></script>
 <script src="game/death.js"></script>
 <script src="game/report.js"></script>
+<script src="game/raid.js"></script>
 <script>main().catch((e) => { setStatus('failed: ' + e.message); console.error(e); });</script>
 </body>
 </html>

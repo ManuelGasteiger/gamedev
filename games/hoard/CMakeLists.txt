@@ -43,6 +43,10 @@ add_library(ages STATIC
   sim/ages/acts_arcana.cpp
   sim/ages/acts_lair.cpp
   sim/ages/aging_json.cpp
+  sim/raid/diff.cpp
+  sim/raid/diff_data.cpp
+  sim/raid/report_json.cpp
+  sim/raid/sortie.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
   sim/ages/data_io.cpp
@@ -170,6 +174,17 @@ add_library(ages STATIC
   sim/text/bundle_io.cpp
   sim/text/batch.cpp
   sim/text/reason.cpp
+  # item 10: scenario runtime
+  sim/scenarios/bank.cpp
+  sim/scenarios/predicate.cpp
+  sim/scenarios/fields.cpp
+  sim/scenarios/bind.cpp
+  sim/scenarios/select.cpp
+  sim/scenarios/present.cpp
+  sim/scenarios/text_ctx.cpp
+  sim/scenarios/answer.cpp
+  sim/scenarios/lab.cpp
+  sim/scenarios/scn_json.cpp
 )
 target_include_directories(ages PUBLIC sim)
 hoard_sim_flags(ages)
@@ -183,7 +198,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp sim/runner/scn_cmd.cpp sim/runner/raid_script.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)
@@ -233,9 +248,9 @@ ages_test(sources_bias fast)
 # item 19: schema, lint and forced-state renders of the seed scenarios in every language (needs jsonschema)
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
-  file(GLOB HOARD_SEEDS ${CMAKE_SOURCE_DIR}/docs/scenarios/seed-*.json)
+  file(GLOB HOARD_SEEDS ${CMAKE_SOURCE_DIR}/data/scenarios/seed-*.json)
   add_test(NAME text_lint_seeds COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/scenario_check.py
-    ${CMAKE_SOURCE_DIR}/docs/scenario.schema.json ${CMAKE_SOURCE_DIR}/docs/act-api.schema.json ${CMAKE_SOURCE_DIR}/docs/scenarios/vocab.json
+    ${CMAKE_SOURCE_DIR}/docs/scenario.schema.json ${CMAKE_SOURCE_DIR}/docs/act-api.schema.json ${CMAKE_SOURCE_DIR}/data/scenarios/vocab.json
     ${HOARD_SEEDS} --text ${AGES_DATA_DIR} --bin $<TARGET_FILE:ages_runner>)
   set_tests_properties(text_lint_seeds PROPERTIES LABELS fast)
 endif()

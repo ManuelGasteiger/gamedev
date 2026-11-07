@@ -5,9 +5,10 @@ $WasiSdk = if ($env:WASI_SDK) { $env:WASI_SDK } else { 'D:\tools\wasi-sdk' }
 $Cxx = Join-Path $WasiSdk 'bin\clang++.exe'
 $Sysroot = Join-Path $WasiSdk 'share\wasi-sysroot'
 
-$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\text\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
+$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\sift\*.cpp, sim\scenarios\*.cpp, sim\text\*.cpp, sim\raid\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
 $Sources += (Resolve-Path sim\wasm\api.cpp).Path
 $Sources += (Resolve-Path sim\wasm\text_api.cpp).Path
+$Sources += (Resolve-Path sim\wasm\raid_api.cpp).Path
 
 & $Cxx --target=wasm32-wasi --sysroot=$Sysroot -std=c++17 -O2 -ffp-contract=off -fno-fast-math `
   -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor `
@@ -28,6 +29,7 @@ $Data['arrivals'] = Get-Content -Raw 'data\arrivals.json'   # item 06
 $Data['moves'] = Get-Content -Raw 'data\moves.json'   # item 07
 $Data['gates'] = Get-Content -Raw 'data\gates.json'   # item 09
 $Data['slayers'] = Get-Content -Raw 'data\slayers.json'   # item 08
+$Data['raid_diff'] = Get-Content -Raw 'data\raid_diff.json'   # item 15
 $Data['text'] = Get-Content -Raw 'data\text\en\narrator.json'
 $Data['importance'] = Get-Content -Raw 'data\importance.json'
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it
@@ -42,6 +44,10 @@ $Data['text_bundles'] = $Bundles
 $Cards = Get-ChildItem data\events\*.json | Sort-Object Name | ForEach-Object { Get-Content -Raw $_.FullName }
 $Data['events'] = '[' + ($Cards -join ",`n") + ']'
 $Data['genesis'] = Get-Content -Raw 'data\genesis.json'   # v0.4 world (S2)
+# item 10: the scenario bank joined as data_io.cpp does, and its vocabulary
+$Scn = Get-ChildItem data\scenarios\*.json | Where-Object { $_.Name -ne 'vocab.json' } | Sort-Object Name | ForEach-Object { Get-Content -Raw $_.FullName }
+$Data['scenarios'] = '[' + ($Scn -join ",`n") + ']'
+$Data['scenario_vocab'] = Get-Content -Raw 'data\scenarios\vocab.json'
 $DataJson = $Data | ConvertTo-Json -Compress -Depth 2
 Write-Host "web\ages.wasm $((Get-Item web\ages.wasm).Length) bytes"
 foreach ($pair in @(@('web\sandbox.template.html', 'web\ages-sandbox.html'), @('web\game.template.html', 'web\hoard-game.html'))) {
