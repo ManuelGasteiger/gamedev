@@ -1,5 +1,6 @@
 #include "record.h"
 #include "chron.h"
+#include "raid/report.h"
 #include "ages.h"
 #include "arrivals.h"
 #include "endings.h"
@@ -65,6 +66,7 @@ uint64_t data_hash(const DataJson& d) {
     if (!d.endings.empty()) add("endings", d.endings);   // item 04
     if (!d.gates.empty()) add("gates", d.gates);   // item 09
     if (!d.scenarios.empty()) { add("scenarios", d.scenarios); add("scenario_vocab", d.scenario_vocab); }   // item 10
+    if (!d.raid_diff.empty()) add("raid_diff", d.raid_diff);   // item 15
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }
@@ -107,6 +109,14 @@ bool apply_input(World& w, const Params& p, const std::string& verb, const std::
     if (verb == "terraform") return terraform(w, p, str(a, "region"), str(a, "kind")).done;
     if (verb == "demand") { demand_oath(w, p, str(a, "target"), str(a, "pred")); return true; }
     if (verb == "answer_scenario") { scn::answer_unrecorded(w, p, str(a, "id"), str(a, "option"), a.value("magnitude", -1.0)); return true; }   // item 10: recorded refused or not
+    if (verb == "begin_sortie") return begin_sortie(w, p, a.value("sortie", 0), err);   // item 15
+    if (verb == "end_sortie") {
+        RaidReport r;
+        if (!report_from_json(args_json, r, err)) return false;
+        SortieResult out = end_sortie(w, p, r);
+        err = out.reason;
+        return out.ok;
+    }
     if (verb == "load_world") {
         World n;
         if (!world_from_json(a.value("world", json::object()).dump(), n, err)) return false;

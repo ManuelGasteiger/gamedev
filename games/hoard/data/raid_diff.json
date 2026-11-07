@@ -1,0 +1,15 @@
+{
+  "civilian_toll_factor": 0.2,
+  "structure_threshold": 0.5,
+  "structures": ["library", "temple", "foundry", "walls", "granary", "tower", "altar"],
+  "plain": ["house", "keep", "monument"],
+  "structure_share": { "library": 0.15, "temple": 0.2, "foundry": 0.15, "walls": 0.2, "granary": 0.1, "tower": 0.1, "altar": 0.05 },
+  "show": { "land": 0.5, "roar": 0.3, "flyover": 0.1, "flyover_seconds": 3 },
+  "oath_defends": false,
+  "kill_person": 0.05,
+  "hostage": 0.5,
+  "repelled": 0.5,
+  "item": 0.05,
+  "snapshot": { "value_per_wealth": 1, "population_per_wealth": 10, "garrison_per_power": 25, "soldiers_per_power": 100, "army_per_power": 100 },
+  "holdings": { "gold": 1, "books": 1, "artifacts": 1, "art": 1, "food": 1, "royals": 1 }
+}

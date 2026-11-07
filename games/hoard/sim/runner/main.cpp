@@ -27,6 +27,7 @@
 #include "act_script.h"
 #include "scn_cmd.h"
 #include "scenarios/scn.h"
+#include "raid_script.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -66,6 +67,7 @@ struct Options {
     std::string scenario_bot, scenario_log, lab;   // item 10, scn_cmd.h
     std::vector<std::string> scenario_why;      // item 10: --scenario-why a,b
     int min_sleep = 0;                         // item 10: a floor on every sleep (the dry run's sleeper-hoarder)
+    std::string raid_script;                   // item 15, raid_script.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -100,6 +102,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--profile") { if (!need(o.profile)) return false; }
         else if (k == "--act-script") { if (!need(o.act_script)) return false; }
+        else if (k == "--raid-report") { if (!need(o.raid_script)) return false; }
         else if (k == "--bot") { if (!need(o.bot)) return false; }
         else if (k == "--scenarios") o.scenarios = true;
         else if (k == "--scenario-bot") { if (!need(o.scenario_bot)) return false; o.scenarios = true; }
@@ -377,6 +380,7 @@ int main(int argc, char** argv) {
     if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
     if (!o.act_script.empty()) return act_script_cmd(o.data, o.act_script);
     if (!o.lab.empty()) return scn_lab_cmd(o.data, o.lab);
+    if (!o.raid_script.empty()) return raid_script_cmd(o.data, o.raid_script);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);

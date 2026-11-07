@@ -4,6 +4,7 @@
 #include "endings.h"
 #include "chron.h"
 #include "../scenarios/scn.h"
+#include "raid/report.h"
 
 namespace ages {
 
@@ -16,6 +17,7 @@ std::vector<ReactionLine> apply_acts(World& w, const Params& p, const std::vecto
 
 SleepResult sleep(World& w, const Params& p, int years) {
     RecordScope rec(w);
+    w.sortie = SortieState();   // item 15: a sleep ends a sortie left open
     SleepResult r = sleep_unrecorded(w, p, years);
     rec.done("sleep", args_int("years", years));
     return r;
@@ -112,6 +114,20 @@ bool commune(World& w, const Params& p, const std::string& relic, const std::str
     if (ok) rec.done("commune", args_of({{"relic", relic}, {"answer", answer}}));
     return ok;
 }
+bool begin_sortie(World& w, const Params& p, int number, std::string& reason) {
+    RecordScope rec(w);
+    bool ok = begin_sortie_unrecorded(w, p, number, reason);
+    if (ok) rec.done("begin_sortie", args_int("sortie", number));
+    return ok;
+}
+
+SortieResult end_sortie(World& w, const Params& p, const RaidReport& r) {
+    RecordScope rec(w);
+    SortieResult out = end_sortie_unrecorded(w, p, r);
+    if (out.ok) rec.done("end_sortie", report_to_json(r));
+    return out;
+}
+
 
 }
 

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "rng.h"
+#include "../raid/snapshot.h"
 
 namespace ages {
 
@@ -610,6 +611,7 @@ struct World {
     Prophecy prophecy;                     // item 04: empty ending on the fixed start
     std::string ended;                     // item 04: the exit kind once the run ended
     ScnState scn;                          // item 10: saved and hashed only while on
+    SortieState sortie;                    // item 15: the open sortie's snapshot; saved and hashed only while open
     Recorder* recorder = nullptr;          // replay recording (record.h); not saved, not hashed
     // item 05, level 3: the world at the last wake, and what the last sleep would have been without one act; not saved, not hashed
     std::shared_ptr<const World> wake_snapshot;

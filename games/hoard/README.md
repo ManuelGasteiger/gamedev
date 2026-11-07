@@ -359,3 +359,23 @@ tools/scenario_dryrun.py        steps 5 to 7: 300 seeds x 6 bots, cut and flag l
 ```
 
 `constants.json` "scenarios": the spec's score weights (`specificity_w` 2, `cite_w` 9, `cite_half_wakings` 2, `recent_w` 9, `recent_half_wakings` 4, `theme_w` 3 over `theme_wakings` 3, `seen_w` 3 capped at `seen_cap` 9, `theme_share` 0.15 at `theme_share_w` 9, `window` 3, `seek_w` 9), pity (`pity_magnitude` 0.2, `pity_wakings` 2, `arrival_pity_after` 4, `arrival_pity_w` 3), citation budget (`cites_per_run` 2, `cites_per_waking` 1, `cites_monumental` 4), runner-set `remember_stock` 0.1, `renown_events` 10, `candidates_per_role` 12, `because_level` 1, `eras`, `sizes`.
+
+## Item 15: RaidReport and raid_diff
+
+Both shells report facts; the core makes acts (`docs/raid-design.md` section 3). `begin_sortie {sortie}` records what the courts held (`World.sortie`: per settlement its building value, population, garrison, soldiers and structures; per court its wealth and holdings per loot category; the armies) and returns it to the shell with the civilian toll factor. `end_sortie {report}` diffs a `RaidReport` (`docs/raid_report.schema.json`) against that snapshot with `data/raid_diff.json`, applies the acts through `apply_acts` and returns `{acts, refused, warnings, changed, events, lines, hooks_resolved, wounds, slain}`. One act per (type, region, structure) per sortie, magnitudes summed and clamped to 1 (a capped one is a warning code, not a refusal); pure arithmetic, no rng. `World.sortie` is saved and hashed only while a sortie is open; a save taken mid-sortie keeps it, and a sleep closes an open sortie. Both verbs are recorded (`begin_sortie`, `end_sortie` in `apply_input`). `apply_acts` stays for the debug page, the policies and scenario answers. The valley sandbox sends every panel action as a sortie of one (`web/game/raid.js`); `--raid-report FILE` of the runner applies `{world, report}`, `tools/raid_report_check.py` validates reports and the acts they make.
+
+```
+data/raid_diff.json             toll factor, structure threshold, show and hostage magnitudes, snapshot units, holdings per category
+docs/raid_report.schema.json    the report
+sim/raid/snapshot.h             SortieState (the snapshot in World)
+sim/raid/diff_book.h            RaidDiffBook
+sim/raid/diff_data.cpp          raid_diff.json
+sim/raid/report.h               RaidReport, DiffResult, SortieResult, the API
+sim/raid/report_json.cpp        report and snapshot JSON
+sim/raid/diff.cpp               raid_diff
+sim/raid/sortie.cpp             snapshot, begin_sortie, end_sortie, the lair's drop
+sim/wasm/raid_api.h/.cpp        wasm begin_sortie and end_sortie
+sim/runner/raid_script.h/.cpp   --raid-report
+web/game/raid.js                the tactical panel's facts
+tools/raid_report_check.py      schema validation of reports and of the acts they make
+```

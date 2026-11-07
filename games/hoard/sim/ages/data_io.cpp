@@ -77,6 +77,7 @@ bool load_data_json(const std::string& dir, DataJson& d, std::string& err) {
            read_optional(dir + "/genesis.json", d.genesis) && read_optional(dir + "/endings.json", d.endings) &&   // item 04
            read_optional(dir + "/moves.json", d.moves) && read_optional(dir + "/slayers.json", d.slayers) &&   // items 07, 08
            read_optional(dir + "/gates.json", d.gates) &&   // item 09
+           read_optional(dir + "/raid_diff.json", d.raid_diff) &&   // item 15
            read_folder(dir, "patterns", d.patterns, err, "base_rates.json") && read_optional(dir + "/patterns/base_rates.json", d.base_rates) &&   // item 14
            read_folder(dir, "scenarios", d.scenarios, err, "vocab.json") && read_optional(dir + "/scenarios/vocab.json", d.scenario_vocab);   // item 10
 }

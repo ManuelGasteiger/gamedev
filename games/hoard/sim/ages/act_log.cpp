@@ -158,7 +158,7 @@ json act_schema_json(const World& w, const Act& a, int id) {
             pl[kv.first] = list;
         } else pl[kv.first] = kv.second;
     }
-    if (a.type == "kill") { pl.erase("soldiers"); if (num(a, "soldiers") > 0) pl["who"] = "army"; }
+    if (a.type == "kill") { pl.erase("soldiers"); if (num(a, "soldiers") > 0 && !a.args.count("who")) pl["who"] = "army"; }
     if (a.type == "miracle") pl.erase("terror");
     if (a.type == "release") pl = json::object();
     if (a.type == "swear") {   // the oath the envoy's offer drafted, as the schema's terms

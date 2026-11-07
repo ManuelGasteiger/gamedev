@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hoard/raid-report/v1",
+  "title": "Hoard RaidReport v1",
+  "description": "The facts a shell sends with end_sortie (raid-design.md section 3). The core turns them into acts with data/raid_diff.json; magnitudes are shares of what the court held when begin_sortie ran. Values are in the units begin_sortie returned for each settlement.",
+  "$defs": {
+    "amounts": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+    "ids": { "type": "array", "items": { "type": "string" } },
+    "settlement": {
+      "type": "object",
+      "required": ["region"],
+      "additionalProperties": false,
+      "properties": {
+        "region": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string" },
+        "destroyed": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "house": { "type": "number", "minimum": 0 }, "keep": { "type": "number", "minimum": 0 }, "library": { "type": "number", "minimum": 0 },
+            "temple": { "type": "number", "minimum": 0 }, "foundry": { "type": "number", "minimum": 0 }, "walls": { "type": "number", "minimum": 0 },
+            "granary": { "type": "number", "minimum": 0 }, "tower": { "type": "number", "minimum": 0 }, "altar": { "type": "number", "minimum": 0 },
+            "monument": { "type": "number", "minimum": 0 }
+          }
+        },
+        "collected": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "gold": { "type": "number", "minimum": 0 }, "books": { "type": "number", "minimum": 0 }, "artifacts": { "type": "number", "minimum": 0 },
+            "art": { "type": "number", "minimum": 0 }, "food": { "type": "number", "minimum": 0 }, "royals": { "type": "number", "minimum": 0 },
+            "items": { "$ref": "#/$defs/ids" }
+          }
+        },
+        "killed": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "soldiers": { "type": "number", "minimum": 0 }, "garrison": { "type": "number", "minimum": 0 }, "civilians": { "type": "number", "minimum": 0 },
+            "persons": { "$ref": "#/$defs/ids" }
+          }
+        },
+        "taken": { "type": "array", "items": { "type": "string" }, "description": "person ids carried to the lair; an empty string is the court's heir" },
+        "presence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lowest_altitude": { "type": "number" }, "seconds_below_150": { "type": "number", "minimum": 0 },
+            "roared": { "type": "boolean" }, "landed_in_square": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "army": {
+      "type": "object",
+      "required": ["attacker", "region"],
+      "additionalProperties": false,
+      "properties": {
+        "attacker": { "type": "string" }, "defender": { "type": "string" }, "region": { "type": "string" },
+        "killed_share": { "type": "number", "minimum": 0, "maximum": 1 },
+        "repelled": { "type": "boolean", "description": "the attacker's assault was broken; yields a defend" }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["sortie"],
+  "additionalProperties": false,
+  "properties": {
+    "sortie": { "type": "integer", "minimum": 0 },
+    "shell": { "enum": ["tactical", "flight"] },
+    "settlements": { "type": "array", "items": { "$ref": "#/$defs/settlement" } },
+    "armies": { "type": "array", "items": { "$ref": "#/$defs/army" } },
+    "lair": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dropped": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "gold": { "type": "number", "minimum": 0 }, "books": { "type": "number", "minimum": 0 }, "artifacts": { "type": "number", "minimum": 0 },
+            "art": { "type": "number", "minimum": 0 }, "food": { "type": "number", "minimum": 0 }, "items": { "$ref": "#/$defs/ids" }
+          }
+        },
+        "received": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["id", "outcome"], "additionalProperties": false,
+            "properties": { "id": { "type": "string" }, "outcome": { "enum": ["receive", "eat", "turn_away"] } }
+          }
+        },
+        "fought": { "$ref": "#/$defs/ids" }
+      }
+    },
+    "spells": { "type": "array", "items": { "type": "object" }, "description": "acts already; validated by act-api.schema.json once logged" },
+    "speech": { "type": "array", "items": { "type": "object" }, "description": "acts already (demand, swear, teach, broker, reveal, judge, release, give, miracle, altar, crush ...)" },
+    "wounds": { "$ref": "#/$defs/amounts", "description": "passive damage before armour, keyed \"<region>|<defence>\"" }
+  }
+}

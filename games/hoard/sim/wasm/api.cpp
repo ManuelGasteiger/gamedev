@@ -21,6 +21,7 @@
 #include "ages/profile.h"
 #include "ages/endings_json.h"
 #include "text_api.h"
+#include "raid_api.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -91,6 +92,7 @@ json cmd_load(const json& in) {
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.endings = text_of(d, "endings");   // item 04
     g.data.gates = text_of(d, "gates");       // item 09
+    g.data.raid_diff = text_of(d, "raid_diff");   // item 15
     g.data.importance = text_of(d, "importance");
     g.data.patterns = text_of(d, "patterns");       // item 14
     g.data.base_rates = text_of(d, "base_rates");
@@ -287,7 +289,7 @@ json cmd_load_world(const json& in) {
 // ---- v0.4 (S1): wounds in apply_acts, a slain dragon refuses its verbs, talents -----------------------------------
 
 const char* const kVerbs[] = {"apply_acts", "sleep", "kill_person", "sponsor_remnant", "cast", "terraform", "demand",
-                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt", "keep_person", "commune"};
+                              "accept_offer", "decline_offer", "pick_talent", "receive", "hunt", "keep_person", "commune", "begin_sortie", "end_sortie"};
 
 json cmd_apply_acts_wounded(const json& in) {
     double before = g.world.dragons[kPlayer].wounds;
@@ -436,6 +438,8 @@ json dispatch(const json& in) {
     if (cmd == "demand") return cmd_demand(in);
     if (cmd == "act_gates") return cmd_act_gates();   // item 09
     if (cmd == "answer_scenario") return scn::answer_json(scn::answer_scenario(g.world, g.params, text_of(in, "id"), text_of(in, "option"), in.value("magnitude", -1.0)));   // item 10
+    if (cmd == "begin_sortie") return raid_begin_sortie(g.world, g.params, in);   // item 15
+    if (cmd == "end_sortie") return raid_end_sortie(g.world, g.params, in);
     if (cmd == "catalogue") { json j = json::parse(spells_catalogue_json(g.params), nullptr, false); j["ok"] = true; return j; }
     if (cmd == "hash") return {{"ok", true}, {"hash", chronicle_hash_hex(g.world)}};
     if (cmd == "state_hash") return json::parse(state_hash_json(g.world), nullptr, false);

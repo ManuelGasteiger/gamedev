@@ -43,6 +43,10 @@ add_library(ages STATIC
   sim/ages/acts_arcana.cpp
   sim/ages/acts_lair.cpp
   sim/ages/aging_json.cpp
+  sim/raid/diff.cpp
+  sim/raid/diff_data.cpp
+  sim/raid/report_json.cpp
+  sim/raid/sortie.cpp
   sim/ages/chronicle.cpp
   sim/ages/data.cpp
   sim/ages/data_io.cpp
@@ -194,7 +198,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp sim/runner/scn_cmd.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/roster_stats.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp sim/runner/scn_cmd.cpp sim/runner/raid_script.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

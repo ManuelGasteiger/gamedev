@@ -5,9 +5,10 @@ $WasiSdk = if ($env:WASI_SDK) { $env:WASI_SDK } else { 'D:\tools\wasi-sdk' }
 $Cxx = Join-Path $WasiSdk 'bin\clang++.exe'
 $Sysroot = Join-Path $WasiSdk 'share\wasi-sysroot'
 
-$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\sift\*.cpp, sim\scenarios\*.cpp, sim\text\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
+$Sources = @(Get-ChildItem sim\core\*.cpp, sim\ages\*.cpp, sim\ages\rules\*.cpp, sim\sift\*.cpp, sim\scenarios\*.cpp, sim\text\*.cpp, sim\raid\*.cpp | Where-Object { $_.Name -ne 'data_io.cpp' -and $_.Name -ne 'bundle_io.cpp' } | ForEach-Object { $_.FullName })
 $Sources += (Resolve-Path sim\wasm\api.cpp).Path
 $Sources += (Resolve-Path sim\wasm\text_api.cpp).Path
+$Sources += (Resolve-Path sim\wasm\raid_api.cpp).Path
 
 & $Cxx --target=wasm32-wasi --sysroot=$Sysroot -std=c++17 -O2 -ffp-contract=off -fno-fast-math `
   -fno-exceptions -DJSON_NOEXCEPTION -mexec-model=reactor `
@@ -28,6 +29,7 @@ $Data['arrivals'] = Get-Content -Raw 'data\arrivals.json'   # item 06
 $Data['moves'] = Get-Content -Raw 'data\moves.json'   # item 07
 $Data['gates'] = Get-Content -Raw 'data\gates.json'   # item 09
 $Data['slayers'] = Get-Content -Raw 'data\slayers.json'   # item 08
+$Data['raid_diff'] = Get-Content -Raw 'data\raid_diff.json'   # item 15
 $Data['text'] = Get-Content -Raw 'data\text\en\narrator.json'
 $Data['importance'] = Get-Content -Raw 'data\importance.json'
 # item 19: one bundle per language as sim/text/bundle_io.cpp merges it

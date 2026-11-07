@@ -203,5 +203,17 @@
  "word.heir_location": "Versteck eines Erben",
  "word.slayer_plan": "Plan der Drachentöter",
  "word.lie": "Lüge",
- "reason.fight.not_slayer": "sie gehören keinem Drachentöterorden an"
+ "reason.fight.not_slayer": "sie gehören keinem Drachentöterorden an",
+ "reason.sortie.already_open": "ein Ausflug ist schon offen",
+ "reason.sortie.not_open": "kein Ausflug ist offen",
+ "reason.raid.unknown_region": "der Bericht nennt {r.region}, wo zu Beginn des Ausflugs keine Siedlung lag",
+ "reason.raid.unknown_class": "der Bericht nennt {r.class}, das die Auswertung nicht kennt",
+ "reason.raid.no_structure": "{r.region} hatte zu Beginn des Ausflugs kein {r.structure}",
+ "reason.raid.no_value": "{r.region} hatte keinen Gebäudewert, von dem ein Anteil zu nehmen wäre",
+ "reason.raid.no_holdings": "{r.court} besaß zu Beginn des Ausflugs kein {r.what}",
+ "reason.raid.capped": "ein {r.type} bei {r.region} war mehr, als die Siedlung hielt, und wird gekappt",
+ "reason.raid.sortie_mismatch": "der Bericht gehört zu einem anderen Ausflug als dem offenen ({r.n})",
+ "reason.raid.unknown_army": "das Heer von {r.attacker} ist unbekannt",
+ "reason.raid.not_at_war": "{r.attacker} führt keinen Krieg gegen {r.defender}, also gibt es nichts zu verteidigen",
+ "reason.raid.loot_lost": "ein Teil des genommenen {r.what} erreichte den Hort nie"
 }
