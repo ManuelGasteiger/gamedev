@@ -11,12 +11,15 @@
 
 namespace ages {
 
+double dragon_points(const World& w, const Params& p);   // the threat budget before the court's era and the adaptation
 double slayer_strength(const World& w, const Params& p, const Faction& f);
 double slaying_odds(const World& w, const Params& p, const Faction& f);   // at the dragon's current wounds
 std::string slayer_stage(const World& w, const std::string& faction);    // "", "slayers_forming" or "slayers_ready"
 double adaptation_factor(const World& w, const Params& p);
 void slayer_clock(World& w, const Params& p);
-void disperse_slayers(World& w, Faction& f);   // the band is gone (killed at the gate): the clock starts over
+void march_failed(World& w, const Params& p, const Faction& f, int attempt_event);   // slayer_march.cpp: the named slayers after a failed march
+void gate_fight(World& w, const Params& p, const Faction& f);                       // the band killed at the gate
+void disperse_slayers(World& w, const Params& p, Faction& f);   // the band is gone (killed at the gate): the clock starts over
 void adapt_after_sleep(World& w, const Params& p, double wounds_share_at_start, size_t first_event);
 
 }

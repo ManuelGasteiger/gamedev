@@ -84,6 +84,7 @@ json cmd_load(const json& in) {
     g.data.hooks = text_of(d, "hooks");         // v0.4 hooks (S3)
     g.data.arrivals = text_of(d, "arrivals");   // item 06
     g.data.moves = text_of(d, "moves");         // item 07
+    g.data.slayers = text_of(d, "slayers");     // item 08
     g.data.genesis = text_of(d, "genesis");   // v0.4 world (S2)
     g.data.endings = text_of(d, "endings");   // item 04
     g.data.importance = text_of(d, "importance");

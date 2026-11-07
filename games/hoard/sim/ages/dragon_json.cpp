@@ -3,6 +3,8 @@
 #include "defences.h"
 #include "growth.h"
 #include "rules/slayers.h"
+#include "slayer_roster.h"
+#include "slayer_view.h"
 #include "talents.h"
 #include "world_util.h"
 #include "wounds.h"
@@ -123,6 +125,11 @@ void dragon_view_to_json(const World& w, const Params& p, json& view) {
         std::string stage = slayer_stage(w, f.id);
         view["factions"][i]["slayers"] = stage.empty() ? json(nullptr)
             : json{{"stage", stage == "slayers_ready" ? "ready" : "forming"}, {"strength", slayer_strength(w, p, f)}, {"odds", slaying_odds(w, p, f)}};
+        const Order* order = find_order(w, f.id);
+        const Person* gm = grandmaster(w, f.id);
+        if (!stage.empty() && order && gm)
+            view["factions"][i]["slayers"]["order"] = {{"grandmaster", {{"id", gm->id}, {"name", gm->name}, {"power", gm->slayer.power}, {"scars", gm->slayer.scars}}},
+                                                       {"power_total", order->power_total}, {"estimate_year", attempt_estimate(w, p, f)}};
     }
     view["phase"]["points"] = total_growth(d);
     view["phase"]["next_phase_points"] = maybe(next_phase_points(d, p.c));

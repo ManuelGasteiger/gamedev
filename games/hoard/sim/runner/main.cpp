@@ -12,6 +12,8 @@
 #include "ages/record.h"
 #include "ages/save.h"
 #include "analyse.h"
+#include "roster_stats.h"
+#include "ages/names.h"
 #include "ages/json.h"
 #include "ages/world_util.h"
 #include "ages/wounds.h"
@@ -148,7 +150,7 @@ json death_json(const World& w) {
             const Event& x = w.chronicle[k];
             warned = x.subject == e.subject && (x.kind == "slayers_ready" || x.kind == "slayers_coming" || x.kind == "slayers_forming");
         }
-        return {{"cause", wounds ? "wounds" : "slaying"}, {"year", e.year}, {"court", e.subject}, {"warned", warned}};
+        return {{"cause", wounds ? "wounds" : "slaying"}, {"year", e.year}, {"court", e.subject}, {"warned", warned}, {"slayer", is_person_id(w, e.object) ? display_name(w, e.object) : std::string()}};
     }
     return nullptr;
 }
@@ -269,6 +271,7 @@ json stats_json(const World& w, const Params& p) {
     j["hunger_wakes"] = hunger_wakes;
     j["dragon"]["hunger"] = w.dragons[kPlayer].hunger;
     j["dragon_death"] = death_json(w);   // v0.4 (S1)
+    j["roster"] = roster_json(w);        // item 08
     j["dragon_growth"] = {{"phase", w.dragons[kPlayer].phase}, {"points", w.dragons[kPlayer].growth}, {"talents", w.dragons[kPlayer].talents}, {"wounds", w.dragons[kPlayer].wounds}};
     j["hooks"] = hooks_json(w, p);   // v0.4 hooks (S3)
     j["genesis"] = {{"template", w.genesis.template_id}, {"prehistory_years", w.genesis.prehistory_years}, {"deal", w.genesis.deal}};   // v0.4 world (S2)

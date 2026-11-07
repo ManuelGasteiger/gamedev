@@ -312,6 +312,16 @@ struct PersonRel {
     int w = 0;              // -100..100
 };
 
+// item 08: a named member of a slayer order. rank grandmaster | master | slayer ("" for anyone else); counter, hate and
+// fear are the trait ids of data/slayers.json; known lists the kinds (counter, hate, fear) the dragon has learned
+struct Slayer {
+    std::string rank, counter, hate, fear;
+    int power = 0;
+    std::vector<std::string> scars, known;
+    int last_fight = 0;
+    bool armed = false;
+};
+
 // 17.2: a named mortal; role in ruler | heir | hero | sage | priest; dies 0 means immortal
 struct Person {
     std::string id;
@@ -331,6 +341,14 @@ struct Person {
     std::vector<PersonMemory> mem, permanent;
     std::vector<PersonRel> rel;
     int flips = 0;
+    Slayer slayer;   // item 08
+};
+
+// item 08: the roster of a court's slayer order; members are people (slayer.rank), hunters are only counted
+struct Order {
+    std::string id, court;
+    int founded = 0, grievance = 0, hunters = 0;
+    double power_total = 0;
 };
 
 // item 07: a secret act on a person that the court may discover; once exposed it carries the purge faction's
@@ -537,6 +555,7 @@ struct World {
     std::vector<DeadPerson> dead_people;   // the ones the briefing may still have to name
     std::map<std::string, int> person_counters;   // race -> next number for `<race><n>` ids
     std::vector<Secret> secrets;           // item 07, in the order made
+    std::vector<Order> orders;             // item 08, sorted by id
     std::vector<Arrival> arrivals;         // item 06: visitors at the lair in the order they came; the dragon's sleep sends them home
     std::map<std::string, int> arrival_fired;   // "<court>|<kind>|<cause>" and "<court>" -> year of the last arrival
     std::vector<Offer> offers;             // current offers, generated at wake
