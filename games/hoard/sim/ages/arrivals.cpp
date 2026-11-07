@@ -70,7 +70,7 @@ void arrivals_at_wake(World& w, const Params& p) {
     for (auto& a : w.arrivals) {
         const ArrivalDef* d = arrival_def(p, a.kind);
         const OfferDef* o = a.kind == "envoy" ? offer_def(p, a.offer_kind) : nullptr;
-        bool gone = !find_faction(w, a.court);
+        bool gone = !find_faction(w, a.court) || (!a.person.empty() && !find_person(w, a.person));
         bool short_gone = d && d->window == "short" && a.year < w.year - window;
         bool expired = o && a.year + o->expires_years <= w.year;
         if (gone || short_gone || expired) {
