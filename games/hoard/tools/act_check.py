@@ -12,6 +12,7 @@ import collections
 import concurrent.futures
 import json
 import os
+import shutil
 import subprocess
 import sys
 
@@ -39,7 +40,10 @@ def run_one(args, policy, seed):
     cmd = [args.bin, "--data", args.data, "--seed", str(seed), "--years", str(args.years), "--genesis", "--no-bank",
            "--policy", policy, "--out", out]
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
-    return policy, os.path.join(out, "act_log.json")
+    log = os.path.join(args.out, f"{policy}-{seed}.json")
+    os.replace(os.path.join(out, "act_log.json"), log)
+    shutil.rmtree(out)   # the rest of a 3000-year run is several MB; only the act log is kept
+    return policy, log
 
 
 def main():
@@ -57,17 +61,15 @@ def main():
 
     schema = json.load(open(SCHEMA))
     validator = jsonschema.Draft202012Validator(schema)
-    logs = [("file", p) for p in args.logs]
-    if args.bin:
-        jobs = [(pol, s) for pol in args.policies.split(",") for s in seeds_of(args.seeds)]
-        with concurrent.futures.ThreadPoolExecutor(args.jobs) as ex:
-            logs += list(ex.map(lambda j: run_one(args, *j), jobs))
-
     counts = collections.Counter()
     by_policy = collections.defaultdict(collections.Counter)
     bad = 0
     shown = 0
-    for policy, path in logs:
+    nlogs = 0
+
+    def check(policy, path):
+        nonlocal bad, shown, nlogs
+        nlogs += 1
         for act in json.load(open(path)):
             counts[act["type"]] += 1
             by_policy[policy][act["type"]] += 1
@@ -79,7 +81,17 @@ def main():
                     print(f"invalid {path} act {act.get('id')}: {json.dumps(act)[:200]}")
                     print(f"  {min(errors, key=lambda e: len(e.message)).message[:200]}")
 
-    print(f"{sum(counts.values())} acts in {len(logs)} logs, {bad} invalid")
+    for p in args.logs:
+        check("file", p)
+    if args.bin:
+        jobs = [(pol, s) for pol in args.policies.split(",") for s in seeds_of(args.seeds)]
+        with concurrent.futures.ThreadPoolExecutor(args.jobs) as ex:
+            for fut in concurrent.futures.as_completed([ex.submit(run_one, args, *j) for j in jobs]):
+                policy, path = fut.result()
+                check(policy, path)
+                os.remove(path)
+
+    print(f"{sum(counts.values())} acts in {nlogs} logs, {bad} invalid")
     policies = sorted(by_policy)
     print("act | " + " | ".join(policies) + " | all")
     missing = []
