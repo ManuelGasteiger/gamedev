@@ -62,6 +62,7 @@ uint64_t data_hash(const DataJson& d) {
     add("importance", d.importance);
     if (!d.patterns.empty()) { add("patterns", d.patterns); add("base_rates", d.base_rates); }   // item 14
     if (!d.endings.empty()) add("endings", d.endings);   // item 04
+    if (!d.gates.empty()) add("gates", d.gates);   // item 09
     for (auto& b : d.text_bundles) { json v = json::parse(b.second, nullptr, false); all["text_bundles"][b.first] = v; }
     return json_hash(all);
 }

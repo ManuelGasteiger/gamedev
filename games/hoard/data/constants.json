@@ -277,6 +277,29 @@
     "teach":        { "gate": "knowledge",  "target": "faction", "gate_min": 1.0, "cost": 0.0, "modifier": { "var": "era_rate", "op": "mul", "value": 2.0, "decades": 10 } },
     "corrupt":      { "enabled": false, "gate": "magic", "target": "faction", "cost": 5.0 }
   },
+  "acts": {
+    "note": "Item 09. Numbers of the acts it added, from act-api.md section 2 and the 09 brief; haunt rows, haunt_cult, the guise purposes' numbers, take_item_artifacts, craft_era_progress, the war, magic and intrigue steps and consort_line_years are runner-set.",
+    "library_era_rate": 0.9, "library_decades": 10,
+    "temple_faith": -0.3,
+    "foundry_era_progress": -20, "foundry_anti_dragon": -0.1,
+    "granary_wealth": 0.1,
+    "ruin_burn": 1.0,
+    "take_item_artifacts": 1.0,
+    "craft_era_progress": 10, "war_militarism": 0.1, "war_anti_dragon": 0.1, "magic_world": 0.05, "intrigue_cunning": 0.1,
+    "trade_growth": 1.1, "trade_decades": 10,
+    "haunt_abdicate": 0.1, "haunt_desert": 0.2, "haunt_cult": 0.3,
+    "haunt": {
+      "warning":   { "sev": 2, "awe": 0.5, "debt": 0.5 },
+      "summons":   { "sev": 2, "awe": 1.0 },
+      "prophecy":  { "sev": 3, "awe": 1.0 },
+      "nightmare": { "sev": 3, "dread": 1.0 }
+    },
+    "guise_discovery": 0.1, "guise_per_sage": 0.05, "guise_forewarned": 0.1, "guise_show": 0.5,
+    "guise_preach_faith": 0.1, "guise_learn_knowledge": 1.0,
+    "curse_research_mult": 0.75, "curse_research_stacks": 3,
+    "curse_blight_land": 0.5,
+    "consort_line_years": 100
+  },
   "terraform": {
     "gate_size": 2.0,
     "cost_size_fraction": 0.1,
