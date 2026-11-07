@@ -118,6 +118,7 @@ void attempt(World& w, const Params& p, Faction& f) {
         return;
     }
     f.wealth *= (1.0 - c.slay_fail_wealth_loss);
+    learn_lair(w, p, f, "returned");   // 06b: the survivors bring home the way in
     Deposit d;
     d.type = "slay_failed";
     d.magnitude = 1.0;

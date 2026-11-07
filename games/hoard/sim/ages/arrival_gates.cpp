@@ -71,7 +71,8 @@ bool value_of(const GateCtx& g, const std::string& n, double& v) {
     if (n == "awe_or_oath") { v = any_oath(w, f.id) ? 1.0 : awe_eff(f); return true; }
     if (n == "knows_lair") return b(lair_level(f, g.p) >= 1);
     if (n == "knows_lair_exact") return b(lair_level(f, g.p) >= 2);
-    if (n == "lair_on_record") return b((memory_rank(f, c.mem) >= 2 && lair_level(f, g.p) >= 1) || lair_level(f, g.p) >= 2);   // written memory and the way roughly known, or exact
+    if (n == "lair_on_record")   // the lair written down, or written memory and the way roughly known, or exact
+        return b(f.lair_written >= g.p.arrivals.lair_rough || (memory_rank(f, c.mem) >= 2 && lair_level(f, g.p) >= 1) || lair_level(f, g.p) >= 2);
     if (n == "route_open") return b(route_open(w, f));
     if (n == "motive") return b(g.motive);
     if (n == "debt") return b(any_oath(w, f.id));
