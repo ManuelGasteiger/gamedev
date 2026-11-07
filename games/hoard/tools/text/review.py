@@ -1,5 +1,5 @@
 """The seed scenarios rendered for a native read: English, then the language with every person male and with every
-person female (items m and f). Usage: python3 tools/text/review.py --bin build/hoard-sim --lang de docs/scenarios/seed-*.json > review.md"""
+person female (items m and f). Usage: python3 tools/text/review.py --bin build/hoard-sim --lang de data/scenarios/seed-*.json > review.md"""
 import argparse, json
 from lint import ctx, render
 from scenario_strings import strings

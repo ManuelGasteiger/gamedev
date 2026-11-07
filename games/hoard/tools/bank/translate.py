@@ -70,7 +70,7 @@ def main():
     de.update({k: v for k, v in got.items() if k in todo})
     write(de_path, de, meta, scs, todo, a.model)
     found = []
-    lint(scs, a.data, a.bin, ["en", "de"], load("docs/scenarios/vocab.json", {}).get("text_caps_chars", {}), found)
+    lint(scs, a.data, a.bin, ["en", "de"], load("data/scenarios/vocab.json", {}).get("text_caps_chars", {}), found)
     mine = [f for f in found if any(k in f for k in todo)]
     if mine:
         fix = text + "\n\nYour first answer:\n" + json.dumps({k: de[k] for k in todo}, ensure_ascii=False) + \
@@ -79,7 +79,7 @@ def main():
         de.update({k: v for k, v in got.items() if k in todo})
         write(de_path, de, meta, scs, todo, a.model)
         found = []
-        lint(scs, a.data, a.bin, ["en", "de"], load("docs/scenarios/vocab.json", {}).get("text_caps_chars", {}), found)
+        lint(scs, a.data, a.bin, ["en", "de"], load("data/scenarios/vocab.json", {}).get("text_caps_chars", {}), found)
         mine = [f for f in found if any(k in f for k in todo)]
     print(f"{len(todo)} strings, {len(mine)} findings left")
     for f in mine: print("  ", f)

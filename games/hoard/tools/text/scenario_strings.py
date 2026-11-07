@@ -1,5 +1,5 @@
 """The flat string table of scenario files: scn.<id>.<field> keys in authoring order.
-Usage: python3 tools/text/scenario_strings.py docs/scenarios/seed-*.json   (writes data/text/en/scenarios.json and .meta)"""
+Usage: python3 tools/text/scenario_strings.py data/scenarios/seed-*.json   (writes data/text/en/scenarios.json and .meta)"""
 import hashlib, json, sys
 
 def strings(sc):
