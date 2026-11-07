@@ -222,19 +222,21 @@ function updateDefences(dt) {
 
 function flushPassiveWounds() {
   const acts = [];
+  const wounds = {};
   let rate = 0;
   for (const [key, amount] of DEF.pending) {
     const [region, item] = key.split('|');
     const target = model.regions.get(region)?.owner;
     const d = regionDefences(region).find((x) => x.id === item);
     if (!target || amount < 0.05) continue;
-    acts.push({ type: 'wound', target, region, magnitude: round1(amount), item, witnesses: [] });
+    acts.push({ region, magnitude: round1(amount) });
+    wounds[key] = round1(amount);
     rate += d?.passive ?? 0;
   }
   DEF.pending.clear();
   DEF.since = 0;
   if (!acts.length || play.dead) return null;
-  const res = applyActs(acts);
+  const res = sortie(() => woundFacts(wounds));
   if (!res?.ok) return res;
   pushEvents(res);
   const raw = acts.reduce((s, a) => s + a.magnitude, 0);
