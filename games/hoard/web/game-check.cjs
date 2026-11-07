@@ -28,6 +28,18 @@ async function seeLair() {
   });
   await page.waitForTimeout(100);
 }
+// 06b caps the ledge at one envoy; the protect lab lifts the cap while it waits for a court at war to ask
+async function ledgeCap(on) {
+  await page.evaluate((on) => {
+    const w = game.world();
+    const str = typeof DATA.arrivals === 'string';
+    const a = str ? JSON.parse(DATA.arrivals) : DATA.arrivals;
+    a.ledge_one_per_kind = on;
+    DATA.arrivals = str ? JSON.stringify(a) : a;
+    sim({ cmd: 'load', data: DATA, seed: 1 });
+    game.loadWorld(w);
+  }, on);
+}
 const oathStatus = (st) => ({ active: 'active', expired: 'expired', breached_by_dragon: 'broken by you', breached_by_them: 'broken by them' })[st] ?? st;
 const actions = () => page.evaluate(() => game.actions());
 const fly = (id) => page.evaluate((id) => game.flyTo(id), id);
@@ -190,6 +202,7 @@ async function finishSleep() {
     return w.offers.findIndex((o) => /protect/.test(o.text_key) && (w.armies ?? []).some((a) => a.defender === o.oath.parties[1] && (w.factions.find((f) => f.id === a.defender)?.at_war_with ?? []).includes(a.attacker)));
   });
   let defOffer = await besieged();
+  if (defOffer < 0 || s3.armies === 0) await ledgeCap(false);
   // the history depends on the sim's data; sleep on (at most 40 centuries; 06b: one envoy at the ledge at a time) until a court at war asks for protection
   for (let extra = 0; extra < 40 && (defOffer < 0 || s3.armies === 0); extra++) {
     await seeLair();
@@ -496,6 +509,7 @@ async function finishSleep() {
   check('a.sponsor', campState.camps > 0 ? true : /no remnant/.test(sponsorWhy), `${campState.camps} camps; ${sponsorWhy || 'camp here'}`);
 
   // ---- h. growth: take gold everywhere, sleep 1000: the model is bigger and threat higher ----------------------------
+  await ledgeCap(true);
   await page.evaluate((seed) => game.newGame(seed), SEED);
   const base = await state();
   for (const f of base.factions) { if (!f.capital) continue; await fly(f.capital); await act('take', { region: f.capital, category: 'gold', magnitude: 0.6 }); }
