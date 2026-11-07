@@ -317,12 +317,14 @@ async function finishSleep() {
     }
     await finishSleep();
     await frames(2);
+    if (captured.era_advance && !captured.era_advance.meshes) Object.assign(captured.era_advance, { meshes: await meshes(), eras: await erasNow() });
     return info.kinds;
   }
   const ownerBefore = {};
   for (const r of regions) ownerBefore[r.id] = await page.evaluate((id) => game.tileOwnerRing(id), r.id);
   // 06b: the history reaches this point centuries later than before, so the era check reads the regions of every court
-  // whose era rose (it read hill_hold alone)
+  // whose era rose (or that was founded with an era above the first) by the end of the sleep that showed it; it read
+  // hill_hold alone
   const meshes = () => page.evaluate((ids) => Object.fromEntries(ids.map((id) => [id, game.settlementCount(id)])), regions.map((r) => r.id));
   const erasNow = () => page.evaluate(() => Object.fromEntries(game.world().factions.map((f) => [f.id, { era: f.era, regions: f.regions }])));
   const eraBefore = await meshes();
@@ -432,9 +434,9 @@ async function finishSleep() {
   const ownerAfter = {};
   for (const r of regions) ownerAfter[r.id] = await page.evaluate((id) => game.tileOwnerRing(id), r.id);
   const recoloured = regions.filter((r) => ownerBefore[r.id] !== ownerAfter[r.id]).map((r) => r.id);
-  const eraAfter = await meshes();
-  const courtEraAfter = await erasNow();
-  const advancedRegions = Object.entries(courtEraAfter).filter(([id, f]) => courtEraBefore[id] && f.era > courtEraBefore[id].era).flatMap(([, f]) => f.regions);
+  const eraAfter = captured.era_advance?.meshes ?? await meshes();   // at the end of the sleep that showed the era
+  const courtEraAfter = captured.era_advance?.eras ?? await erasNow();
+  const advancedRegions = Object.entries(courtEraAfter).filter(([id, f]) => f.era > (courtEraBefore[id]?.era ?? 0)).flatMap(([, f]) => f.regions);
   const eraMeshed = advancedRegions.filter((id) => id in eraBefore && eraAfter[id] !== eraBefore[id]);
   const have = (k) => kindsAll.includes(k);
   const more = extraSleeps ? ` (after ${extraSleeps} more centur${extraSleeps === 1 ? 'y' : 'ies'})` : '';
