@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const { chromium } = require('playwright');
 
-const SEED = 39;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2's people and offers
+const SEED = 40;   // chosen so that age 1 ends with wars, armies and a protect offer (see GAME.md); was 77 before v0.2, 39 before item 04b
 const ONLY_V04 = process.argv.includes('--v04');   // `node web/game-check.cjs --v04` runs the v0.4 screens alone
 const shots = path.resolve(__dirname, 'shots');
 const results = [];
@@ -18,14 +18,30 @@ let page;
 function check(id, ok, detail) { results.push({ id, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + id + (detail ? '  ' + detail : '')); return ok; }
 async function shot(name) { await page.screenshot({ path: path.join(shots, name + '.png'), timeout: 180000 }); }   // swiftshader on a busy machine is slow
 const state = () => page.evaluate(() => game.state());
-// item 06: an envoy climbs only to a lair its court has seen, so the lab lets every court see it before a sleep
+// item 06: an envoy climbs only to a lair its court knows (06b: on record), so the lab lets every court know it before a sleep
 async function seeLair() {
   await page.evaluate(() => {
     const w = game.world();
-    for (const f of w.factions) { f.lair_known = w.year; f.lair_exact = true; }
+    for (const f of w.factions) { f.lair_oral = 1; f.lair_written = 1; }
+    delete w.arrival_fired;   // 06b: and lets envoys come again at once (cooldowns of centuries would outlast the lab)
     game.loadWorld(w);
   });
   await page.waitForTimeout(100);
+}
+// 06b keeps envoys rare (one at the ledge, none two wakings running, 400 years between any two); the protect lab lifts that while it waits for a court at war to ask
+async function ledgeCap(on) {
+  await page.evaluate((on) => {
+    const w = game.world();
+    const str = typeof DATA.arrivals === 'string';
+    const a = str ? JSON.parse(DATA.arrivals) : DATA.arrivals;
+    a.ledge_one_per_kind = on;
+    a.ledge_no_repeat = on;
+    const envoy = (a.kinds ?? a.visitors ?? []).find((k) => k.kind === 'envoy');
+    if (envoy) { envoy.world_cooldown_lab ??= envoy.world_cooldown_years; envoy.world_cooldown_years = on ? envoy.world_cooldown_lab : 0; }
+    DATA.arrivals = str ? JSON.stringify(a) : a;
+    sim({ cmd: 'load', data: DATA, seed: 1 });
+    game.loadWorld(w);
+  }, on);
 }
 const oathStatus = (st) => ({ active: 'active', expired: 'expired', breached_by_dragon: 'broken by you', breached_by_them: 'broken by them' })[st] ?? st;
 const actions = () => page.evaluate(() => game.actions());
@@ -189,8 +205,9 @@ async function finishSleep() {
     return w.offers.findIndex((o) => /protect/.test(o.text_key) && (w.armies ?? []).some((a) => a.defender === o.oath.parties[1] && (w.factions.find((f) => f.id === a.defender)?.at_war_with ?? []).includes(a.attacker)));
   });
   let defOffer = await besieged();
-  // the history depends on the sim's data; sleep on (at most 12 centuries) until a court at war asks for protection
-  for (let extra = 0; extra < 12 && (defOffer < 0 || s3.armies === 0); extra++) {
+  if (defOffer < 0 || s3.armies === 0) await ledgeCap(false);
+  // the history depends on the sim's data; sleep on (at most 40 centuries; 06b: one envoy at the ledge at a time) until a court at war asks for protection
+  for (let extra = 0; extra < 40 && (defOffer < 0 || s3.armies === 0); extra++) {
     await seeLair();
     await sleepThrough(100);
     await finishSleep();
@@ -316,11 +333,18 @@ async function finishSleep() {
     }
     await finishSleep();
     await frames(2);
+    if (captured.era_advance && !captured.era_advance.meshes) Object.assign(captured.era_advance, { meshes: await meshes(), eras: await erasNow() });
     return info.kinds;
   }
   const ownerBefore = {};
   for (const r of regions) ownerBefore[r.id] = await page.evaluate((id) => game.tileOwnerRing(id), r.id);
-  const eraBefore = await page.evaluate((id) => game.settlementCount(id), 'hill_hold');
+  // 06b: the history reaches this point centuries later than before, so the era check reads the regions of every court
+  // whose era rose (or that was founded with an era above the first) by the end of the sleep that showed it; it read
+  // hill_hold alone
+  const meshes = () => page.evaluate((ids) => Object.fromEntries(ids.map((id) => [id, game.settlementCount(id)])), regions.map((r) => r.id));
+  const erasNow = () => page.evaluate(() => Object.fromEntries(game.world().factions.map((f) => [f.id, { era: f.era, regions: f.regions }])));
+  const eraBefore = await meshes();
+  const courtEraBefore = await erasNow();
   await act('burn', { region: rich.capital, magnitude: 0.5 });
   await sleepThrough(300, { paused: true });
   const kinds2 = await playMontage();
@@ -426,7 +450,10 @@ async function finishSleep() {
   const ownerAfter = {};
   for (const r of regions) ownerAfter[r.id] = await page.evaluate((id) => game.tileOwnerRing(id), r.id);
   const recoloured = regions.filter((r) => ownerBefore[r.id] !== ownerAfter[r.id]).map((r) => r.id);
-  const eraAfter = await page.evaluate((id) => game.settlementCount(id), 'hill_hold');
+  const eraAfter = captured.era_advance?.meshes ?? await meshes();   // at the end of the sleep that showed the era
+  const courtEraAfter = captured.era_advance?.eras ?? await erasNow();
+  const advancedRegions = Object.entries(courtEraAfter).filter(([id, f]) => f.era > (courtEraBefore[id]?.era ?? 0)).flatMap(([, f]) => f.regions);
+  const eraMeshed = advancedRegions.filter((id) => id in eraBefore && eraAfter[id] !== eraBefore[id]);
   const have = (k) => kindsAll.includes(k);
   const more = extraSleeps ? ` (after ${extraSleeps} more centur${extraSleeps === 1 ? 'y' : 'ies'})` : '';
   // the ticker names events in the narrator's words and only shows the ones worth a line (importance, or the dragon's stake)
@@ -434,7 +461,7 @@ async function finishSleep() {
   check('c.war', have('war_started') && captured.war_started && captured.war_started.arrows > 0 && told('war_started', /declared war/), `arrows ${captured.war_started?.arrows}, army groups ${captured.war_started?.armies}, ticker "${captured.war_started?.ticker}"`);
   check('c.conquest', have('region_taken') && captured.region_taken && recoloured.length > 0, `"${captured.region_taken?.ticker}"; rings recoloured since age 2: ${recoloured.join(', ')}${conquestLab ? ` (lab: ${conquestLab})` : ''}`);
   check('c.collapse', have('collapse') && told('collapse', /fell/), captured.collapse?.ticker);   // narrator.json: "fell apart into" / "fell, and a new house"
-  check('c.era', have('era_advance') && told('era_advance', /entered the \w+ age/) && eraAfter !== eraBefore, `"${captured.era_advance?.ticker}"; hill_hold settlement meshes ${eraBefore} -> ${eraAfter}`);
+  check('c.era', have('era_advance') && told('era_advance', /entered the \w+ age/) && eraMeshed.length > 0, `"${captured.era_advance?.ticker}"; settlement meshes changed in ${eraMeshed.map((id) => `${id} ${eraBefore[id]} -> ${eraAfter[id]}`).join(', ') || 'no region'} (regions of courts whose era rose: ${advancedRegions.join(', ')})`);
   check('c.plague', have('plague') && told('plague', /plague/i), `${captured.plague?.ticker}${more}`);
   check('c.settled', have('region_settled') && told('region_settled', /settled/), `${captured.region_settled?.ticker}${captured.region_settled?.worthy ? '' : ' (below the ticker threshold: map only)'}${settleLab ? ` (lab: ${settleLab} left open)` : ''}${more}`);
   const left = await spellsLeft();
@@ -485,6 +512,7 @@ async function finishSleep() {
   check('a.sponsor', campState.camps > 0 ? true : /no remnant/.test(sponsorWhy), `${campState.camps} camps; ${sponsorWhy || 'camp here'}`);
 
   // ---- h. growth: take gold everywhere, sleep 1000: the model is bigger and threat higher ----------------------------
+  await ledgeCap(true);
   await page.evaluate((seed) => game.newGame(seed), SEED);
   const base = await state();
   for (const f of base.factions) { if (!f.capital) continue; await fly(f.capital); await act('take', { region: f.capital, category: 'gold', magnitude: 0.6 }); }
@@ -765,9 +793,14 @@ async function finishSleep() {
     const has = (f, role) => w.people.some((p) => p.faction === f.id && p.role === role && !p.tags.includes('hostage'));
     return w.factions.find((f) => f.capital && has(f, 'ruler') && has(f, 'heir'))?.id ?? '';
   });
-  let courtId = await courtWithHeir(), courtRests = 0;
+  // item 04b: the card lists only people the dragon has met, so the dragon shows itself at every capital first
+  const meetCourts = () => page.evaluate(() => {
+    for (const f of game.world().factions) if (f.capital) game.sim({ cmd: 'apply_acts', acts: [{ type: 'show', target: f.id, region: f.capital, magnitude: 0.1, witnesses: [] }] });
+  });
+  let courtId = '', courtRests = 0;
   while (!courtId && courtRests < 100) {
     courtRests += 1;
+    await meetCourts();
     await page.evaluate(() => game.sleep(1));
     await finishSleep();
     await page.keyboard.press('Enter');
@@ -829,9 +862,11 @@ async function finishSleep() {
   check('v02.go', goIndex >= 0 && !(await page.evaluate(() => game.wake())).open && goState.region === goRegion && goCourt.faction === goFaction, `go on "${wake.opportunities[goIndex]?.text.slice(0, 70)}" -> dragon over ${goState.region}, court of ${goCourt.faction}`);
 
   // 4. envoys: each offer is a person with a stated reason; accept one (it becomes a task), eat another. Courts send
-  // envoys when their situation calls for it, so sleep on a century at a time (at most ten) until two have come in person
+  // envoys when their situation calls for it, so sleep on a century at a time (at most ten) until one has come in person
+  // (06b: one envoy waits at the ledge at a time; with one, it is eaten and the late-task check is skipped)
   const envoysWaiting = () => page.evaluate(() => game.world().offers.filter((o) => o.envoy && game.people().some((p) => p.id === o.envoy)).length);
-  for (let extra = 0; extra < 10 && (await envoysWaiting()) < 2; extra++) {
+  if ((await envoysWaiting()) < 1) await ledgeCap(false);
+  for (let extra = 0; extra < 10 && (await envoysWaiting()) < 1; extra++) {
     await seeLair();
     await sleepThrough(100);
     await finishSleep();
@@ -927,6 +962,7 @@ async function checksV04() {
   // the real wasm (S1) on the classic map: growth, health, defences and the arms race show; hooks, legends and names do not
   await page.goto(file);
   await page.waitForSelector('body[data-ready="1"]', { timeout: 120000 });
+  await ledgeCap(true);
   await page.evaluate((seed) => { try { localStorage.clear(); } catch (e) { /* ignore */ } game.newGame(seed); }, SEED);
   const plain = await v04();
   const catalogue = await page.evaluate(() => game.sim({ cmd: 'talents' }));

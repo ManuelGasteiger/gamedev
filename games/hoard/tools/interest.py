@@ -700,36 +700,74 @@ def deaths_summary(deaths):
             "unwarned": sum(1 for d in dead if d["cause"] == "slaying" and not d.get("warned", True))}
 
 
-def arrivals_count(wakings_log, after=200):
-    """item 06: visitors waiting at the lair at each waking from `after` years past the hatching."""
-    kinds, because, wakings = Counter(), Counter(), 0
-    for w in wakings_log:
+def arrivals_count(wakings_log, after=200, run_wakings=40):
+    """item 06: visitors waiting at the lair at each waking from `after` years past the hatching. 06b: per 1000 years,
+    consecutive wakings with the same kind, counts in the first `run_wakings` wakings, and per court the years from the
+    hatching (or the court's birth) to the first waking at which it knew the lair roughly (level 1) and exactly (2)."""
+    kinds, because, wakings, first_run = Counter(), Counter(), 0, Counter()
+    repeat, pairs, prev = Counter(), 0, None
+    lair_first, lair_from = {}, {}
+    years = [w["since_hatch"] for w in wakings_log if "since_hatch" in w]
+    hatched = (wakings_log[0]["year"] - wakings_log[0]["since_hatch"]) if wakings_log and "since_hatch" in wakings_log[0] else 0
+    for i, w in enumerate(wakings_log):
+        here = Counter(a["kind"] for a in w.get("arrivals", []))
+        if i < run_wakings:
+            first_run.update(here)
+        for c in w.get("lair", []):
+            lair_from.setdefault(c["court"], max(hatched, c["born"]))
+            for lv in (1, 2):
+                if c["level"] >= lv and (c["court"], lv) not in lair_first:
+                    lair_first[(c["court"], lv)] = w["year"] - lair_from[c["court"]]
         if w.get("since_hatch", 0) < after:
             continue
         wakings += 1
+        if prev is not None:
+            pairs += 1
+            for k in here:
+                if k in prev:
+                    repeat[k] += 1
+        prev = here
         for a in w.get("arrivals", []):
             kinds[a["kind"]] += 1
             because[" + ".join(a["because"])] += 1
-    return {"wakings": wakings, "kinds": dict(kinds), "because": dict(because)}
+    span = max(0, (max(years) if years else 0) - after)
+    lair = {lv: [y for (c, l), y in lair_first.items() if l == lv] for lv in (1, 2)}
+    return {"wakings": wakings, "kinds": dict(kinds), "because": dict(because), "years": span, "pairs": pairs, "repeat": dict(repeat),
+            "first_run": dict(first_run), "first_run_wakings": min(run_wakings, len(wakings_log)),
+            "courts": len(lair_from), "lair_rough": lair[1], "lair_exact": lair[2]}
 
 
 def arrivals_summary(runs):
     runs = [r for r in runs if r]
     wakings = sum(r["wakings"] for r in runs)
-    kinds, because = Counter(), Counter()
+    years = sum(r.get("years", 0) for r in runs)
+    pairs = sum(r.get("pairs", 0) for r in runs)
+    kinds, because, repeat, first = Counter(), Counter(), Counter(), Counter()
     for r in runs:
         kinds.update(r["kinds"])
         because.update(r["because"])
+        repeat.update(r.get("repeat", {}))
+        first.update(r.get("first_run", {}))
     total = sum(kinds.values())
+    rough = sorted(y for r in runs for y in r.get("lair_rough", []))
+    exact = sorted(y for r in runs for y in r.get("lair_exact", []))
+    courts = sum(r.get("courts", 0) for r in runs)
     return {"wakings": wakings, "total": total, "per_waking": total / wakings if wakings else 0.0,
             "by_kind": {k: v / wakings if wakings else 0.0 for k, v in sorted(kinds.items())},
+            "per_1000y": {k: 1000 * v / years if years else 0.0 for k, v in sorted(kinds.items())},
+            "repeat_share": {k: v / pairs if pairs else 0.0 for k, v in sorted(repeat.items())},
+            "first_run_mean": {k: v / len(runs) if runs else 0.0 for k, v in sorted(first.items())},
+            "first_run_wakings_mean": statistics.fmean(r.get("first_run_wakings", 0) for r in runs) if runs else 0.0,
+            "lair": {"courts": courts, "rough": len(rough), "exact": len(exact),
+                     "rough_median": statistics.median(rough) if rough else None, "exact_median": statistics.median(exact) if exact else None},
             "top_because": because.most_common(10), "runs_with_none": sum(1 for r in runs if not r["kinds"])}
 
 
 def people_count(wakings_log, events, after=300):
     """item 07: tracked people with a dragon memory per court from `after` years past the hatching, the move census
     (each move scored on every tracked person at every waking) and trait flips against finished lives."""
-    courts = with_mem = wakings = 0
+    courts = with_mem = wakings = tracked = seen = 0
+    roles = Counter()
     moves = Counter(), Counter()
     for w in wakings_log:
         pw = w.get("people")
@@ -743,9 +781,13 @@ def people_count(wakings_log, events, after=300):
         wakings += 1
         courts += pw["courts"]
         with_mem += pw["with_memory"]
+        tracked += pw.get("tracked", 0)
+        seen += pw.get("seen", 0)
+        roles.update(pw.get("roles", {}))
     flips = sum(e.get("count", 1) for e in events if e["kind"] == "trait_flipped")
     deaths = sum(e.get("count", 1) for e in events if e["kind"] == "person_died")
-    return {"wakings": wakings, "courts": courts, "with_memory": with_mem, "tried": dict(moves[0]), "accepted": dict(moves[1]),
+    return {"wakings": wakings, "courts": courts, "with_memory": with_mem, "tracked": tracked, "seen": seen, "roles": dict(roles),
+            "tried": dict(moves[0]), "accepted": dict(moves[1]),
             "flips": flips, "deaths": deaths}
 
 
@@ -759,7 +801,13 @@ def people_summary(runs):
         accepted.update(r["accepted"])
     courts = sum(r["courts"] for r in runs)
     deaths = sum(r["deaths"] for r in runs)
+    roles = Counter()
+    for r in runs:
+        roles.update(r.get("roles", {}))
     return {"memory_per_court": sum(r["with_memory"] for r in runs) / courts if courts else 0.0,
+            "tracked_per_court": sum(r.get("tracked", 0) for r in runs) / courts if courts else 0.0,
+            "seen_per_court": sum(r.get("seen", 0) for r in runs) / courts if courts else 0.0,
+            "roles_per_court": {k: v / courts for k, v in sorted(roles.items())} if courts else {},
             "acceptance": {m: accepted[m] / tried[m] if tried[m] else 0.0 for m in sorted(tried)},
             "flips": sum(r["flips"] for r in runs), "deaths": deaths,
             "flips_per_life": sum(r["flips"] for r in runs) / deaths if deaths else 0.0}
@@ -969,12 +1017,20 @@ def print_table(summaries):
         if ar and ar["wakings"]:   # item 06
             print(f"[{s['policy']}] arrivals: {ar['per_waking']:.2f} per waking after year 200 ({ar['total']} in {ar['wakings']} wakings, {ar['runs_with_none']} runs with none)")
             print(f"[{s['policy']}] arrivals per waking by kind: " + ", ".join(f"{k} {v:.3f}" for k, v in ar["by_kind"].items()))
+            if "per_1000y" in ar:   # 06b
+                print(f"[{s['policy']}] arrivals per 1000 years by kind: " + ", ".join(f"{k} {v:.2f}" for k, v in ar["per_1000y"].items()))
+                print(f"[{s['policy']}] same kind on consecutive wakings (share of pairs): " + ", ".join(f"{k} {v:.3f}" for k, v in ar["repeat_share"].items()))
+                print(f"[{s['policy']}] per run in the first {ar['first_run_wakings_mean']:.1f} wakings (mean): " + ", ".join(f"{k} {v:.2f}" for k, v in ar["first_run_mean"].items()))
+                lr = ar["lair"]
+                print(f"[{s['policy']}] lair known: {lr['rough']}/{lr['courts']} courts rough, median {fmt(lr['rough_median'], 0)} y; {lr['exact']} exact, median {fmt(lr['exact_median'], 0)} y")
             for text, n in ar["top_because"]:
                 print(f"[{s['policy']}]   because {n:6d}  {text}")
         pe = s.get("people")
         if pe:   # item 07
             print(f"[{s['policy']}] people: {pe['memory_per_court']:.2f} tracked people with a dragon memory per court after year 300; "
                   f"trait flips {pe['flips']} over {pe['deaths']} finished lives ({pe['flips_per_life']:.3f} per life)")
+            print(f"[{s['policy']}] tracked people per court {pe.get('tracked_per_court', 0):.2f}, seen by the player {pe.get('seen_per_court', 0):.2f}; by role "
+                  + ", ".join(f"{k} {v:.2f}" for k, v in pe.get("roles_per_court", {}).items()))
             print(f"[{s['policy']}] move census (accepted share): " + ", ".join(f"{k} {100 * v:.0f}%" for k, v in pe["acceptance"].items()))
         for label, key in (("most", "most_interesting"), ("least", "least_interesting")):
             print(f"[{s['policy']}] {label} interesting seeds:")

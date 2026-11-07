@@ -1,5 +1,6 @@
 #include "slayers.h"
 #include "../memory_tiers.h"
+#include "../arrivals.h"
 #include <cmath>
 #include <limits>
 #include "rules.h"
@@ -117,6 +118,7 @@ void attempt(World& w, const Params& p, Faction& f) {
         return;
     }
     f.wealth *= (1.0 - c.slay_fail_wealth_loss);
+    learn_lair(w, p, f, "returned");   // 06b: the survivors bring home the way in
     Deposit d;
     d.type = "slay_failed";
     d.magnitude = 1.0;
@@ -126,6 +128,13 @@ void attempt(World& w, const Params& p, Faction& f) {
     w.dragons[kPlayer].tags.insert("rage");
     if (w.wake_reason.empty()) w.wake_reason = "slay_attempt_failed";
     emit(w, "slay_attempt_failed", f.id, hero, odds, {}, cause);
+}
+
+// 06b: a band marches only on a lair its court knows, and not while the slayer_band arrival rests (data/arrivals.json)
+bool band_may_march(const World& w, const Params& p, const Faction& f) {
+    if (lair_level(f, p) < 1) return false;
+    const ArrivalDef* d = arrival_def(p, "slayer_band");
+    return !d || !arrival_resting(w, p, f.id, *d, d->cause.empty() ? d->kind : d->cause);
 }
 
 }
@@ -169,7 +178,7 @@ void slayer_clock(World& w, const Params& p) {
         if (!order || dread < c.slay_lapse_dread) { clear_stage(w, f); continue; }
         if (t->from > w.sleep_started) continue;   // reported this sleep: the next stage waits for a waking
         if (t->tag == kForming) {
-            if (eligible && w.rng.chance(c.slay_ready_rate * k * slayer_pressure(f, c.mem) / c.mem.slayer_dread)) ready(w, p, f);
+            if (eligible && band_may_march(w, p, f) && w.rng.chance(c.slay_ready_rate * k * slayer_pressure(f, c.mem) / c.mem.slayer_dread)) ready(w, p, f);
             continue;
         }
         attempt(w, p, f);

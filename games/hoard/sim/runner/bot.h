@@ -5,11 +5,13 @@
 
 // item 04: the inter-run pacing bots. Every bot takes an exit the waking offers. amnesiac plays the base policy;
 // carry steers toward the ending its profile knows most atoms of; oracle steers toward its target from the first run.
-// Steering swaps the waking's acts for data/policies/steer_<ending>.json and, for Mortality, receives every visitor.
+// Steering swaps the waking's acts for data/policies/steer_<ending>.json and, for Mortality, receives every visitor;
+// Ascension is steered by ascend_bot.cpp (item 04b).
 
 struct Bot {
     std::string kind;     // amnesiac | carry | oracle
     std::string target;   // oracle: the ending it aims at
+    bool free = false;    // item 04b, "oracle:ascension:free": the Ascension bot without a stamina budget
 };
 
 bool parse_bot(const std::string& spec, Bot& out);   // "carry", "oracle:ascension"

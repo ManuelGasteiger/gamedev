@@ -1,4 +1,5 @@
 #include "arrivals.h"
+#include "core/detmath.h"
 #include "defences.h"
 #include "memory_tiers.h"
 #include "rules/slayers.h"
@@ -18,8 +19,6 @@ bool any_oath(const World& w, const std::string& court) {
     for (auto& o : w.oaths) if (o.status == "active" && (o.parties[0] == court || o.parties[1] == court)) return true;
     return false;
 }
-
-double oral_eff(const Faction& f) { return 1.0 - (1.0 - f.dread.oral) * (1.0 - f.awe.oral); }
 
 int memory_rank(const Faction& f, const MemoryConstants& m) {
     std::string t = memory_tier(f, m);
@@ -70,9 +69,10 @@ bool value_of(const GateCtx& g, const std::string& n, double& v) {
     if (n == "era") { v = f.era; return true; }
     if (n == "piety") { v = f.culture.traits.piety; return true; }
     if (n == "awe_or_oath") { v = any_oath(w, f.id) ? 1.0 : awe_eff(f); return true; }
-    if (n == "knows_lair") return b(f.lair_known >= 0);
-    if (n == "knows_lair_exact") return b(f.lair_known >= 0 && f.lair_exact);
-    if (n == "lair_on_record") return b(memory_rank(f, c.mem) >= 2 || (f.lair_known >= 0 && f.lair_exact));
+    if (n == "knows_lair") return b(lair_level(f, g.p) >= 1);
+    if (n == "knows_lair_exact") return b(lair_level(f, g.p) >= 2);
+    if (n == "lair_on_record")   // the lair written down, or written memory and the way roughly known, or exact
+        return b(f.lair_written >= g.p.arrivals.lair_rough || (memory_rank(f, c.mem) >= 2 && lair_level(f, g.p) >= 1) || lair_level(f, g.p) >= 2);
     if (n == "route_open") return b(route_open(w, f));
     if (n == "motive") return b(g.motive);
     if (n == "debt") return b(any_oath(w, f.id));
@@ -123,26 +123,62 @@ int lair_distance(const World& w, const std::string& region) {
     return 1000;
 }
 
-void learn_lair(World& w, Faction& f, bool exact) {
-    f.lair_known = w.year;
-    if (exact) f.lair_exact = true;
+namespace {
+
+void raise(double& x, double gain, double cap) {
+    if (x < cap) x = std::min(cap, x + gain * (1.0 - x));
 }
 
-// a witnessed act within sight_regions of the lair, a show at a capital, a hostage sent home
+}
+
+void learn_lair(World& w, const Params& p, Faction& f, const std::string& evidence, double scale) {
+    const ArrivalBook& b = p.arrivals;
+    auto e = b.lair_evidence.find(evidence);
+    if (e == b.lair_evidence.end() || scale <= 0) return;
+    auto c = b.lair_caps.find(evidence);
+    double cap = c == b.lair_caps.end() ? 1.0 : c->second;
+    raise(f.lair_oral, e->second * scale, cap);
+    if (keeps_records(w, f)) raise(f.lair_written, e->second * scale * b.lair_written_share, cap);
+}
+
+double lair_lore(const Faction& f) { return std::max(f.lair_oral, f.lair_written); }
+
+int lair_level(const Faction& f, const Params& p) {
+    double x = lair_lore(f);
+    return x >= p.arrivals.lair_exact ? 2 : (x >= p.arrivals.lair_rough ? 1 : 0);
+}
+
+// a flight home is seen by the witnesses of an act within sight_regions of the lair and by every court with land within
+// sight_regions of it, halved per region of distance; the closest sighting of a waking counts once. A show or a
+// receive is no flight; a released hostage lived in the lair
 void note_lair_sight(World& w, const Params& p, const Act& a) {
+    if (a.type == "release") if (Faction* f = find_faction(w, a.target)) learn_lair(w, p, *f, "hostage");
+    if (contains(p.arrivals.no_flight, a.type)) return;
     const Region* at = act_region(w, a);
-    bool near = at && lair_distance(w, at->id) <= p.arrivals.sight_regions;
-    for (auto& id : a.witnesses)
-        if (Faction* f = find_faction(w, id)) if (near || (a.type == "show" && id == a.target)) learn_lair(w, *f, false);
-    if (a.type == "release") if (Faction* f = find_faction(w, a.target)) learn_lair(w, *f, true);
+    int act_d = at ? lair_distance(w, at->id) : 1000;
+    auto seen = [&](int dist) { double s = 1; for (int i = 0; i < dist; ++i) s *= p.arrivals.flight_falloff; return s; };
+    for (auto& f : w.factions) {
+        int d = contains(a.witnesses, f.id) ? act_d : 1000;
+        for (auto& rid : f.regions) d = std::min(d, lair_distance(w, rid));
+        if (d > p.arrivals.sight_regions) continue;
+        auto year = w.arrival_fired.find(f.id + "|sight");
+        double before = year != w.arrival_fired.end() && year->second == w.year ? seen(w.arrival_fired[f.id + "|sight_d"]) : 0;
+        if (seen(d) <= before) continue;
+        learn_lair(w, p, f, "flight", seen(d) - before);
+        w.arrival_fired[f.id + "|sight"] = w.year;
+        w.arrival_fired[f.id + "|sight_d"] = d;
+    }
 }
 
-void refresh_lair_knowledge(World& w, const Params& p) {
+void fade_lair_knowledge(World& w, const Params& p) {
+    double written = det::half_life(w.dt, p.c.mem.written_halflife);
     for (auto& f : w.factions) {
-        if (f.lair_known < 0) continue;
-        if (memory_rank(f, p.c.mem) >= 2 || oral_eff(f) >= p.arrivals.oral_floor || w.year - f.lair_known < p.arrivals.lair_memory_years) continue;
-        f.lair_known = -1;
-        f.lair_exact = false;
+        if (f.lair_oral <= 0 && f.lair_written <= 0) continue;
+        double hl = halflife_of(w, p, f, "awe", "oral");
+        f.lair_oral *= hl > 0 ? det::half_life(w.dt, hl) : 1.0;
+        f.lair_written *= written;
+        if (f.lair_oral < 1e-3) f.lair_oral = 0;
+        if (f.lair_written < 1e-3) f.lair_written = 0;
     }
 }
 

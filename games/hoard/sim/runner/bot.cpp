@@ -10,6 +10,11 @@ bool parse_bot(const std::string& spec, Bot& out) {
     size_t colon = spec.find(':');
     out.kind = spec.substr(0, colon);
     out.target = colon == std::string::npos ? "" : spec.substr(colon + 1);
+    size_t extra = out.target.find(':');
+    if (extra != std::string::npos) {
+        out.free = out.target.substr(extra + 1) == "free";
+        out.target = out.target.substr(0, extra);
+    }
     return out.kind == "amnesiac" || out.kind == "carry" || (out.kind == "oracle" && !out.target.empty());
 }
 

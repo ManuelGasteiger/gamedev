@@ -17,4 +17,8 @@ int valley_era(const World& w);
 std::string war_winner(const World& w, const Event& ended);
 std::string protagonist(const SiftPattern& p, const SiftThread& t);
 
+// a folded line's members: the protagonists, and (thread, event) per line, lead first
+std::vector<std::string> fold_names(const SiftLine& l);
+std::vector<std::pair<int, int>> fold_lines(const SiftLine& l);
+
 }
