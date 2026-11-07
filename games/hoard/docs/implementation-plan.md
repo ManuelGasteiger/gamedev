@@ -126,6 +126,8 @@ Status 2026-10-29: merged together in pull request 15 (rules version 8; reports 
 
 Gate: the reports' numbers read by Manu; goldens regenerated once for the three.
 
+Status 2026-11-07: merged together in pull request 18 (rules version 10; reports `05b-known-causes.md`, `06b-rare-visitors.md`, `04b-endings-people.md`). 05b: 33 causal lines get a cause-free text below level 2; tier-4 lines of one kind and year fold into one. 06b: 0.17 visitors per waking (was 2.13); a court knows the lair roughly after a median 270 years (8 % of courts ever), a show gives nothing; played deaths 5 per 100 runs (was 11). 04b: the Ascension bot is never ready (temples do not pass to successor courts); Mortality ready in 15 % of played runs, leverage 1.57; Court at threshold 4 accepted 18 %; 3.9 named people per court, 1.3 visible. The merge also fixed a dead visitor leaving an offer behind. Open for Manu: 05b's test fixture, `prophecy_answered` as causal, the German drafts; temple inheritance, Mortality "sent" against "received", Court at 18 %, people with memory 2.3; envoys, thieves and pilgrims under once per run, slayer deaths halved.
+
 ### Iteration 6: acts, slayers, scenarios, raid boundary (08 and 09, then 10 and 15)
 
 - 08 (Sonnet) and 09 (Opus) in parallel; 09 also turns `sleep`, `pick_talent`, hook and offer answers into logged acts, and writes the world-aging fields.

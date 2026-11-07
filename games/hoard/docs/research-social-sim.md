@@ -1,6 +1,6 @@
 # Social simulation as Hoard's interaction layer (excerpt)
 
-Excerpt for items 06 and 07: the "For Hoard" notes of sections 1, 2 and 4, and section 6 in full. Section 3 (the slayer roster, item 08), section 5, the findings and the sources stay in the Project (`claude/research-social-sim.md`).
+Excerpt for items 06, 07 and 08: the "For Hoard" notes of sections 1, 2 and 4, and sections 3 and 6 in full. Section 5, the other findings and the sources stay in the Project (`claude/research-social-sim.md`); bracketed numbers refer to its source list.
 
 ## 1. For Hoard (from section 1)
 
@@ -38,6 +38,24 @@ Use practices for anything that lasts longer than one exchange, and keep them as
 | threshold | 2 | 3 | 2 | 1 | 4 |
 
 Shared modifiers: `awe` counts for Teach and Court (cap +4), `dread` for Threaten and Bargain (cap +4), `debt` for all (cap +3). Memory term: each `mercy` entry +2, each `betrayal` -3, each earlier success of the same move +1 (CiF "times true"), clamped to plus or minus 6. Corrupt adds `dragon_touched` and a discoverable Secret. Threaten on a proud or vengeful target writes a hidden `humiliated` entry, which feeds later slayer birth. Teach writes `taught` (severity 2, awe +2, debt +1). Release has no roll. It writes a memory read through the trait. The default reading is `mercy` (debt +2, awe +1), proud reads `insult` (a severity 2 grudge), vengeful reads `weakness` (no gratitude) and craven reads `reprieve` (dread +1).
+
+## 3. Middle-earth Nemesis system (for item 08)
+
+**Record.** The patent family describes each nemesis as a name and title fixed per game, a tribe, appearance parameters, a power level starting at 1 to 4 with a cap, a rank, relationship links (rivalry, bodyguard, follower), a fighting style and a trait set [14]. Ranks run overlord, warchief, captain, soldier, with veteran, elite and legendary prefixes tied to completed missions. Traits are grouped as invulnerabilities, hate triggers that cause rage, attack moves, weapon bonuses, fear weaknesses, vulnerabilities and miscellany. As power rises the engine can drop weaknesses and add strengths, but an orc with a sword immunity must keep at least one weakness [14]. The patent gives no counts of traits or voice lines, and the GDC session page and interviews I could reach give none either [16].
+
+**Promotion.** A soldier becomes a captain by killing the player or a captain, or through an opportunist trait that fills a vacancy. If a higher-ranked member dies a lower one may rise, and rivals of a harmed member can be strengthened. Warchiefs stay hidden until a dominated nemesis or special mission draws them out. Outcomes are probabilistic, weighted by relative power, mission type and a player interaction score that grows with each encounter [14]. Wikipedia adds that the orc the player meets most is likelier to return from death [21] (secondary). Changes are queued and applied on triggers: player death, zone change, level-up, passing time [14]. Forum players describe each player death as one hierarchy turn in which captains resolve missions and some die or level up [18], and a patent-based summary says orcs keep running missions while Talion is gone [19]. Hierarchy size is uncertain: the patent text suggests about five warchiefs [15], a forum post says four [18].
+
+**Memory and scars.** Event records are queued and dialogue is selected by matching a stored record (fled, burned, killed the player) or recent player actions to indexed audio. Scars are few and match the cause of defeat, and a face covering appears after a set number of deaths [14]. The patent does not describe a dedicated offline power-struggle simulation, only trigger-based updates (uncertain on what shipped).
+
+**What the team learned.** The first game had orc-to-orc personal relationships and multiple factions with morale and discipline meters. The relationship layer was cut as too complicated [17], and the faction hierarchy screen became a tangle the director compared to a Christmas tree [20]. Shadow of War added bonds, betrayal and shaming [21][24]. Betrayal was described as a tunable knob for when the player is doing too well [22]. Advanced classes were added to stop unlucky trait rolls from producing near-invulnerable orcs [23]. Design intent was love-to-hate enemies and hate-to-love followers [16][24]. The earliest inspirations were tabletop recurring villains, sports career narration and Batman's scarred rogues [25].
+
+**For Hoard: slayer roster.**
+- Orders, not individuals, are born from grievance. An order spawns in a court when a `grief` memory of severity 3 or more about the dragon (hostage death, burned town, corrupted heir) survives at s of 0.3 or higher and the era allows organized hunters.
+- Ranks: Hunter (unnamed, counted), Slayer (named, max 6 per order), Master (max 2, shielded by Slayers), Grandmaster (1). Start power 1 to 4, cap 12, resolved per 10-year tick.
+- Traits map to the five growths: `fireward` counters Flame, `plate` Might, `runeward` Arcana, `waxed ears` Dominion, `forewarned` Lore. Add one hate trigger (smoke, banners) that raises power on contact, and one fear that the dragon can exploit. Keep a minimum of one weakness at every power level [14].
+- Each tick a Slayer rolls a mission weighted by relative power. Surviving a dragon encounter gives a scar (burn, claw, tail, deaf) and +1 power. Killing a dragon ally (envoy, consort, vassal) promotes. A fallen Master is replaced by the opportunist or the highest power. A harmed Slayer's rival gains +1 [14]. 50 years of peace costs -1 power unless the Slayer has the `zealot` trait.
+- Succession carries the grudge: the new Grandmaster inherits 50 percent of negative memory strength. Relationships stay at three types (rival, mentor, kin) because Monolith cut richer ones [17][20].
+- Telegraph: the briefing lists band power, known traits and an arrival estimate. Unknown traits show as `?` and are revealed by captives, spies or books.
 
 ## 4. For Hoard (from section 4, Crusader Kings 3)
 
