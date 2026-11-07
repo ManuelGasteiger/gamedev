@@ -25,14 +25,19 @@ Branch `item/09-new-acts` from main 1478254. Build with `-j2`. Item 08 pushed `r
 - reaction rows, narrator lines, reason keys en and de, importance
 - policies `schemer.json`, `priest.json`; `tools/act_check.py`; `tools/act_scenarios.py` with `hoard-sim --act-script`
 - world-aging from abandon, collapse, fading, settle
-- merge of item 08, fight wired (build running)
+- merge of item 08 (6a71ed4, then 2fe68cd), fight wired
+- golden commits (rules 11), save expectation, pages; ctest fast 24/24, smoke 1-60 equal, l10n pass, game-check 90/90, check.cjs ok
+- README, report draft
 
 ## Next
 
-1. build, `ctest -L fast`, act_scenarios, act_check 300 x 3, interest after; played vs 08 tip
-2. merge commit, then `golden:` commit (rules 11): state_hashes, chronicle texts and hashes, sift bank hash, replays, save expect
-3. wasm build (LFS gltf), smoke, l10n, game-check, check.cjs
-4. README, report
+1. fill the report's numbers (coverage 300 x 3, interest after), commit, push
+
+## Notes for a replacement
+
+- Never `git add -A games/hoard`: the LFS-pulled assets show as modified. Add paths.
+- The disk is nearly full (shared machine); delete run outputs after use.
+- Push with plain `git push`; a merge that staged assets was rejected once and redone.
 
 ## Baselines
 
