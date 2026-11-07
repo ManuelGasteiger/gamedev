@@ -43,6 +43,7 @@ static std::string gain_key(const Act& a, const std::string& rel) {
     else if (a.type == "take_hostage" && a.payload.count("consent") && a.payload.at("consent") > 0) kind = "consent";
     else if (a.type == "guise" && a.args.count("discovered")) kind = "discovered";
     else if (a.type == "judge" && a.args.count("untagged")) return "kill.person";
+    else if (a.type == "dismiss") return "release";
     return kind.empty() ? a.type : a.type + "." + kind;
 }
 
@@ -366,7 +367,8 @@ struct ActRun {
         }
         bool on_person = act.target_kind == "person" && !act.item.empty();
         std::string subject = on_person ? act.item : !act.target.empty() ? act.target : (!act.item.empty() ? act.item : "dragon");
-        emit(w, "act_" + act.type, subject, on_person ? act.target : act.region, m, act_tags(act), because("", {}, {{"act", act_index}}));
+        std::string object = on_person ? act.target : (act.region.empty() && !legacy(act.type) ? act.against : act.region);
+        emit(w, "act_" + act.type, subject, object, m, act_tags(act), because("", {}, {{"act", act_index}}));
         std::string sub = sub_kind(act);
         if (!sub.empty()) w.chronicle.back().text_key = "ev.act_" + act.type + "_" + sub;
         note_act(w, p, act, m);
