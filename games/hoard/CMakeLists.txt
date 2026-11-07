@@ -176,7 +176,7 @@ else()
   target_compile_options(ages PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp)
+add_executable(ages_runner sim/runner/main.cpp sim/runner/analyse.cpp sim/runner/text_cmd.cpp sim/runner/bot.cpp sim/runner/ascend_bot.cpp sim/runner/chron_demo.cpp sim/runner/act_script.cpp)
 target_link_libraries(ages_runner PRIVATE ages)
 target_include_directories(ages_runner PRIVATE sim/runner)
 hoard_sim_flags(ages_runner)

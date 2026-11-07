@@ -22,6 +22,7 @@
 #include "ascend_bot.h"
 #include "text_cmd.h"
 #include "chron_demo.h"
+#include "act_script.h"
 
 using namespace ages;
 using nlohmann::json;
@@ -56,6 +57,7 @@ struct Options {
     std::string profile;    // item 04: the profile folder (read before genesis, written at the end)
     std::string bot;        // item 04: amnesiac | carry | oracle:<ending>
     uint64_t chron_demo = 0;                   // item 05, chron_demo.h
+    std::string act_script;                    // item 09, act_script.h
 };
 
 bool parse(int argc, char** argv, Options& o) {
@@ -89,6 +91,7 @@ bool parse(int argc, char** argv, Options& o) {
         else if (k == "--bucket-samples") { if (!need(v)) return false; o.bucket_samples = std::max(1, std::atoi(v.c_str())); }
         else if (k == "--perturb") { if (!need(o.perturb)) return false; }
         else if (k == "--profile") { if (!need(o.profile)) return false; }
+        else if (k == "--act-script") { if (!need(o.act_script)) return false; }
         else if (k == "--bot") { if (!need(o.bot)) return false; }
         else if (k == "--golden") {
             if (!need(v)) return false;
@@ -353,6 +356,7 @@ int main(int argc, char** argv) {
     }
     if (o.golden_to) return golden(o);
     if (o.chron_demo) return chronicle_demo(o.data, o.chron_demo);
+    if (!o.act_script.empty()) return act_script_cmd(o.data, o.act_script);
     if (!o.render_batch.empty()) return render_batch_cmd(o.data, o.render_batch);
     if (!o.text_bundle.empty()) return text_bundle_cmd(o.data, o.text_bundle);
     if (!o.replay.empty()) return replay(o);
