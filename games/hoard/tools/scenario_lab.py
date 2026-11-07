@@ -160,8 +160,7 @@ def lab_case(sc):
         if box.get((r, "at_war"), [0, 1])[1] < 1: at_war = False
         if at_war: c["at_war_with"] = ["*"]
         elif at_war is False: c["peace"] = True
-        lo, hi = box.get((r, "wealth_rank"), [1, 30])
-        if hi < 30: c["wealth"] = 1e7
+        c["wealth"] = 1e6   # the lab's courts outrank the world's for by_score choosers
         nb = re.match(r"(?:neighbour_of|strongest_army\(neighbours)\(\$?([a-z_0-9]+)", f.get("is", ""))
         if nb and nb.group(1) in roles: c["near"] = nb.group(1)
         if r == arrival_from:
@@ -199,6 +198,7 @@ def lab_case(sc):
         else: x["role"] = "sage"
         if words.get((r, "role")): x["role"] = words[(r, "role")]
         tags = [p["tag"]] if "tag" in p else []
+        if any(t.startswith("corrupted:") for t in tags): x["secret"] = True
         if "slayer" in tags: x["slayer_rank"] = "slayer"; x["role"] = "hero"
         x["tags"] = tags
         if "trait" in p: x["traits"] = [p["trait"]]
@@ -213,6 +213,27 @@ def lab_case(sc):
         if (r, "debt") in box: x["debt"] = max(lo, 1.5)
         if d.get("sex") in ("m", "f"): x["sex"] = d["sex"]
         persons.append(x)
+    visitor = {"pilgrim": "priest", "prophet": "priest", "kin": "ruler", "refugee": "sage", "hero": "hero", "envoy": "envoy", "scholar": "sage", "thief": ""}
+    who = sc.get("arrival", {}).get("who")
+    for x in persons:   # the visitor waits at the ledge: the arriving court's person whose role fits the kind, else its first
+        if who and x["court"] == arrival_from and not x.get("envoy"):
+            x["arrival"] = who
+            break
+    for o in sc["options"]:   # a receive of a named person needs that person at the ledge
+        w_ = (o["act"].get("payload") or {}).get("who")
+        for x in persons:
+            if w_ and ref(w_) == x["as"] and x["court"] != "lair" and not x.get("envoy"): x["arrival"] = who or "kin"
+    preds = sc.get("require", []) + [o["gate"] for o in sc["options"] if "gate" in o]
+    hastags = [re.match(r"^has_tag\(([a-z_0-9]+),\s*([a-z0-9_:]+)\)$", c.strip()) for p_ in preds for c in p_.split(" and ")]
+    for m in [m for m in hastags if m]:
+        for x in persons:
+            if x["as"] == m.group(1): x["tags"].append(m.group(2))
+        for c in courts:
+            if c["as"] == m.group(1): c["tags"].append(m.group(2))
+    for o in sc["options"]:   # incite works on an orc horde (item 09): the lab's target court is orc
+        if o["act"]["type"] == "incite":
+            for c in courts:
+                if c["as"] == ref(o["act"].get("target")): c["race"] = "orc"
     if "court.kin_alive" in gates and not any(x["court"] == "lair" and x.get("from") == arrival_from for x in persons):
         persons.append({"as": "_kin", "court": "lair", "from": arrival_from, "role": "heir", "age": 30})
     for r, d in roles.items():
@@ -243,6 +264,18 @@ def lab_case(sc):
                            "court": courts[0]["as"] if courts else ""})
         if types[r] == "remnant":
             remnants.append({"race": d["remnant"].get("race", "orc"), "strength": 0.5})
+    regions = []
+    for r, d in roles.items():
+        if types[r] == "region":
+            g = d["region"]
+            x = {"as": r, "owner": "none" if g.get("owner") == "none" else ref(g.get("owner", "")) or (courts[0]["as"] if courts else "none")}
+            if "terrain" in g: x["terrain"] = g["terrain"][0]
+            tags = list(g.get("tags", [])) + ([g["has_structure"]] if "has_structure" in g else [])
+            if tags: x["tags"] = tags
+            if "burn" in g: x["burn"] = g["burn"][0]
+            lo, hi = box.get((r, "burn"), [0, 1])
+            if (r, "burn") in box: x["burn"] = mid(lo, hi, 0)
+            regions.append(x)
     growth = {"lore": 20, "arcana": 20, "dominion": 10, "might": 30, "flame": 10}
     for (scope, field), (lo, hi) in box.items():
         if scope == "dragon" and field in growth:
@@ -257,7 +290,8 @@ def lab_case(sc):
     world = {}
     if ("world", "magic") in box: world["magic"] = mid(*box[("world", "magic")], 0.5)
     if ("world", "prophecy_ending") in words: world["prophecy_ending"] = words[("world", "prophecy_ending")]
-    return {"scenario": sc["id"], "courts": courts, "persons": persons, "acts": acts, "relics": relics, "remnants": remnants, "dragon": dragon, "world": world}
+    era_min = min((["bronze", "iron", "castles", "gunpowder", "arcane"].index(e) for e in sc.get("eras", [])), default=0)
+    return {"scenario": sc["id"], "era_min": era_min, "regions": regions, "courts": courts, "persons": persons, "acts": acts, "relics": relics, "remnants": remnants, "dragon": dragon, "world": world}
 
 
 def forced_state(scenarios, data, binary, base):

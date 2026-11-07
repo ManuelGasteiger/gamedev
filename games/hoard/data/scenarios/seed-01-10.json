@@ -94,7 +94,7 @@
             "role": "historian"
           }
         },
-        "gate": "dragon.lore >= 3"
+        "gate": "dragon.lore >= 3 and has_tag(hostage, lettered)"
       },
       {
         "id": "release",
@@ -376,7 +376,7 @@
         "person": {
           "court": "$court",
           "role": "hero",
-          "tag": "sworn_to",
+          "tag": "slayer",
           "choose": "by_score:renown"
         },
         "noun": "hero",
@@ -394,6 +394,10 @@
       },
       {
         "if": "hero.trait == vengeful",
+        "w": 3
+      },
+      {
+        "if": "has_tag(hero, sworn_to)",
         "w": 3
       }
     ],

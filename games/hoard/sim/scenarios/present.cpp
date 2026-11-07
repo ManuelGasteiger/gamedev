@@ -54,6 +54,19 @@ bool resolve_option(const World& w, const Def& d, const Option& o, const std::ma
     if (t.contains("magnitude")) act["magnitude"] = t["magnitude"].is_string() ? (magnitude >= 0 ? magnitude : 0.5) : t["magnitude"].get<double>();
     else if (magnitude >= 0) act["magnitude"] = magnitude;
     if (t.contains("payload")) act["payload"] = subst(w, d, roles, t["payload"], "", ok);
+    const std::string type = t["type"].get<std::string>();
+    if (ok && act.contains("target") && act["target"].is_object() && act["target"].value("kind", std::string()) == "faction") {
+        std::string court = act["target"].value("id", std::string());
+        if (type == "swear")
+            for (auto& o : w.offers) if (o.from_faction == court) { act["target"] = {{"kind", "offer"}, {"id", o.id}}; break; }
+        if (type == "bless" || type == "ward")
+            if (const Faction* f = find_faction(w, court)) if (!f->regions.empty()) act["region"] = f->regions.front();
+    }
+    if (ok && type == "receive" && act.contains("payload") && act["payload"].contains("who") && act["payload"]["who"].is_object()) {
+        std::string person = act["payload"]["who"].value("id", std::string());
+        act["payload"].erase("who");
+        for (auto& a : w.arrivals) if (a.person == person) act["payload"]["who"] = a.id;
+    }
     act["source"] = "scenario";
     act["answers"] = d.id;
     return ok;

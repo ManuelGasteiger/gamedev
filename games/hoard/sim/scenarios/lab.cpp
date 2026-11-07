@@ -47,7 +47,7 @@ bool lab_world(World& w, const Params& p, const json& spec, std::string& err) {
         used.push_back(pick->id);
         as[name] = pick->id;
         Faction& f = *pick;
-        if (!race.empty()) f.race = race;
+        if (!race.empty()) { f.race = race; f.pop = {{race, 1.0}}; }
         if (c.contains("era")) f.era = c["era"].get<int>();
         if (c.contains("cohesion")) f.cohesion = c["cohesion"].get<double>();
         if (c.contains("piety")) f.culture.traits.piety = c["piety"].get<double>();
@@ -101,6 +101,28 @@ bool lab_world(World& w, const Params& p, const json& spec, std::string& err) {
         }
     }
     Dragon& d = w.dragons[kPlayer];
+    if (spec.contains("era_min"))
+        for (auto& f : w.factions) f.era = std::max(f.era, spec["era_min"].get<int>());
+    for (auto& r : spec.value("regions", json::array())) {
+        std::string owner = r.value("owner", std::string("none"));
+        Region* pick = nullptr;
+        if (owner == "none") {
+            for (auto& g : w.regions) {
+                if (g.lair) continue;
+                const Faction* f = find_faction(w, g.owner);
+                bool court = false;
+                for (auto& kv : as) court = court || kv.second == g.owner;
+                if (!g.owner.empty() && (court || !f || f->regions.size() < 2)) continue;
+                pick = &g;
+                break;
+            }
+            if (pick && !pick->owner.empty()) { if (Faction* f = find_faction(w, pick->owner)) erase_value(f->regions, pick->id); pick->owner.clear(); }
+        } else if (Faction* f = find_faction(w, as[owner])) pick = find_region(w, f->regions.front());
+        if (!pick) continue;
+        if (r.contains("terrain")) pick->terrain = r["terrain"].get<std::string>();
+        if (r.contains("burn")) pick->burn = r["burn"].get<double>();
+        for (auto& t : r.value("tags", json::array())) pick->tags.insert(t.get<std::string>());
+    }
     const json& dj = spec.value("dragon", json::object());
     if (dj.contains("growth")) for (auto it = dj["growth"].begin(); it != dj["growth"].end(); ++it) d.growth[it.key()] = it.value().get<double>();
     if (dj.contains("phase")) d.phase = dj["phase"].get<int>();
@@ -114,6 +136,17 @@ bool lab_world(World& w, const Params& p, const json& spec, std::string& err) {
     if (wj.contains("magic")) w.magic = wj["magic"].get<double>();
     for (auto& t : wj.value("tags", json::array())) w.tags.insert(t.get<std::string>());
     if (wj.contains("prophecy_ending")) w.prophecy.ending = wj["prophecy_ending"].get<std::string>();
+    // the courts' own people and the lair's captives leave, so the roles bind to the lab's persons
+    std::vector<Person> keep;
+    for (auto& x : w.people) {
+        bool court = false;
+        for (auto& kv : as) court = court || kv.second == x.faction;
+        if (!court && !contains(d.hostages, x.id)) keep.push_back(x);
+    }
+    w.people = keep;
+    d.hostages.clear();
+    w.arrivals.clear();
+    w.offers.clear();
     int serial = 0;
     for (auto& x : spec.value("persons", json::array())) {
         Person n;
@@ -137,6 +170,14 @@ bool lab_world(World& w, const Params& p, const json& spec, std::string& err) {
         if (lair) { n.tags.insert("hostage"); n.hostage_since = w.year - x.value("held_years", 10); d.hostages.push_back(n.id); std::sort(d.hostages.begin(), d.hostages.end()); }
         if (x.contains("kept")) n.tags.insert("kept:" + x["kept"].get<std::string>());
         if (x.contains("slayer_rank")) { n.slayer.rank = x["slayer_rank"].get<std::string>(); n.slayer.power = 5; }
+        if (x.value("secret", false)) {
+            Secret sc;
+            sc.holder = n.faction;
+            sc.about = n.id;
+            sc.kind = "corrupt";
+            sc.year = w.year - 20;
+            w.secrets.push_back(sc);
+        }
         w.people.push_back(n);
         std::sort(w.people.begin(), w.people.end(), [](const Person& a, const Person& b) { return a.id < b.id; });
         as[x.value("as", std::string())] = n.id;
@@ -149,7 +190,21 @@ bool lab_world(World& w, const Params& p, const json& spec, std::string& err) {
             a.person = n.id;
             a.year = w.year;
             a.is_lie = x.value("is_lie", false);
+            a.offer_kind = "lab";
             w.arrivals.push_back(a);
+            Offer o;
+            o.id = "offer:" + n.id;
+            o.from_faction = n.faction;
+            o.envoy = n.id;
+            o.kind = "lab";
+            o.is_lie = a.is_lie;
+            o.expires = w.year + 100;
+            o.draft.id = "oath:" + n.id;
+            o.draft.parties[0] = "dragon";
+            o.draft.parties[1] = n.faction;
+            o.draft.sworn = w.year;
+            o.draft.expires = w.year + 100;
+            w.offers.push_back(o);
         }
         if (x.contains("arrival")) {
             Arrival a;

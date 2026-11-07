@@ -341,7 +341,10 @@ bool gate_open(const World& w, const Params& p, const Bank& b, const std::string
             if (row.contains("gt")) { d.has_gt = true; d.gt = row["gt"].get<double>(); }
             if (row.contains("lt")) { d.has_lt = true; d.lt = row["lt"].get<double>(); }
             GateCtx gc{w, p, f};
-            if (g == "motive") gc.motive = !envoy_drafts(w, p, f).empty();
+            if (g == "motive") {
+                gc.motive = !envoy_drafts(w, p, f).empty();
+                for (auto& a : w.arrivals) if (a.court == f.id && !a.offer_kind.empty()) gc.motive = true;
+            }
             ok = gate_holds(gc, d);
         }
         if (ok) return true;
