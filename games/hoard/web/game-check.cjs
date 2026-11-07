@@ -957,6 +957,10 @@ async function checksV04() {
     f.tags = [...new Set([...f.tags, 'slayers'])]; f.anti_dragon = Math.max(f.anti_dragon, 1.05); f.dread = { oral: dread, written: 0, monumental: 0 };
     f.memory.push({ year: w.year, type: 'burn', magnitude: 1, weight: 1, axis: 'dread', tier: 'oral', strength: dread, faith: 0, act: -1, tags: ['burn'] });
     w.timed_tags.push({ on: 'faction', target: id, tag: 'slayers_' + stage, from: w.year - 10, until: 1e9, event: 0, inherit: false });
+    // item 08: a band needs its order and a named grandmaster, or the ladder drops the stage
+    w.orders = [...(w.orders ?? []).filter((o) => o.court !== id), { id: 'order:' + id, court: id, founded: w.year - 20, grievance: 0, hunters: 2, power_total: 3 }];
+    w.people = [...w.people.filter((x) => x.id !== 'lab-gm-' + id), { id: 'lab-gm-' + id, name: 'Lab Grandmaster', race: 'human', faction: id, role: 'hero', born: w.year - 30, dies: w.year + 40, traits: { bold: 0.5, pious: 0.5, greedy: 0.5, cunning: 0.5 }, tags: [], memory_of_dragon: 0, hostage_since: 0,
+      slayer: { rank: 'grandmaster', power: 3, counter: 'plate', hate: 'gold', fear: 'dark', last_fight: 0 } }];
   };
 
   // the real wasm (S1) on the classic map: growth, health, defences and the arms race show; hooks, legends and names do not
@@ -982,7 +986,7 @@ async function checksV04() {
   const slainState = await page.evaluate(() => ({ v: game.v04(), ages: game.state().ages.map((a) => a.wake_reason) }));
   const tombSlain = await text('#death');
   await shot('v04-slain');
-  check('v04.slain', /slayers ready: Vessary \(odds 100%\)/.test(doomed) && slainState.ages[0] === 'dragon_slain' && slainState.v.dead && slainState.v.deathOpen && /the slayers of Vessary came up the mountain while you slept/.test(tombSlain),
+  check('v04.slain', /slayers ready: Vessary \(odds 100%\)/.test(doomed) && slainState.ages[0] === 'dragon_slain' && slainState.v.dead && slainState.v.deathOpen && /the slayers of Vessary(, led by [^,]+,)? came up the mountain while you slept/.test(tombSlain),
     `"${(doomed.match(/slayers ready[^·]*/) ?? [''])[0].trim()}"; woke ${slainState.ages[0]}; "${(tombSlain.match(/In the year[^.]*\./) ?? [''])[0]}"`);
 
   // 8. a fresh start and New world: reset with genesis, the legends page before the first flight, the sim's region names
