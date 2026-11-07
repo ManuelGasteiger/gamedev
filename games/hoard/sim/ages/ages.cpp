@@ -7,6 +7,7 @@
 #include "oaths.h"
 #include "offers.h"
 #include "rules/rules.h"
+#include "rules/slayers.h"
 #include "arrivals.h"
 #include "endings.h"
 #include "talents.h"
@@ -42,6 +43,14 @@ bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
     Oath o = of.draft;
     o.status = "active";
     w.oaths.push_back(o);
+    Act sw;   // item 09: swear as a logged act
+    sw.year = w.year;
+    sw.type = "swear";
+    sw.target = of.from_faction;
+    sw.source = "lair";
+    sw.answers = of.id;
+    sw.args["answers_offer"] = of.id;
+    w.acts.push_back(sw);
     const OfferDef* def = offer_def(p, of.kind);
     Tags tags = {of.text_key};
     if (def) for (auto& t : def->tags) tags.insert(t);
@@ -72,14 +81,52 @@ bool accept_offer_unrecorded(World& w, const Params& p, size_t index) {
 
 static std::string num(double v) { char b[32]; std::snprintf(b, sizeof b, "%g", v); return b; }
 
-DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string& target, const std::string& pred) {
+// item 09: what a sworn clause does at once (hostage, disband, tear_down); pilgrimage and no_harm_to are kept over time
+static void demand_now(World& w, const Params& p, Faction& f, const std::string& pred, const std::string& what, int sworn) {
+    if (pred == "hostage") {
+        Person* x = pick_hostage(w, f.id);
+        if (!x || has_tag(x->tags, "hostage")) return;
+        f.tags.insert("hostage_taken");
+        if (!contains(w.dragons[kPlayer].lineages, f.id)) w.dragons[kPlayer].lineages.push_back(f.id);
+        take_hostage_person(w, p, *x, false, because("demanded", {sworn}));
+    } else if (pred == "disband") {
+        f.tags.erase("slayers");
+        disperse_slayers(w, f);
+        emit(w, "order_disbanded", f.id, "", 0, {}, because("demanded", {sworn}));
+        Person* gm = find_person_role(w, f.id, "hero");
+        const Faction* to = nullptr;
+        for (auto& g : w.factions) if (g.id != f.id && adjacent(w, f, g) && (!to || power(g, p.c) > power(*to, p.c))) to = &g;
+        if (gm && to) {
+            std::string id = gm->id, dest = to->id;
+            gm->faction = dest;
+            gm->tags.insert("grudge");
+            emit(w, "grandmaster_fled", id, dest, 0, {}, because("disbanded", {last_event_id(w, "order_disbanded", f.id)}));
+        }
+    } else if (pred == "tear_down") {
+        for (auto& rid : f.regions)
+            if (Region* r = find_region(w, rid)) r->tags.erase(what);
+        if (what == "temple" || what == "altar") raze_monuments(f, "", "");
+        emit(w, "structure_torn_down", f.id, what, 0, {}, because("demanded", {sworn}));
+    }
+}
+
+DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string& target, const std::string& pred,
+                                    const std::map<std::string, std::string>& args) {
     const Constants& c = p.c;
     DemandResult r;
     r.target = target;
     r.pred = pred;
     Faction* f = find_faction(w, target);
     if (!f) { r.reason = "no_faction"; return r; }
-    if (pred != "tribute" && pred != "no_walls" && pred != "no_settle") { r.reason = "unknown_demand|pred=" + pred; return r; }
+    static const char* const kClauses[] = {"tribute", "no_walls", "no_settle", "no_harm_to", "hostage", "disband", "tear_down", "pilgrimage"};
+    bool known = false;
+    for (const char* k : kClauses) if (pred == k) known = true;
+    if (!known) { r.reason = "unknown_demand|pred=" + pred; return r; }
+    auto argv = [&](const char* k) { auto it = args.find(k); return it == args.end() ? std::string() : it->second; };
+    std::string protect = argv("faction"), what = argv("structure");
+    if (pred == "no_harm_to" && (protect.empty() || protect == target || !find_faction(w, protect))) { r.reason = "demand.no_ward|pred=" + pred; return r; }
+    if (pred == "disband" && !has_tag(f->tags, "slayers")) { r.reason = "demand.no_order"; return r; }
+    if (pred == "tear_down" && what.empty()) { r.reason = "demand.no_structure"; return r; }
     double knowledge = c.demand_knowledge * effect(w, p, "demand_mult");   // v0.4: Old Tongues
     if (w.dragons[kPlayer].knowledge < knowledge) { r.reason = "needs_knowledge|n=" + num(knowledge); return r; }
     if (active_oath_with_pred(w, f->id, pred)) { r.reason = "already_sworn"; return r; }
@@ -88,6 +135,10 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     a.type = "demand";
     a.target = f->id;
     a.item = pred;
+    a.source = "lair";
+    a.args["clause"] = pred;
+    if (!protect.empty()) a.args["faction"] = protect;
+    if (!what.empty()) a.args["structure"] = what;
     w.acts.push_back(a);
     double dread = dread_eff(*f);
     bool cowed = dread >= c.mem.demand_dread || power(*f, c) < c.reaction_weak_ratio * threat(w.dragons[kPlayer], c);
@@ -123,8 +174,11 @@ DemandResult demand_oath_unrecorded(World& w, const Params& p, const std::string
     o.breach_by_dragon = "none";
     o.status = "active";
     o.kind = "demand";
+    o.target = protect;
+    o.ask = what;
     w.oaths.push_back(o);
-    emit(w, "oath_sworn", o.id, f->id, 0, {"demand." + pred}, because("cowed", {}, {{"dread", dread}}), "oath:" + o.id);
+    int sworn = emit(w, "oath_sworn", o.id, f->id, 0, {"demand." + pred}, because("cowed", {}, {{"dread", dread}}), "oath:" + o.id);
+    demand_now(w, p, *f, pred, what, sworn);
     r.sworn = true;
     r.oath = o;
     return r;
@@ -139,6 +193,8 @@ bool decline_offer_unrecorded(World& w, const Params& p, size_t index) {
     a.type = "show";
     a.target = of.from_faction;
     a.magnitude = 0.1;
+    a.source = "lair";
+    a.answers = of.id;
     apply_acts(w, p, {a});
     emit(w, "offer_declined", of.from_faction, of.envoy, 0, {of.kind}, because("declined", {last_event_id(w, "act_show", of.from_faction, "", "", w.year)}));
     w.offers.erase(w.offers.begin() + static_cast<std::ptrdiff_t>(index));

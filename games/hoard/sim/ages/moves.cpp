@@ -128,6 +128,14 @@ static void effects(World& w, const Params& p, const std::string& id, const Move
     if (giving) hand_over(w, p, *x, d, ctx, out);
 }
 
+std::string move_refusal(const World& w, const Params& p, const std::string& id, const std::string& move, const MoveCtx& ctx) {
+    auto def = p.moves.moves.find(move);
+    const Person* x = find_person(w, id);
+    if (def == p.moves.moves.end()) return "move_unknown|move=" + move;
+    if (!x) return "move_no_person";
+    return precondition(w, *x, def->second, ctx);
+}
+
 MoveOutcome resolve_move(World& w, const Params& p, const std::string& id, const std::string& move, const MoveCtx& ctx) {
     MoveOutcome out;
     auto def = p.moves.moves.find(move);

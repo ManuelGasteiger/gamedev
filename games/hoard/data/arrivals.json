@@ -25,6 +25,13 @@
         "eat": { "food": 15, "hunger_add": -0.2, "growth_might": 1 },
         "turn_away": {}
       } },
+    { "kind": "sworn_pilgrim", "person_role": "priest", "specificity": 5, "cooldown_years": 100, "world_cooldown_years": 0, "window": "short", "cause": "oath", "text_key": "arrival.sworn_pilgrim",
+      "requires": [ { "gate": "sworn_pilgrimage" }, { "gate": "route_open" } ],
+      "answers": {
+        "receive": { "faith_pool": 1, "growth_dominion": 2, "growth_lore": 1 },
+        "eat": { "food": 15, "hunger_add": -0.2, "growth_might": 1 },
+        "turn_away": {}
+      } },
     { "kind": "thief", "person_role": "", "specificity": 4, "cooldown_years": 300, "world_cooldown_years": 600, "cause": "gold", "text_key": "arrival.thief",
       "requires": [ { "gate": "gold_rumour" }, { "gate": "era", "gte": 1 }, { "gate": "knows_lair_exact" } ],
       "blocked_when": [ { "gate": "thief_guard" } ] },
